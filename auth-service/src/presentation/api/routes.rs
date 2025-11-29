@@ -3,8 +3,10 @@ use axum::{
     routing::{get, post, delete},
 };
 use crate::presentation::api::handlers::*;
+use std::sync::Arc;
+use crate::shared::AppState;
 
-pub fn create_router() -> Router {
+pub fn create_router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/health", get(health_check))
         .route("/auth/login", post(login))

@@ -79,7 +79,24 @@ impl DekManager {
         Ok(plaintext)
     }
 
-    /// Encrypt DEK with master key
+    /// Encrypt DEK with master key and return separately (for database storage)
+    pub async fn encrypt_dek_for_storage(
+        &self,
+        _entity_id: Uuid,
+        _entity_type: &str,
+        dek: &[u8],
+    ) -> AppResult<(Vec<u8>, Vec<u8>)> {
+        let cipher = Aes256Gcm::new_from_slice(self.master_key.key())
+            .map_err(|e| crate::shared::AppError::Encryption(format!("Invalid master key: {}", e)))?;
+
+        let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+        let ciphertext = cipher.encrypt(&nonce, dek)
+            .map_err(|e| crate::shared::AppError::Encryption(format!("DEK encryption failed: {}", e)))?;
+
+        Ok((ciphertext, nonce.to_vec()))
+    }
+
+    /// Encrypt DEK with master key (for vault storage - combined format)
     fn encrypt_dek(&self, dek: &[u8]) -> AppResult<Vec<u8>> {
         let cipher = Aes256Gcm::new_from_slice(self.master_key.key())
             .map_err(|e| crate::shared::AppError::Encryption(format!("Invalid master key: {}", e)))?;

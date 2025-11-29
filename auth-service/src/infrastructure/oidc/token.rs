@@ -12,6 +12,10 @@ pub struct Claims {
     pub iat: i64,
     pub iss: String,
     pub aud: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub permissions: Option<Vec<String>>,
 }
 
 pub struct TokenManager {
@@ -34,6 +38,15 @@ impl TokenManager {
     }
 
     pub fn generate_access_token(&self, user: &User) -> AppResult<String> {
+        self.generate_access_token_with_permissions(user, "", &[])
+    }
+
+    pub fn generate_access_token_with_permissions(
+        &self,
+        user: &User,
+        role: &str,
+        permissions: &[String],
+    ) -> AppResult<String> {
         let now = Utc::now();
         let exp = now + Duration::seconds(self.expiration as i64);
 
@@ -44,6 +57,8 @@ impl TokenManager {
             iat: now.timestamp(),
             iss: self.issuer.clone(),
             aud: "auth-service".to_string(),
+            role: if role.is_empty() { None } else { Some(role.to_string()) },
+            permissions: if permissions.is_empty() { None } else { Some(permissions.to_vec()) },
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)
@@ -62,6 +77,8 @@ impl TokenManager {
             iat: now.timestamp(),
             iss: self.issuer.clone(),
             aud: "auth-service".to_string(),
+            role: None,
+            permissions: None,
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)

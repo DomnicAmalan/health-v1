@@ -18,16 +18,22 @@ impl GenerateDekUseCase {
     }
 
     pub async fn execute(&self, entity_id: Uuid, entity_type: &str) -> AppResult<EncryptionKey> {
-        // Generate DEK
-        let _dek = self.dek_manager.generate_dek(entity_id, entity_type).await?;
+        // Generate random 256-bit DEK
+        use aes_gcm::{AeadCore, KeyInit};
+        use aes_gcm::Aes256Gcm;
+        use aes_gcm::aead::rand_core::OsRng;
+        let dek = Aes256Gcm::generate_key(&mut OsRng);
+        let dek_bytes = dek.as_slice().to_vec();
 
-        // Retrieve the encrypted key from vault to store in database
-        // The DEK is already stored in vault by generate_dek
-        // We need to create an EncryptionKey entity for tracking
+        // Encrypt DEK with master key and get encrypted + nonce separately for database storage
+        let (encrypted_key, nonce) = self.dek_manager.encrypt_dek_for_storage(entity_id, entity_type, &dek_bytes).await?;
+
+        // Create EncryptionKey entity with encrypted_key and nonce stored separately
         let key = EncryptionKey::new(
             entity_id,
             entity_type.to_string(),
-            vec![], // Encrypted key is in vault
+            encrypted_key,
+            nonce,
             "AES-256-GCM".to_string(),
         );
 

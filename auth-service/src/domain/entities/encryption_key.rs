@@ -10,6 +10,7 @@ pub struct EncryptionKey {
     pub entity_id: Uuid,           // User or entity this key belongs to
     pub entity_type: String,       // "user", "patient", "document", etc.
     pub encrypted_key: Vec<u8>,     // DEK encrypted with master key
+    pub nonce: Vec<u8>,             // Nonce used for AES-256-GCM encryption (12 bytes)
     pub key_algorithm: String,      // "AES-256-GCM"
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub rotated_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -21,6 +22,7 @@ impl EncryptionKey {
         entity_id: Uuid,
         entity_type: String,
         encrypted_key: Vec<u8>,
+        nonce: Vec<u8>,
         key_algorithm: String,
     ) -> Self {
         Self {
@@ -28,6 +30,7 @@ impl EncryptionKey {
             entity_id,
             entity_type,
             encrypted_key,
+            nonce,
             key_algorithm,
             created_at: chrono::Utc::now(),
             rotated_at: None,
@@ -35,8 +38,9 @@ impl EncryptionKey {
         }
     }
 
-    pub fn rotate(&mut self, new_encrypted_key: Vec<u8>) {
+    pub fn rotate(&mut self, new_encrypted_key: Vec<u8>, new_nonce: Vec<u8>) {
         self.encrypted_key = new_encrypted_key;
+        self.nonce = new_nonce;
         self.rotated_at = Some(chrono::Utc::now());
         self.is_active = true;
     }

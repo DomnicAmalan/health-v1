@@ -11,6 +11,7 @@ pub struct User {
     pub password_hash: String,
     pub is_active: bool,
     pub is_verified: bool,
+    pub is_super_user: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub last_login: Option<DateTime<Utc>>,
@@ -26,6 +27,23 @@ impl User {
             password_hash,
             is_active: true,
             is_verified: false,
+            is_super_user: false,
+            created_at: now,
+            updated_at: now,
+            last_login: None,
+        }
+    }
+    
+    pub fn new_super_user(email: String, username: String, password_hash: String) -> Self {
+        let now = Utc::now();
+        Self {
+            id: Uuid::new_v4(),
+            email,
+            username,
+            password_hash,
+            is_active: true,
+            is_verified: true,
+            is_super_user: true,
             created_at: now,
             updated_at: now,
             last_login: None,
