@@ -126,6 +126,7 @@ playwright/.cache/
 ehthumbs.db
 Thumbs.db
 Desktop.ini
+bun.lock
 
 # ============================================
 # Application Specific
