@@ -1,97 +1,200 @@
 @import "tailwindcss";
 
 @theme {
+  /* ============================================
+     MICROSOFT-STYLE HEALTH-TECH COLOR PALETTE
+     ============================================ */
+  
+  /* Core/Default App Color: Microsoft Blue
+     - #0066CC - Strong blue (Microsoft Outlook/Office-blue)
+     - Usage: Default UI, headers, nav bars, primary actions
+  */
+  --color-primary: hsl(210 100% 40%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  /* Health-Care Primary Blue: Clinical Blue
+     - #2A7FA9 - Realistic medical/clinical blue
+     - Usage: Clinical screens, patient dashboards, health modules
+  */
+  --color-health: hsl(201 60% 42%);
+  --color-health-foreground: hsl(0 0% 100%);
+  
+  /* Success / Wellness / Confirmation: Deep Green
+     - #1E8D4C - Deep green (Excel-green inspired)
+     - Usage: Success states, health metrics OK status, confirmations
+  */
+  --color-accent: hsl(145 65% 33%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  
+  /* Warning / Attention / Alerts: Warm Orange-Red
+     - #E84F24 - Warm orange-red (PowerPoint-red / Office orange)
+     - Usage: Warnings, critical alerts, urgent messages
+  */
+  --color-warning: hsl(12 81% 52%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  
+  /* Info / Secondary Modules: Modern Purple
+     - #9C27B0 - Modern purple (MS app palettes)
+     - Usage: Secondary modules, optional features, user-management UI
+  */
+  --color-info: hsl(292 70% 42%);
+  --color-info-foreground: hsl(0 0% 100%);
+  
+  /* Accent / Highlights: Bright Yellow
+     - #FFC900 - Bright yellow (used sparingly)
+     - Usage: Buttons, notifications, badges, highlights
+  */
+  --color-highlight: hsl(48 100% 50%);
+  --color-highlight-foreground: hsl(0 0% 9%);
+  
+  /* Neutrals - Light Backgrounds */
   --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222.2 84% 4.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222.2 84% 4.9%);
+  --color-card: hsl(210 13% 95%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222.2 84% 4.9%);
-  --color-primary: hsl(221.2 83.2% 53.3%);
-  --color-primary-foreground: hsl(210 40% 98%);
-  --color-secondary: hsl(210 40% 96.1%);
-  --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-muted: hsl(210 40% 96.1%);
-  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
-  --color-accent: hsl(210 40% 96.1%);
-  --color-accent-foreground: hsl(222.2 47.4% 11.2%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(214.3 31.8% 91.4%);
-  --color-input: hsl(214.3 31.8% 91.4%);
-  --color-ring: hsl(221.2 83.2% 53.3%);
+  --color-secondary: hsl(213 9% 90%);
+  
+  /* Neutrals - Text / Dark Mode Base */
+  --color-foreground: hsl(0 0% 11%);
+  --color-card-foreground: hsl(0 0% 11%);
+  --color-popover-foreground: hsl(0 0% 11%);
+  --color-secondary-foreground: hsl(0 0% 15%);
+  --color-muted: hsl(210 13% 95%);
+  --color-muted-foreground: hsl(0 0% 29%);
+  
+  /* Semantic Colors */
+  --color-destructive: hsl(12 81% 52%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  
+  /* UI Element Colors */
+  --color-border: hsl(213 9% 90%);
+  --color-input: hsl(210 13% 95%);
+  --color-ring: hsl(210 100% 40%);
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 11%;
+    --card: 210 13% 95%;
+    --card-foreground: 0 0% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --popover-foreground: 0 0% 11%;
+    --primary: 210 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 213 9% 90%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 210 13% 95%;
+    --muted-foreground: 0 0% 29%;
+    --accent: 145 65% 33%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 12 81% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 12 81% 52%;
+    --warning-foreground: 0 0% 100%;
+    --info: 292 70% 42%;
+    --info-foreground: 0 0% 100%;
+    --health: 201 60% 42%;
+    --health-foreground: 0 0% 100%;
+    --highlight: 48 100% 50%;
+    --highlight-foreground: 0 0% 11%;
+    --border: 213 9% 90%;
+    --input: 210 13% 95%;
+    --ring: 210 100% 40%;
+    --radius: 4px;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-full: 100px;
   }
 
   .dark {
-    --color-background: hsl(222.2 84% 4.9%);
-    --color-foreground: hsl(210 40% 98%);
-    --color-card: hsl(222.2 84% 4.9%);
-    --color-card-foreground: hsl(210 40% 98%);
-    --color-popover: hsl(222.2 84% 4.9%);
-    --color-popover-foreground: hsl(210 40% 98%);
-    --color-primary: hsl(217.2 91.2% 59.8%);
-    --color-primary-foreground: hsl(222.2 47.4% 11.2%);
-    --color-secondary: hsl(217.2 32.6% 17.5%);
-    --color-secondary-foreground: hsl(210 40% 98%);
-    --color-muted: hsl(217.2 32.6% 17.5%);
-    --color-muted-foreground: hsl(215 20.2% 65.1%);
-    --color-accent: hsl(217.2 32.6% 17.5%);
-    --color-accent-foreground: hsl(210 40% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(210 40% 98%);
-    --color-border: hsl(217.2 32.6% 17.5%);
-    --color-input: hsl(217.2 32.6% 17.5%);
-    --color-ring: hsl(224.3 76.3% 48%);
+    --color-background: hsl(0 0% 11%);
+    --color-foreground: hsl(0 0% 98%);
+    --color-card: hsl(0 0% 15%);
+    --color-card-foreground: hsl(0 0% 98%);
+    --color-popover: hsl(0 0% 15%);
+    --color-popover-foreground: hsl(0 0% 98%);
+    --color-primary: hsl(210 100% 50%);
+    --color-primary-foreground: hsl(0 0% 100%);
+    --color-secondary: hsl(0 0% 18%);
+    --color-secondary-foreground: hsl(0 0% 98%);
+    --color-muted: hsl(0 0% 20%);
+    --color-muted-foreground: hsl(0 0% 65%);
+    --color-accent: hsl(145 65% 40%);
+    --color-accent-foreground: hsl(0 0% 100%);
+    --color-destructive: hsl(12 81% 55%);
+    --color-destructive-foreground: hsl(0 0% 100%);
+    --color-warning: hsl(12 81% 55%);
+    --color-warning-foreground: hsl(0 0% 100%);
+    --color-info: hsl(292 70% 50%);
+    --color-info-foreground: hsl(0 0% 100%);
+    --color-health: hsl(201 60% 50%);
+    --color-health-foreground: hsl(0 0% 100%);
+    --color-highlight: hsl(48 100% 55%);
+    --color-highlight-foreground: hsl(0 0% 11%);
+    --color-border: hsl(0 0% 20%);
+    --color-input: hsl(0 0% 18%);
+    --color-ring: hsl(210 100% 50%);
 
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --background: 0 0% 11%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 145 65% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 12 81% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 12 81% 55%;
+    --warning-foreground: 0 0% 100%;
+    --info: 292 70% 50%;
+    --info-foreground: 0 0% 100%;
+    --health: 201 60% 50%;
+    --health-foreground: 0 0% 100%;
+    --highlight: 48 100% 55%;
+    --highlight-foreground: 0 0% 11%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 210 100% 50%;
   }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-[15px] leading-relaxed font-normal;
+    font-family: 'Avenir Next', 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  
+  /* Microsoft-inspired Typography Scale */
+  h1 {
+    @apply text-[32px] leading-tight font-bold;
+  }
+  
+  h2 {
+    @apply text-[24px] leading-tight font-semibold;
+  }
+  
+  h3 {
+    @apply text-[20px] leading-tight font-medium;
+  }
+  
+  small, .text-small {
+    @apply text-[13px] leading-normal font-medium;
   }
 }
 
@@ -102,5 +205,81 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Microsoft Fluent UI Border Radius System */
+  .radius-xs {
+    border-radius: 2px; /* Table cells, chips, inputs */
+  }
+  
+  .radius-sm {
+    border-radius: 4px; /* Buttons, tabs */
+  }
+  
+  .radius-md {
+    border-radius: 6px; /* Cards, floating panels */
+  }
+  
+  .radius-lg {
+    border-radius: 8px; /* Modal windows, navigation panes */
+  }
+  
+  .radius-full {
+    border-radius: 100px; /* Tags, round loaders */
+  }
+  
+  /* Microsoft Fluent UI Shadow System (Elevation Levels) */
+  .shadow-fluent-1 {
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12); /* Level 1 - Low (cards, dropdowns) */
+  }
+  
+  .shadow-fluent-2 {
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16); /* Level 2 - Medium (hover states, menus) */
+  }
+  
+  .shadow-fluent-3 {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.18); /* Level 3 - High (modals, panels) */
+  }
+  
+  .shadow-fluent-4 {
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.20); /* Level 4 - Popover / Floating UI */
+  }
+  
+  /* Microsoft Fluent UI Motion / Transitions */
+  .transition-fluent {
+    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  }
+  
+  .transition-fluent-fast {
+    transition: all 0.1s cubic-bezier(0.2, 0, 0, 1);
+  }
+  
+  .transition-fluent-medium {
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  }
+  
+  .transition-fluent-slow {
+    transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+  
+  /* Fluent UI Blur Loader */
+  .blur-loader {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  /* Spinner animation */
+  @keyframes spin-fluent {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin-fluent {
+    animation: spin-fluent 0.9s linear infinite;
   }
 }

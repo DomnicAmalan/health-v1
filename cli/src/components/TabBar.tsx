@@ -16,13 +16,24 @@ import { openNewWindow } from "@/lib/tauriUtils"
 import { cn } from "@/lib/utils"
 
 interface TabItemProps {
-  tab: { id: string; label: string; path: string; icon?: React.ReactNode; closable?: boolean }
+  tab: { id: string; label: string; path: string; icon?: React.ReactNode; closable?: boolean; alert?: boolean; success?: boolean; disabled?: boolean }
   isActive: boolean
   isDragging?: boolean
   isDragOver?: boolean
   onSelect: () => void
   onClose: () => void
   onDragStart: (e: React.MouseEvent) => void
+}
+
+// Module color mapping - Microsoft 365 style
+const getModuleColor = (path: string): { color: string; className: string } => {
+  if (path.includes('/patients') || path === '/') return { color: '#0066CC', className: 'text-primary' } // Patient Overview
+  if (path.includes('/clinical')) return { color: '#2A7FA9', className: 'text-[#2A7FA9]' } // Clinical Charts
+  if (path.includes('/results') || path.includes('/labs')) return { color: '#9C27B0', className: 'text-info' } // Labs & Results
+  if (path.includes('/pharmacy') || path.includes('/care')) return { color: '#1E8D4C', className: 'text-accent' } // Care Plans
+  if (path.includes('/scheduling') || path.includes('/messaging')) return { color: '#FFC900', className: 'text-[#FFC900]' } // Messaging
+  if (path.includes('/orders') || path.includes('/alerts')) return { color: '#E84F24', className: 'text-warning' } // Alerts/Flags
+  return { color: '#0066CC', className: 'text-primary' } // Default
 }
 
 interface TabBarProps {
@@ -135,25 +146,94 @@ const TabItem = memo(function TabItem({
             role="button"
             tabIndex={0}
             className={cn(
-              "group flex items-center gap-1 px-3 py-1.5 rounded-t-md border-b-2 transition-colors min-w-[120px] max-w-[200px] shrink-0",
+              // Base styles - Microsoft Fluent UI tab design
+              "group flex items-center gap-1.5 h-[42px] px-4 py-2 border-b-4 transition-fluent min-w-[120px] max-w-[200px] shrink-0",
+              "text-[14px] font-medium tracking-[0.25px]",
+              "rounded-t-sm", // 4px top corners only (Fluent UI)
               isDraggable && !isDragging && "cursor-grab active:cursor-grabbing",
-              !isDraggable && "cursor-pointer",
-              isActive
-                ? "bg-background border-primary text-foreground"
-                : "border-transparent hover:bg-muted/50 text-muted-foreground"
+              !isDraggable && !tab.disabled && "cursor-pointer",
+              tab.disabled && "cursor-not-allowed opacity-60",
+              
+              // Default (Inactive) State - Fluent UI styling
+              !isActive && !tab.disabled && !tab.alert && !tab.success && [
+                "bg-[#F4F6F8] border-[#E1E4E8] text-[#4A4A4E]",
+                "hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E]",
+                "dark:bg-[#1E1E1E] dark:text-[#A9A9A9] dark:border-transparent",
+                "dark:hover:bg-[#2B2B2B] dark:hover:text-white"
+              ],
+              
+              // Active State - Microsoft Fluent style with 4px bottom border
+              isActive && !tab.alert && !tab.success && [
+                "bg-white border-primary text-primary shadow-fluent-1",
+                "dark:bg-[#2B2B2B] dark:border-primary dark:text-white"
+              ],
+              
+              // Alert State
+              tab.alert && [
+                isActive 
+                  ? "bg-[#FFF5F2] border-warning text-warning shadow-fluent-1 dark:bg-[#2B2B2B]"
+                  : "bg-[#F4F6F8] border-transparent text-warning hover:bg-[#FFF5F2] hover:border-warning dark:bg-[#1E1E1E] dark:hover:bg-[#2B2B2B]"
+              ],
+              
+              // Success State
+              tab.success && [
+                isActive
+                  ? "bg-[#F0FAF4] border-accent text-accent shadow-fluent-1 dark:bg-[#2B2B2B]"
+                  : "bg-[#F4F6F8] border-transparent text-accent hover:bg-[#F0FAF4] hover:border-accent dark:bg-[#1E1E1E] dark:hover:bg-[#2B2B2B]"
+              ],
+              
+              // Disabled State
+              tab.disabled && [
+                "bg-[#F4F6F8] border-transparent text-[#A5A5A5]",
+                "dark:bg-[#1E1E1E] dark:text-[#A5A5A5]"
+              ]
             )}
+            style={isActive && !tab.alert && !tab.success ? {
+              borderBottomColor: getModuleColor(tab.path).color
+            } : undefined}
             onMouseDown={isDraggable ? handleMouseDown : undefined}
-            onClick={!isDraggable ? onSelect : undefined}
+            onClick={!isDraggable && !tab.disabled ? onSelect : undefined}
             onKeyDown={(e) => {
-              if (!isDraggable && (e.key === "Enter" || e.key === " ")) {
+              if (!isDraggable && !tab.disabled && (e.key === "Enter" || e.key === " ")) {
                 e.preventDefault()
                 onSelect()
               }
             }}
           >
-            {tab.icon && <span className="h-4 w-4 shrink-0">{tab.icon}</span>}
-            <span className="text-sm font-medium truncate flex-1">{tab.label}</span>
-            {tab.closable && (
+            {tab.icon && (
+              <span 
+                className={cn(
+                  "shrink-0 transition-colors",
+                  !isActive && !tab.alert && !tab.success && "text-[#4A4A4E] dark:text-[#A9A9A9]",
+                  tab.alert && "text-warning",
+                  tab.success && "text-accent",
+                  tab.disabled && "text-[#A5A5A5]"
+                )}
+                style={{ 
+                  width: '18px', 
+                  height: '18px',
+                  ...(isActive && !tab.alert && !tab.success ? {
+                    color: getModuleColor(tab.path).color
+                  } : {})
+                }}
+              >
+                {tab.icon}
+              </span>
+            )}
+            <span className={cn(
+              "truncate flex-1 capitalize",
+              !isActive && !tab.alert && !tab.success && "text-[#4A4A4E] dark:text-[#A9A9A9]",
+              tab.alert && "text-warning",
+              tab.success && "text-accent",
+              tab.disabled && "text-[#A5A5A5]"
+            )}
+            style={isActive && !tab.alert && !tab.success ? {
+              color: getModuleColor(tab.path).color
+            } : undefined}
+            >
+              {tab.label}
+            </span>
+            {tab.closable && !tab.disabled && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -163,7 +243,7 @@ const TabItem = memo(function TabItem({
                   onClose()
                 }}
               >
-                <X className="h-3 w-3" />
+                <X className="h-3.5 w-3.5" />
               </Button>
             )}
           </div>
@@ -529,7 +609,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
     <TooltipProvider delayDuration={200}>
       <div
         ref={tabBarRef}
-        className="border-b bg-muted/30 relative flex items-center justify-between"
+        className="border-b border-[#E1E4E8] bg-[#F4F6F8] dark:bg-[#1E1E1E] dark:border-[#2B2B2B] relative flex items-center justify-between"
       >
         {/* Mobile Menu Button */}
         {onMobileMenuClick && (
@@ -568,7 +648,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 {/* Chrome-style placeholder: empty space where tab will be inserted */}
                 {showPlaceholderBefore && !isDragging && (
                   <div
-                    className="absolute left-0 top-0 bottom-0 w-[120px] bg-primary/10 border-2 border-dashed border-primary rounded transition-all duration-200 z-10"
+                    className="absolute left-0 top-0 bottom-0 w-[120px] bg-primary/10 border-2 border-dashed border-primary rounded transition-all duration-200 z-10 h-[42px]"
                     style={{
                       animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
                     }}
@@ -588,10 +668,10 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 )}
                 {/* Show invisible placeholder when dragging to maintain layout */}
                 {isDragging && (
-                  <div className="invisible min-w-[120px] max-w-[200px] shrink-0">
-                    <div className="flex items-center gap-1 px-3 py-1.5">
-                      {tab.icon && <span className="h-4 w-4 shrink-0">{tab.icon}</span>}
-                      <span className="text-sm font-medium truncate flex-1">{tab.label}</span>
+                  <div className="invisible min-w-[120px] max-w-[200px] shrink-0 h-[42px]">
+                    <div className="flex items-center gap-2 px-4 py-2 h-full">
+                      {tab.icon && <span className="h-[18px] w-[18px] shrink-0">{tab.icon}</span>}
+                      <span className="text-[14px] font-medium tracking-[0.25px] truncate flex-1">{tab.label}</span>
                     </div>
                   </div>
                 )}
@@ -606,7 +686,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 dragOverIndex === nonDashboardCount &&
                 draggedTabId && (
                   <div
-                    className="w-[120px] h-8 bg-primary/10 border-2 border-dashed border-primary rounded shrink-0 transition-all duration-200"
+                    className="w-[120px] h-[42px] bg-primary/10 border-2 border-dashed border-primary rounded shrink-0 transition-all duration-200"
                     style={{
                       animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
                     }}
@@ -635,22 +715,22 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 <div
                   className={cn(
                     "flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 shadow-lg",
-                    "bg-background",
+                    "bg-white dark:bg-[#2B2B2B]",
                     "min-w-[140px] max-w-[220px]",
-                    isDraggingOutside ? "border-green-500" : "border-primary"
+                    isDraggingOutside ? "border-accent" : "border-primary"
                   )}
                 >
                   {draggedTab.icon && (
                     <span
                       className={cn(
-                        "h-4 w-4 shrink-0",
-                        isDraggingOutside ? "text-green-500" : "text-primary"
+                        "h-[18px] w-[18px] shrink-0",
+                        isDraggingOutside ? "text-accent" : "text-primary"
                       )}
                     >
                       {draggedTab.icon}
                     </span>
                   )}
-                  <span className="text-sm font-semibold text-foreground truncate">
+                  <span className="text-[14px] font-medium tracking-[0.25px] text-foreground truncate">
                     {draggedTab.label}
                   </span>
                   {isDraggingOutside && (
@@ -668,7 +748,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
           })()}
 
         {/* Fixed User Menu & Avatar at End - Always visible */}
-        <div className={cn("flex items-center gap-2 px-2 py-1 bg-muted/30 shrink-0", "border-l")}>
+        <div className={cn("flex items-center gap-2 px-2 py-1 bg-[#F4F6F8] dark:bg-[#1E1E1E] shrink-0 border-l border-[#E1E4E8] dark:border-[#2B2B2B]")}>
           {/* User Menu Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
