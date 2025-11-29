@@ -1,5 +1,7 @@
 import { Eye, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 
 interface CanvasToolbarProps {
   viewMode: "edit" | "preview"
@@ -9,11 +11,11 @@ interface CanvasToolbarProps {
 
 export function CanvasToolbar({ viewMode, fieldCount, onViewModeChange }: CanvasToolbarProps) {
   return (
-    <div className="border-b bg-white dark:bg-[#2B2B2B] px-4 py-2 flex items-center justify-between">
-      <div className="flex items-center gap-2">
+    <Flex className="border-b bg-white dark:bg-[#2B2B2B] px-4 py-2 items-center justify-between">
+      <Flex className="items-center gap-2">
         <span className="text-sm font-medium">Physical Form Builder</span>
-      </div>
-      <div className="flex items-center gap-2">
+      </Flex>
+      <Flex className="items-center gap-2">
         <Button
           variant={viewMode === "edit" ? "default" : "outline"}
           size="sm"
@@ -35,8 +37,8 @@ export function CanvasToolbar({ viewMode, fieldCount, onViewModeChange }: Canvas
         <span className="text-sm text-muted-foreground ml-4">
           {fieldCount} field{fieldCount !== 1 ? "s" : ""}
         </span>
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   )
 }
 

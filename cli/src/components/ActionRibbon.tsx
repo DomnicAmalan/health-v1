@@ -1,5 +1,7 @@
 import { memo, useMemo } from "react"
+import { Box } from "@/components/ui/box"
 import { Button } from "@/components/ui/button"
+import { Flex } from "@/components/ui/flex"
 import { Separator } from "@/components/ui/separator"
 import { useTabs } from "@/contexts/TabContext"
 import { getTabActions } from "@/lib/tab-actions"
@@ -29,11 +31,11 @@ export const ActionRibbon = memo(function ActionRibbon({ onAction }: ActionRibbo
   }
 
   return (
-    <div className="border-b bg-card" role="toolbar" aria-label="Page actions">
-      <div className="px-4 py-2">
-        <div className="flex items-center gap-1 flex-wrap" role="group">
+    <Box className="border-b bg-card" role="toolbar" aria-label="Page actions">
+      <Box className="px-4 py-2">
+        <Flex className="items-center gap-1 flex-wrap" role="group">
           {allActions.map((action, index) => (
-            <div key={action.id} className="flex items-center gap-1">
+            <Flex key={action.id} className="items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -48,10 +50,10 @@ export const ActionRibbon = memo(function ActionRibbon({ onAction }: ActionRibbo
               {index < allActions.length - 1 && (
                 <Separator orientation="vertical" className="h-4" />
               )}
-            </div>
+            </Flex>
           ))}
-        </div>
-      </div>
-    </div>
+        </Flex>
+      </Box>
+    </Box>
   )
 })

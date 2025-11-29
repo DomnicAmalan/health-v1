@@ -7,6 +7,8 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
+import { Box } from "@/components/ui/box"
+import { Stack } from "@/components/ui/stack"
 import { getNavActions, getNavContextActions } from "@/lib/nav-actions"
 import { cn } from "@/lib/utils"
 
@@ -51,7 +53,7 @@ export const SidebarItemComponent = memo(function SidebarItemComponent({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div>
+        <Box>
           <button
             type="button"
             onClick={handleClick}
@@ -87,31 +89,33 @@ export const SidebarItemComponent = memo(function SidebarItemComponent({
 
           {/* Action Items Below Nav Item (like Excel ribbon) */}
           {!isCollapsed && isExpanded && hasActions && (
-            <div className="mt-1 mb-2 space-y-0.5 border-t border-muted pt-2">
-              {actions.map((action) => (
-                <button
-                  key={action.id}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    // First navigate if needed, then execute action
-                    if (!item.isActive) {
-                      item.onClick()
-                    }
-                    action.onClick()
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors text-left",
-                    "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {action.icon && <span className="h-4 w-4 shrink-0">{action.icon}</span>}
-                  <span className="text-xs font-medium">{action.label}</span>
-                </button>
-              ))}
-            </div>
+            <Box className="mt-1 mb-2 border-t border-muted pt-2">
+              <Stack spacing="xs">
+                {actions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // First navigate if needed, then execute action
+                      if (!item.isActive) {
+                        item.onClick()
+                      }
+                      action.onClick()
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors text-left",
+                      "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {action.icon && <span className="h-4 w-4 shrink-0">{action.icon}</span>}
+                    <span className="text-xs font-medium">{action.label}</span>
+                  </button>
+                ))}
+              </Stack>
+            </Box>
           )}
-        </div>
+        </Box>
       </ContextMenuTrigger>
       <ContextMenuContent>
         {contextActions.map((action) => (

@@ -1,5 +1,7 @@
 import { memo, useRef } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { cn } from "@/lib/utils"
 import { getModuleColor } from "./useTabColors"
 import { TabDragHandle } from "./TabDragHandle"
@@ -32,7 +34,7 @@ export const TabItem = memo(function TabItem({
   const { handleMouseDown } = useTabDrag({ isDraggable, onDragStart, onSelect })
 
   return (
-    <div
+    <Box
       ref={tabRef}
       role="tab"
       aria-selected={isActive}
@@ -70,7 +72,7 @@ export const TabItem = memo(function TabItem({
       {isDraggable && <TabDragHandle />}
       <Tooltip>
         <TooltipTrigger asChild>
-          <div
+          <Box
             role="tab"
             aria-selected={isActive}
             aria-controls={`tabpanel-${tab.id}`}
@@ -165,13 +167,13 @@ export const TabItem = memo(function TabItem({
               {tab.label}
             </span>
             {tab.closable && !tab.disabled && <TabCloseButton onClose={onClose} />}
-          </div>
+          </Box>
         </TooltipTrigger>
         <TooltipContent>
           <p>{tab.label}</p>
         </TooltipContent>
       </Tooltip>
-    </div>
+    </Box>
   )
 })
 

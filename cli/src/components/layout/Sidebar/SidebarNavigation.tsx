@@ -1,3 +1,5 @@
+import { Box } from "@/components/ui/box"
+import { Stack } from "@/components/ui/stack"
 import { SidebarItemComponent, type SidebarItem } from "./SidebarItem"
 
 interface SidebarNavigationProps {
@@ -17,21 +19,23 @@ export function SidebarNavigation({
 }: SidebarNavigationProps) {
   return (
     <nav
-      className="flex-1 overflow-y-auto p-2 space-y-1"
+      className="flex-1 overflow-y-auto p-2"
       onContextMenu={(e) => {
         e.preventDefault()
       }}
     >
-      {items.map((item) => (
-        <SidebarItemComponent
-          key={item.path}
-          item={item}
-          isCollapsed={isCollapsed}
-          isExpanded={expandedItems.has(item.path)}
-          onToggleExpand={() => onToggleExpand(item.path)}
-          onNavAction={onNavAction}
-        />
-      ))}
+      <Stack spacing="xs">
+        {items.map((item) => (
+          <SidebarItemComponent
+            key={item.path}
+            item={item}
+            isCollapsed={isCollapsed}
+            isExpanded={expandedItems.has(item.path)}
+            onToggleExpand={() => onToggleExpand(item.path)}
+            onNavAction={onNavAction}
+          />
+        ))}
+      </Stack>
     </nav>
   )
 }

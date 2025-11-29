@@ -1,6 +1,8 @@
 import { Menu } from "lucide-react"
 import { memo, useEffect, useMemo, useRef } from "react"
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { useTabs } from "@/contexts/TabContext"
 import { cn } from "@/lib/utils"
@@ -74,7 +76,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div
+      <Box
         ref={tabBarRef}
         className="border-b border-[#E1E4E8] bg-[#F4F6F8] dark:bg-[#1E1E1E] dark:border-[#2B2B2B] relative flex items-center justify-between"
       >
@@ -91,9 +93,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
         )}
 
         {/* Scrollable tabs area - always show dashboard */}
-        <div
+        <Flex
           ref={scrollContainerRef}
-          className="flex items-center gap-1 px-2 py-1 overflow-x-auto scrollbar-hide flex-1 min-w-0"
+          className="items-center gap-1 px-2 py-1 overflow-x-auto scrollbar-hide flex-1 min-w-0"
         >
           {sortedTabs.map((tab) => {
             if (!tab) return null
@@ -112,10 +114,10 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
               dragOverIndex !== null && !isDashboard && dragOverIndex === nonDashboardIndex
 
             return (
-              <div key={tab.id} className="relative">
+              <Box key={tab.id} className="relative">
                 {/* Chrome-style placeholder: empty space where tab will be inserted */}
                 {showPlaceholderBefore && !isDragging && (
-                  <div
+                  <Box
                     className="absolute left-0 top-0 bottom-0 w-[180px] bg-primary/10 border-2 border-dashed border-primary rounded transition-all duration-200 z-10 h-[42px]"
                     style={{
                       animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -136,14 +138,14 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 )}
                 {/* Show invisible placeholder when dragging to maintain layout */}
                 {isDragging && (
-                  <div className="invisible w-[180px] shrink-0 h-[42px]">
-                    <div className="flex items-center gap-2 px-4 py-2 h-full">
+                  <Box className="invisible w-[180px] shrink-0 h-[42px]">
+                    <Flex className="items-center gap-2 px-4 py-2 h-full">
                       {tab.icon && <span className="h-[18px] w-[18px] shrink-0">{tab.icon}</span>}
                       <span className="text-[14px] font-medium tracking-[0.25px] truncate flex-1">{tab.label}</span>
-                    </div>
-                  </div>
+                    </Flex>
+                  </Box>
                 )}
-              </div>
+              </Box>
             )
           })}
           {/* Show placeholder at the end if dragging to last position */}
@@ -153,7 +155,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
               return (
                 dragOverIndex === nonDashboardCount &&
                 draggedTabId && (
-                  <div
+                  <Box
                     className="w-[180px] h-[42px] bg-primary/10 border-2 border-dashed border-primary rounded shrink-0 transition-all duration-200"
                     style={{
                       animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -162,7 +164,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 )
               )
             })()}
-        </div>
+        </Flex>
 
         {/* Drag Preview - Floating tab name */}
         {draggedTabId &&
@@ -183,7 +185,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
 
         {/* Fixed User Menu & Avatar at End - Always visible */}
         <TabUserMenu />
-      </div>
+      </Box>
     </TooltipProvider>
   )
 })

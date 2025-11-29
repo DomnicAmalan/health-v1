@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { Label } from "@/components/ui/label"
+import { Stack } from "@/components/ui/stack"
 import { cn } from "@/lib/utils"
 import { useFormBuilder } from "@/hooks/forms/useFormBuilder"
 import { FormFieldRenderer } from "./FormFieldRenderer"
@@ -72,7 +75,7 @@ export function FormBuilder({
     )
 
     return (
-      <div key={field.id} className={fieldContainerClasses} style={layout.order ? { order: layout.order } : undefined}>
+      <Stack key={field.id} spacing="xs" className={fieldContainerClasses} style={layout.order ? { order: layout.order } : undefined}>
         {field.label && (
           <Label htmlFor={field.id} help={field.help}>
             {field.label}
@@ -103,7 +106,7 @@ export function FormBuilder({
             {error}
           </p>
         )}
-      </div>
+      </Stack>
     )
   }
 
@@ -128,30 +131,32 @@ export function FormBuilder({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cn("space-y-6 overflow-auto", className)} noValidate>
-      {(config.title || config.description) && (
-        <div>
-          {config.title && <h2 className="text-2xl font-semibold mb-2">{config.title}</h2>}
-          {config.description && (
-            <p className="text-sm text-muted-foreground">{config.description}</p>
-          )}
-        </div>
-      )}
-
-      <div className={cn("grid", getGridLayoutClasses(config), getGapClasses(config), "auto-rows-min")}>
-        {renderFieldsWithGroups()}
-      </div>
-
-      <div className="flex items-center justify-end gap-3 pt-4 border-t">
-        {config.showCancel && onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            {config.cancelLabel || "Cancel"}
-          </Button>
+    <form onSubmit={handleSubmit} className={cn("overflow-auto", className)} noValidate>
+      <Stack spacing="lg">
+        {(config.title || config.description) && (
+          <Stack spacing="xs">
+            {config.title && <h2 className="text-2xl font-semibold">{config.title}</h2>}
+            {config.description && (
+              <p className="text-sm text-muted-foreground">{config.description}</p>
+            )}
+          </Stack>
         )}
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : config.submitLabel || "Submit"}
-        </Button>
-      </div>
+
+        <Box className={cn("grid", getGridLayoutClasses(config), getGapClasses(config), "auto-rows-min")}>
+          {renderFieldsWithGroups()}
+        </Box>
+
+        <Flex className="items-center justify-end gap-3 pt-4 border-t">
+          {config.showCancel && onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {config.cancelLabel || "Cancel"}
+            </Button>
+          )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : config.submitLabel || "Submit"}
+          </Button>
+        </Flex>
+      </Stack>
     </form>
   )
 }

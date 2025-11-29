@@ -1,4 +1,6 @@
 import { memo } from "react"
+import { Box } from "@/components/ui/box"
+import { Stack } from "@/components/ui/stack"
 import { cn } from "@/lib/utils"
 import { SidebarHeader } from "./SidebarHeader"
 import { SidebarNavigation, type SidebarItem } from "./SidebarNavigation"

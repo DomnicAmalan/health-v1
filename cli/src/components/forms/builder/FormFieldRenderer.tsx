@@ -1,5 +1,8 @@
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Stack } from "@/components/ui/stack"
 import { cn } from "@/lib/utils"
 import type { FormField, FieldLayout } from "@/components/ui/form-builder"
 
@@ -92,7 +95,7 @@ export function FormFieldRenderer({
 
   if (field.type === "checkbox") {
     return (
-      <div className={cn("flex items-center space-x-2", getWidthClasses(layout.width))}>
+      <Flex className={cn("items-center gap-2", getWidthClasses(layout.width))}>
         <input
           type="checkbox"
           id={field.id}
@@ -109,15 +112,15 @@ export function FormFieldRenderer({
         <Label htmlFor={field.id} className="font-normal">
           {field.description || field.label}
         </Label>
-      </div>
+      </Flex>
     )
   }
 
   if (field.type === "radio" && field.options) {
     return (
-      <div className={cn("space-y-2", getWidthClasses(layout.width))}>
+      <Stack spacing="xs" className={getWidthClasses(layout.width)}>
         {field.options.map((option) => (
-          <div key={option.value} className="flex items-center space-x-2">
+          <Flex key={option.value} className="items-center gap-2">
             <input
               type="radio"
               id={`${field.id}-${option.value}`}
@@ -135,9 +138,9 @@ export function FormFieldRenderer({
             <Label htmlFor={`${field.id}-${option.value}`} className="font-normal">
               {option.label}
             </Label>
-          </div>
+          </Flex>
         ))}
-      </div>
+      </Stack>
     )
   }
 

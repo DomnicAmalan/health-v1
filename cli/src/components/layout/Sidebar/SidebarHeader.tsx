@@ -1,5 +1,7 @@
 import { ChevronLeft, Stethoscope } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 
 interface SidebarHeaderProps {
   isCollapsed: boolean
@@ -8,17 +10,17 @@ interface SidebarHeaderProps {
 
 export function SidebarHeader({ isCollapsed, onToggle }: SidebarHeaderProps) {
   return (
-    <div className="flex items-center justify-between p-4 border-b shrink-0">
+    <Flex className="items-center justify-between p-4 border-b shrink-0">
       {isCollapsed ? (
-        <div className="flex items-center justify-center w-full">
+        <Flex className="items-center justify-center w-full">
           <Stethoscope className="h-6 w-6 text-primary shrink-0" />
-        </div>
+        </Flex>
       ) : (
         <>
-          <div className="flex items-center gap-2 min-w-0">
+          <Flex className="items-center gap-2 min-w-0">
             <Stethoscope className="h-6 w-6 text-primary shrink-0" />
             <h2 className="text-lg font-semibold truncate">EHR Platform</h2>
-          </div>
+          </Flex>
           <Button
             variant="ghost"
             size="icon"
@@ -30,7 +32,7 @@ export function SidebarHeader({ isCollapsed, onToggle }: SidebarHeaderProps) {
           </Button>
         </>
       )}
-    </div>
+    </Flex>
   )
 }
 

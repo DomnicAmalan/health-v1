@@ -1,7 +1,10 @@
 import { Settings, Download, Upload, Code, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Stack } from "@/components/ui/stack"
 import { Grid3x3 } from "lucide-react"
 import type { FieldCategory, FieldCategoryItem, SheetSize } from "./types"
 import { SHEET_SIZES } from "./types"
@@ -58,16 +61,16 @@ export function CanvasFieldLibrary({
   }
 
   return (
-    <div className="w-72 border-r bg-[#F4F6F8] dark:bg-[#1E1E1E] p-4 overflow-y-auto">
-      <div className="space-y-6">
+    <Box className="w-72 border-r bg-[#F4F6F8] dark:bg-[#1E1E1E] p-4 overflow-y-auto">
+      <Stack spacing="lg">
         {/* Canvas Settings */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <Box>
+          <Flex className="items-center gap-2 mb-3">
             <Settings className="h-4 w-4" />
-            Canvas Settings
-          </h3>
-          <div className="space-y-3">
-            <div>
+            <h3 className="text-sm font-semibold">Canvas Settings</h3>
+          </Flex>
+          <Stack spacing="sm">
+            <Stack spacing="xs">
               <Label htmlFor="sheet-size" className="text-xs mb-1.5 block">Sheet Size</Label>
               <select
                 id="sheet-size"
@@ -90,10 +93,10 @@ export function CanvasFieldLibrary({
                   </option>
                 ))}
               </select>
-            </div>
+            </Stack>
             {selectedSheetSize === "custom" && (
               <>
-                <div>
+                <Stack spacing="xs">
                   <Label htmlFor="canvas-width" className="text-xs mb-1.5 block">Canvas Width (px)</Label>
                   <Input
                     id="canvas-width"
@@ -102,8 +105,8 @@ export function CanvasFieldLibrary({
                     onChange={(e) => onCanvasWidthChange(Number(e.target.value))}
                     className="h-8 text-sm"
                   />
-                </div>
-                <div>
+                </Stack>
+                <Stack spacing="xs">
                   <Label htmlFor="canvas-height" className="text-xs mb-1.5 block">Canvas Height (px)</Label>
                   <Input
                     id="canvas-height"
@@ -112,15 +115,15 @@ export function CanvasFieldLibrary({
                     onChange={(e) => onCanvasHeightChange(Number(e.target.value))}
                     className="h-8 text-sm"
                   />
-                </div>
+                </Stack>
               </>
             )}
             {selectedSheetSize !== "custom" && (
-              <div className="text-xs text-muted-foreground p-2 bg-muted rounded-xs">
+              <Box className="text-xs text-muted-foreground p-2 bg-muted rounded-xs">
                 {sheetSizes[selectedSheetSize as keyof typeof sheetSizes]?.name}: {canvasWidth} × {canvasHeight} px
-              </div>
+              </Box>
             )}
-            <div>
+            <Stack spacing="xs">
               <Label htmlFor="grid-size" className="text-xs mb-1.5 block">Grid Size</Label>
               <Input
                 id="grid-size"
@@ -129,7 +132,7 @@ export function CanvasFieldLibrary({
                 onChange={(e) => onGridSizeChange(Number(e.target.value))}
                 className="h-8 text-sm"
               />
-            </div>
+            </Stack>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -160,14 +163,14 @@ export function CanvasFieldLibrary({
               />
               <span className="text-xs">Wrap Overflow</span>
             </label>
-          </div>
-        </div>
+          </Stack>
+        </Box>
 
         {/* Field Library */}
         {Object.entries(fieldCategories).map(([category, items]) => (
-          <div key={category}>
+          <Box key={category}>
             <h3 className="text-sm font-semibold mb-2">{category}</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <Box className="grid grid-cols-2 gap-2">
               {items.map(({ type, label, icon }) => (
                 <Button
                   key={type}
@@ -180,41 +183,43 @@ export function CanvasFieldLibrary({
                   <span>{label}</span>
                 </Button>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         ))}
 
         {/* Import/Export */}
-        <div className="pt-4 border-t space-y-2">
-          <Button variant="outline" size="sm" onClick={onExport} className="w-full">
-            <Download className="h-3 w-3 mr-2" />
-            Export JSON
-          </Button>
-          <label className="w-full">
-            <Button variant="outline" size="sm" asChild className="w-full">
-              <span>
-                <Upload className="h-3 w-3 mr-2" />
-                Import JSON
-              </span>
+        <Box className="pt-4 border-t">
+          <Stack spacing="xs">
+            <Button variant="outline" size="sm" onClick={onExport} className="w-full">
+              <Download className="h-3 w-3 mr-2" />
+              Export JSON
             </Button>
-            <input type="file" accept=".json" onChange={onImport} className="hidden" />
-          </label>
-          <Button variant="outline" size="sm" onClick={onCopyCode} className="w-full">
-            {copied ? (
-              <>
-                <Check className="h-3 w-3 mr-2" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Code className="h-3 w-3 mr-2" />
-                Copy Code
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </div>
+            <label className="w-full">
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <span>
+                  <Upload className="h-3 w-3 mr-2" />
+                  Import JSON
+                </span>
+              </Button>
+              <input type="file" accept=".json" onChange={onImport} className="hidden" />
+            </label>
+            <Button variant="outline" size="sm" onClick={onCopyCode} className="w-full">
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Code className="h-3 w-3 mr-2" />
+                  Copy Code
+                </>
+              )}
+            </Button>
+          </Stack>
+        </Box>
+      </Stack>
+    </Box>
   )
 }
 

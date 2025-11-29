@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { Box } from "@/components/ui/box"
+import { Flex } from "@/components/ui/flex"
 import { FormCanvasPreview } from "@/components/ui/form-canvas-preview"
 import { useFormCanvas } from "@/hooks/forms/useFormCanvas"
 import { useCanvasDrag } from "@/hooks/ui/useCanvasDrag"
@@ -95,7 +97,7 @@ export function FormCanvasBuilder() {
   const selectedSectionData = sections.find((s) => s.id === selectedSection)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <Flex className="h-screen overflow-hidden bg-background">
       <CanvasFieldLibrary
         fieldCategories={FIELD_CATEGORIES}
         selectedSheetSize={selectedSheetSize}
@@ -119,7 +121,7 @@ export function FormCanvasBuilder() {
         onCopyCode={copyCode}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <Flex direction="column" className="flex-1 overflow-hidden">
         <CanvasToolbar
           viewMode={viewMode}
           fieldCount={fields.length}
@@ -136,7 +138,7 @@ export function FormCanvasBuilder() {
             sheetSize={selectedSheetSize}
           />
         ) : (
-          <div className="flex-1 overflow-auto bg-[#F4F6F8] dark:bg-[#1E1E1E] p-6">
+          <Box className="flex-1 overflow-auto bg-[#F4F6F8] dark:bg-[#1E1E1E] p-6">
             <Canvas
               canvasRef={canvasRef}
               canvasWidth={canvasConfig.canvasWidth || 1200}
@@ -172,9 +174,9 @@ export function FormCanvasBuilder() {
                 setSelectedSection(null)
               }}
             />
-          </div>
+          </Box>
         )}
-      </div>
+      </Flex>
 
       <CanvasPropertyPanel
         selectedField={selectedFieldData || null}
@@ -188,7 +190,7 @@ export function FormCanvasBuilder() {
         onRemoveGroup={removeGroup}
         onRemoveSection={removeSection}
       />
-    </div>
+    </Flex>
   )
 }
 

@@ -1,7 +1,9 @@
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Box } from "@/components/ui/box"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Flex } from "@/components/ui/flex"
 import { cn } from "@/lib/utils"
 import type { FormFieldGroup } from "@/components/ui/form-builder"
 
@@ -21,7 +23,7 @@ export function FormFieldGroupComponent({
   const [isCollapsed, setIsCollapsed] = useState(group.defaultCollapsed || false)
 
   return (
-    <div className="col-span-12">
+    <Box className="col-span-12">
       <Card className="overflow-visible">
         {(group.title || group.description) && (
           <CardHeader
@@ -31,13 +33,13 @@ export function FormFieldGroupComponent({
             )}
             onClick={() => group.collapsible && setIsCollapsed(!isCollapsed)}
           >
-            <div className="flex items-center justify-between">
-              <div>
+            <Flex className="items-center justify-between">
+              <Box>
                 {group.title && <CardTitle className="text-lg">{group.title}</CardTitle>}
                 {group.description && (
                   <CardDescription className="mt-1">{group.description}</CardDescription>
                 )}
-              </div>
+              </Box>
               {group.collapsible && (
                 <Button variant="ghost" size="icon" className="h-6 w-6">
                   {isCollapsed ? (
@@ -47,18 +49,18 @@ export function FormFieldGroupComponent({
                   )}
                 </Button>
               )}
-            </div>
+            </Flex>
           </CardHeader>
         )}
         {!isCollapsed && (
           <CardContent className="pt-6">
-            <div className={cn("grid", getGridLayoutClasses(), getGapClasses(), "auto-rows-min")}>
+            <Box className={cn("grid", getGridLayoutClasses(), getGapClasses(), "auto-rows-min")}>
               {fields.map((item) => item.render())}
-            </div>
+            </Box>
           </CardContent>
         )}
       </Card>
-    </div>
+    </Box>
   )
 }
 

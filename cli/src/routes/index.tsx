@@ -9,7 +9,10 @@ import {
   Users,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Box } from "@/components/ui/box"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Flex } from "@/components/ui/flex"
+import { Stack } from "@/components/ui/stack"
 import { useTabs } from "@/contexts/TabContext"
 
 export const Route = createFileRoute("/")({
@@ -94,16 +97,16 @@ function DashboardComponent() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div>
+    <Stack spacing="lg">
+      <Stack spacing="xs">
         <h1 className="text-3xl font-bold">Clinical Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground">
           Welcome back, Dr. John Doe. Here's your overview.
         </p>
-      </div>
+      </Stack>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Box className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card
             key={stat.title}
@@ -131,12 +134,12 @@ function DashboardComponent() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </Box>
 
       {/* Quick Actions */}
-      <div>
+      <Box>
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Box className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => (
             <Card
               key={action.title}
@@ -154,11 +157,11 @@ function DashboardComponent() {
               </CardHeader>
             </Card>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Alerts & Notifications */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <Box className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -168,24 +171,24 @@ function DashboardComponent() {
             <CardDescription>Items requiring immediate attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
+            <Stack spacing="md">
+              <Flex className="items-center justify-between p-3 border rounded-lg">
+                <Box>
                   <p className="font-medium">Abnormal Lab Results</p>
                   <p className="text-sm text-muted-foreground">
                     3 results pending physician review
                   </p>
-                </div>
+                </Box>
                 <Badge variant="destructive">3</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
+              </Flex>
+              <Flex className="items-center justify-between p-3 border rounded-lg">
+                <Box>
                   <p className="font-medium">Medication Interactions</p>
                   <p className="text-sm text-muted-foreground">2 potential interactions detected</p>
-                </div>
+                </Box>
                 <Badge variant="destructive">2</Badge>
-              </div>
-            </div>
+              </Flex>
+            </Stack>
           </CardContent>
         </Card>
 
@@ -198,25 +201,25 @@ function DashboardComponent() {
             <CardDescription>Today's pending tasks</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
+            <Stack spacing="md">
+              <Flex className="items-center justify-between p-3 border rounded-lg">
+                <Box>
                   <p className="font-medium">Discharge Summaries</p>
                   <p className="text-sm text-muted-foreground">5 pending completion</p>
-                </div>
+                </Box>
                 <Badge variant="secondary">5</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
+              </Flex>
+              <Flex className="items-center justify-between p-3 border rounded-lg">
+                <Box>
                   <p className="font-medium">Clinical Notes</p>
                   <p className="text-sm text-muted-foreground">12 notes awaiting signature</p>
-                </div>
+                </Box>
                 <Badge variant="secondary">12</Badge>
-              </div>
-            </div>
+              </Flex>
+            </Stack>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </Box>
+    </Stack>
   )
 }

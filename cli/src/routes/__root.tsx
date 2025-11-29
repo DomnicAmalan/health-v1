@@ -6,17 +6,20 @@ import {
   Calendar,
   ClipboardList,
   CreditCard,
+  FileEdit,
   FileText,
   Pill,
+  Settings,
   Stethoscope,
   Users,
-  Settings,
-  FileEdit,
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ActionRibbon } from "@/components/ActionRibbon"
-import { Sidebar, type SidebarItem } from "@/components/layout/Sidebar"
+import { Sidebar } from "@/components/layout/Sidebar"
 import { TabBar } from "@/components/layout/TabBar"
+import { Box } from "@/components/ui/box"
+import { Container } from "@/components/ui/container"
+import { Flex } from "@/components/ui/flex"
 import { TabProvider, useTabs } from "@/contexts/TabContext"
 import { SkipToMainContent } from "@/lib/accessibility"
 
@@ -24,37 +27,37 @@ export const Route = createRootRoute({
   component: RootComponent,
 })
 
+// Helper function to get icon for a path
+function getIconForPath(path: string): React.ReactNode {
+  const iconMap: Record<string, React.ReactNode> = {
+    "/": <Stethoscope className="h-4 w-4" />,
+    "/patients": <Users className="h-4 w-4" />,
+    "/clinical": <FileText className="h-4 w-4" />,
+    "/orders": <ClipboardList className="h-4 w-4" />,
+    "/results": <Activity className="h-4 w-4" />,
+    "/scheduling": <Calendar className="h-4 w-4" />,
+    "/pharmacy": <Pill className="h-4 w-4" />,
+    "/revenue": <CreditCard className="h-4 w-4" />,
+    "/analytics": <BarChart3 className="h-4 w-4" />,
+    "/form-builder": <FileEdit className="h-4 w-4" />,
+    "/settings": <Settings className="h-4 w-4" />,
+  }
+
+  // Find matching icon by path prefix
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (path.startsWith(key)) {
+      return icon
+    }
+  }
+
+  return <FileText className="h-4 w-4" /> // Default icon
+}
+
 function RootComponentInner() {
   const location = useLocation()
   const { tabs, activeTabId, openTab, setActiveTab } = useTabs()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-
-  // Helper function to get icon for a path
-  const getIconForPath = (path: string): React.ReactNode => {
-    const iconMap: Record<string, React.ReactNode> = {
-      "/": <Stethoscope className="h-4 w-4" />,
-      "/patients": <Users className="h-4 w-4" />,
-      "/clinical": <FileText className="h-4 w-4" />,
-      "/orders": <ClipboardList className="h-4 w-4" />,
-      "/results": <Activity className="h-4 w-4" />,
-      "/scheduling": <Calendar className="h-4 w-4" />,
-      "/pharmacy": <Pill className="h-4 w-4" />,
-      "/revenue": <CreditCard className="h-4 w-4" />,
-      "/analytics": <BarChart3 className="h-4 w-4" />,
-      "/form-builder": <FileEdit className="h-4 w-4" />,
-      "/settings": <Settings className="h-4 w-4" />,
-    }
-
-    // Find matching icon by path prefix
-    for (const [key, icon] of Object.entries(iconMap)) {
-      if (path.startsWith(key)) {
-        return icon
-      }
-    }
-
-    return <FileText className="h-4 w-4" /> // Default icon
-  }
 
   // Check for standalone tab on mount (when window is opened from drag-out)
   useEffect(() => {
@@ -266,7 +269,8 @@ function RootComponentInner() {
       path: "/form-builder",
       label: "Form Builder",
       icon: <FileEdit className="h-5 w-5" />,
-      onClick: () => handleNavClick("/form-builder", "Form Builder", <FileEdit className="h-4 w-4" />),
+      onClick: () =>
+        handleNavClick("/form-builder", "Form Builder", <FileEdit className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/form-builder"),
     },
     {
@@ -279,7 +283,7 @@ function RootComponentInner() {
   ]
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <Flex className="h-screen overflow-hidden bg-background">
       <SkipToMainContent />
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block" aria-label="Main navigation">
@@ -293,7 +297,7 @@ function RootComponentInner() {
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <>
-          <div
+          <Box
             role="button"
             tabIndex={0}
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -316,7 +320,7 @@ function RootComponentInner() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <Flex direction="column" className="flex-1 overflow-hidden">
         {/* Tab Bar */}
         <TabBar onMobileMenuClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
 
@@ -324,15 +328,15 @@ function RootComponentInner() {
         <ActionRibbon onAction={handleTabAction} />
 
         {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-y-auto" role="main" aria-label="Main content">
-          <div className="container mx-auto px-4 py-6">
+        <main id="main-content" className="flex-1 overflow-y-auto" aria-label="Main content">
+          <Container className="py-6">
             <Outlet />
-          </div>
+          </Container>
         </main>
-      </div>
+      </Flex>
 
       <TanStackRouterDevtools />
-    </div>
+    </Flex>
   )
 }
 
