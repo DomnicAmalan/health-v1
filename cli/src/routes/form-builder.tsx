@@ -3,7 +3,7 @@ import { useState } from "react"
 import { FileText, Layout } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FormCanvasBuilder } from "@/components/ui/form-canvas-builder"
+import { FormCanvasBuilder } from "@/components/forms/canvas"
 import { FormPlaygroundWithResizer } from "@/components/ui/form-playground-with-resizer"
 
 export const Route = createFileRoute("/form-builder")({

@@ -15,8 +15,8 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ActionRibbon } from "@/components/ActionRibbon"
-import { Sidebar } from "@/components/Sidebar"
-import { TabBar } from "@/components/TabBar"
+import { Sidebar, type SidebarItem } from "@/components/layout/Sidebar"
+import { TabBar } from "@/components/layout/TabBar"
 import { TabProvider, useTabs } from "@/contexts/TabContext"
 import { SkipToMainContent } from "@/lib/accessibility"
 

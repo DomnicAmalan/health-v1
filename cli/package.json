@@ -15,10 +15,11 @@
     "build": "tsc && vite build --mode desktop",
     "build:web": "tsc && vite build",
     "build:desktop": "tsc && vite build --mode desktop",
-    "lint": "biome check .",
+    "lint": "biome check . && node scripts/check-file-sizes.js",
     "lint:fix": "biome check --write .",
     "lint:fix:unsafe": "biome check --write --unsafe .",
     "format": "biome format --write .",
+    "check:size": "node scripts/check-file-sizes.js",
     "preview": "vite preview",
     "preview:web": "vite preview",
     "tauri": "tauri",
@@ -70,6 +71,7 @@
     "standard-version": "^9.5.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "glob": "^11.0.0"
   }
 }
