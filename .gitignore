@@ -3,10 +3,11 @@
 # ============================================
 node_modules/
 cli/node_modules/
-bun.lock
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# Note: Lock files should be committed for reproducible builds
+# bun.lock
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
 # ============================================
 # Build Outputs (CLI/Frontend)
