@@ -4,6 +4,10 @@
  */
 
 import * as React from "react"
+import { keyboardShortcutManager, COMMON_SHORTCUTS } from "./keyboard/shortcuts"
+import { useAccessibilityStore } from "@/stores/accessibilityStore"
+import { useVoiceCommandStore } from "@/stores/voiceCommandStore"
+import { getVoiceCommandEngine } from "./voice/voiceCommandEngine"
 
 /**
  * Skip to main content link - allows keyboard users to skip navigation
@@ -167,5 +171,50 @@ export function isScreenReaderActive(): boolean {
     navigator.userAgent.includes("VoiceOver") ||
     document.querySelector('[role="application"][aria-label*="screen reader"]') !== null
   )
+}
+
+/**
+ * Initialize accessibility features
+ * Sets up keyboard shortcuts and other accessibility features
+ */
+export function initializeAccessibility(): void {
+  // Register common keyboard shortcuts
+  keyboardShortcutManager.register({
+    ...COMMON_SHORTCUTS.OPEN_ACCESSIBILITY,
+    action: () => {
+      // Trigger accessibility panel open
+      const event = new CustomEvent('open-accessibility-panel');
+      window.dispatchEvent(event);
+    },
+    global: true,
+  });
+
+  keyboardShortcutManager.register({
+    ...COMMON_SHORTCUTS.TOGGLE_VOICE_COMMANDS,
+    action: () => {
+      const preferences = useAccessibilityStore.getState().preferences;
+      if (preferences.voiceCommandsEnabled) {
+        const engine = getVoiceCommandEngine();
+        const voiceStore = useVoiceCommandStore.getState();
+        if (voiceStore.isListening) {
+          engine.stop();
+        } else {
+          engine.start({ language: preferences.voiceCommandsLanguage || 'en-US' });
+        }
+      }
+    },
+    global: true,
+  });
+
+  // Register escape key for closing modals
+  keyboardShortcutManager.register({
+    ...COMMON_SHORTCUTS.ESCAPE,
+    action: () => {
+      // Close any open modals/dialogs
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.activeElement?.dispatchEvent(event);
+    },
+    global: true,
+  });
 }
 

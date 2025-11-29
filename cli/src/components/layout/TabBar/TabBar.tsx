@@ -84,6 +84,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
       <Box
         ref={tabBarRef}
         className="border-b border-[#E1E4E8] bg-[#F4F6F8] dark:bg-[#1E1E1E] dark:border-[#2B2B2B] relative flex items-center justify-between"
+        role="tablist"
+        aria-label="Application tabs"
+        aria-orientation="horizontal"
       >
         {/* Mobile Menu Button */}
         {onMobileMenuClick && (

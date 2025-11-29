@@ -27,6 +27,13 @@ import { useTabs, useActiveTabId, useOpenTab, useSetActiveTab } from "@/stores/t
 import { useSidebarCollapsed, useSetSidebarCollapsed } from "@/stores/uiStore"
 import { useDisclosure } from "@/hooks/ui/useDisclosure"
 import { PERMISSIONS, type Permission } from "@/lib/constants/permissions"
+import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel"
+import { VoiceCommandIndicator } from "@/components/accessibility/VoiceCommandIndicator"
+import { VoiceCommandFeedback } from "@/components/accessibility/VoiceCommandFeedback"
+import { VoiceCommandFAB } from "@/components/accessibility/VoiceCommandFAB"
+import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChatbox"
+import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp"
+import { initializeAccessibility } from "@/lib/accessibility"
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -68,6 +75,11 @@ function RootComponentInner() {
   const isSidebarCollapsed = useSidebarCollapsed()
   const setIsSidebarCollapsed = useSetSidebarCollapsed()
   const { isOpen: isMobileSidebarOpen, onClose: onMobileSidebarClose, onToggle: onMobileSidebarToggle } = useDisclosure('mobile-sidebar')
+
+  // Initialize accessibility features on mount
+  useEffect(() => {
+    initializeAccessibility()
+  }, [])
 
   // Check for standalone tab on mount (when window is opened from drag-out)
   useEffect(() => {
@@ -383,18 +395,24 @@ function RootComponentInner() {
         {/* Action Ribbon - shows actions for active tab */}
         <ActionRibbon onAction={handleTabAction} />
 
-        {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-y-auto" aria-label="Main content">
-          <Container size="full" className="py-2 px-4">
-            <Outlet />
-          </Container>
-        </main>
-      </Flex>
+          {/* Main Content */}
+          <main id="main-content" className="flex-1 overflow-y-auto" aria-label="Main content">
+            <Container size="full" className="py-2 px-4">
+              <Outlet />
+            </Container>
+          </main>
+        </Flex>
 
-      <TanStackRouterDevtools />
-    </Flex>
-  )
-}
+        {/* Voice Command Components - Bottom Right */}
+        <VoiceCommandIndicator />
+        <VoiceCommandFeedback />
+        <VoiceCommandFAB />
+        <VoiceCommandChatbox />
+
+        <TanStackRouterDevtools />
+      </Flex>
+    )
+  }
 
 // Root component - no longer needs TabProvider
 function RootComponent() {

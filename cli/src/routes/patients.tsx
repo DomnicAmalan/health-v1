@@ -28,8 +28,18 @@ function PatientsComponentInner() {
   const navigate = useNavigate()
   const openTab = useOpenTab()
 
-  // Mock patient data
+  // Mock patient data - including John Doe for demo
   const patients = [
+    {
+      id: "john-doe-123",
+      name: "John Doe",
+      mrn: "MRN-123456",
+      dob: "1985-05-15",
+      age: 39,
+      gender: "Male",
+      status: "Active",
+      lastVisit: "2024-01-10",
+    },
     {
       id: "123456",
       name: "John Doe",

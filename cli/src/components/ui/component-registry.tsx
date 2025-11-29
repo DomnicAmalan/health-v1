@@ -6,6 +6,95 @@ import { HelpButton, HelpButtonProps } from "./help-button"
  * This allows for consistent hint/help buttons and component customization across the app
  */
 
+/**
+ * Action Item - Available actions for voice commands and screen readers
+ */
+export interface ActionItem {
+  readonly id: string
+  readonly label: string
+  readonly action: () => void | Promise<void>
+  readonly i18nKey?: string
+  readonly voiceCommand?: string | string[] // Voice command patterns that trigger this action
+  readonly confirmationRequired?: boolean
+}
+
+/**
+ * Component Structure - Exposes component's internal structure to LLM
+ */
+export interface ComponentStructure {
+  readonly type: 'form' | 'button' | 'dropdown' | 'table' | 'modal' | 'card' | 'input' | 'navigation' | 'other'
+  readonly fields?: FieldStructure[]
+  readonly options?: OptionStructure[]
+  readonly columns?: ColumnStructure[]
+  readonly rows?: RowStructure[]
+  readonly actions?: ActionStructure[]
+  readonly sections?: SectionStructure[]
+  readonly dataPoints?: DataPointStructure[]
+  readonly validation?: ValidationRules
+  readonly currentValue?: string | number | boolean
+  readonly content?: string
+  readonly label?: string
+  readonly placeholder?: string
+}
+
+export interface FieldStructure {
+  readonly id: string
+  readonly label: string
+  readonly placeholder?: string
+  readonly type: string
+  readonly required?: boolean
+  readonly validation?: ValidationRules
+  readonly ref?: { current: HTMLElement | null }
+}
+
+export interface OptionStructure {
+  readonly value: string | number
+  readonly label: string
+  readonly disabled?: boolean
+}
+
+export interface ColumnStructure {
+  readonly id: string
+  readonly label: string
+  readonly sortable?: boolean
+  readonly filterable?: boolean
+}
+
+export interface RowStructure {
+  readonly id: string
+  readonly data: Record<string, unknown>
+}
+
+export interface ActionStructure {
+  readonly id: string
+  readonly label: string
+  readonly type: 'button' | 'link' | 'menu-item'
+  readonly ref?: { current: HTMLElement | null }
+  readonly confirmationRequired?: boolean
+}
+
+export interface SectionStructure {
+  readonly id: string
+  readonly label: string
+  readonly content?: string
+}
+
+export interface DataPointStructure {
+  readonly id: string
+  readonly label: string
+  readonly value: string | number
+}
+
+export interface ValidationRules {
+  readonly required?: boolean
+  readonly minLength?: number
+  readonly maxLength?: number
+  readonly pattern?: string
+  readonly min?: number
+  readonly max?: number
+  readonly errorMessage?: string
+}
+
 export interface ComponentConfig {
   readonly showHelp?: boolean
   readonly helpContent?: string | React.ReactNode
@@ -14,6 +103,17 @@ export interface ComponentConfig {
   readonly helpSize?: HelpButtonProps["size"]
   readonly className?: string
   readonly customizations?: Readonly<Record<string, unknown>>
+  // Accessibility metadata
+  readonly ariaLabel?: string
+  readonly ariaLabelledBy?: string
+  readonly ariaDescribedBy?: string
+  readonly role?: string
+  readonly i18nKey?: string
+  // Voice command support
+  readonly voiceInteractable?: boolean // Whether component supports voice interaction (default: true)
+  readonly voiceDescription?: string // How to describe this component for voice commands
+  readonly actionItems?: ActionItem[] // Available actions for voice commands
+  readonly componentStructure?: ComponentStructure // Expose component structure to LLM
 }
 
 export interface ComponentWithHelpProps {
@@ -111,6 +211,56 @@ export function HelpHint({
 
 // Component Registry - Store component configurations
 export const componentRegistry = new Map<string, ComponentConfig>()
+
+/**
+ * Get all voice-interactable components
+ */
+export function getVoiceInteractableComponents(): Array<{ id: string; config: ComponentConfig }> {
+  return Array.from(componentRegistry.entries())
+    .filter(([_, config]) => config.voiceInteractable !== false)
+    .map(([id, config]) => ({ id, config }))
+}
+
+/**
+ * Find component by voice command
+ */
+export function findComponentByVoiceCommand(command: string): ComponentConfig | null {
+  const normalizedCommand = command.toLowerCase().trim()
+  
+  for (const config of componentRegistry.values()) {
+    if (config.actionItems) {
+      for (const action of config.actionItems) {
+        if (action.voiceCommand) {
+          const commands = Array.isArray(action.voiceCommand) ? action.voiceCommand : [action.voiceCommand]
+          for (const cmd of commands) {
+            if (normalizedCommand.includes(cmd.toLowerCase())) {
+              return config
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return null
+}
+
+/**
+ * Get all action items from all components
+ */
+export function getAllActionItems(): Array<{ componentId: string; action: ActionItem }> {
+  const actions: Array<{ componentId: string; action: ActionItem }> = []
+  
+  for (const [componentId, config] of componentRegistry.entries()) {
+    if (config.actionItems) {
+      for (const action of config.actionItems) {
+        actions.push({ componentId, action })
+      }
+    }
+  }
+  
+  return actions
+}
 
 /**
  * Register a component configuration

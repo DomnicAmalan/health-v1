@@ -10,8 +10,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, help, "aria-label": ariaLabel, "aria-describedby": ariaDescribedBy, ...props }, ref) => {
+  ({ className, type, help, "aria-label": ariaLabel, "aria-describedby": ariaDescribedBy, placeholder, ...props }, ref) => {
     const helpId = help ? `help-${Math.random().toString(36).substring(2, 9)}` : undefined
+    
+    // Generate ARIA label from placeholder if not provided
+    const inputAriaLabel = ariaLabel || placeholder
     
     return (
       <div className="relative w-full group">
@@ -22,9 +25,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className
           )}
           ref={ref}
-          aria-label={ariaLabel}
+          aria-label={inputAriaLabel}
           aria-describedby={helpId || ariaDescribedBy}
           aria-required={props.required}
+          placeholder={placeholder}
           {...props}
         />
         {help && (

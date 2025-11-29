@@ -46,11 +46,22 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, help, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, help, "aria-label": ariaLabel, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    
+    // Generate ARIA label from children if not provided
+    const buttonAriaLabel = ariaLabel || (typeof children === 'string' ? children : undefined)
+    
     return (
       <div className="relative inline-flex group">
-        <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+        <Comp 
+          className={cn(buttonVariants({ variant, size, className }))} 
+          ref={ref} 
+          aria-label={buttonAriaLabel}
+          {...props}
+        >
+          {children}
+        </Comp>
         {help && (
           <HoverHelp
             content={help.content}
