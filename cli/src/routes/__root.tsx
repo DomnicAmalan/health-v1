@@ -329,7 +329,7 @@ function RootComponentInner() {
 
         {/* Main Content */}
         <main id="main-content" className="flex-1 overflow-y-auto" aria-label="Main content">
-          <Container className="py-6">
+          <Container size="full" className="py-2 px-4">
             <Outlet />
           </Container>
         </main>

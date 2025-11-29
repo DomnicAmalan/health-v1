@@ -178,6 +178,21 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    cursor: url('/cursors/cursor-default.png') 0 0, default;
+  }
+  
+  /* Microsoft-style cursor behavior for interactive elements with Flaticon support */
+  a, button, [role="button"], [role="link"], input[type="button"], input[type="submit"] {
+    cursor: url('/cursors/cursor-pointer.png') 0 0, pointer;
+  }
+  
+  input[type="text"], input[type="email"], input[type="password"], input[type="number"], 
+  input[type="search"], input[type="tel"], input[type="url"], textarea, [contenteditable="true"] {
+    cursor: url('/cursors/cursor-text.png') 0 0, text;
+  }
+  
+  input:disabled, button:disabled, [aria-disabled="true"] {
+    cursor: url('/cursors/cursor-not-allowed.png') 0 0, not-allowed;
   }
   
   /* Microsoft-inspired Typography Scale */
@@ -240,11 +255,11 @@
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     * {
-      border-color: currentColor !important;
+      border-color: currentColor;
     }
     
     button, a, [role="button"] {
-      border: 2px solid currentColor !important;
+      border: 2px solid currentColor;
     }
   }
   
@@ -253,10 +268,10 @@
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
+      transition-duration: 0.01ms;
+      scroll-behavior: auto;
     }
   }
   
@@ -334,5 +349,202 @@
   
   .animate-spin-fluent {
     animation: spin-fluent 0.9s linear infinite;
+  }
+  
+  .cursor-default {
+    cursor: url('/cursors/cursor-default.png') 0 0, default;
+  }
+  
+  .cursor-pointer {
+    cursor: url('/cursors/cursor-pointer.png') 0 0, pointer;
+  }
+  
+  .cursor-text {
+    cursor: url('/cursors/cursor-text.png') 0 0, text;
+  }
+  
+  .cursor-move {
+    cursor: url('/cursors/cursor-move.png') 0 0, move;
+  }
+  
+  .cursor-grab {
+    cursor: url('/cursors/cursor-grab.png') 0 0, grab;
+  }
+  
+  .cursor-grabbing {
+    cursor: url('/cursors/cursor-grabbing.png') 0 0, grabbing;
+  }
+  
+  .cursor-not-allowed {
+    cursor: url('/cursors/cursor-not-allowed.png') 0 0, not-allowed;
+  }
+  
+  .cursor-wait {
+    cursor: url('/cursors/cursor-wait.png') 0 0, wait;
+  }
+  
+  .cursor-help {
+    cursor: url('/cursors/cursor-help.png') 0 0, help;
+  }
+  
+  .cursor-crosshair {
+    cursor: url('/cursors/cursor-crosshair.png') 0 0, crosshair;
+  }
+  
+  /* Resize cursors - Microsoft style with Flaticon support */
+  .cursor-resize {
+    cursor: url('/cursors/cursor-resize.png') 0 0, resize;
+  }
+  
+  .cursor-resize-n {
+    cursor: url('/cursors/cursor-resize-n.png') 0 0, n-resize;
+  }
+  
+  .cursor-resize-s {
+    cursor: url('/cursors/cursor-resize-s.png') 0 0, s-resize;
+  }
+  
+  .cursor-resize-e {
+    cursor: url('/cursors/cursor-resize-e.png') 0 0, e-resize;
+  }
+  
+  .cursor-resize-w {
+    cursor: url('/cursors/cursor-resize-w.png') 0 0, w-resize;
+  }
+  
+  .cursor-resize-ne {
+    cursor: url('/cursors/cursor-resize-ne.png') 0 0, ne-resize;
+  }
+  
+  .cursor-resize-nw {
+    cursor: url('/cursors/cursor-resize-nw.png') 0 0, nw-resize;
+  }
+  
+  .cursor-resize-se {
+    cursor: url('/cursors/cursor-resize-se.png') 0 0, se-resize;
+  }
+  
+  .cursor-resize-sw {
+    cursor: url('/cursors/cursor-resize-sw.png') 0 0, sw-resize;
+  }
+  
+  .cursor-resize-ew {
+    cursor: url('/cursors/cursor-resize-ew.png') 0 0, ew-resize;
+  }
+  
+  .cursor-resize-ns {
+    cursor: url('/cursors/cursor-resize-ns.png') 0 0, ns-resize;
+  }
+  
+  .cursor-resize-nesw {
+    cursor: url('/cursors/cursor-resize-nesw.png') 0 0, nesw-resize;
+  }
+  
+  .cursor-resize-nwse {
+    cursor: url('/cursors/cursor-resize-nwse.png') 0 0, nwse-resize;
+  }
+  
+  /* Microsoft Fluent UI specific cursor states with Flaticon support */
+  .cursor-context-menu {
+    cursor: url('/cursors/cursor-context-menu.png') 0 0, context-menu;
+  }
+  
+  .cursor-progress {
+    cursor: url('/cursors/cursor-progress.png') 0 0, progress;
+  }
+  
+  .cursor-cell {
+    cursor: url('/cursors/cursor-cell.png') 0 0, cell;
+  }
+  
+  .cursor-copy {
+    cursor: url('/cursors/cursor-copy.png') 0 0, copy;
+  }
+  
+  .cursor-alias {
+    cursor: url('/cursors/cursor-alias.png') 0 0, alias;
+  }
+  
+  .cursor-no-drop {
+    cursor: url('/cursors/cursor-no-drop.png') 0 0, no-drop;
+  }
+  
+  .cursor-vertical-text {
+    cursor: url('/cursors/cursor-vertical-text.png') 0 0, vertical-text;
+  }
+  
+  .cursor-zoom-in {
+    cursor: url('/cursors/cursor-zoom-in.png') 0 0, zoom-in;
+  }
+  
+  .cursor-zoom-out {
+    cursor: url('/cursors/cursor-zoom-out.png') 0 0, zoom-out;
+  }
+  
+  /* Microsoft-style hover cursor states */
+  .cursor-hover-pointer:hover {
+    cursor: pointer;
+  }
+  
+  .cursor-hover-grab:hover {
+    cursor: grab;
+  }
+  
+  .cursor-hover-grabbing:active {
+    cursor: grabbing;
+  }
+  
+  /* Custom cursor for interactive elements with Flaticon support */
+  .cursor-interactive {
+    cursor: url('/cursors/cursor-pointer.png') 0 0, pointer;
+  }
+  
+  /* Microsoft-style drag cursor */
+  .cursor-drag {
+    cursor: url('/cursors/cursor-grab.png') 0 0, grab;
+  }
+  
+  .cursor-drag:active {
+    cursor: url('/cursors/cursor-grabbing.png') 0 0, grabbing;
+  }
+  
+  /* Microsoft-style selection cursor */
+  .cursor-select {
+    cursor: url('/cursors/cursor-text.png') 0 0, text;
+  }
+  
+  /* Microsoft-style link cursor */
+  .cursor-link {
+    cursor: url('/cursors/cursor-pointer.png') 0 0, pointer;
+  }
+  
+  /* Microsoft-style button cursor */
+  .cursor-button {
+    cursor: url('/cursors/cursor-pointer.png') 0 0, pointer;
+  }
+  
+  /* Microsoft-style disabled cursor */
+  .cursor-disabled {
+    cursor: url('/cursors/cursor-not-allowed.png') 0 0, not-allowed;
+  }
+  
+  /* Microsoft-style loading cursor */
+  .cursor-loading {
+    cursor: url('/cursors/cursor-wait.png') 0 0, wait;
+  }
+  
+  /* Microsoft-style resize handle cursor */
+  .cursor-resize-handle {
+    cursor: url('/cursors/cursor-resize-nwse.png') 0 0, nwse-resize;
+  }
+  
+  /* Microsoft-style column resize cursor */
+  .cursor-resize-column {
+    cursor: url('/cursors/cursor-resize-ew.png') 0 0, col-resize;
+  }
+  
+  /* Microsoft-style row resize cursor */
+  .cursor-resize-row {
+    cursor: url('/cursors/cursor-resize-ns.png') 0 0, row-resize;
   }
 }

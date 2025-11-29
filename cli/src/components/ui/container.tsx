@@ -1,6 +1,6 @@
 import * as React from "react"
-import { Box } from "./box"
 import { cn } from "@/lib/utils"
+import { Box } from "./box"
 
 export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg" | "xl" | "full"
@@ -19,7 +19,12 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
     return (
       <Box
         ref={ref}
-        className={cn("mx-auto px-4", sizeClasses[size], className)}
+        className={cn(
+          size === "full" ? "w-full" : "mx-auto",
+          size !== "full" && "px-4",
+          sizeClasses[size],
+          className
+        )}
         {...props}
       />
     )
@@ -28,4 +33,3 @@ const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
 Container.displayName = "Container"
 
 export { Container }
-
