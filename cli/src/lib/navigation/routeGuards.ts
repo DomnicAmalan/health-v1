@@ -4,7 +4,8 @@
  */
 
 import type { Permission } from '@/lib/constants/permissions';
-import { logAccessDenied } from '@/lib/api/audit';
+import { logAccessDenied as logAccessDeniedAPI } from '@/lib/api/audit';
+import { useAuthStore } from '@/stores/authStore';
 
 export interface RouteGuardConfig {
   requiredPermission: Permission;
@@ -24,7 +25,10 @@ export function checkRoutePermission(
   if (!hasPermission(requiredPermission)) {
     // Log access denied
     if (resource) {
-      logAccessDenied('system', resource, requiredPermission);
+      const state = useAuthStore.getState();
+      if (state.user) {
+        logAccessDeniedAPI(state.user.id, resource, requiredPermission, state.user.role);
+      }
     }
 
     return {

@@ -23,7 +23,7 @@ import { Flex } from "@/components/ui/flex"
 import { TabProvider, useTabs } from "@/contexts/TabContext"
 import { SkipToMainContent } from "@/lib/accessibility"
 import { useAuthStore } from "@/stores/authStore"
-import { PERMISSIONS } from "@/lib/constants/permissions"
+import { PERMISSIONS, type Permission } from "@/lib/constants/permissions"
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -207,7 +207,15 @@ function RootComponentInner() {
     }
   }
 
-  const allNavigationItems = [
+  // Define navigation items with permissions
+  const allNavigationItems: Array<{
+    path: string;
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    isActive: boolean;
+    permission?: Permission;
+  }> = [
     {
       path: "/",
       label: "Dashboard",

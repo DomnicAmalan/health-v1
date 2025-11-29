@@ -63,6 +63,7 @@ function PatientsComponentInner() {
       path: `/patients/${patient.id}`,
       icon: <Users className="h-4 w-4" />,
       closable: true,
+      requiredPermission: PERMISSIONS.PATIENTS.VIEW,
     })
   }
 
