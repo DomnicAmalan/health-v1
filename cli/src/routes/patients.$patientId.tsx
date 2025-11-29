@@ -3,12 +3,22 @@ import { Activity, Calendar, FileText, Pill } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/patients/$patientId")({
   component: PatientDetailComponent,
 })
 
 function PatientDetailComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.PATIENTS.VIEW} resource="patients">
+      <PatientDetailComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function PatientDetailComponentInner() {
   const { patientId } = Route.useParams()
 
   // Mock patient data

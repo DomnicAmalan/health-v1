@@ -13,7 +13,7 @@ import {
   Stethoscope,
   Users,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { ActionRibbon } from "@/components/ActionRibbon"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { TabBar } from "@/components/layout/TabBar"
@@ -22,6 +22,8 @@ import { Container } from "@/components/ui/container"
 import { Flex } from "@/components/ui/flex"
 import { TabProvider, useTabs } from "@/contexts/TabContext"
 import { SkipToMainContent } from "@/lib/accessibility"
+import { useAuthStore } from "@/stores/authStore"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -148,11 +150,15 @@ function RootComponentInner() {
   }, [tabs, activeTabId])
 
   const handleNavClick = (path: string, label: string, icon: React.ReactNode) => {
+    // Get required permission for this route
+    const requiredPermission = allNavigationItems.find(item => item.path === path)?.permission
+    
     openTab({
       label,
       path,
       icon,
       closable: path !== "/",
+      requiredPermission,
     })
     // Close mobile sidebar after navigation
     setIsMobileSidebarOpen(false)
@@ -201,13 +207,14 @@ function RootComponentInner() {
     }
   }
 
-  const navigationItems = [
+  const allNavigationItems = [
     {
       path: "/",
       label: "Dashboard",
       icon: <Stethoscope className="h-5 w-5" />,
       onClick: () => handleNavClick("/", "Dashboard", <Stethoscope className="h-4 w-4" />),
       isActive: location.pathname === "/",
+      permission: undefined, // Dashboard is always accessible
     },
     {
       path: "/patients",
@@ -215,6 +222,7 @@ function RootComponentInner() {
       icon: <Users className="h-5 w-5" />,
       onClick: () => handleNavClick("/patients", "Patients", <Users className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/patients"),
+      permission: PERMISSIONS.PATIENTS.VIEW,
     },
     {
       path: "/clinical",
@@ -222,6 +230,7 @@ function RootComponentInner() {
       icon: <FileText className="h-5 w-5" />,
       onClick: () => handleNavClick("/clinical", "Clinical", <FileText className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/clinical"),
+      permission: PERMISSIONS.CLINICAL.VIEW,
     },
     {
       path: "/orders",
@@ -229,6 +238,7 @@ function RootComponentInner() {
       icon: <ClipboardList className="h-5 w-5" />,
       onClick: () => handleNavClick("/orders", "Orders", <ClipboardList className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/orders"),
+      permission: PERMISSIONS.ORDERS.VIEW,
     },
     {
       path: "/results",
@@ -236,6 +246,7 @@ function RootComponentInner() {
       icon: <Activity className="h-5 w-5" />,
       onClick: () => handleNavClick("/results", "Results", <Activity className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/results"),
+      permission: PERMISSIONS.RESULTS.VIEW,
     },
     {
       path: "/scheduling",
@@ -243,6 +254,7 @@ function RootComponentInner() {
       icon: <Calendar className="h-5 w-5" />,
       onClick: () => handleNavClick("/scheduling", "Scheduling", <Calendar className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/scheduling"),
+      permission: PERMISSIONS.SCHEDULING.VIEW,
     },
     {
       path: "/pharmacy",
@@ -250,6 +262,7 @@ function RootComponentInner() {
       icon: <Pill className="h-5 w-5" />,
       onClick: () => handleNavClick("/pharmacy", "Pharmacy", <Pill className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/pharmacy"),
+      permission: PERMISSIONS.PHARMACY.VIEW,
     },
     {
       path: "/revenue",
@@ -257,6 +270,7 @@ function RootComponentInner() {
       icon: <CreditCard className="h-5 w-5" />,
       onClick: () => handleNavClick("/revenue", "Revenue", <CreditCard className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/revenue"),
+      permission: PERMISSIONS.REVENUE.VIEW,
     },
     {
       path: "/analytics",
@@ -264,6 +278,7 @@ function RootComponentInner() {
       icon: <BarChart3 className="h-5 w-5" />,
       onClick: () => handleNavClick("/analytics", "Analytics", <BarChart3 className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/analytics"),
+      permission: PERMISSIONS.ANALYTICS.VIEW,
     },
     {
       path: "/form-builder",
@@ -272,6 +287,7 @@ function RootComponentInner() {
       onClick: () =>
         handleNavClick("/form-builder", "Form Builder", <FileEdit className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/form-builder"),
+      permission: undefined, // Form builder might not need specific permission
     },
     {
       path: "/settings",
@@ -279,8 +295,19 @@ function RootComponentInner() {
       icon: <Settings className="h-5 w-5" />,
       onClick: () => handleNavClick("/settings", "Settings", <Settings className="h-4 w-4" />),
       isActive: location.pathname.startsWith("/settings"),
+      permission: PERMISSIONS.SETTINGS.VIEW,
     },
   ]
+
+  // Filter navigation items based on permissions
+  // Use direct store access to avoid hook re-render issues
+  const navigationItems = useMemo(() => {
+    const state = useAuthStore.getState()
+    return allNavigationItems.filter((item) => {
+      if (!item.permission) return true // No permission required
+      return state.permissions.includes(item.permission)
+    })
+  }, [location.pathname]) // Only depend on pathname, not hasPermission
 
   return (
     <Flex className="h-screen overflow-hidden bg-background">

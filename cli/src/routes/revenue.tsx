@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { CreditCard, DollarSign, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/revenue")({
   component: RevenueComponent,
 })
 
 function RevenueComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.REVENUE.VIEW} resource="revenue">
+      <RevenueComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function RevenueComponentInner() {
   return (
     <div className="space-y-6">
       <div>

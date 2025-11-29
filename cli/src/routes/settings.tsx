@@ -5,12 +5,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,
 })
 
 function SettingsComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.SETTINGS.VIEW} resource="settings">
+      <SettingsComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function SettingsComponentInner() {
   return (
     <div className="space-y-6">
       <div>

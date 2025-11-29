@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Pill } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/pharmacy")({
   component: PharmacyComponent,
 })
 
 function PharmacyComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.PHARMACY.VIEW} resource="pharmacy">
+      <PharmacyComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function PharmacyComponentInner() {
   return (
     <div className="space-y-6">
       <div>

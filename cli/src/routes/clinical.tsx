@@ -2,12 +2,22 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/clinical")({
   component: ClinicalComponent,
 })
 
 function ClinicalComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.CLINICAL.VIEW} resource="clinical">
+      <ClinicalComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function ClinicalComponentInner() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

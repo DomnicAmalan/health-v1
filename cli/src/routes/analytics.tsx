@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Activity, Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/analytics")({
   component: AnalyticsComponent,
 })
 
 function AnalyticsComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.ANALYTICS.VIEW} resource="analytics">
+      <AnalyticsComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function AnalyticsComponentInner() {
   return (
     <div className="space-y-6">
       <div>

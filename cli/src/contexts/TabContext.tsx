@@ -9,6 +9,11 @@ import {
   useState,
 } from "react"
 import { reorderTabsArray } from "@/lib/dragUtils"
+import { useAuthStore } from "@/stores/authStore"
+import { useAuditStore } from "@/stores/auditStore"
+import { canAccessRoute, getRoutePermission } from "@/lib/navigation/permissionChecks"
+import { logAccessDenied } from "@/lib/api/audit"
+import type { Permission } from "@/lib/constants/permissions"
 
 export interface Tab {
   id: string
@@ -17,6 +22,8 @@ export interface Tab {
   icon?: ReactNode
   closable?: boolean
   allowDuplicate?: boolean // If true, allows multiple tabs with same path (for forms, etc.)
+  requiredPermission?: Permission // Permission required to open this tab
+  accessDenied?: boolean // True if access was denied
 }
 
 interface TabContextType {
@@ -58,6 +65,30 @@ export function TabProvider({ children }: { children: ReactNode }) {
   const navigateRef = useRef(navigate)
   navigateRef.current = navigate
 
+  // Helper function to check permissions (reads directly from store to avoid re-renders)
+  const checkPermission = useCallback((permission: Permission): boolean => {
+    const state = useAuthStore.getState()
+    return state.permissions.includes(permission)
+  }, [])
+
+  // Helper function to log access denied (stable reference)
+  const logAccessDeniedHelper = useCallback((resource: string, permission: Permission) => {
+    const authState = useAuthStore.getState()
+    if (authState.user) {
+      const { addEntry } = useAuditStore.getState()
+      addEntry({
+        userId: authState.user.id,
+        action: 'ACCESS_DENIED',
+        resource,
+        details: {
+          requiredPermission: permission,
+          userRole: authState.user.role,
+        },
+      })
+      logAccessDenied(authState.user.id, resource, permission, authState.user.role)
+    }
+  }, [])
+
   // Create Map index for O(1) lookups (updated on each render via useMemo)
   const tabsMap = useMemo(() => {
     const map = new Map<string, Tab>()
@@ -69,11 +100,41 @@ export function TabProvider({ children }: { children: ReactNode }) {
   }, [tabs])
 
   const openTab = useCallback((tab: Omit<Tab, "id">) => {
+    // Check permission before opening tab
+    const requiredPermission = tab.requiredPermission || getRoutePermission(tab.path)
+    const hasAccess = requiredPermission
+      ? checkPermission(requiredPermission)
+      : canAccessRoute(tab.path, checkPermission)
+
+    if (!hasAccess && requiredPermission) {
+      // Log access denied
+      logAccessDeniedHelper(tab.path, requiredPermission)
+
+      // Create access denied tab instead
+      const accessDeniedTab: Tab = {
+        id: `access-denied-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        label: `Access Denied: ${tab.label}`,
+        path: tab.path,
+        closable: true,
+        accessDenied: true,
+        requiredPermission: tab.requiredPermission,
+      }
+
+      setTabs((prev) => {
+        const dashboard = prev[0]?.id === DASHBOARD_ID ? prev[0] : null
+        const otherTabs = dashboard ? prev.slice(1) : prev
+        return dashboard ? [dashboard, accessDeniedTab, ...otherTabs] : [accessDeniedTab, ...otherTabs]
+      })
+
+      setActiveTabId(accessDeniedTab.id)
+      return
+    }
+
     setTabs((prev) => {
       // If duplicates are not allowed (default), check if tab with same path exists
       // If it exists, just switch to it instead of creating a duplicate
       if (!tab.allowDuplicate) {
-        const existing = prev.find((t) => t.path === tab.path && t.id !== DASHBOARD_ID)
+        const existing = prev.find((t) => t.path === tab.path && t.id !== DASHBOARD_ID && !t.accessDenied)
         if (existing) {
           // Tab exists and duplicates not allowed - switch to existing tab
           setActiveTabId(existing.id)

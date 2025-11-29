@@ -8,12 +8,22 @@ import { Flex } from "@/components/ui/flex"
 import { Input } from "@/components/ui/input"
 import { Stack } from "@/components/ui/stack"
 import { useTabs } from "@/contexts/TabContext"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/patients")({
   component: PatientsComponent,
 })
 
 function PatientsComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.PATIENTS.VIEW} resource="patients">
+      <PatientsComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function PatientsComponentInner() {
   const { openTab } = useTabs()
 
   // Mock patient data

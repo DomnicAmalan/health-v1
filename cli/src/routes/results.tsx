@@ -2,12 +2,22 @@ import { createFileRoute } from "@tanstack/react-router"
 import { AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ProtectedRoute } from "@/components/security/ProtectedRoute"
+import { PERMISSIONS } from "@/lib/constants/permissions"
 
 export const Route = createFileRoute("/results")({
   component: ResultsComponent,
 })
 
 function ResultsComponent() {
+  return (
+    <ProtectedRoute requiredPermission={PERMISSIONS.RESULTS.VIEW} resource="results">
+      <ResultsComponentInner />
+    </ProtectedRoute>
+  )
+}
+
+function ResultsComponentInner() {
   return (
     <div className="space-y-6">
       <div>
