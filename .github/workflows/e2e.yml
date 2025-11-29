@@ -1,0 +1,99 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        working-directory: ./cli
+        run: bun install
+      
+      - name: Install Playwright Browsers
+        working-directory: ./cli
+        run: bunx playwright install --with-deps
+      
+      - name: Run Playwright tests
+        working-directory: ./cli
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5173
+          PLAYWRIGHT_API_URL: ${{ secrets.PLAYWRIGHT_API_URL || 'http://localhost:8080' }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'testpassword' }}
+        run: bunx playwright test --shard=${{ matrix.shard }}/4
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: cli/playwright-report/
+          retention-days: 30
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results-${{ matrix.shard }}
+          path: cli/test-results/
+          retention-days: 30
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-videos-${{ matrix.shard }}
+          path: cli/test-results/**/*.webm
+          retention-days: 7
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-screenshots-${{ matrix.shard }}
+          path: cli/test-results/**/*.png
+          retention-days: 7
+
+  merge-results:
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-*
+          merge-multiple: true
+          path: cli/playwright-report/
+      
+      - name: Generate HTML Report
+        working-directory: ./cli
+        run: bunx playwright show-report || true
+      
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-merged
+          path: cli/playwright-report/
+          retention-days: 30
+
