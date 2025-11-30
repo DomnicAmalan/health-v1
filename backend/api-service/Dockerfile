@@ -1,5 +1,5 @@
 # Multi-stage build for Rust api-service
-FROM rust:1.77-slim as builder
+FROM rust:1.85-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
