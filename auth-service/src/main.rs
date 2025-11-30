@@ -89,6 +89,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get_permissions_use_case,
     ));
 
+    // Initialize Zanzibar services
+    let relationship_store = Arc::new(infrastructure::zanzibar::RelationshipStore::new(
+        Box::new(infrastructure::repositories::RelationshipRepositoryImpl::new(pool.clone())),
+    ));
+    
+    let permission_checker = Arc::new(infrastructure::zanzibar::PermissionChecker::new(
+        infrastructure::zanzibar::RelationshipStore::new(
+            Box::new(infrastructure::repositories::RelationshipRepositoryImpl::new(pool.clone())),
+        ),
+    ));
+
     // Create application state
     let app_state = shared::AppState {
         login_use_case,
@@ -96,6 +107,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         logout_use_case,
         userinfo_use_case,
         token_manager: token_manager_arc,
+        permission_checker,
+        relationship_store,
     };
 
     // Build application router with state and CORS

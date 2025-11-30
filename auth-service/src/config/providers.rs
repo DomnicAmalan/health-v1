@@ -1,11 +1,25 @@
 use serde::{Deserialize, Serialize};
 use std::env;
 
+/// Parse a boolean environment variable.
+/// Supports: "true", "1", "yes", "on" (case insensitive) → true
+///           "false", "0", "no", "off", empty → false
+fn parse_bool_env(key: &str, default: bool) -> bool {
+    match env::var(key) {
+        Ok(val) => {
+            let lower = val.to_lowercase().trim().to_string();
+            matches!(lower.as_str(), "true" | "1" | "yes" | "on")
+        }
+        Err(_) => default,
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderConfig {
     pub kms: KmsProviderConfig,
     pub storage: StorageProviderConfig,
     pub database: DatabaseProviderConfig,
+    pub messaging: MessagingProviderConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,9 +38,6 @@ pub enum KmsProvider {
     GcpKms,
     AzureKeyVault,
 }
-
-// Make enum variants public for pattern matching
-pub use KmsProvider::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HashiCorpConfig {
@@ -76,15 +87,14 @@ pub enum StorageProvider {
     AzureBlob,
 }
 
-// Make enum variants public for pattern matching
-pub use StorageProvider::*;
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct S3Config {
     pub region: String,
     pub bucket: String,
     pub access_key_id: String,
     pub secret_access_key: String,
+    #[serde(default)]
+    pub endpoint: Option<String>, // For LocalStack or custom S3-compatible endpoints
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -124,58 +134,121 @@ pub struct PostgresConfig {
     pub url: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MessagingProviderConfig {
+    pub nats: Option<NatsConfig>,
+    pub kafka: Option<KafkaConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NatsConfig {
+    pub url: String,
+    pub enable_jetstream: bool,
+    pub http_port: Option<u16>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KafkaConfig {
+    pub bootstrap_servers: String,
+    pub client_id: Option<String>,
+}
+
 impl ProviderConfig {
     pub fn from_env() -> Result<Self, config::ConfigError> {
-        let kms_provider_str = env::var("KMS_PROVIDER").unwrap_or_else(|_| "hashicorp".to_string());
-        let kms_provider = match kms_provider_str.as_str() {
-            "hashicorp" => KmsProvider::HashiCorp,
-            "aws_kms" => KmsProvider::AwsKms,
-            "gcp_kms" => KmsProvider::GcpKms,
-            "azure_keyvault" => KmsProvider::AzureKeyVault,
-            _ => KmsProvider::HashiCorp,
-        };
+        // Check enable flags first (boolean flags take precedence)
+        let enable_hashicorp = parse_bool_env("ENABLE_HASHICORP_OPENBAO", true);
+        let enable_aws_kms = parse_bool_env("ENABLE_AWS_KMS", false);
+        let enable_gcp_kms = parse_bool_env("ENABLE_GCP_KMS", false);
+        let enable_azure_vault = parse_bool_env("ENABLE_AZURE_VAULT", false);
 
-        let hashicorp = if matches!(kms_provider, KmsProvider::HashiCorp) {
-            Some(HashiCorpConfig {
+        // Determine which provider to use based on enable flags
+        // First enabled provider in order becomes active (mutually exclusive)
+        let (kms_provider, hashicorp, aws, gcp, azure) = if enable_hashicorp {
+            let config = Some(HashiCorpConfig {
                 addr: env::var("VAULT_ADDR").unwrap_or_else(|_| "http://localhost:8200".to_string()),
                 token: env::var("VAULT_TOKEN").unwrap_or_else(|_| "".to_string()),
                 mount_path: env::var("VAULT_MOUNT_PATH").unwrap_or_else(|_| "secret".to_string()),
-            })
-        } else {
-            None
-        };
-
-        let aws = if matches!(kms_provider, KmsProvider::AwsKms) {
-            Some(AwsKmsConfig {
+            });
+            (KmsProvider::HashiCorp, config, None, None, None)
+        } else if enable_aws_kms {
+            let config = Some(AwsKmsConfig {
                 region: env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string()),
                 access_key_id: env::var("AWS_ACCESS_KEY_ID").unwrap_or_else(|_| "".to_string()),
                 secret_access_key: env::var("AWS_SECRET_ACCESS_KEY").unwrap_or_else(|_| "".to_string()),
                 key_id: env::var("AWS_KMS_KEY_ID").unwrap_or_else(|_| "".to_string()),
-            })
-        } else {
-            None
-        };
-
-        let gcp = if matches!(kms_provider, KmsProvider::GcpKms) {
-            Some(GcpKmsConfig {
+            });
+            (KmsProvider::AwsKms, None, config, None, None)
+        } else if enable_gcp_kms {
+            let config = Some(GcpKmsConfig {
                 project_id: env::var("GCP_PROJECT_ID").unwrap_or_else(|_| "".to_string()),
                 credentials_path: env::var("GCP_CREDENTIALS_PATH").unwrap_or_else(|_| "".to_string()),
                 key_ring: env::var("GCP_KMS_KEY_RING").unwrap_or_else(|_| "".to_string()),
                 key_name: env::var("GCP_KMS_KEY_NAME").unwrap_or_else(|_| "".to_string()),
-            })
-        } else {
-            None
-        };
-
-        let azure = if matches!(kms_provider, KmsProvider::AzureKeyVault) {
-            Some(AzureKeyVaultConfig {
+            });
+            (KmsProvider::GcpKms, None, None, config, None)
+        } else if enable_azure_vault {
+            let config = Some(AzureKeyVaultConfig {
                 tenant_id: env::var("AZURE_TENANT_ID").unwrap_or_else(|_| "".to_string()),
                 client_id: env::var("AZURE_CLIENT_ID").unwrap_or_else(|_| "".to_string()),
                 client_secret: env::var("AZURE_CLIENT_SECRET").unwrap_or_else(|_| "".to_string()),
                 vault_url: env::var("AZURE_KEY_VAULT_URL").unwrap_or_else(|_| "".to_string()),
-            })
+            });
+            (KmsProvider::AzureKeyVault, None, None, None, config)
         } else {
-            None
+            // Fallback to KMS_PROVIDER env var for backward compatibility
+            let kms_provider_str = env::var("KMS_PROVIDER").unwrap_or_else(|_| "hashicorp".to_string());
+            let kms_provider = match kms_provider_str.as_str() {
+                "hashicorp" => KmsProvider::HashiCorp,
+                "aws_kms" => KmsProvider::AwsKms,
+                "gcp_kms" => KmsProvider::GcpKms,
+                "azure_keyvault" => KmsProvider::AzureKeyVault,
+                _ => KmsProvider::HashiCorp,
+            };
+
+            let hashicorp = if matches!(kms_provider, KmsProvider::HashiCorp) {
+                Some(HashiCorpConfig {
+                    addr: env::var("VAULT_ADDR").unwrap_or_else(|_| "http://localhost:8200".to_string()),
+                    token: env::var("VAULT_TOKEN").unwrap_or_else(|_| "".to_string()),
+                    mount_path: env::var("VAULT_MOUNT_PATH").unwrap_or_else(|_| "secret".to_string()),
+                })
+            } else {
+                None
+            };
+
+            let aws = if matches!(kms_provider, KmsProvider::AwsKms) {
+                Some(AwsKmsConfig {
+                    region: env::var("AWS_REGION").unwrap_or_else(|_| "us-east-1".to_string()),
+                    access_key_id: env::var("AWS_ACCESS_KEY_ID").unwrap_or_else(|_| "".to_string()),
+                    secret_access_key: env::var("AWS_SECRET_ACCESS_KEY").unwrap_or_else(|_| "".to_string()),
+                    key_id: env::var("AWS_KMS_KEY_ID").unwrap_or_else(|_| "".to_string()),
+                })
+            } else {
+                None
+            };
+
+            let gcp = if matches!(kms_provider, KmsProvider::GcpKms) {
+                Some(GcpKmsConfig {
+                    project_id: env::var("GCP_PROJECT_ID").unwrap_or_else(|_| "".to_string()),
+                    credentials_path: env::var("GCP_CREDENTIALS_PATH").unwrap_or_else(|_| "".to_string()),
+                    key_ring: env::var("GCP_KMS_KEY_RING").unwrap_or_else(|_| "".to_string()),
+                    key_name: env::var("GCP_KMS_KEY_NAME").unwrap_or_else(|_| "".to_string()),
+                })
+            } else {
+                None
+            };
+
+            let azure = if matches!(kms_provider, KmsProvider::AzureKeyVault) {
+                Some(AzureKeyVaultConfig {
+                    tenant_id: env::var("AZURE_TENANT_ID").unwrap_or_else(|_| "".to_string()),
+                    client_id: env::var("AZURE_CLIENT_ID").unwrap_or_else(|_| "".to_string()),
+                    client_secret: env::var("AZURE_CLIENT_SECRET").unwrap_or_else(|_| "".to_string()),
+                    vault_url: env::var("AZURE_KEY_VAULT_URL").unwrap_or_else(|_| "".to_string()),
+                })
+            } else {
+                None
+            };
+
+            (kms_provider, hashicorp, aws, gcp, azure)
         };
 
         let kms = KmsProviderConfig {
@@ -200,6 +273,7 @@ impl ProviderConfig {
                 bucket: env::var("AWS_S3_BUCKET").unwrap_or_else(|_| "".to_string()),
                 access_key_id: env::var("AWS_ACCESS_KEY_ID").unwrap_or_else(|_| "".to_string()),
                 secret_access_key: env::var("AWS_SECRET_ACCESS_KEY").unwrap_or_else(|_| "".to_string()),
+                endpoint: env::var("AWS_S3_ENDPOINT").ok(), // For LocalStack: http://localhost:4566
             })
         } else {
             None
@@ -253,10 +327,38 @@ impl ProviderConfig {
             },
         };
 
+        // NATS Configuration
+        let nats = env::var("NATS_URL").ok().map(|url| {
+            NatsConfig {
+                url,
+                enable_jetstream: env::var("NATS_ENABLE_JETSTREAM")
+                    .unwrap_or_else(|_| "true".to_string())
+                    .parse()
+                    .unwrap_or(true),
+                http_port: env::var("NATS_HTTP_PORT")
+                    .ok()
+                    .and_then(|p| p.parse().ok()),
+            }
+        });
+
+        // Kafka Configuration
+        let kafka = env::var("KAFKA_BOOTSTRAP_SERVERS").ok().map(|bootstrap_servers| {
+            KafkaConfig {
+                bootstrap_servers,
+                client_id: env::var("KAFKA_CLIENT_ID").ok(),
+            }
+        });
+
+        let messaging = MessagingProviderConfig {
+            nats,
+            kafka,
+        };
+
         Ok(ProviderConfig {
             kms,
             storage,
             database,
+            messaging,
         })
     }
 }
