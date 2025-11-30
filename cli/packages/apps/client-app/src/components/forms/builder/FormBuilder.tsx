@@ -58,7 +58,7 @@ export function FormBuilder({
 
     const value = formData[field.id] ?? field.defaultValue ?? "";
     const error = errors[field.id];
-    const hasError = touched[field.id] && error;
+    const hasError = Boolean(touched[field.id] && error) as boolean;
     const layout = field.layout || {};
 
     if (field.type === "separator" || field.type === "display-text") {

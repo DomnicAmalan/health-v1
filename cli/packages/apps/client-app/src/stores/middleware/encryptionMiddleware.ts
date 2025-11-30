@@ -4,100 +4,74 @@
  * Note: In a real implementation, this would use the encryption service
  */
 
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
 import type { StateCreator } from "zustand";
 
-// Fields that should be encrypted in state
-const ENCRYPTED_FIELDS = ["ssn", "creditCard", "password", "token", "secret"];
+// Note: Encryption functionality is currently disabled
+// Fields that should be encrypted in state (for future use)
+// const ENCRYPTED_FIELDS = ["ssn", "creditCard", "password", "token", "secret"];
 
-/**
- * Check if a field name should be encrypted
- */
-function shouldEncryptField(fieldName: string): boolean {
-  return ENCRYPTED_FIELDS.some((encryptedField) =>
-    fieldName.toLowerCase().includes(encryptedField.toLowerCase())
-  );
-}
+// Note: Encryption functions are commented out as they're not currently used
+// but may be needed in the future for production implementation
+// Uncomment and implement when ready to use encryption middleware
 
-/**
- * Encrypt a value (placeholder - in production, use actual encryption)
- */
-async function encryptValue(value: unknown): Promise<string> {
-  // In production, this would call the encryption service
-  // For now, we'll just return a placeholder
-  if (typeof value === "string") {
-    // In a real implementation, this would encrypt the value
-    // return await encryptionService.encrypt(value);
-    return value; // Placeholder - actual encryption would happen here
-  }
-  return String(value);
-}
+// /**
+//  * Check if a field name should be encrypted
+//  */
+// function _shouldEncryptField(fieldName: string): boolean {
+//   return ENCRYPTED_FIELDS.some((encryptedField) =>
+//     fieldName.toLowerCase().includes(encryptedField.toLowerCase())
+//   );
+// }
 
-/**
- * Decrypt a value (placeholder - in production, use actual decryption)
- */
-async function decryptValue(encryptedValue: string): Promise<string> {
-  // In production, this would call the decryption service
-  // For now, we'll just return the value as-is
-  // return await encryptionService.decrypt(encryptedValue);
-  return encryptedValue; // Placeholder - actual decryption would happen here
-}
+// /**
+//  * Encrypt a value (placeholder - in production, use actual encryption)
+//  */
+// async function _encryptValue(value: unknown): Promise<string> {
+//   // In production, this would call the encryption service
+//   // For now, we'll just return a placeholder
+//   if (typeof value === "string") {
+//     // In a real implementation, this would encrypt the value
+//     // return await encryptionService.encrypt(value);
+//     return value; // Placeholder - actual encryption would happen here
+//   }
+//   return String(value);
+// }
 
-/**
- * Encrypt sensitive fields in an object
- */
-async function encryptObject(obj: unknown): Promise<unknown> {
-  if (!obj || typeof obj !== "object") return obj;
+// /**
+//  * Decrypt a value (placeholder - in production, use actual decryption)
+//  */
+// async function _decryptValue(encryptedValue: string): Promise<string> {
+//   // In production, this would call the decryption service
+//   // For now, we'll just return the value as-is
+//   // return await encryptionService.decrypt(encryptedValue);
+//   return encryptedValue; // Placeholder - actual decryption would happen here
+// }
 
-  if (Array.isArray(obj)) {
-    return Promise.all(obj.map((item) => encryptObject(item)));
-  }
+// /**
+//  * Encrypt sensitive fields in an object
+//  */
+// async function _encryptObject(obj: unknown): Promise<unknown> {
+//   if (!obj || typeof obj !== "object") return obj;
 
-  const encrypted: Record<string, unknown> = {};
+//   if (Array.isArray(obj)) {
+//     return Promise.all(obj.map((item) => _encryptObject(item)));
+//   }
 
-  for (const [key, value] of Object.entries(obj)) {
-    if (shouldEncryptField(key) && typeof value === "string") {
-      encrypted[key] = await encryptValue(value);
-      encrypted[`${key}_encrypted`] = true; // Flag to indicate encryption
-    } else if (typeof value === "object" && value !== null) {
-      encrypted[key] = await encryptObject(value);
-    } else {
-      encrypted[key] = value;
-    }
-  }
+//   const encrypted: Record<string, unknown> = {};
 
-  return encrypted;
-}
+//   for (const [key, value] of Object.entries(obj)) {
+//     if (_shouldEncryptField(key) && typeof value === "string") {
+//       encrypted[key] = await _encryptValue(value);
+//       encrypted[`${key}_encrypted`] = true; // Flag to indicate encryption
+//     } else if (typeof value === "object" && value !== null) {
+//       encrypted[key] = await _encryptObject(value);
+//     } else {
+//       encrypted[key] = value;
+//     }
+//   }
 
-/**
- * Decrypt sensitive fields in an object
- */
-async function decryptObject(obj: unknown): Promise<unknown> {
-  if (!obj || typeof obj !== "object") return obj;
-
-  if (Array.isArray(obj)) {
-    return Promise.all(obj.map((item) => decryptObject(item)));
-  }
-
-  const decrypted: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (
-      shouldEncryptField(key) &&
-      typeof value === "string" &&
-      (obj as Record<string, unknown>)[`${key}_encrypted`]
-    ) {
-      decrypted[key] = await decryptValue(value as string);
-    } else if (key.endsWith("_encrypted")) {
-    } else if (typeof value === "object" && value !== null) {
-      decrypted[key] = await decryptObject(value);
-    } else {
-      decrypted[key] = value;
-    }
-  }
-
-  return decrypted;
-}
+//   return encrypted;
+// }
 
 /**
  * Encryption middleware that encrypts sensitive fields before storing
@@ -109,29 +83,28 @@ async function decryptObject(obj: unknown): Promise<unknown> {
 export function encryptionMiddleware<T>(config: StateCreator<T>): StateCreator<T> {
   return (set, get, api) => {
     // Wrap set function to encrypt sensitive data
-    const setWithEncryption = async (
+    // Note: In a real implementation, encryption would be async, but zustand's set is synchronous
+    // This is a placeholder that would need to be refactored for production use
+    const setWithEncryption = (
       partial: T | Partial<T> | ((state: T) => T | Partial<T>),
-      replace?: boolean
+      replace?: boolean | undefined
     ) => {
-      let encryptedPartial = partial;
+      // For now, we'll just pass through without encryption
+      // In production, you would need to handle async encryption differently
+      // (e.g., encrypt before calling set, or use a different pattern)
 
-      // If partial is an object, encrypt sensitive fields
-      if (typeof partial === "object" && partial !== null && !Array.isArray(partial)) {
-        encryptedPartial = (await encryptObject(partial)) as T | Partial<T>;
-      } else if (typeof partial === "function") {
-        // For function updates, we'd need to encrypt after the function runs
-        // This is more complex and would require a different approach
-        const currentState = get();
-        const newState = partial(currentState);
-        if (typeof newState === "object" && newState !== null) {
-          encryptedPartial = (await encryptObject(newState)) as T | Partial<T>;
-        } else {
-          encryptedPartial = newState;
+      // Call original set - handle replace parameter correctly
+      if (replace === true) {
+        // When replace is true, partial must be T (full state)
+        if (typeof partial === "function" && partial.prototype === undefined) {
+          const currentState = get();
+          const fullState = (partial as (state: T) => T)(currentState);
+          return set(fullState, true);
         }
+        return set(partial as T, true);
       }
-
-      // Call original set with encrypted data
-      return set(encryptedPartial, replace);
+      // When replace is false or undefined, partial can be Partial<T>
+      return set(partial, false);
     };
 
     // Note: In a real implementation, you'd also need to decrypt when reading

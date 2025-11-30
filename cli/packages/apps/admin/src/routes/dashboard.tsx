@@ -1,13 +1,13 @@
 import {
+  Badge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@health-v1/ui-components";
-import { Stack } from "@health-v1/ui-components";
-import { Badge } from "@health-v1/ui-components";
-import { useQuery } from "@tanstack/react-query";
+  Stack,
+} from "@health-v1/ui-components"
+import { useQuery } from "@tanstack/react-query"
 import {
   Activity,
   AlertCircle,
@@ -16,33 +16,33 @@ import {
   Shield,
   Users,
   XCircle,
-} from "lucide-react";
-import { getServiceStatus } from "../lib/api/services";
-import { getSetupStatus } from "../lib/api/setup";
+} from "lucide-react"
+import { getServiceStatus } from "../lib/api/services"
+import { getSetupStatus } from "../lib/api/setup"
 
 function getStatusColor(status: string) {
   switch (status.toLowerCase()) {
     case "operational":
-      return "text-green-600";
+      return "text-green-600"
     case "degraded":
-      return "text-yellow-600";
+      return "text-yellow-600"
     case "down":
-      return "text-red-600";
+      return "text-red-600"
     default:
-      return "text-muted-foreground";
+      return "text-muted-foreground"
   }
 }
 
 function getStatusIcon(status: string) {
   switch (status.toLowerCase()) {
     case "operational":
-      return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      return <CheckCircle2 className="h-4 w-4 text-green-600" />
     case "degraded":
-      return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      return <AlertCircle className="h-4 w-4 text-yellow-600" />
     case "down":
-      return <XCircle className="h-4 w-4 text-red-600" />;
+      return <XCircle className="h-4 w-4 text-red-600" />
     default:
-      return <Activity className="h-4 w-4 text-muted-foreground" />;
+      return <Activity className="h-4 w-4 text-muted-foreground" />
   }
 }
 
@@ -51,16 +51,16 @@ export function DashboardPage() {
     queryKey: ["serviceStatus"],
     queryFn: getServiceStatus,
     refetchInterval: 30000,
-  });
+  })
 
   const { data: setupStatus, isLoading: isLoadingSetup } = useQuery({
     queryKey: ["setupStatus"],
     queryFn: getSetupStatus,
-  });
+  })
 
-  const enabledServices = serviceStatus?.services.filter((s) => s.enabled) || [];
-  const operationalServices = enabledServices.filter((s) => s.operational);
-  const overallStatus = serviceStatus?.overallStatus || "unknown";
+  const enabledServices = serviceStatus?.services.filter((s) => s.enabled) || []
+  const operationalServices = enabledServices.filter((s) => s.operational)
+  const overallStatus = serviceStatus?.overallStatus || "unknown"
 
   return (
     <div className="p-6">
@@ -211,5 +211,5 @@ export function DashboardPage() {
         </div>
       </Stack>
     </div>
-  );
+  )
 }

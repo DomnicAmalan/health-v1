@@ -90,7 +90,7 @@ export async function responseInterceptor<T>(
     if (refreshToken && !refreshPromise) {
       // Use auth store to refresh token (handles state updates and persistence)
       const { useAuthStore } = await import("@/stores/authStore");
-      refreshPromise = useAuthStore.getState().refreshToken();
+      refreshPromise = useAuthStore.getState().refreshAccessToken();
       try {
         await refreshPromise;
         // Tokens are now updated in sessionStorage by auth store

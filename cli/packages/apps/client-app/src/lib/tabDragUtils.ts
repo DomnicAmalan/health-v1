@@ -6,7 +6,7 @@ const DASHBOARD_ID = "dashboard";
 
 interface CalculateInsertionIndexOptions {
   e: MouseEvent;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   sortedTabsRef: React.MutableRefObject<
     Array<
       | { id: string; label: string; path: string; closable?: boolean; allowDuplicate?: boolean }

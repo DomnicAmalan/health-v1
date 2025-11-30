@@ -3,7 +3,7 @@
  * Hook for validating and protecting immutable fields
  */
 
-import { FIELD_DEFINITIONS, SECURITY_CONFIG } from "@health-v1/shared/constants";
+import { FIELD_DEFINITIONS } from "@health-v1/shared/constants";
 import type { EntityType, FieldName } from "@health-v1/shared/constants/fields";
 import { useCallback } from "react";
 
@@ -11,7 +11,8 @@ export function useImmutableFields() {
   const isImmutable = useCallback(
     <T extends EntityType>(entityType: T, fieldName: FieldName<T>): boolean => {
       const fieldDef = FIELD_DEFINITIONS[entityType]?.[fieldName];
-      return fieldDef?.immutable ?? false;
+      // Type assertion needed because TypeScript can't infer the immutable property
+      return (fieldDef as { immutable?: boolean })?.immutable ?? false;
     },
     []
   );
@@ -20,7 +21,7 @@ export function useImmutableFields() {
     <T extends EntityType>(
       entityType: T,
       fieldName: FieldName<T>,
-      newValue: unknown
+      _newValue: unknown
     ): { valid: boolean; error?: string } => {
       if (isImmutable(entityType, fieldName)) {
         return {

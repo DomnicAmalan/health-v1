@@ -17,6 +17,11 @@ interface PreviewField {
   validation?: {
     required?: boolean;
   };
+  imageUrl?: string;
+  lineDirection?: "horizontal" | "vertical";
+  borderWidth?: number;
+  borderStyle?: string;
+  borderColor?: string;
 }
 
 interface PreviewGroup {

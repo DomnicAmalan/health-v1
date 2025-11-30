@@ -1,7 +1,9 @@
-import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
-import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { useNavigate } from "@tanstack/react-router"
+import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react"
+import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel"
+import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,45 +11,43 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useDisclosure } from "@/hooks/ui/useDisclosure";
-import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/stores/authStore";
-import { useNavigate } from "@tanstack/react-router";
-import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react";
+} from "@/components/ui/dropdown-menu"
+import { useDisclosure } from "@/hooks/ui/useDisclosure"
+import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/stores/authStore"
 
 export function TabUserMenu() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
-  const { onOpen: onOpenAccessibility } = useDisclosure("accessibility-panel");
-  const { onOpen: onOpenKeyboardHelp } = useDisclosure("keyboard-shortcuts-help");
+  const navigate = useNavigate()
+  const { user, logout } = useAuthStore()
+  const { onOpen: onOpenAccessibility } = useDisclosure("accessibility-panel")
+  const { onOpen: onOpenKeyboardHelp } = useDisclosure("keyboard-shortcuts-help")
 
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate({ to: "/login" });
+      await logout()
+      navigate({ to: "/login" })
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error)
       // Still navigate to login even if logout API call fails
-      navigate({ to: "/login" });
+      navigate({ to: "/login" })
     }
-  };
+  }
 
   // Get user initials for avatar
   const getUserInitials = () => {
-    if (user?.email) {
-      return user.email
-        .split("@")[0]
-        .split(".")
-        .map((part) => part[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
+    const userEmail = user?.email
+    if (!userEmail) {
+      return "U"
     }
-    return "U";
-  };
+    const parts = userEmail.split("@")[0]?.split(".") ?? []
+    return parts
+      .map((part: string) => part[0] ?? "")
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
-  const displayName = user?.email?.split("@")[0] || "User";
+  const displayName = user?.email?.split("@")[0] || "User"
 
   return (
     <div className={cn("flex items-center gap-2 px-2 py-1 bg-[#F4F6F8]")}>
@@ -102,5 +102,5 @@ export function TabUserMenu() {
       <AccessibilityPanel showTrigger={false} />
       <KeyboardShortcutsHelp showTrigger={false} />
     </div>
-  );
+  )
 }

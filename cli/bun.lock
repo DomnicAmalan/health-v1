@@ -10,9 +10,9 @@
       "dependencies": {
         "@health-v1/shared": "workspace:*",
         "@health-v1/ui-components": "workspace:*",
-        "@tanstack/react-query": "^5.0.0",
-        "@tanstack/react-router": "^1.0.0",
-        "@tanstack/react-router-devtools": "^1.0.0",
+        "@tanstack/react-query": "^5.90.11",
+        "@tanstack/react-router": "^1.139.12",
+        "@tanstack/react-router-devtools": "^1.139.12",
         "autoprefixer": "^10.4.0",
         "immer": "^10.0.0",
         "lucide-react": "^0.400.0",

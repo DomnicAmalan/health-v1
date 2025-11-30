@@ -1,32 +1,32 @@
-import { Box } from "@/components/ui/box";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useTabDrag } from "@/hooks/ui/useTabDrag";
-import { cn } from "@/lib/utils";
-import { memo, useRef } from "react";
-import { TabCloseButton } from "./TabCloseButton";
-import { TabDragHandle } from "./TabDragHandle";
-import { getModuleColor } from "./useTabColors";
+import { memo, useRef } from "react"
+import { Box } from "@/components/ui/box"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useTabDrag } from "@/hooks/ui/useTabDrag"
+import { cn } from "@/lib/utils"
+import { TabCloseButton } from "./TabCloseButton"
+import { TabDragHandle } from "./TabDragHandle"
+import { getModuleColor } from "./useTabColors"
 
 export interface TabItemProps {
   tab: {
-    id: string;
-    label: string;
-    path: string;
-    icon?: React.ReactNode;
-    closable?: boolean;
-    alert?: boolean;
-    success?: boolean;
-    disabled?: boolean;
-  };
-  isActive: boolean;
-  isDragging?: boolean;
-  isDragOver?: boolean;
-  onSelect: () => void;
-  onClose: () => void;
-  onDragStart: (e: React.MouseEvent) => void;
+    id: string
+    label: string
+    path: string
+    icon?: React.ReactNode
+    closable?: boolean
+    alert?: boolean
+    success?: boolean
+    disabled?: boolean
+  }
+  isActive: boolean
+  isDragging?: boolean
+  isDragOver?: boolean
+  onSelect: () => void
+  onClose: () => void
+  onDragStart: (e: React.MouseEvent) => void
 }
 
-const DASHBOARD_ID = "dashboard";
+const DASHBOARD_ID = "dashboard"
 
 export const TabItem = memo(function TabItem({
   tab,
@@ -37,9 +37,9 @@ export const TabItem = memo(function TabItem({
   onClose,
   onDragStart,
 }: TabItemProps) {
-  const isDraggable = tab.closable && tab.id !== DASHBOARD_ID && tab.path !== "/";
-  const tabRef = useRef<HTMLDivElement>(null);
-  const { handleMouseDown } = useTabDrag({ isDraggable, onDragStart, onSelect });
+  const isDraggable = Boolean(tab.closable) && tab.id !== DASHBOARD_ID && tab.path !== "/"
+  const tabRef = useRef<HTMLDivElement>(null)
+  const { handleMouseDown } = useTabDrag({ isDraggable, onDragStart, onSelect })
 
   return (
     <Box
@@ -59,19 +59,19 @@ export const TabItem = memo(function TabItem({
       onContextMenu={(e) => e.preventDefault()}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
+          e.preventDefault()
           if (!isDraggable) {
-            onSelect();
+            onSelect()
           }
         }
         // Arrow key navigation for tabs
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-          e.preventDefault();
-          const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
-          const currentIndex = tabs.findIndex((t) => t === e.currentTarget);
-          const direction = e.key === "ArrowLeft" ? -1 : 1;
-          const nextIndex = (currentIndex + direction + tabs.length) % tabs.length;
-          tabs[nextIndex]?.focus();
+          e.preventDefault()
+          const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'))
+          const currentIndex = tabs.findIndex((t) => t === e.currentTarget)
+          const direction = e.key === "ArrowLeft" ? -1 : 1
+          const nextIndex = (currentIndex + direction + tabs.length) % tabs.length
+          tabs[nextIndex]?.focus()
         }
       }}
     >
@@ -135,8 +135,8 @@ export const TabItem = memo(function TabItem({
             onClick={!isDraggable && !tab.disabled ? onSelect : undefined}
             onKeyDown={(e) => {
               if (!isDraggable && !tab.disabled && (e.key === "Enter" || e.key === " ")) {
-                e.preventDefault();
-                onSelect();
+                e.preventDefault()
+                onSelect()
               }
             }}
           >
@@ -188,5 +188,5 @@ export const TabItem = memo(function TabItem({
         </TooltipContent>
       </Tooltip>
     </Box>
-  );
-});
+  )
+})

@@ -4,7 +4,6 @@
  */
 
 import { FIELD_DEFINITIONS } from "@health-v1/shared/constants/fields";
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
 import type { StateCreator } from "zustand";
 
 interface ValidationError {
@@ -95,14 +94,16 @@ export function validationMiddleware<T>(
     // Wrap set function to validate changes
     const setWithValidation = (
       partial: T | Partial<T> | ((state: T) => T | Partial<T>),
-      replace?: boolean
+      replace?: boolean | undefined
     ) => {
       let dataToValidate: unknown = partial;
 
       // If partial is a function, execute it first to get the actual data
-      if (typeof partial === "function") {
+      // If partial is strictly a function (excluding T & Function objects), execute it
+      // To avoid TypeScript error, check if partial is a function AND not an object
+      if (typeof partial === "function" && partial.prototype === undefined) {
         const currentState = get();
-        dataToValidate = partial(currentState);
+        dataToValidate = (partial as (state: T) => T | Partial<T>)(currentState);
       }
 
       // Validate the data
@@ -117,8 +118,19 @@ export function validationMiddleware<T>(
         }
       }
 
-      // Call original set
-      return set(partial, replace);
+      // Call original set - handle replace parameter correctly
+      if (replace === true) {
+        // When replace is true, partial must be T (full state)
+        // If it's a function, execute it to get the full state
+        if (typeof partial === "function") {
+          const currentState = get();
+          const fullState = partial(currentState);
+          return set(fullState as T, true);
+        }
+        return set(partial as T, true);
+      }
+      // When replace is false or undefined, partial can be Partial<T>
+      return set(partial, false);
     };
 
     return config(setWithValidation, get, api);

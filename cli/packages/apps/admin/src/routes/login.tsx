@@ -12,7 +12,7 @@ import {
 } from "@health-v1/ui-components";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function LoginPage() {
   const navigate = useNavigate();

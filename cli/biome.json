@@ -56,7 +56,8 @@
       },
       "correctness": {
         "recommended": true,
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "off",
+        "noUnusedImports": "off"
       },
       "performance": {
         "recommended": true

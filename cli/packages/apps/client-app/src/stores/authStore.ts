@@ -95,7 +95,7 @@ interface AuthState {
 interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  refreshAccessToken: () => Promise<void>;
   setUser: (user: User) => void;
   setTokens: (accessToken: string | null, refreshToken: string | null) => void;
   clearError: () => void;
@@ -189,7 +189,7 @@ export const useAuthStore = create<AuthStore>()(
       }
     },
 
-    refreshToken: async () => {
+    refreshAccessToken: async () => {
       const { refreshToken: currentRefreshToken } = get();
 
       if (!currentRefreshToken) {
@@ -310,7 +310,7 @@ export const useAuthStore = create<AuthStore>()(
       } catch (error) {
         // Auth check failed, try to refresh token
         try {
-          await get().refreshToken();
+          await get().refreshAccessToken();
           // Retry user info after refresh
           const userInfo = await getUserInfo();
           set((state) => {
@@ -376,7 +376,7 @@ export const useAuthActions = () =>
   useAuthStore((state) => ({
     login: state.login,
     logout: state.logout,
-    refreshToken: state.refreshToken,
+    refreshAccessToken: state.refreshAccessToken,
     setUser: state.setUser,
     setTokens: state.setTokens,
     clearError: state.clearError,

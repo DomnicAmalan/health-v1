@@ -18,7 +18,7 @@ export interface AuthState {
 export interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  refreshAccessToken: () => Promise<void>;
   setUser: (user: User) => void;
   setTokens: (accessToken: string | null, refreshToken: string | null) => void;
   clearError: () => void;

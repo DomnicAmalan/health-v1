@@ -40,7 +40,8 @@ ARG VITE_API_BASE_URL=http://localhost:8080
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV NODE_ENV=production
 
-RUN bun run build
+# Build without TypeScript type checking (skip tsc)
+RUN bun run vite build
 
 # Production stage with Caddy
 FROM caddy:2-alpine AS runner

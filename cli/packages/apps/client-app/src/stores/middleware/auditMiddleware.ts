@@ -74,11 +74,11 @@ export function auditMiddleware<T>(config: StateCreator<T>): StateCreator<T> {
       // Determine what changed
       let changes: Record<string, unknown> | null = null;
 
-      if (typeof partial === "function") {
+      if (typeof partial === "function" && partial.prototype === undefined) {
         // For function updates, we can't easily detect changes before applying
         // In a production system, you might use a deep diff library
         const currentState = get();
-        const newState = partial(currentState);
+        const newState = (partial as (state: T) => T | Partial<T>)(currentState);
         if (typeof newState === "object" && newState !== null) {
           changes = extractPHIChanges(newState);
         }
@@ -88,11 +88,27 @@ export function auditMiddleware<T>(config: StateCreator<T>): StateCreator<T> {
 
       // Log PHI access if changes contain PHI
       if (changes && authState.user) {
-        auditStore.logPHIAccess(authState.user.id, "state", undefined, changes);
+        // Log PHI access using addEntry
+        auditStore.addEntry({
+          userId: authState.user.id,
+          action: "access",
+          resource: "state",
+          details: changes,
+        });
       }
 
-      // Call original set
-      return set(partial, replace);
+      // Call original set - handle replace parameter correctly
+      if (replace === true) {
+        // When replace is true, partial must be T (full state)
+        if (typeof partial === "function" && partial.prototype === undefined) {
+          const currentState = get();
+          const fullState = (partial as (state: T) => T)(currentState);
+          return set(fullState, true);
+        }
+        return set(partial as T, true);
+      }
+      // When replace is false or undefined, partial can be Partial<T>
+      return set(partial, false);
     };
 
     return config(setWithAudit, get, api);
