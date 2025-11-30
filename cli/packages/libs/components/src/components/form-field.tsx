@@ -1,0 +1,64 @@
+import type { FormFieldProps } from "@health-v1/shared/types/components/form";
+import type * as React from "react";
+import { cn } from "../lib/utils";
+import { Input } from "./input";
+import { Label } from "./label";
+
+// Re-export from shared
+export type { FormFieldProps };
+
+/**
+ * Individual form field component
+ * Can be used standalone or within FormBuilder
+ */
+export function FormField({
+  id,
+  label,
+  type = "text",
+  value,
+  onChange,
+  onBlur,
+  error,
+  required,
+  disabled,
+  placeholder,
+  description,
+  help,
+  className,
+}: FormFieldProps) {
+  const hasError = Boolean(error);
+
+  return (
+    <div className={cn("space-y-2", className)}>
+      <Label htmlFor={id} help={help}>
+        {label}
+        {required && (
+          <span className="text-destructive ml-1" aria-label="required">
+            *
+          </span>
+        )}
+      </Label>
+      {description && <p className="text-sm text-muted-foreground">{description}</p>}
+
+      <Input
+        id={id}
+        type={type}
+        value={String(value ?? "")}
+        onChange={(e) => onChange?.(e.target.value)}
+        onBlur={onBlur}
+        disabled={disabled}
+        placeholder={placeholder}
+        help={help}
+        aria-invalid={hasError ? "true" : "false"}
+        aria-describedby={hasError ? `${id}-error` : undefined}
+        className={cn(hasError && "border-destructive")}
+      />
+
+      {hasError && (
+        <p id={`${id}-error`} className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
