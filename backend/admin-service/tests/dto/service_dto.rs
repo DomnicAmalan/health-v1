@@ -4,7 +4,7 @@ use serde_json;
 #[test]
 fn test_service_info_serialization() {
     let service = ServiceInfo {
-        name: "auth-service".to_string(),
+        name: "api-service".to_string(),
         enabled: true,
         operational: true,
         health_endpoint: Some("/health".to_string()),
@@ -13,17 +13,17 @@ fn test_service_info_serialization() {
     };
 
     let json = serde_json::to_string(&service).unwrap();
-    assert!(json.contains("auth-service"));
+    assert!(json.contains("api-service"));
     assert!(json.contains("operational"));
     assert!(json.contains("/health"));
 }
 
 #[test]
 fn test_service_info_deserialization() {
-    let json = r#"{"name":"auth-service","enabled":true,"operational":true,"healthEndpoint":"/health","lastChecked":"2024-01-01T00:00:00Z"}"#;
+    let json = r#"{"name":"api-service","enabled":true,"operational":true,"healthEndpoint":"/health","lastChecked":"2024-01-01T00:00:00Z"}"#;
     let service: ServiceInfo = serde_json::from_str(json).unwrap();
     
-    assert_eq!(service.name, "auth-service");
+    assert_eq!(service.name, "api-service");
     assert!(service.enabled);
     assert!(service.operational);
     assert_eq!(service.health_endpoint, Some("/health".to_string()));
@@ -34,7 +34,7 @@ fn test_service_status_response_serialization() {
     let response = ServiceStatusResponse {
         services: vec![
             ServiceInfo {
-                name: "auth-service".to_string(),
+                name: "api-service".to_string(),
                 enabled: true,
                 operational: true,
                 health_endpoint: None,
@@ -48,16 +48,16 @@ fn test_service_status_response_serialization() {
 
     let json = serde_json::to_string(&response).unwrap();
     assert!(json.contains("operational"));
-    assert!(json.contains("auth-service"));
+    assert!(json.contains("api-service"));
 }
 
 #[test]
 fn test_service_status_response_deserialization() {
-    let json = r#"{"services":[{"name":"auth-service","enabled":true,"operational":true}],"overallStatus":"operational","checkedAt":"2024-01-01T00:00:00Z"}"#;
+    let json = r#"{"services":[{"name":"api-service","enabled":true,"operational":true}],"overallStatus":"operational","checkedAt":"2024-01-01T00:00:00Z"}"#;
     let response: ServiceStatusResponse = serde_json::from_str(json).unwrap();
     
     assert_eq!(response.overall_status, "operational");
     assert_eq!(response.services.len(), 1);
-    assert_eq!(response.services[0].name, "auth-service");
+    assert_eq!(response.services[0].name, "api-service");
 }
 

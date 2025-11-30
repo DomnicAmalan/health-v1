@@ -17,9 +17,9 @@ updates:
       prefix: "chore"
       include: "scope"
 
-  # Rust dependencies in auth-service
+  # Rust dependencies in backend workspace
   - package-ecosystem: "cargo"
-    directory: "/auth-service"
+    directory: "/backend"
     schedule:
       interval: "weekly"
       day: "monday"

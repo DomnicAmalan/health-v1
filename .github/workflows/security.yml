@@ -102,8 +102,8 @@ jobs:
       - name: Install cargo-audit
         run: cargo install cargo-audit --features vendored-openssl
       
-      - name: Run cargo-audit (auth-service)
-        working-directory: ./auth-service
+      - name: Run cargo-audit (backend)
+        working-directory: ./backend
         run: cargo audit
         continue-on-error: true
       
@@ -124,8 +124,8 @@ jobs:
       - name: Install cargo-deny
         run: cargo install cargo-deny
       
-      - name: Run cargo-deny (auth-service)
-        working-directory: ./auth-service
+      - name: Run cargo-deny (backend)
+        working-directory: ./backend
         run: cargo deny check
         continue-on-error: true
       

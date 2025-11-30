@@ -107,7 +107,7 @@ fn test_token_manager_validate_token() {
     assert_eq!(claims.sub, user.id.to_string());
     assert_eq!(claims.email, user.email);
     assert_eq!(claims.iss, "test-issuer");
-    assert_eq!(claims.aud, "auth-service");
+    assert_eq!(claims.aud, "api-service");
 }
 
 #[test]

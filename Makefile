@@ -13,16 +13,16 @@ build-no-cache: ## Build all Docker images without cache
 	docker-compose build --no-cache
 
 up: ## Start all core services
-	docker-compose up -d
+	docker-compose up -d --force-recreate --remove-orphans
 
 up-all: ## Start all services including optional ones
-	docker-compose --profile client --profile localstack --profile nats --profile kafka up -d
+	docker-compose --profile client --profile localstack --profile nats --profile kafka up -d --force-recreate --remove-orphans
 
 up-build: ## Build and start all core services
-	docker-compose up -d --build
+	docker-compose up -d --build --force-recreate --remove-orphans
 
 up-build-all: ## Build and start all services including optional ones
-	docker-compose --profile client --profile localstack --profile nats --profile kafka up -d --build
+	docker-compose --profile client --profile localstack --profile nats --profile kafka up -d --build --force-recreate --remove-orphans
 
 up-client: ## Start with client app
 	docker-compose --profile client up -d
@@ -48,8 +48,8 @@ restart: ## Restart all services
 logs: ## Show logs from all services
 	docker-compose logs -f
 
-logs-auth: ## Show logs from auth-service
-	docker-compose logs -f auth-service
+logs-api: ## Show logs from api-service
+	docker-compose logs -f api-service
 
 logs-admin: ## Show logs from admin-ui
 	docker-compose logs -f admin-ui
@@ -70,8 +70,8 @@ clean-volumes: ## Remove all volumes (WARNING: This deletes all data!)
 clean-all: clean-volumes ## Remove everything including volumes
 	docker system prune -af --volumes
 
-shell-auth: ## Open shell in auth-service container
-	docker-compose exec auth-service /bin/sh
+shell-api: ## Open shell in api-service container
+	docker-compose exec api-service /bin/sh
 
 shell-admin: ## Open shell in admin-ui container
 	docker-compose exec admin-ui /bin/sh
@@ -80,13 +80,13 @@ shell-db: ## Open PostgreSQL shell
 	docker-compose exec postgres psql -U auth_user -d auth_db
 
 migrate: ## Run database migrations
-	docker-compose exec auth-service ./auth-service migrate || echo "Migrations should run automatically on startup"
+	docker-compose exec api-service ./api-service migrate || echo "Migrations should run automatically on startup"
 
 health: ## Check health status of all services
 	@echo "Checking service health..."
 	@docker-compose ps
-	@echo "\nAuth Service Health:"
-	@curl -s http://localhost:8080/health || echo "❌ Auth service not responding"
+	@echo "\nAPI Service Health:"
+	@curl -s http://localhost:8080/health || echo "❌ API service not responding"
 	@echo "\nAdmin UI Health:"
 	@curl -s http://localhost:5174/health || echo "❌ Admin UI not responding"
 	@echo "\nClient App Health:"

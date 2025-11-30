@@ -1,4 +1,4 @@
-version: '3.8'
+# Docker Compose file - version removed as it's obsolete in newer Docker Compose
 
 services:
   # PostgreSQL Database
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,20 +41,21 @@ services:
       - ./infra/openbao-init:/vault/config:ro
     command: server -dev -dev-root-token-id=${VAULT_TOKEN:-dev-root-token} -dev-listen-address=0.0.0.0:8200
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8200/v1/sys/health"]
+      test: ["CMD-SHELL", "sleep 2 && wget --quiet --tries=1 --spider http://127.0.0.1:8200/v1/sys/health || exit 1"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
+      start_period: 40s
     networks:
       - health-network
     restart: unless-stopped
 
   # API Service (Rust Backend)
-  auth-service:
+  api-service:
     build:
       context: .
       dockerfile: backend/api-service/Dockerfile
-    container_name: health-auth-service
+    container_name: health-api-service
     environment:
       # Server
       SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
@@ -99,14 +100,14 @@ services:
       NATS_URL: ${NATS_URL:-nats://nats:4222}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
     ports:
-      - "${AUTH_SERVICE_PORT:-8080}:8080"
+      - "${API_SERVICE_PORT:-8080}:8080"
     volumes:
-      - auth_service_data:/app/data
+      - api_service_data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
       openbao:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -137,7 +138,7 @@ services:
     ports:
       - "${ADMIN_UI_PORT:-5174}:80"
     depends_on:
-      - auth-service
+      - api-service
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
@@ -163,7 +164,7 @@ services:
     ports:
       - "${CLIENT_APP_PORT:-5175}:80"
     depends_on:
-      - auth-service
+      - api-service
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
@@ -298,7 +299,7 @@ volumes:
     driver: local
   openbao_data:
     driver: local
-  auth_service_data:
+  api_service_data:
     driver: local
   localstack_data:
     driver: local

@@ -1,6 +1,6 @@
 /**
  * API Integration E2E Tests
- * Direct API tests against the Rust auth-service
+ * Direct API tests against the Rust api-service
  */
 
 import { expect, test } from "../fixtures/api"

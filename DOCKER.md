@@ -43,7 +43,7 @@ This guide explains how to run the Health V1 application stack using Docker.
 ### Core Services (Always Running)
 - **PostgreSQL** (port 5432) - Database
 - **OpenBao** (port 8200) - Key management service
-- **Auth Service** (port 8080) - Rust backend API
+- **API Service** (port 8080) - Rust backend API
 - **Admin UI** (port 5174) - React frontend admin dashboard
 
 ### Optional Services (Use Profiles)
@@ -85,14 +85,14 @@ make up-build       # Build and start all services
 make down           # Stop all services
 make restart        # Restart all services
 make logs           # Show logs from all services
-make logs-auth      # Show logs from auth-service
+make logs-api       # Show logs from api-service
 make logs-admin     # Show logs from admin-ui
 make logs-db        # Show logs from postgres
 make ps             # Show running containers
 make health         # Check health status
 make clean          # Remove stopped containers
 make clean-volumes  # Remove all volumes (WARNING: deletes data!)
-make shell-auth     # Open shell in auth-service
+make shell-api      # Open shell in api-service
 make shell-admin    # Open shell in admin-ui
 make shell-db       # Open PostgreSQL shell
 make setup          # Create .env from example
@@ -117,7 +117,7 @@ make up-build
 Data is persisted in Docker volumes:
 - `postgres_data` - PostgreSQL database
 - `openbao_data` - OpenBao vault data
-- `auth_service_data` - Auth service data directory
+- `api_service_data` - API service data directory
 
 To remove volumes (WARNING: deletes all data):
 ```bash
@@ -133,7 +133,7 @@ Key environment variables (see `env.docker.example` for full list):
 - `POSTGRES_PASSWORD` - Database password
 
 ### Optional (with defaults)
-- `AUTH_SERVICE_PORT` - Backend API port (default: 8080)
+- `API_SERVICE_PORT` - Backend API port (default: 8080)
 - `ADMIN_UI_PORT` - Frontend port (default: 5174)
 - `VAULT_TOKEN` - OpenBao root token (default: dev-root-token)
 
@@ -151,7 +151,7 @@ For development with hot reload, mount source directories:
 
 - **Admin UI**: http://localhost:5174
 - **Client App**: http://localhost:5175 (when profile `client` is enabled)
-- **Auth API**: http://localhost:8080
+- **API Service**: http://localhost:8080
 - **API Health**: http://localhost:8080/health
 - **OpenBao UI**: http://localhost:8200 (token: dev-root-token)
 - **LocalStack**: http://localhost:4566 (when profile `localstack` is enabled)
@@ -170,10 +170,10 @@ docker-compose exec postgres psql -U auth_user -d auth_db
 
 ### Running Migrations
 
-Migrations run automatically on auth-service startup. To run manually:
+Migrations run automatically on api-service startup. To run manually:
 
 ```bash
-docker-compose exec auth-service ./auth-service migrate
+docker-compose exec api-service ./api-service migrate
 ```
 
 ## Troubleshooting
@@ -188,7 +188,7 @@ docker-compose exec auth-service ./auth-service migrate
 
 1. Ensure PostgreSQL is healthy: `docker-compose ps postgres`
 2. Check DATABASE_URL in .env
-3. Verify network connectivity: `docker-compose exec auth-service ping postgres`
+3. Verify network connectivity: `docker-compose exec api-service ping postgres`
 
 ### Build failures
 
@@ -242,7 +242,7 @@ All services communicate through the `health-network` bridge network:
 └─────────────┘    │
                    │
 ┌─────────────┐    │     ┌──────────────┐     ┌─────────────┐
-│ Client App  │────┼────▶│ Auth Service │────▶│  PostgreSQL │
+│ Client App  │────┼────▶│ API Service  │────▶│  PostgreSQL │
 │  (Caddy)    │    │     │   (Rust)     │     │             │
 └─────────────┘    │     └──────────────┘     └─────────────┘
                    │             │
@@ -272,7 +272,7 @@ All services have health checks configured:
 
 - **PostgreSQL**: `pg_isready`
 - **OpenBao**: HTTP `/v1/sys/health`
-- **Auth Service**: HTTP `/health`
+- **API Service**: HTTP `/health`
 - **Admin UI**: HTTP `/health`
 
 Check health status:
@@ -289,7 +289,7 @@ make logs
 
 View logs for specific service:
 ```bash
-make logs-auth    # Auth service
+make logs-api     # API service
 make logs-admin   # Admin UI
 make logs-db      # PostgreSQL
 ```

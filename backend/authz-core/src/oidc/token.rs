@@ -56,7 +56,7 @@ impl TokenManager {
             exp: exp.timestamp(),
             iat: now.timestamp(),
             iss: self.issuer.clone(),
-            aud: "auth-service".to_string(),
+            aud: "api-service".to_string(),
             role: if role.is_empty() { None } else { Some(role.to_string()) },
             permissions: if permissions.is_empty() { None } else { Some(permissions.to_vec()) },
         };
@@ -76,7 +76,7 @@ impl TokenManager {
             exp: exp.timestamp(),
             iat: now.timestamp(),
             iss: self.issuer.clone(),
-            aud: "auth-service".to_string(),
+            aud: "api-service".to_string(),
             role: None,
             permissions: None,
         };
@@ -88,7 +88,7 @@ impl TokenManager {
     pub fn validate_token(&self, token: &str) -> AppResult<Claims> {
         let mut validation = Validation::default();
         validation.set_issuer(&[&self.issuer]);
-        validation.set_audience(&["auth-service"]);
+        validation.set_audience(&["api-service"]);
 
         let token_data = decode::<Claims>(token, &self.decoding_key, &validation)
             .map_err(|e| shared::AppError::Authentication(format!("Token validation failed: {}", e)))?;

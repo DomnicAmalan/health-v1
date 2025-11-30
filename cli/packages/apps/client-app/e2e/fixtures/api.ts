@@ -1,6 +1,6 @@
 /**
  * API Test Fixtures
- * API client for direct auth-service integration testing
+ * API client for direct api-service integration testing
  */
 
 import type { APIRequestContext } from "@playwright/test"

@@ -5,7 +5,7 @@
 version: '3.8'
 
 services:
-  auth-service:
+  api-service:
     # Mount source code for development (hot reload)
     volumes:
       - ./backend/api-service/src:/app/src:ro
