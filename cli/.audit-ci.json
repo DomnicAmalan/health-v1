@@ -1,0 +1,7 @@
+{
+  "audit-level": "moderate",
+  "report-type": "summary",
+  "allowlist": [],
+  "skip-dev": false,
+  "package-manager": "bun"
+}
