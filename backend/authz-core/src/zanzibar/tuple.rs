@@ -1,5 +1,5 @@
-use crate::domain::entities::Relationship;
-use crate::shared::AppResult;
+use shared::domain::entities::Relationship;
+use shared::AppResult;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RelationshipTuple {
@@ -31,7 +31,7 @@ impl RelationshipTuple {
 
     pub fn validate(&self) -> AppResult<()> {
         if self.user.is_empty() || self.relation.is_empty() || self.object.is_empty() {
-            return Err(crate::shared::AppError::Validation(
+            return Err(shared::AppError::Validation(
                 "Relationship tuple cannot have empty fields".to_string(),
             ));
         }

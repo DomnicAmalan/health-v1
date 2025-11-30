@@ -1,4 +1,4 @@
-use shared::infrastructure::database::migrations::MigrationConfig;
+use shared::infrastructure::database::migrations::{MigrationConfig, parse_sql_statements};
 
 #[test]
 fn test_migration_config_defaults() {
@@ -118,15 +118,6 @@ fn test_parse_multiline_function() {
     assert_eq!(statements.len(), 2);
     assert!(statements[0].contains("CREATE OR REPLACE FUNCTION"));
     assert!(statements[1].contains("CREATE TRIGGER"));
-}
-
-#[test]
-fn test_migration_config_defaults() {
-    let config = MigrationConfig::default();
-    assert_eq!(config.query_timeout.as_secs(), 30);
-    assert_eq!(config.statement_delay.as_millis(), 10);
-    assert_eq!(config.max_retries, 3);
-    assert_eq!(config.retry_delay_base.as_millis(), 100);
 }
 
 #[test]

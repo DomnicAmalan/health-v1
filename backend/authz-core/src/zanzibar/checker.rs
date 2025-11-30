@@ -1,5 +1,5 @@
-use crate::infrastructure::zanzibar::RelationshipStore;
-use crate::shared::AppResult;
+use shared::infrastructure::zanzibar::RelationshipStore;
+use shared::AppResult;
 
 pub struct PermissionChecker {
     store: RelationshipStore,

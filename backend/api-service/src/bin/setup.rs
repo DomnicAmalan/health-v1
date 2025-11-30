@@ -6,6 +6,7 @@ use shared::infrastructure::database::{create_pool, DatabaseService};
 use shared::infrastructure::repositories::{
     SetupRepositoryImpl, UserRepositoryImpl,
 };
+use shared::domain::repositories::SetupRepository;
 use admin_service::use_cases::setup::{
     SetupOrganizationUseCase, CreateSuperAdminUseCase,
 };
@@ -64,7 +65,7 @@ async fn main() {
     }
 
     // Initialize repositories
-    let setup_repository = Box::new(SetupRepositoryImpl::new(pool.clone()));
+    let setup_repository: Box<dyn SetupRepository> = Box::new(SetupRepositoryImpl::new(pool.clone()));
     let user_repository = Box::new(UserRepositoryImpl::new(database_service.clone()));
 
     // Check if setup is already completed
@@ -187,8 +188,8 @@ async fn main() {
     // Create organization
     println!("\nCreating organization...");
     let setup_org_use_case = SetupOrganizationUseCase::new(
-        setup_repository.clone(),
-        user_repository.clone(),
+        Box::new(SetupRepositoryImpl::new(pool.clone())),
+        Box::new(UserRepositoryImpl::new(database_service.clone())),
     );
 
     let org_id = match setup_org_use_case
@@ -208,8 +209,8 @@ async fn main() {
     // Create super admin
     println!("Creating super admin user...");
     let create_admin_use_case = CreateSuperAdminUseCase::new(
-        setup_repository.clone(),
-        user_repository.clone(),
+        Box::new(SetupRepositoryImpl::new(pool.clone())),
+        Box::new(UserRepositoryImpl::new(database_service.clone())),
     );
 
     match create_admin_use_case

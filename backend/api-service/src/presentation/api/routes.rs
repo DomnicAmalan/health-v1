@@ -2,11 +2,12 @@ use axum::{
     Router,
     routing::{get, post, delete},
 };
-use api_service::presentation::api::handlers::*;
+use crate::presentation::api::handlers::*;
+use admin_service::handlers::*;
 use std::sync::Arc;
-use api_service::AppState;
+use super::AppState;
 
-pub fn create_router() -> Router<Arc<AppState>> {
+pub fn create_router() -> Router<Arc<super::AppState>> {
     // Public routes (no authentication required)
     let public_routes = Router::new()
         .route("/health", get(health_check))

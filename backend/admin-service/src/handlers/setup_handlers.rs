@@ -6,6 +6,16 @@ use shared::AppState;
 use std::sync::Arc;
 use uuid::Uuid;
 
+// Type aliases for convenience - these match the concrete types used in api-service
+type ConcreteAppState = shared::AppState<
+    authz_core::auth::LoginUseCase,
+    authz_core::auth::RefreshTokenUseCase,
+    authz_core::auth::LogoutUseCase,
+    authz_core::auth::UserInfoUseCase,
+    crate::use_cases::setup::SetupOrganizationUseCase,
+    crate::use_cases::setup::CreateSuperAdminUseCase,
+>;
+
 #[derive(Debug, Deserialize)]
 pub struct SetupRequest {
     pub organization_name: String,
@@ -26,7 +36,7 @@ pub struct SetupResponse {
 
 /// Initialize the system (one-time setup)
 pub async fn initialize_setup(
-    State(state): State<Arc<AppState>>,
+    State(state): State<Arc<ConcreteAppState>>,
     Json(request): Json<SetupRequest>,
 ) -> impl IntoResponse {
     // Check if setup is already completed
@@ -112,7 +122,7 @@ pub async fn initialize_setup(
 
 /// Check setup status
 pub async fn check_setup_status(
-    State(state): State<Arc<AppState>>,
+    State(state): State<Arc<ConcreteAppState>>,
 ) -> impl IntoResponse {
     match state.setup_repository.is_setup_completed().await {
         Ok(is_completed) => (

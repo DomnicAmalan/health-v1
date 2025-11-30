@@ -1,5 +1,5 @@
 use axum::{Json, extract::Path, http::StatusCode, response::IntoResponse};
-use admin_service::dto::{CreateUserRequest, UpdateUserRequest};
+use crate::dto::{CreateUserRequest, UpdateUserRequest};
 use uuid::Uuid;
 
 pub async fn create_user(
@@ -9,7 +9,9 @@ pub async fn create_user(
     (StatusCode::NOT_IMPLEMENTED, Json(serde_json::json!({"error": "Not yet implemented - database not configured"})))
 }
 
-pub async fn get_user() -> impl IntoResponse {
+pub async fn get_user(
+    Path(_id): Path<Uuid>,
+) -> impl IntoResponse {
     // TODO: Implement when database is configured
     (StatusCode::NOT_IMPLEMENTED, Json(serde_json::json!({"error": "Not yet implemented - database not configured"})))
 }

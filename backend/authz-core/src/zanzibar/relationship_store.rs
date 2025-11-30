@@ -1,6 +1,6 @@
-use crate::domain::entities::Relationship;
-use crate::domain::repositories::RelationshipRepository;
-use crate::shared::AppResult;
+use shared::domain::entities::Relationship;
+use shared::domain::repositories::RelationshipRepository;
+use shared::AppResult;
 
 pub struct RelationshipStore {
     repository: Box<dyn RelationshipRepository>,

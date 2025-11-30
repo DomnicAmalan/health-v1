@@ -1,6 +1,6 @@
-use authz_core::dto::{LoginRequest, LoginResponse, LoginUserResponse};
+use crate::dto::{LoginRequest, LoginResponse, LoginUserResponse};
 use shared::domain::repositories::{UserRepository, RefreshTokenRepository, RoleRepository, PermissionRepository};
-use authz_core::oidc::TokenManager;
+use crate::oidc::TokenManager;
 use shared::AppResult;
 use bcrypt::verify;
 use uuid::Uuid;

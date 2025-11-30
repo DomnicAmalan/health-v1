@@ -7,7 +7,7 @@ use axum::{
 use std::sync::Arc;
 use uuid::Uuid;
 use shared::RequestContext;
-use api_service::AppState;
+use super::super::AppState;
 
 /// Authentication middleware that validates JWT tokens and extracts user context
 pub async fn auth_middleware(

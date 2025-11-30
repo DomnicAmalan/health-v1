@@ -27,27 +27,27 @@ impl SetupOrganizationUseCase {
         // Validate that setup hasn't been completed
         let is_completed = self.setup_repository.is_setup_completed().await?;
         if is_completed {
-            return Err(crate::shared::AppError::Validation(
+            return Err(shared::AppError::Validation(
                 "Setup has already been completed".to_string(),
             ));
         }
 
         // Validate inputs
         if name.trim().is_empty() {
-            return Err(crate::shared::AppError::Validation(
+            return Err(shared::AppError::Validation(
                 "Organization name cannot be empty".to_string(),
             ));
         }
 
         if slug.trim().is_empty() {
-            return Err(crate::shared::AppError::Validation(
+            return Err(shared::AppError::Validation(
                 "Organization slug cannot be empty".to_string(),
             ));
         }
 
         // Validate slug format (alphanumeric and hyphens only)
         if !slug.chars().all(|c| c.is_alphanumeric() || c == '-') {
-            return Err(crate::shared::AppError::Validation(
+            return Err(shared::AppError::Validation(
                 "Organization slug can only contain alphanumeric characters and hyphens".to_string(),
             ));
         }

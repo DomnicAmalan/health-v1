@@ -1,5 +1,5 @@
-use authz_core::dto::UserInfoResponse;
-use authz_core::authorization::GetUserPermissionsUseCase;
+use crate::dto::UserInfoResponse;
+use crate::authorization::GetUserPermissionsUseCase;
 use shared::domain::repositories::UserRepository;
 use shared::AppResult;
 use uuid::Uuid;

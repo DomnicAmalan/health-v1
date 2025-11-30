@@ -57,3 +57,6 @@ bcrypt.workspace = true
 # CLI tools
 dialoguer.workspace = true
 
+# HTTP client
+reqwest.workspace = true
+

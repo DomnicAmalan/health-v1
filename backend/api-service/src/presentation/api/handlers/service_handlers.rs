@@ -1,7 +1,7 @@
 use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use chrono::Utc;
 use admin_service::dto::{ServiceStatusResponse, ServiceInfo};
-use api_service::AppState;
+use super::super::AppState;
 use std::sync::Arc;
 use std::env;
 use std::time::Duration;
@@ -23,6 +23,7 @@ fn parse_bool_env(key: &str, default: bool) -> bool {
 /// Check PostgreSQL health using DatabaseService
 async fn check_postgres_health(db_service: &shared::infrastructure::database::DatabaseService) -> (bool, Option<String>) {
     use std::time::Duration;
+    use shared::infrastructure::database::DatabaseService;
     match db_service.health_check_with_timeout(Duration::from_secs(5)).await {
         Ok(true) => (true, None),
         Ok(false) => (false, Some("Database health check returned false".to_string())),

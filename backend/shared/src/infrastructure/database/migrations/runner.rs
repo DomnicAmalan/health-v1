@@ -30,7 +30,7 @@ impl Default for MigrationConfig {
 }
 
 /// Parse SQL statements, handling dollar-quoted strings and complex blocks
-pub(crate) fn parse_sql_statements(sql: &str) -> Vec<String> {
+pub fn parse_sql_statements(sql: &str) -> Vec<String> {
     let mut statements = Vec::new();
     let mut current_statement = String::new();
     let mut in_dollar_quote = false;

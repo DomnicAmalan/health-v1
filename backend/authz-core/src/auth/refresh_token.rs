@@ -1,6 +1,6 @@
-use authz_core::dto::{RefreshTokenRequest, RefreshTokenResponse};
+use crate::dto::{RefreshTokenRequest, RefreshTokenResponse};
 use shared::domain::repositories::{UserRepository, RefreshTokenRepository};
-use authz_core::oidc::TokenManager;
+use crate::oidc::TokenManager;
 use shared::AppResult;
 use uuid::Uuid;
 use chrono::{Utc, Duration};

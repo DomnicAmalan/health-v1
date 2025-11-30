@@ -16,7 +16,7 @@ impl DeleteUserUseCase {
         self.user_repository
             .find_by_id(user_id)
             .await?
-            .ok_or_else(|| crate::shared::AppError::NotFound("User not found".to_string()))?;
+            .ok_or_else(|| shared::AppError::NotFound("User not found".to_string()))?;
 
         // Delete user
         self.user_repository.delete(user_id).await?;

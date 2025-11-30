@@ -1,4 +1,4 @@
-use admin_service::dto::{CreateUserRequest, UserResponse};
+use crate::dto::{CreateUserRequest, UserResponse};
 use shared::domain::entities::User;
 use shared::domain::repositories::UserRepository;
 use shared::AppResult;
