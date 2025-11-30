@@ -16,6 +16,7 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
 import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as FormBuilderRouteImport } from './routes/form-builder'
 import { Route as ClinicalRouteImport } from './routes/clinical'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -58,6 +59,11 @@ const OrdersRoute = OrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FormBuilderRoute = FormBuilderRouteImport.update({
   id: '/form-builder',
   path: '/form-builder',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
   '/form-builder': typeof FormBuilderRoute
+  '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
   '/form-builder': typeof FormBuilderRoute
+  '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
   '/form-builder': typeof FormBuilderRoute
+  '/login': typeof LoginRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/clinical'
     | '/form-builder'
+    | '/login'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/clinical'
     | '/form-builder'
+    | '/login'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/clinical'
     | '/form-builder'
+    | '/login'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   ClinicalRoute: typeof ClinicalRoute
   FormBuilderRoute: typeof FormBuilderRoute
+  LoginRoute: typeof LoginRoute
   OrdersRoute: typeof OrdersRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PharmacyRoute: typeof PharmacyRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/form-builder': {
@@ -312,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   ClinicalRoute: ClinicalRoute,
   FormBuilderRoute: FormBuilderRoute,
+  LoginRoute: LoginRoute,
   OrdersRoute: OrdersRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PharmacyRoute: PharmacyRoute,

@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
+import { createRootRoute, Outlet, useLocation, useNavigate, redirect } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import {
   Activity,
@@ -21,11 +21,16 @@ import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChat
 import { VoiceCommandFAB } from "@/components/accessibility/VoiceCommandFAB"
 import { VoiceCommandFeedback } from "@/components/accessibility/VoiceCommandFeedback"
 import { VoiceCommandIndicator } from "@/components/accessibility/VoiceCommandIndicator"
-import { Sidebar } from "@/components/layout/Sidebar"
-import { TabBar } from "@/components/layout/TabBar"
+import {
+  CenteredLayout,
+  CleanLayout,
+  FullLayout,
+  MinimalLayout,
+} from "@/components/layout/Layouts"
 import { Box } from "@/components/ui/box"
 import { Container } from "@/components/ui/container"
 import { Flex } from "@/components/ui/flex"
+import { getLayoutForRoute } from "@/lib/layouts/routeLayouts"
 import { useDisclosure } from "@/hooks/ui/useDisclosure"
 import { initializeAccessibility, SkipToMainContent } from "@/lib/accessibility"
 import { PERMISSIONS, type Permission } from "@/lib/constants/permissions"
@@ -34,6 +39,32 @@ import { useActiveTabId, useOpenTab, useSetActiveTab, useTabs } from "@/stores/t
 import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore"
 
 export const Route = createRootRoute({
+  beforeLoad: async ({ location }) => {
+    // Public routes that don't require authentication
+    const publicRoutes = ["/login", "/access-denied"]
+    const isPublicRoute = publicRoutes.includes(location.pathname)
+
+    if (isPublicRoute) {
+      return
+    }
+
+    // Check authentication
+    const authStore = useAuthStore.getState()
+    
+    // If no token in store, try to restore from sessionStorage
+    if (!authStore.accessToken) {
+      await authStore.checkAuth()
+    }
+
+    // If still not authenticated, redirect to login
+    if (!authStore.isAuthenticated) {
+      const redirectTo = location.pathname !== "/" ? location.pathname : undefined
+      throw redirect({
+        to: "/login",
+        search: redirectTo ? { redirect: redirectTo } : undefined,
+      })
+    }
+  },
   component: RootComponent,
 })
 
@@ -81,6 +112,17 @@ function RootComponentInner() {
   // Initialize accessibility features on mount
   useEffect(() => {
     initializeAccessibility()
+  }, [])
+
+  // Initialize auth on app startup - check for existing tokens
+  useEffect(() => {
+    const authStore = useAuthStore.getState()
+    // Only check if we don't already have auth state
+    if (!authStore.isAuthenticated && !authStore.isLoading) {
+      authStore.checkAuth().catch((error) => {
+        console.error("Auth initialization error:", error)
+      })
+    }
   }, [])
 
   // Check for standalone tab on mount (when window is opened from drag-out)
@@ -370,63 +412,68 @@ function RootComponentInner() {
     })
   }, [allNavigationItems]) // Filter based on navigation items and permissions
 
-  return (
-    <Flex className="h-screen overflow-hidden bg-background">
-      <SkipToMainContent />
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:block" aria-label="Main navigation">
-        <Sidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          items={navigationItems}
-        />
-      </aside>
+  // Determine layout based on route
+  const layoutType = getLayoutForRoute(location.pathname)
 
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
+  // Voice command components should only show on authenticated layouts
+  const showVoiceCommands = layoutType === "full" || layoutType === "minimal"
+
+  // Render appropriate layout
+  switch (layoutType) {
+    case "centered":
+      return (
         <>
-          <Box
-            role="button"
-            tabIndex={0}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={onMobileSidebarClose}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-                e.preventDefault()
-                onMobileSidebarClose()
-              }
-            }}
-          />
-          <aside className="fixed left-0 top-0 h-screen z-50 lg:hidden">
-            <Sidebar isCollapsed={false} onToggle={onMobileSidebarClose} items={navigationItems} />
-          </aside>
+          <CenteredLayout />
+          <TanStackRouterDevtools />
         </>
-      )}
+      )
 
-      {/* Main Content Area */}
-      <Flex direction="column" className="flex-1 overflow-hidden">
-        {/* Tab Bar */}
-        <TabBar onMobileMenuClick={onMobileSidebarToggle} />
+    case "clean":
+      return (
+        <>
+          <CleanLayout />
+          <TanStackRouterDevtools />
+        </>
+      )
 
-        {/* Action Ribbon - shows actions for active tab */}
-        <ActionRibbon onAction={handleTabAction} />
+    case "minimal":
+      return (
+        <>
+          <MinimalLayout onTabAction={handleTabAction} />
+          {showVoiceCommands && <VoiceCommandComponents />}
+          <TanStackRouterDevtools />
+        </>
+      )
 
-        {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-y-auto" aria-label="Main content">
-          <Container size="full" className="py-2 px-4">
-            <Outlet />
-          </Container>
-        </main>
-      </Flex>
+    case "full":
+    default:
+      return (
+        <>
+          <FullLayout
+            sidebarItems={navigationItems}
+            isSidebarCollapsed={isSidebarCollapsed}
+            onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            isMobileSidebarOpen={isMobileSidebarOpen}
+            onCloseMobileSidebar={onMobileSidebarClose}
+            onToggleMobileSidebar={onMobileSidebarToggle}
+            onTabAction={handleTabAction}
+          />
+          {showVoiceCommands && <VoiceCommandComponents />}
+          <TanStackRouterDevtools />
+        </>
+      )
+  }
+}
 
-      {/* Voice Command Components - Bottom Right */}
+// Voice command components wrapper
+function VoiceCommandComponents() {
+  return (
+    <>
       <VoiceCommandIndicator />
       <VoiceCommandFeedback />
       <VoiceCommandFAB />
       <VoiceCommandChatbox />
-
-      <TanStackRouterDevtools />
-    </Flex>
+    </>
   )
 }
 

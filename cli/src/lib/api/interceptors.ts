@@ -3,33 +3,54 @@
  * Request and response interceptors for security, audit logging, and error handling
  */
 
-import { API_BASE_URL } from "@/lib/constants/api"
 import { SECURITY_CONFIG } from "@/lib/constants/security"
 import { maskObject } from "./masking"
 import type { ApiResponse, RequestConfig } from "./types"
 
-let accessToken: string | null = null
-let refreshToken: string | null = null
+const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token"
+const TOKEN_STORAGE_KEY_REFRESH = "auth_refresh_token"
 let refreshPromise: Promise<string> | null = null
 
+/**
+ * Store tokens in sessionStorage (more secure than localStorage - cleared on tab close)
+ */
 export function setTokens(access: string | null, refresh: string | null) {
-  accessToken = access
-  refreshToken = refresh
+  if (typeof window === "undefined") return
+  
+  if (access) {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY_ACCESS, access)
+  } else {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY_ACCESS)
+  }
+  
+  if (refresh) {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY_REFRESH, refresh)
+  } else {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY_REFRESH)
+  }
 }
 
+/**
+ * Get access token from sessionStorage
+ */
 export function getAccessToken(): string | null {
-  return accessToken
+  if (typeof window === "undefined") return null
+  return sessionStorage.getItem(TOKEN_STORAGE_KEY_ACCESS)
 }
 
+/**
+ * Get refresh token from sessionStorage
+ */
 export function getRefreshToken(): string | null {
-  return refreshToken
+  if (typeof window === "undefined") return null
+  return sessionStorage.getItem(TOKEN_STORAGE_KEY_REFRESH)
 }
 
 /**
  * Request interceptor - adds auth token, request ID, and timestamp
  */
 export async function requestInterceptor(
-  url: string,
+  _url: string,
   config: RequestConfig
 ): Promise<RequestConfig> {
   const headers: Record<string, string> = {
@@ -37,7 +58,8 @@ export async function requestInterceptor(
     ...config.headers,
   }
 
-  // Add authorization token if available
+  // Add authorization token if available (from sessionStorage)
+  const accessToken = getAccessToken()
   if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`
   }
@@ -62,27 +84,27 @@ export async function responseInterceptor<T>(
   response: Response,
   url: string
 ): Promise<ApiResponse<T>> {
-  // Handle 401 Unauthorized - trigger token refresh
+  // Handle 401 Unauthorized - trigger token refresh via auth store
   if (response.status === 401) {
+    const refreshToken = getRefreshToken()
     if (refreshToken && !refreshPromise) {
-      refreshPromise = refreshAccessToken()
+      // Use auth store to refresh token (handles state updates and persistence)
+      const { useAuthStore } = await import("@/stores/authStore")
+      refreshPromise = useAuthStore.getState().refreshToken()
       try {
-        const newToken = await refreshPromise
-        accessToken = newToken
-        // Retry original request with new token
-        // This would be handled by the API client
+        await refreshPromise
+        // Tokens are now updated in sessionStorage by auth store
       } catch (error) {
-        // Refresh failed, clear tokens and redirect to login
-        setTokens(null, null)
-        window.location.href = "/login"
+        // Refresh failed, clear tokens via auth store
+        useAuthStore.getState().logout()
         throw error
       } finally {
         refreshPromise = null
       }
     } else {
-      // No refresh token, redirect to login
-      setTokens(null, null)
-      window.location.href = "/login"
+      // No refresh token, clear tokens via auth store
+      const { useAuthStore } = await import("@/stores/authStore")
+      useAuthStore.getState().logout()
     }
   }
 
@@ -165,26 +187,3 @@ function sanitizeErrorMessage(message: string): string {
   return message
 }
 
-/**
- * Refresh access token using refresh token
- */
-async function refreshAccessToken(): Promise<string> {
-  if (!refreshToken) {
-    throw new Error("No refresh token available")
-  }
-
-  const response = await fetch(`${API_BASE_URL}/auth/token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken }),
-  })
-
-  if (!response.ok) {
-    throw new Error("Token refresh failed")
-  }
-
-  const data = await response.json()
-  return data.accessToken
-}

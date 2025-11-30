@@ -15,6 +15,72 @@ import { apiClient } from "@/lib/api/client"
 import type { User } from "@/lib/api/types"
 import { SECURITY_CONFIG } from "@/lib/constants/security"
 
+const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token"
+const TOKEN_STORAGE_KEY_REFRESH = "auth_refresh_token"
+const USER_STORAGE_KEY = "auth_user"
+
+/**
+ * Load tokens from sessionStorage
+ */
+function loadTokensFromStorage(): { accessToken: string | null; refreshToken: string | null } {
+  if (typeof window === "undefined") {
+    return { accessToken: null, refreshToken: null }
+  }
+  
+  return {
+    accessToken: sessionStorage.getItem(TOKEN_STORAGE_KEY_ACCESS),
+    refreshToken: sessionStorage.getItem(TOKEN_STORAGE_KEY_REFRESH),
+  }
+}
+
+/**
+ * Save tokens to sessionStorage
+ */
+function saveTokensToStorage(accessToken: string | null, refreshToken: string | null): void {
+  if (typeof window === "undefined") return
+  
+  if (accessToken) {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY_ACCESS, accessToken)
+  } else {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY_ACCESS)
+  }
+  
+  if (refreshToken) {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY_REFRESH, refreshToken)
+  } else {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY_REFRESH)
+  }
+}
+
+/**
+ * Load user from sessionStorage
+ */
+function loadUserFromStorage(): User | null {
+  if (typeof window === "undefined") return null
+  
+  const userStr = sessionStorage.getItem(USER_STORAGE_KEY)
+  if (!userStr) return null
+  
+  try {
+    return JSON.parse(userStr) as User
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Save user to sessionStorage
+ */
+function saveUserToStorage(user: User | null): void {
+  if (typeof window === "undefined") return
+  
+  if (user) {
+    sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user))
+  } else {
+    sessionStorage.removeItem(USER_STORAGE_KEY)
+  }
+}
+
 interface AuthState {
   user: User | null
   accessToken: string | null
@@ -38,15 +104,19 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions
 
+// Initialize state from sessionStorage if available
+const storedTokens = loadTokensFromStorage()
+const storedUser = loadUserFromStorage()
+
 const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  isAuthenticated: false,
+  user: storedUser,
+  accessToken: storedTokens.accessToken,
+  refreshToken: storedTokens.refreshToken,
+  isAuthenticated: !!storedTokens.accessToken,
   isLoading: false,
   error: null,
-  permissions: [],
-  role: null,
+  permissions: storedUser?.permissions || [],
+  role: storedUser?.role || null,
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -71,6 +141,10 @@ export const useAuthStore = create<AuthStore>()(
           state.role = response.user.role
           state.isLoading = false
         })
+
+        // Persist to sessionStorage
+        saveTokensToStorage(response.accessToken, response.refreshToken)
+        saveUserToStorage(response.user)
 
         // Set tokens in API client
         apiClient.setAuthTokens(response.accessToken, response.refreshToken)
@@ -106,6 +180,10 @@ export const useAuthStore = create<AuthStore>()(
           state.error = null
         })
 
+        // Clear from sessionStorage
+        saveTokensToStorage(null, null)
+        saveUserToStorage(null)
+
         // Clear tokens in API client
         apiClient.setAuthTokens(null, null)
       }
@@ -126,6 +204,9 @@ export const useAuthStore = create<AuthStore>()(
           state.refreshToken = response.refreshToken
         })
 
+        // Persist to sessionStorage
+        saveTokensToStorage(response.accessToken, response.refreshToken)
+
         // Update tokens in API client
         apiClient.setAuthTokens(response.accessToken, response.refreshToken)
       } catch (error) {
@@ -138,6 +219,10 @@ export const useAuthStore = create<AuthStore>()(
           state.permissions = []
           state.role = null
         })
+
+        // Clear from sessionStorage
+        saveTokensToStorage(null, null)
+        saveUserToStorage(null)
 
         apiClient.setAuthTokens(null, null)
         throw error
@@ -160,6 +245,9 @@ export const useAuthStore = create<AuthStore>()(
         state.isAuthenticated = !!accessToken
       })
 
+      // Persist to sessionStorage
+      saveTokensToStorage(accessToken, refreshToken)
+
       apiClient.setAuthTokens(accessToken, refreshToken)
     },
 
@@ -170,6 +258,22 @@ export const useAuthStore = create<AuthStore>()(
     },
 
     checkAuth: async () => {
+      // First try to restore from sessionStorage
+      const storedTokens = loadTokensFromStorage()
+      const storedUser = loadUserFromStorage()
+      
+      if (storedTokens.accessToken && storedUser) {
+        set((state) => {
+          state.accessToken = storedTokens.accessToken
+          state.refreshToken = storedTokens.refreshToken
+          state.user = storedUser
+          state.isAuthenticated = true
+          state.permissions = storedUser.permissions || []
+          state.role = storedUser.role || null
+        })
+        apiClient.setAuthTokens(storedTokens.accessToken, storedTokens.refreshToken)
+      }
+
       const { accessToken } = get()
 
       if (!accessToken) {
@@ -189,9 +293,20 @@ export const useAuthStore = create<AuthStore>()(
             state.user.email = userInfo.email
             state.user.role = userInfo.role || state.user.role
             state.permissions = userInfo.permissions || state.permissions
+          } else {
+            // Set user if not already set
+            state.user = userInfo
+            state.permissions = userInfo.permissions || []
+            state.role = userInfo.role || null
           }
           state.isLoading = false
         })
+        
+        // Persist updated user info
+        const currentUser = get().user
+        if (currentUser) {
+          saveUserToStorage(currentUser)
+        }
       } catch (error) {
         // Auth check failed, try to refresh token
         try {
@@ -203,9 +318,19 @@ export const useAuthStore = create<AuthStore>()(
               state.user.email = userInfo.email
               state.user.role = userInfo.role || state.user.role
               state.permissions = userInfo.permissions || state.permissions
+            } else {
+              state.user = userInfo
+              state.permissions = userInfo.permissions || []
+              state.role = userInfo.role || null
             }
             state.isLoading = false
           })
+          
+          // Persist updated user info
+          const currentUser = get().user
+          if (currentUser) {
+            saveUserToStorage(currentUser)
+          }
         } catch (refreshError) {
           // Both check and refresh failed, clear auth
           set((state) => {
@@ -217,6 +342,11 @@ export const useAuthStore = create<AuthStore>()(
             state.role = null
             state.isLoading = false
           })
+          
+          // Clear from sessionStorage
+          saveTokensToStorage(null, null)
+          saveUserToStorage(null)
+          apiClient.setAuthTokens(null, null)
         }
       }
     },

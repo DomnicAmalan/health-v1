@@ -111,9 +111,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         relationship_store,
     };
 
-    // Build application router with state and CORS
-    let app = presentation::api::routes::create_router()
-        .with_state(Arc::new(app_state))
+    // Build application router with state, middleware, and CORS
+    let app_state_arc = Arc::new(app_state);
+    
+    // Create public routes (no auth required)
+    let public_routes = axum::Router::new()
+        .route("/health", axum::routing::get(|| async { "OK" }))
+        .route("/auth/login", axum::routing::post(presentation::api::handlers::login))
+        .with_state(app_state_arc.clone());
+    
+    // Create protected routes with middleware
+    let protected_routes = axum::Router::new()
+        .route("/auth/logout", axum::routing::post(presentation::api::handlers::logout))
+        .route("/auth/token", axum::routing::post(presentation::api::handlers::refresh_token))
+        .route("/auth/userinfo", axum::routing::get(presentation::api::handlers::userinfo))
+        .route("/users", axum::routing::post(presentation::api::handlers::create_user))
+        .route("/users/:id", axum::routing::get(presentation::api::handlers::get_user))
+        .route("/users/:id", axum::routing::post(presentation::api::handlers::update_user))
+        .route("/users/:id", axum::routing::delete(presentation::api::handlers::delete_user))
+        .with_state(app_state_arc.clone())
+        .layer(axum::middleware::from_fn_with_state(
+            app_state_arc.clone(),
+            presentation::api::middleware::auth_middleware,
+        ))
+        .layer(axum::middleware::from_fn_with_state(
+            app_state_arc.clone(),
+            presentation::api::middleware::acl_middleware,
+        ));
+    
+    let app = axum::Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
+        .layer(axum::middleware::from_fn(presentation::api::middleware::request_id_middleware))
         .layer(tower_http::cors::CorsLayer::permissive());
 
     // Start server
