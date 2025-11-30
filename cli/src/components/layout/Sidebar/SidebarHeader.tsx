@@ -19,7 +19,7 @@ export function SidebarHeader({ isCollapsed, onToggle }: SidebarHeaderProps) {
         <>
           <Flex className="items-center gap-2 min-w-0">
             <Stethoscope className="h-6 w-6 text-primary shrink-0" />
-            <h2 className="text-lg font-semibold truncate">EHR Platform</h2>
+            <h2 className="text-lg font-semibold truncate">Salk Commons Health</h2>
           </Flex>
           <Button
             variant="ghost"

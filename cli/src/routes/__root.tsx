@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
-import { TanStackRouterDevtools } from "@tanstack/router-devtools"
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import {
   Activity,
   BarChart3,
@@ -168,9 +168,9 @@ function RootComponentInner() {
   useEffect(() => {
     const activeTab = tabs.find((t) => t.id === activeTabId)
     if (activeTab) {
-      document.title = `${activeTab.label} - EHR Platform`
+      document.title = `${activeTab.label} - Salk Commons Health`
     } else {
-      document.title = "EHR Platform"
+      document.title = "Salk Commons Health"
     }
   }, [tabs, activeTabId])
 

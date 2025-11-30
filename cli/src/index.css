@@ -2,18 +2,19 @@
 
 @theme {
   /* ============================================
-     MICROSOFT-STYLE HEALTH-TECH COLOR PALETTE
+     SALK COMMONS HEALTH - MICROSOFT 365 INSPIRED COLOR PALETTE
+     Inspired by Jonas Salk's legacy of compassion and open-source values
      ============================================ */
 
-  /* Core/Default App Color: Microsoft Blue (WCAG AAA Compliant)
-     - #0066CC - Strong blue (Microsoft Outlook/Office-blue)
+  /* Core/Default App Color: Microsoft 365 Blue (WCAG AA Compliant)
+     - #0078D4 - Microsoft 365 primary blue, reflects Salk's scientific rigor
      - Usage: Default UI, headers, nav bars, primary actions
   */
-  --color-primary: hsl(210 100% 40%);
+  --color-primary: hsl(207 100% 42%);
   --color-primary-foreground: hsl(0 0% 100%);
 
-  /* Health-Care Primary Blue: Clinical Blue (WCAG AA Compliant)
-     - #2A7FA9 - Realistic medical/clinical blue
+  /* Health-Care Primary Blue: Compassionate Clinical Blue (WCAG AA Compliant)
+     - Slightly softer blue inspired by Salk's compassionate approach
      - Usage: Clinical screens, patient dashboards, health modules
   */
   --color-health: hsl(201 60% 42%);
@@ -47,11 +48,13 @@
   --color-highlight: hsl(48 100% 50%);
   --color-highlight-foreground: hsl(0 0% 9%);
 
-  /* Neutrals - Light Backgrounds */
+  /* Neutrals - Clean Microsoft 365 Gray Scale
+     - Scientific, sterile, professional aesthetic
+  */
   --color-background: hsl(0 0% 100%);
-  --color-card: hsl(210 13% 95%);
+  --color-card: hsl(0 0% 98%);
   --color-popover: hsl(0 0% 100%);
-  --color-secondary: hsl(213 9% 90%);
+  --color-secondary: hsl(0 0% 96%);
 
   /* Neutrals - Text / Dark Mode Base (WCAG AAA Compliant) */
   --color-foreground: hsl(0 0% 11%); /* #1C1C1E - AAA */
@@ -65,25 +68,25 @@
   --color-destructive: hsl(12 75% 48%); /* #D6461F - AA */
   --color-destructive-foreground: hsl(0 0% 100%);
 
-  /* UI Element Colors */
-  --color-border: hsl(213 9% 90%);
-  --color-input: hsl(210 13% 95%);
-  --color-ring: hsl(210 100% 40%);
+  /* UI Element Colors - Microsoft 365 Clean Aesthetic */
+  --color-border: hsl(0 0% 90%);
+  --color-input: hsl(0 0% 98%);
+  --color-ring: hsl(207 100% 42%);
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 11%;
-    --card: 210 13% 95%;
+    --card: 0 0% 98%;
     --card-foreground: 0 0% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 11%;
-    --primary: 210 100% 40%;
+    --primary: 207 100% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 213 9% 90%;
+    --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 15%;
-    --muted: 210 13% 95%;
+    --muted: 0 0% 98%;
     --muted-foreground: 0 0% 29%;
     --accent: 145 65% 33%;
     --accent-foreground: 0 0% 100%;
@@ -97,9 +100,9 @@
     --health-foreground: 0 0% 100%;
     --highlight: 48 100% 50%;
     --highlight-foreground: 0 0% 11%;
-    --border: 213 9% 90%;
-    --input: 210 13% 95%;
-    --ring: 210 100% 40%;
+    --border: 0 0% 90%;
+    --input: 0 0% 98%;
+    --ring: 207 100% 42%;
     --radius: 4px;
     --radius-xs: 2px;
     --radius-sm: 4px;
@@ -115,7 +118,7 @@
     --color-card-foreground: hsl(0 0% 98%);
     --color-popover: hsl(0 0% 15%);
     --color-popover-foreground: hsl(0 0% 98%);
-    --color-primary: hsl(210 100% 50%);
+    --color-primary: hsl(207 100% 55%);
     --color-primary-foreground: hsl(0 0% 100%);
     --color-secondary: hsl(0 0% 18%);
     --color-secondary-foreground: hsl(0 0% 98%);
@@ -135,7 +138,7 @@
     --color-highlight-foreground: hsl(0 0% 11%);
     --color-border: hsl(0 0% 20%);
     --color-input: hsl(0 0% 18%);
-    --color-ring: hsl(210 100% 50%);
+    --color-ring: hsl(207 100% 55%);
 
     --background: 0 0% 11%;
     --foreground: 0 0% 98%;
@@ -143,7 +146,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 15%;
     --popover-foreground: 0 0% 98%;
-    --primary: 210 100% 50%;
+    --primary: 207 100% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 98%;
@@ -163,7 +166,7 @@
     --highlight-foreground: 0 0% 11%;
     --border: 0 0% 20%;
     --input: 0 0% 18%;
-    --ring: 210 100% 50%;
+    --ring: 207 100% 55%;
   }
 }
 

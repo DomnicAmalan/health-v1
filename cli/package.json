@@ -1,5 +1,5 @@
 {
-  "name": "ehr-platform",
+  "name": "salk-commons-health",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -51,7 +51,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^5.90.11",
-    "@tanstack/react-router": "^1.139.10",
+    "@tanstack/react-router": "^1.139.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "immer": "^11.0.1",
@@ -59,7 +59,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@axe-core/react": "^4.11.0",
@@ -68,9 +68,9 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.1.17",
-    "@tanstack/router-devtools": "^1.139.10",
-    "@tanstack/router-plugin": "^1.139.10",
-    "@tanstack/router-vite-plugin": "^1.139.10",
+    "@tanstack/react-router-devtools": "^1.139.12",
+    "@tanstack/router-plugin": "^1.139.12",
+    "@tanstack/router-vite-plugin": "^1.139.12",
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/cli": "^2.9.4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -83,7 +83,7 @@
     "axe-core": "^4.11.0",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "glob": "^11.0.0",
+    "glob": "^13.0.0",
     "husky": "^9.1.7",
     "jsdom": "^27.2.0",
     "lint-staged": "^16.2.7",

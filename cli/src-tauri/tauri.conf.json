@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "ehr-platform",
+  "productName": "salk-commons-health",
   "version": "0.1.0",
-  "identifier": "com.ehrplatform.app",
+  "identifier": "com.salkcommonshealth.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "EHR Platform",
+        "title": "Salk Commons Health",
         "width": 1920,
         "height": 1080,
         "minWidth": 1280,
