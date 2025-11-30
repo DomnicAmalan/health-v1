@@ -1,12 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { Plus, Search, Shield } from "lucide-react"
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Stack } from "@health-v1/ui-components"
 
-export const Route = createFileRoute("/permissions")({
-  component: PermissionsPage,
-})
-
-function PermissionsPage() {
+export function PermissionsPage() {
   return (
     <div className="p-6">
       <Stack spacing="lg">

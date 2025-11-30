@@ -1,12 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { Activity, Plus, Search, Server } from "lucide-react"
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Stack } from "@health-v1/ui-components"
 
-export const Route = createFileRoute("/services")({
-  component: ServicesPage,
-})
-
-function ServicesPage() {
+export function ServicesPage() {
   return (
     <div className="p-6">
       <Stack spacing="lg">

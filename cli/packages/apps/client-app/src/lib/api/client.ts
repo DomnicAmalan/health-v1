@@ -15,10 +15,19 @@ import type { ApiError, ApiResponse, RequestConfig } from "./types"
 export class ApiClient {
   private baseUrl: string
   private defaultTimeout: number
+  private retryAttempts: number
+  private retryDelay: number
 
-  constructor(baseUrl: string = API_BASE_URL, timeout: number = API_TIMEOUT) {
+  constructor(
+    baseUrl: string = API_BASE_URL,
+    timeout: number = API_TIMEOUT,
+    retryAttempts: number = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
+    retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
+  ) {
     this.baseUrl = baseUrl
     this.defaultTimeout = timeout
+    this.retryAttempts = retryAttempts
+    this.retryDelay = retryDelay
   }
 
   /**

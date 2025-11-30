@@ -1,14 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { Activity, Building2, Shield, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@health-v1/ui-components"
 import { Flex } from "@health-v1/ui-components"
 import { Stack } from "@health-v1/ui-components"
 
-export const Route = createFileRoute("/dashboard")({
-  component: DashboardPage,
-})
-
-function DashboardPage() {
+export function DashboardPage() {
   return (
     <div className="p-6">
       <Stack spacing="lg">

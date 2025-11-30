@@ -1,13 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button, Input, Label, Card, CardContent, CardDescription, CardHeader, CardTitle, Flex, Stack } from "@health-v1/ui-components"
 
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
-})
 
-function LoginPage() {
+export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

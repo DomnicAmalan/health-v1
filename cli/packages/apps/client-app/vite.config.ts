@@ -16,12 +16,16 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: resolve(__dirname, "dist"),
+    outDir: process.env.VITE_BUILD_OUT_DIR || resolve(__dirname, "dist"),
+    sourcemap: process.env.VITE_SOURCEMAP === "true",
+    minify: process.env.VITE_MINIFY !== "false" ? "esbuild" : false,
   },
   server: {
-    port: 5173,
-    strictPort: true,
-    open: true,
+    port: Number(process.env.VITE_PORT) || 5173,
+    host: process.env.VITE_HOST || "localhost",
+    strictPort: process.env.VITE_STRICT_PORT !== "false",
+    open: process.env.VITE_OPEN !== "false",
   },
   clearScreen: false,
+  envPrefix: ["VITE_", "TAURI_"],
 })

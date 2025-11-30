@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "vite",
     "dev:web": "vite",
-    "build": "tsc && vite build --mode desktop",
+    "build": "tsc && vite build",
     "build:web": "tsc && vite build",
     "build:desktop": "tsc && vite build --mode desktop",
     "lint": "biome check . && node scripts/check-file-sizes.js",

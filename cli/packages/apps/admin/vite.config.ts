@@ -10,19 +10,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  clearScreen: false,
   server: {
-    port: 5174,
-    strictPort: true,
-    watch: {
-      ignored: ["**/src-tauri/**"],
-    },
+    port: Number(process.env.VITE_PORT) || 5174,
+    host: process.env.VITE_HOST || "localhost",
+    strictPort: process.env.VITE_STRICT_PORT !== "false",
+    open: process.env.VITE_OPEN === "true",
   },
-  envPrefix: ["VITE_", "TAURI_"],
   build: {
-    target: ["es2021", "chrome100", "safari13"],
-    minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
-    sourcemap: !!process.env.TAURI_DEBUG,
+    outDir: process.env.VITE_BUILD_OUT_DIR || "dist",
+    sourcemap: process.env.VITE_SOURCEMAP === "true",
+    minify: process.env.VITE_MINIFY !== "false" ? "esbuild" : false,
   },
+  clearScreen: false,
+  envPrefix: ["VITE_", "TAURI_"],
 })
-

@@ -1,4 +1,4 @@
-import { createRouter, createRootRoute, createRoute } from "@tanstack/react-router"
+import { createRouter, createRootRoute, createRoute, RouterProvider } from "@tanstack/react-router"
 import { RootComponent } from "./routes/__root"
 import { DashboardPage } from "./routes/dashboard"
 import { LoginPage } from "./routes/login"
@@ -72,4 +72,9 @@ declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router
   }
+}
+
+// Router component
+export default function Router() {
+  return <RouterProvider router={router} />
 }

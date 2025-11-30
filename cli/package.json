@@ -2,10 +2,7 @@
   "name": "health-v1-cli",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/apps/*",
-    "packages/libs/*"
-  ],
+  "workspaces": ["packages/apps/*", "packages/libs/*"],
   "scripts": {
     "dev": "bun --filter='*' run dev",
     "dev:client": "bun --filter=client-app run dev",

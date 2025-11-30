@@ -151,8 +151,9 @@ Desktop.ini
 # Bun
 # ============================================
 .bun/
-bun.lockb
-cli/bun.lockb
+bun.lock
+**/bun.lock
+*.lockb
 
 # ============================================
 # Python (if any)
