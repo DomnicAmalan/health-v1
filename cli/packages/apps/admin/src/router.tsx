@@ -9,6 +9,8 @@ import { UsersPage } from "./routes/users";
 import { RolesPage } from "./routes/roles";
 import { GroupsPage } from "./routes/groups";
 import { UiEntitiesPage } from "./routes/ui-entities";
+import { DekManagementPage } from "./routes/encryption/deks";
+import { MasterKeyManagementPage } from "./routes/encryption/master-key";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -71,6 +73,19 @@ const uiEntitiesRoute = createRoute({
   component: UiEntitiesPage,
 });
 
+// Encryption routes
+const dekManagementRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/encryption/deks",
+  component: DekManagementPage,
+});
+
+const masterKeyManagementRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/encryption/master-key",
+  component: MasterKeyManagementPage,
+});
+
 // Services route
 const servicesRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -88,6 +103,8 @@ const routeTree = rootRoute.addChildren([
   rolesRoute,
   groupsRoute,
   uiEntitiesRoute,
+  dekManagementRoute,
+  masterKeyManagementRoute,
   servicesRoute,
 ]);
 

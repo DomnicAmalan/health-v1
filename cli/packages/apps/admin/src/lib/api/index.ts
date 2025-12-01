@@ -8,5 +8,6 @@ export * from "./permissions";
 export * from "./roles";
 export * from "./groups";
 export * from "./ui-entities";
+export * from "./encryption";
 export * from "./setup";
 export * from "./services";
