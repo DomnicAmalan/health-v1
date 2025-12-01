@@ -117,7 +117,14 @@ services:
       - ./backend/shared/src:/app/backend/shared/src
       - ./backend/authz-core/src:/app/backend/authz-core/src
       - ./backend/admin-service/src:/app/backend/admin-service/src
+      # Mount migrations so they're available at runtime
       - ./backend/migrations:/app/backend/migrations
+      # Mount Cargo.toml files for cargo to work
+      - ./backend/Cargo.toml:/app/backend/Cargo.toml
+      - ./backend/shared/Cargo.toml:/app/backend/shared/Cargo.toml
+      - ./backend/authz-core/Cargo.toml:/app/backend/authz-core/Cargo.toml
+      - ./backend/admin-service/Cargo.toml:/app/backend/admin-service/Cargo.toml
+      - ./backend/api-service/Cargo.toml:/app/backend/api-service/Cargo.toml
     depends_on:
       postgres:
         condition: service_healthy

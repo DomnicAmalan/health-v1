@@ -67,8 +67,15 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app/backend
 
-# Copy workspace files and source code from builder
-COPY --from=builder /app/backend .
+# Copy workspace Cargo.toml files (needed for cargo to work)
+COPY backend/Cargo.toml backend/
+COPY backend/shared/Cargo.toml backend/shared/
+COPY backend/authz-core/Cargo.toml backend/authz-core/
+COPY backend/admin-service/Cargo.toml backend/admin-service/
+COPY backend/api-service/Cargo.toml backend/api-service/
+
+# Copy migrations (always needed, even in dev mode)
+COPY backend/migrations backend/migrations
 
 # Expose port
 EXPOSE 8080

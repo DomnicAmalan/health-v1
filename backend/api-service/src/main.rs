@@ -44,7 +44,19 @@ async fn main() -> Result<(), String> {
     
     // Run migrations using sqlx's built-in migrator
     info!("Running database migrations...");
-    let migrations_path = std::path::Path::new("./migrations");
+    // Try multiple possible paths for migrations (dev vs prod)
+    let migrations_path = if std::path::Path::new("./migrations").exists() {
+        std::path::Path::new("./migrations")
+    } else if std::path::Path::new("/app/backend/migrations").exists() {
+        std::path::Path::new("/app/backend/migrations")
+    } else if std::path::Path::new("/app/migrations").exists() {
+        std::path::Path::new("/app/migrations")
+    } else if std::path::Path::new("../migrations").exists() {
+        std::path::Path::new("../migrations")
+    } else {
+        std::path::Path::new("./migrations")
+    };
+    info!("Using migrations path: {:?}", migrations_path);
     let migrator = sqlx::migrate::Migrator::new(migrations_path)
         .await
         .map_err(|e| format!("Failed to initialize migrator: {}", e))?;
