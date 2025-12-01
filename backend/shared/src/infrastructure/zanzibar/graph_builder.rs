@@ -98,17 +98,25 @@ impl AuthorizationGraph {
     
     /// Get all outgoing edges from a node
     pub fn get_outgoing_edges(&self, node_idx: NodeIndex) -> Vec<(NodeIndex, &RelationshipEdge)> {
+        use petgraph::visit::EdgeRef;
         self.graph
             .edges(node_idx)
-            .map(|edge_ref| (edge_ref.target(), edge_ref.weight()))
+            .map(|edge_ref| {
+                let target = EdgeRef::target(&edge_ref);
+                (target, edge_ref.weight())
+            })
             .collect()
     }
     
     /// Get all incoming edges to a node
     pub fn get_incoming_edges(&self, node_idx: NodeIndex) -> Vec<(NodeIndex, &RelationshipEdge)> {
+        use petgraph::visit::EdgeRef;
         self.graph
             .edges_directed(node_idx, petgraph::Direction::Incoming)
-            .map(|edge_ref| (edge_ref.source(), edge_ref.weight()))
+            .map(|edge_ref| {
+                let source = EdgeRef::source(&edge_ref);
+                (source, edge_ref.weight())
+            })
             .collect()
     }
     

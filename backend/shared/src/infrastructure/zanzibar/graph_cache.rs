@@ -5,9 +5,10 @@ use std::sync::{Arc, RwLock};
 use chrono::{DateTime, Utc, Duration};
 
 /// Cache entry for authorization graph
+#[allow(dead_code)]
 struct CacheEntry {
     graph: Arc<AuthorizationGraph>, // Use Arc to avoid cloning the entire graph
-    created_at: DateTime<Utc>,
+    created_at: DateTime<Utc>, // Kept for future use (e.g., cache statistics)
     expires_at: DateTime<Utc>,
 }
 

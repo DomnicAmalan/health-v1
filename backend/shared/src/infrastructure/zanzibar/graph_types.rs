@@ -121,9 +121,10 @@ impl RelationshipEdge {
     
     /// Check conditional permissions (time-based, context-based)
     /// Evaluates conditions in metadata
+    #[allow(unused_variables)]
     pub fn evaluate_condition(&self, context: Option<&Value>) -> bool {
         // Check if metadata contains conditions
-        if let Some(conditions) = self.metadata.get("conditions") {
+        if let Some(_conditions) = self.metadata.get("conditions") {
             // Example conditions:
             // - time_based: { "time_range": { "start": "...", "end": "..." } }
             // - context_based: { "requires": { "department": "cardiology" } }

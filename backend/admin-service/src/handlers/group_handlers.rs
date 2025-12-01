@@ -1,6 +1,6 @@
 use axum::{Json, extract::{State, Path}, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
-use shared::AppState;
+use shared::domain::repositories::GroupRepository;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -10,8 +10,8 @@ type ConcreteAppState = shared::AppState<
     authz_core::auth::RefreshTokenUseCase,
     authz_core::auth::LogoutUseCase,
     authz_core::auth::UserInfoUseCase,
-    admin_service::use_cases::setup::SetupOrganizationUseCase,
-    admin_service::use_cases::setup::CreateSuperAdminUseCase,
+    crate::use_cases::setup::SetupOrganizationUseCase,
+    crate::use_cases::setup::CreateSuperAdminUseCase,
 >;
 
 #[derive(Debug, Deserialize)]
@@ -45,7 +45,7 @@ pub async fn create_group(
     State(state): State<Arc<ConcreteAppState>>,
     Json(request): Json<CreateGroupRequest>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::group::CreateGroupUseCase;
+    use crate::use_cases::group::CreateGroupUseCase;
     use shared::infrastructure::repositories::GroupRepositoryImpl;
     
     let group_repository = Box::new(GroupRepositoryImpl::new(state.database_pool.as_ref().clone()));
@@ -133,7 +133,7 @@ pub async fn add_user_to_group(
     State(state): State<Arc<ConcreteAppState>>,
     Path((group_id, user_id)): Path<(Uuid, Uuid)>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::group::AddUserToGroupUseCase;
+    use crate::use_cases::group::AddUserToGroupUseCase;
     use shared::infrastructure::repositories::UserRepositoryImpl;
     
     let user_repository = Box::new(UserRepositoryImpl::new(state.database_service.clone()));
@@ -193,7 +193,7 @@ pub async fn assign_role_to_group(
     State(state): State<Arc<ConcreteAppState>>,
     Path((group_id, role_id)): Path<(Uuid, Uuid)>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::group::AssignRoleToGroupUseCase;
+    use crate::use_cases::group::AssignRoleToGroupUseCase;
     use shared::infrastructure::repositories::{RoleRepositoryImpl, PermissionRepositoryImpl};
     
     // Create role repository with dependencies

@@ -1,6 +1,5 @@
 use axum::{Json, extract::{State, Path}, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
-use shared::AppState;
+use serde::Deserialize;
 use std::sync::Arc;
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
@@ -12,8 +11,8 @@ type ConcreteAppState = shared::AppState<
     authz_core::auth::RefreshTokenUseCase,
     authz_core::auth::LogoutUseCase,
     authz_core::auth::UserInfoUseCase,
-    admin_service::use_cases::setup::SetupOrganizationUseCase,
-    admin_service::use_cases::setup::CreateSuperAdminUseCase,
+    crate::use_cases::setup::SetupOrganizationUseCase,
+    crate::use_cases::setup::CreateSuperAdminUseCase,
 >;
 
 #[derive(Debug, Deserialize)]
@@ -37,7 +36,7 @@ pub async fn create_permission(
     State(state): State<Arc<ConcreteAppState>>,
     Json(request): Json<CreatePermissionRequest>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::permission::CreatePermissionUseCase;
+    use crate::use_cases::permission::CreatePermissionUseCase;
     use shared::infrastructure::repositories::RelationshipRepositoryImpl;
     
     let relationship_repository = Box::new(RelationshipRepositoryImpl::new(state.database_pool.as_ref().clone()));
@@ -83,7 +82,7 @@ pub async fn extend_permission(
     Path(id): Path<Uuid>,
     Json(request): Json<ExtendPermissionRequest>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::permission::ExtendPermissionUseCase;
+    use crate::use_cases::permission::ExtendPermissionUseCase;
     use shared::domain::repositories::RelationshipRepository;
     use shared::infrastructure::repositories::RelationshipRepositoryImpl;
     
@@ -113,8 +112,18 @@ pub async fn extend_permission(
     
     // Extract user_id from user string (e.g., "user:123" -> 123)
     let user_id_str = relationship.user.strip_prefix("user:").unwrap_or(&relationship.user);
-    let user_id = Uuid::parse_str(user_id_str)
-        .map_err(|_| shared::AppError::Validation("Invalid user ID in relationship".to_string()))?;
+    let user_id = match Uuid::parse_str(user_id_str) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({
+                    "error": "Invalid user ID in relationship"
+                })),
+            )
+                .into_response();
+        }
+    };
     
     let use_case = ExtendPermissionUseCase::new(state.relationship_store.clone());
     
@@ -142,7 +151,7 @@ pub async fn revoke_permission(
     State(state): State<Arc<ConcreteAppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    use admin_service::use_cases::permission::RevokePermissionUseCase;
+    use crate::use_cases::permission::RevokePermissionUseCase;
     use shared::domain::repositories::RelationshipRepository;
     use shared::infrastructure::repositories::RelationshipRepositoryImpl;
     
@@ -172,8 +181,18 @@ pub async fn revoke_permission(
     
     // Extract user_id from user string
     let user_id_str = relationship.user.strip_prefix("user:").unwrap_or(&relationship.user);
-    let user_id = Uuid::parse_str(user_id_str)
-        .map_err(|_| shared::AppError::Validation("Invalid user ID in relationship".to_string()))?;
+    let user_id = match Uuid::parse_str(user_id_str) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({
+                    "error": "Invalid user ID in relationship"
+                })),
+            )
+                .into_response();
+        }
+    };
     
     let use_case = RevokePermissionUseCase::new(state.relationship_store.clone());
     

@@ -123,12 +123,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get_permissions_use_case,
     ));
 
-    // Permission checker (uses relationship_store)
-    let permission_checker = Arc::new(shared::infrastructure::zanzibar::PermissionChecker::new(
-        shared::infrastructure::zanzibar::RelationshipStore::new(
-            Box::new(shared::infrastructure::repositories::RelationshipRepositoryImpl::new(pool.clone())),
-        ),
-    ));
+    // Initialize graph cache for complex authorization queries
+    info!("Initializing graph cache...");
+    use shared::infrastructure::zanzibar::GraphCache;
+    let graph_cache = Arc::new(GraphCache::with_default_ttl());
+    info!("Graph cache initialized");
+
+    // Permission checker (uses relationship_store with optional graph cache)
+    let permission_checker = Arc::new(
+        shared::infrastructure::zanzibar::PermissionChecker::with_graph_cache(
+            shared::infrastructure::zanzibar::RelationshipStore::new(
+                Box::new(shared::infrastructure::repositories::RelationshipRepositoryImpl::new(pool.clone())),
+            ),
+            graph_cache.clone(),
+            true, // Enable graph for deep queries
+        )
+    );
 
     // Initialize setup components
     let setup_repository = Arc::new(shared::infrastructure::repositories::SetupRepositoryImpl::new(pool.clone()));
@@ -197,25 +207,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         permission_repository.clone(),
     ));
 
-    // Initialize graph cache for complex authorization queries
-    info!("Initializing graph cache...");
-    use shared::infrastructure::zanzibar::GraphCache;
-    let graph_cache = Arc::new(GraphCache::with_default_ttl());
-    info!("Graph cache initialized");
-
-    // Update permission checker to use graph cache
-    use shared::infrastructure::repositories::RelationshipRepositoryImpl;
-    let relationship_repository_for_cache = RelationshipRepositoryImpl::new(pool.clone());
-    let permission_checker_with_graph = Arc::new(
-        shared::infrastructure::zanzibar::PermissionChecker::with_graph_cache(
-            shared::infrastructure::zanzibar::RelationshipStore::new(
-                Box::new(shared::infrastructure::repositories::RelationshipRepositoryImpl::new(pool.clone())),
-            ),
-            graph_cache.clone(),
-            true, // Enable graph for deep queries
-        )
-    );
-
     // Create application state
     use api_service::AppState;
     let app_state = AppState {
@@ -226,7 +217,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         logout_use_case,
         userinfo_use_case,
         token_manager: token_manager_arc,
-        permission_checker: permission_checker_with_graph,
+        permission_checker,
         relationship_store,
         setup_repository,
         setup_organization_use_case,

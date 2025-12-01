@@ -161,6 +161,7 @@ impl GraphPermissionChecker {
     }
     
     /// Find shortest path using BFS
+    #[allow(unused_variables)]
     pub fn shortest_path(
         &self,
         source: &str,

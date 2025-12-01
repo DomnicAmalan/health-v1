@@ -8,7 +8,6 @@ use async_trait::async_trait;
 use sqlx::Row;
 use std::sync::Arc;
 use uuid::Uuid;
-use chrono::Utc;
 
 pub struct RoleRepositoryImpl {
     database_service: Arc<DatabaseService>,

@@ -1,6 +1,5 @@
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
-use shared::AppState;
+use axum::{Json, extract::{State, Path}, http::StatusCode, response::IntoResponse};
+use serde::Deserialize;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -10,8 +9,8 @@ type ConcreteAppState = shared::AppState<
     authz_core::auth::RefreshTokenUseCase,
     authz_core::auth::LogoutUseCase,
     authz_core::auth::UserInfoUseCase,
-    admin_service::use_cases::setup::SetupOrganizationUseCase,
-    admin_service::use_cases::setup::CreateSuperAdminUseCase,
+    crate::use_cases::setup::SetupOrganizationUseCase,
+    crate::use_cases::setup::CreateSuperAdminUseCase,
 >;
 
 #[derive(Debug, Deserialize)]
