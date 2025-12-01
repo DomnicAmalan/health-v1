@@ -55,6 +55,12 @@ services:
     build:
       context: .
       dockerfile: backend/api-service/Dockerfile
+      # Build args for dev mode
+      args:
+        - BUILD_MODE=${BUILD_MODE:-release}
+        - SKIP_CHECKS=${SKIP_CHECKS:-false}
+      # Uncomment to skip build and use existing image:
+      # target: builder
     container_name: health-api-service
     environment:
       # Server
@@ -69,6 +75,8 @@ services:
       VAULT_ADDR: http://openbao:8200
       VAULT_TOKEN: ${VAULT_TOKEN:-dev-root-token}
       VAULT_MOUNT_PATH: ${VAULT_MOUNT_PATH:-secret}
+      VAULT_NAMESPACE: ${VAULT_NAMESPACE:-}
+      ENABLE_HASHICORP_OPENBAO: ${ENABLE_HASHICORP_OPENBAO:-true}
       
       # OIDC/JWT
       OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8080}

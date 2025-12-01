@@ -1,0 +1,15 @@
+# Docker Compose for development mode (skips checks, uses dev build)
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  api-service:
+    build:
+      args:
+        BUILD_MODE: dev
+        SKIP_CHECKS: "true"
+    environment:
+      # Enable debug logging in dev mode
+      RUST_LOG: debug
+      LOG_LEVEL: debug
+      RUST_BACKTRACE: full
+

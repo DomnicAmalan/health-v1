@@ -201,7 +201,7 @@ async fn main() {
     );
 
     let org_id = match setup_org_use_case
-        .execute(&org_name, &org_slug, org_domain.as_deref())
+        .execute(&org_name, &org_slug, org_domain.as_deref(), false)
         .await
     {
         Ok(id) => {

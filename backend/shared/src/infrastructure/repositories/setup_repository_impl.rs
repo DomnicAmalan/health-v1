@@ -91,5 +91,26 @@ impl SetupRepository for SetupRepositoryImpl {
             domain,
         }))
     }
+
+    async fn get_organization_by_slug(&self, slug: &str) -> AppResult<Option<OrganizationInfo>> {
+        let result = sqlx::query_as::<_, (Uuid, String, String, Option<String>)>(
+            r#"
+            SELECT id, name, slug, domain
+            FROM organizations
+            WHERE slug = $1
+            "#
+        )
+        .bind(slug)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| crate::shared::AppError::Database(e))?;
+
+        Ok(result.map(|(id, name, slug, domain)| OrganizationInfo {
+            id,
+            name,
+            slug,
+            domain,
+        }))
+    }
 }
 

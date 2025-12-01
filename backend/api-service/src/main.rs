@@ -16,7 +16,7 @@ use std::sync::Arc;
 use tracing::info;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), String> {
     // Load environment variables
     dotenv::dotenv().ok();
 
@@ -154,38 +154,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Box::new(shared::infrastructure::repositories::UserRepositoryImpl::new(database_service.clone())),
     ));
 
-    // Initialize master key
-    info!("Initializing master key...");
-    use shared::infrastructure::encryption::MasterKey;
-    use std::path::Path;
-    let master_key = if let Some(path) = &settings.encryption.master_key_path {
-        // Load from file
-        MasterKey::from_file(Path::new(path))
-            .map_err(|e| format!("Failed to load master key from file: {}", e))?
-    } else if let Ok(_) = std::env::var("MASTER_KEY") {
-        // Load from environment (hex-encoded)
-        MasterKey::from_env("MASTER_KEY")
-            .map_err(|e| format!("Failed to load master key from environment: {}", e))?
-    } else {
-        // Generate new master key (first-time setup)
-        info!("Generating new master key...");
-        let key = MasterKey::generate()
-            .map_err(|e| format!("Failed to generate master key: {}", e))?;
-        // Save if path is configured
-        if let Some(path) = &settings.encryption.master_key_path {
-            std::fs::create_dir_all(Path::new(path).parent().unwrap())
-                .map_err(|e| format!("Failed to create master key directory: {}", e))?;
-            key.save_to_file(Path::new(path))
-                .map_err(|e| format!("Failed to save master key: {}", e))?;
-            info!("Generated and saved master key to: {}", path);
-        } else {
-            tracing::warn!("Master key generated but not saved. Set MASTER_KEY_PATH or MASTER_KEY env var.");
-        }
-        key
-    };
-    info!("Master key initialized");
-
-    // Initialize vault (OpenBao/KMS)
+    // Initialize vault (OpenBao/KMS) first - needed for master key storage
     info!("Initializing vault...");
     use shared::config::providers::ProviderConfig;
     use shared::infrastructure::providers::create_kms_provider;
@@ -194,6 +163,91 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let vault = create_kms_provider(&provider_config.kms)
         .map_err(|e| format!("Failed to create KMS provider: {}", e))?;
     info!("Vault initialized");
+
+    // Initialize master key
+    info!("Initializing master key...");
+    use shared::infrastructure::encryption::MasterKey;
+    use std::path::Path;
+    
+    // Try to load master key from OpenBao/Vault first (preferred)
+    let master_key = match MasterKey::from_vault(vault.as_ref()).await {
+        Ok(Some(key)) => {
+            info!("Master key loaded from OpenBao/Vault");
+            key
+        }
+        Ok(None) => {
+            // Master key doesn't exist in vault - try fallback sources
+            info!("Master key not found in OpenBao/Vault, trying fallback sources...");
+            
+            if let Some(path) = &settings.encryption.master_key_path {
+                // Load from file
+                match MasterKey::from_file(Path::new(path)) {
+                    Ok(key) => {
+                        info!("Master key loaded from file (fallback)");
+                        // Try to store in vault for future use
+                        let _ = key.save_to_vault(vault.as_ref()).await;
+                        key
+                    }
+                    Err(_) => {
+                        // Generate new master key
+                        info!("Generating new master key...");
+                        let key = MasterKey::generate()
+                            .map_err(|e| format!("Failed to generate master key: {}", e))?;
+                        
+                        // Try to store in vault first
+                        if let Err(e) = key.save_to_vault(vault.as_ref()).await {
+                            tracing::warn!("Failed to store master key in vault: {}, saving to file", e);
+                            std::fs::create_dir_all(Path::new(path).parent().unwrap())
+                                .map_err(|e| format!("Failed to create master key directory: {}", e))?;
+                            key.save_to_file(Path::new(path))
+                                .map_err(|e| format!("Failed to save master key: {}", e))?;
+                            info!("Generated and saved master key to: {}", path);
+                        } else {
+                            info!("Generated and stored master key in OpenBao/Vault");
+                        }
+                        key
+                    }
+                }
+            } else if let Ok(_) = std::env::var("MASTER_KEY") {
+                // Load from environment (hex-encoded)
+                let key = MasterKey::from_env("MASTER_KEY")
+                    .map_err(|e| format!("Failed to load master key from environment: {}", e))?;
+                info!("Master key loaded from environment (fallback)");
+                // Try to store in vault for future use
+                let _ = key.save_to_vault(vault.as_ref()).await;
+                key
+            } else {
+                // Generate new master key (first-time setup)
+                info!("Generating new master key...");
+                let key = MasterKey::generate()
+                    .map_err(|e| format!("Failed to generate master key: {}", e))?;
+                
+                // Try to store in vault
+                if let Err(e) = key.save_to_vault(vault.as_ref()).await {
+                    tracing::warn!("Failed to store master key in vault: {}", e);
+                    tracing::warn!("Master key generated but not persisted. Set up OpenBao/Vault or MASTER_KEY_PATH/MASTER_KEY env var.");
+                } else {
+                    info!("Generated and stored master key in OpenBao/Vault");
+                }
+                key
+            }
+        }
+        Err(e) => {
+            tracing::warn!("Failed to retrieve master key from OpenBao/Vault: {}, using fallback", e);
+            
+            // Fallback to file or environment
+            if let Some(path) = &settings.encryption.master_key_path {
+                MasterKey::from_file(Path::new(path))
+                    .map_err(|e| format!("Failed to load master key from file: {}", e))?
+            } else if let Ok(_) = std::env::var("MASTER_KEY") {
+                MasterKey::from_env("MASTER_KEY")
+                    .map_err(|e| format!("Failed to load master key from environment: {}", e))?
+            } else {
+                return Err(format!("Cannot load master key. Set up OpenBao/Vault or configure MASTER_KEY_PATH/MASTER_KEY"));
+            }
+        }
+    };
+    info!("Master key initialized");
 
     // Create DEK Manager
     use shared::infrastructure::encryption::DekManager;
@@ -294,10 +348,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Start server
     let addr = SocketAddr::from(([0, 0, 0, 0], settings.server.port));
-    let listener = tokio::net::TcpListener::bind(addr).await?;
+    let listener = tokio::net::TcpListener::bind(addr).await
+        .map_err(|e| format!("Failed to bind to address {}: {}", addr, e))?;
     
     info!("Server listening on {}", addr);
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app).await
+        .map_err(|e| format!("Server error: {}", e))?;
 
     Ok(())
 }

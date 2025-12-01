@@ -70,6 +70,7 @@ pub async fn initialize_setup(
             &request.organization_name,
             &request.organization_slug,
             request.organization_domain.as_deref(),
+            false, // force flag - API handlers should not use force mode
         )
         .await
     {

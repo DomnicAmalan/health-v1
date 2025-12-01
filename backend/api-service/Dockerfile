@@ -1,6 +1,10 @@
 # Multi-stage build for Rust api-service
 FROM rust:1.91-slim as builder
 
+# Build arguments
+ARG BUILD_MODE=release
+ARG SKIP_CHECKS=false
+
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     pkg-config \
@@ -33,12 +37,23 @@ COPY backend/migrations backend/migrations
 # no database connection is needed during build
 ENV RUST_BACKTRACE=1
 
-# Build the release binary
+# Build based on mode and skip checks flag
 WORKDIR /app/backend
-RUN cargo build --release --bin api-service
+RUN if [ "$SKIP_CHECKS" = "true" ]; then \
+        echo "Skipping type checks, building directly in dev mode..."; \
+        RUSTFLAGS="-A warnings" cargo build --${BUILD_MODE} --bin api-service || \
+        (echo "Build failed, trying with release mode..." && cargo build --release --bin api-service); \
+    else \
+        echo "Running full build with checks..."; \
+        cargo build --${BUILD_MODE} --bin api-service; \
+    fi
 
 # Copy the binary to a known location
-RUN cp target/release/api-service /app/api-service
+RUN if [ "$BUILD_MODE" = "dev" ]; then \
+        cp target/debug/api-service /app/api-service; \
+    else \
+        cp target/release/api-service /app/api-service; \
+    fi
 
 # Runtime stage
 FROM debian:trixie-slim

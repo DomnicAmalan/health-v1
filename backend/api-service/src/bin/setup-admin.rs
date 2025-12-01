@@ -205,57 +205,102 @@ async fn main() {
         }
     };
 
-    // Initialize master key
+    // Initialize master key from OpenBao/Vault (preferred) or fallback to file/env
     println!("Initializing master key...");
     use std::path::Path;
-    let master_key = if let Some(path) = &settings.encryption.master_key_path {
-        match MasterKey::from_file(Path::new(path)) {
-            Ok(key) => {
-                println!("✓ Master key loaded from file\n");
-                key
-            }
-            Err(_) => {
-                println!("Master key file not found, generating new key...");
-                let key = MasterKey::generate()
-                    .map_err(|e| {
-                        eprintln!("Failed to generate master key: {}", e);
-                        process::exit(1);
-                    })
-                    .unwrap();
-                
-                if let Some(parent) = Path::new(path).parent() {
-                    fs::create_dir_all(parent).unwrap_or_else(|e| {
-                        eprintln!("Failed to create master key directory: {}", e);
-                        process::exit(1);
-                    });
-                }
-                
-                key.save_to_file(Path::new(path)).unwrap_or_else(|e| {
-                    eprintln!("Failed to save master key: {}", e);
+    
+    // First, try to load from OpenBao/Vault
+    let master_key = match MasterKey::from_vault(vault.as_ref()).await {
+        Ok(Some(key)) => {
+            println!("✓ Master key loaded from OpenBao/Vault\n");
+            key
+        }
+        Ok(None) => {
+            // Master key doesn't exist in vault - generate new one
+            println!("Master key not found in OpenBao/Vault, generating new key...");
+            let key = MasterKey::generate()
+                .map_err(|e| {
+                    eprintln!("Failed to generate master key: {}", e);
                     process::exit(1);
-                });
-                println!("✓ Master key generated and saved\n");
-                key
+                })
+                .unwrap();
+            
+            // Store in vault
+            key.save_to_vault(vault.as_ref()).await.unwrap_or_else(|e| {
+                eprintln!("Failed to store master key in OpenBao/Vault: {}", e);
+                eprintln!("Falling back to file storage...");
+                // Fallback to file if vault storage fails
+                if let Some(path) = &settings.encryption.master_key_path {
+                    if let Some(parent) = Path::new(path).parent() {
+                        let _ = fs::create_dir_all(parent);
+                    }
+                    let _ = key.save_to_file(Path::new(path));
+                }
+            });
+            println!("✓ Master key generated and stored in OpenBao/Vault\n");
+            key
+        }
+        Err(e) => {
+            eprintln!("⚠ Failed to retrieve master key from OpenBao/Vault: {}", e);
+            eprintln!("⚠ Falling back to file/environment variable...");
+            
+            // Fallback to file or environment variable
+            if let Some(path) = &settings.encryption.master_key_path {
+                match MasterKey::from_file(Path::new(path)) {
+                    Ok(key) => {
+                        println!("✓ Master key loaded from file (fallback)\n");
+                        // Try to store in vault for future use
+                        let _ = key.save_to_vault(vault.as_ref()).await;
+                        key
+                    }
+                    Err(_) => {
+                        println!("Master key file not found, generating new key...");
+                        let key = MasterKey::generate()
+                            .map_err(|e| {
+                                eprintln!("Failed to generate master key: {}", e);
+                                process::exit(1);
+                            })
+                            .unwrap();
+                        
+                        if let Some(parent) = Path::new(path).parent() {
+                            fs::create_dir_all(parent).unwrap_or_else(|e| {
+                                eprintln!("Failed to create master key directory: {}", e);
+                                process::exit(1);
+                            });
+                        }
+                        
+                        key.save_to_file(Path::new(path)).unwrap_or_else(|e| {
+                            eprintln!("Failed to save master key: {}", e);
+                            process::exit(1);
+                        });
+                        // Try to store in vault for future use
+                        let _ = key.save_to_vault(vault.as_ref()).await;
+                        println!("✓ Master key generated and saved to file (fallback)\n");
+                        key
+                    }
+                }
+            } else if let Ok(_) = std::env::var("MASTER_KEY") {
+                match MasterKey::from_env("MASTER_KEY") {
+                    Ok(key) => {
+                        println!("✓ Master key loaded from environment (fallback)\n");
+                        // Try to store in vault for future use
+                        let _ = key.save_to_vault(vault.as_ref()).await;
+                        key
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to load master key from environment: {}", e);
+                        process::exit(1);
+                    }
+                }
+            } else {
+                println!("⚠ No master key found. Generating temporary key...");
+                println!("⚠ WARNING: This key will not be persisted. Set up OpenBao/Vault or MASTER_KEY_PATH/MASTER_KEY for production!");
+                MasterKey::generate().unwrap_or_else(|e| {
+                    eprintln!("Failed to generate master key: {}", e);
+                    process::exit(1);
+                })
             }
         }
-    } else if let Ok(_) = std::env::var("MASTER_KEY") {
-        match MasterKey::from_env("MASTER_KEY") {
-            Ok(key) => {
-                println!("✓ Master key loaded from environment\n");
-                key
-            }
-            Err(e) => {
-                eprintln!("Failed to load master key from environment: {}", e);
-                process::exit(1);
-            }
-        }
-    } else {
-        println!("⚠ No master key path or MASTER_KEY env var set. Generating temporary key...");
-        println!("⚠ WARNING: This key will not be persisted. Set MASTER_KEY_PATH or MASTER_KEY for production!");
-        MasterKey::generate().unwrap_or_else(|e| {
-            eprintln!("Failed to generate master key: {}", e);
-            process::exit(1);
-        })
     };
 
     // Test vault connectivity by creating DEK manager
@@ -371,7 +416,7 @@ async fn main() {
     );
 
     let org_id = match setup_org_use_case
-        .execute(&org_name_value, &org_slug_value, org_domain.as_deref())
+        .execute(&org_name_value, &org_slug_value, org_domain.as_deref(), force)
         .await
     {
         Ok(id) => {

@@ -4,7 +4,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
@@ -21,7 +20,7 @@ import {
 } from "@health-v1/ui-components";
 import { Plus, Search, Shield, Edit, Trash2 } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../lib/permissions";
-import { listRoles, createRole, deleteRole, type Role } from "../lib/api/roles";
+import { listRoles, deleteRole } from "../lib/api/roles";
 import { useState } from "react";
 
 export function RolesPage() {
@@ -38,12 +37,6 @@ export function RolesPage() {
     ? rolesResponse.data 
     : rolesResponse?.data?.roles || [];
 
-  const createMutation = useMutation({
-    mutationFn: createRole,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: deleteRole,
