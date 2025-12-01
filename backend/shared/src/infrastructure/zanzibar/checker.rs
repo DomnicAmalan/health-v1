@@ -39,12 +39,19 @@ impl PermissionChecker {
 
     /// Check if user has relation on object
     /// Supports multiple inheritance paths and UNION of permissions:
-    /// 1. Direct user permissions: user#relation@resource
-    /// 2. Role inheritance: user#has_role@role → role#relation@resource
-    /// 3. Group membership: user#member@group → group#relation@resource
-    /// 4. Group role inheritance: user#member@group → group#has_role@role → role#relation@resource
+    /// 1. Wildcard permission: user#*@* (grants all permissions - checked first)
+    /// 2. Direct user permissions: user#relation@resource
+    /// 3. Role inheritance: user#has_role@role → role#relation@resource
+    /// 4. Group membership: user#member@group → group#relation@resource
+    /// 5. Group role inheritance: user#member@group → group#has_role@role → role#relation@resource
     /// Returns true if ANY path grants permission (union, not override)
     pub async fn check(&self, user: &str, relation: &str, object: &str) -> AppResult<bool> {
+        // First, check for wildcard permission (super admin bypass)
+        // This must be checked first to ensure super admins have access to everything
+        if self.store.check(user, "*", "*").await? {
+            return Ok(true);
+        }
+
         // Use graph-based checker if available and enabled
         if self.should_use_graph() {
             if let Some(cache) = &self.graph_cache {
