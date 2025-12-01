@@ -22,6 +22,7 @@ export * from "./components/stack";
 export * from "./components/separator";
 export * from "./components/select";
 export * from "./components/table";
+export * from "./components/tabs";
 export * from "./components/tooltip";
 export * from "./components/hover-help";
 export * from "./components/help-button";

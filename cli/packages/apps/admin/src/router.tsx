@@ -8,6 +8,7 @@ import { ServicesPage } from "./routes/services";
 import { UsersPage } from "./routes/users";
 import { RolesPage } from "./routes/roles";
 import { GroupsPage } from "./routes/groups";
+import { UiEntitiesPage } from "./routes/ui-entities";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -63,6 +64,13 @@ const groupsRoute = createRoute({
   component: GroupsPage,
 });
 
+// UI Entities route
+const uiEntitiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/ui-entities",
+  component: UiEntitiesPage,
+});
+
 // Services route
 const servicesRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -79,6 +87,7 @@ const routeTree = rootRoute.addChildren([
   permissionsRoute,
   rolesRoute,
   groupsRoute,
+  uiEntitiesRoute,
   servicesRoute,
 ]);
 
