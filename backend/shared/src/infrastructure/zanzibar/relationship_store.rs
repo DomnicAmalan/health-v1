@@ -4,6 +4,7 @@ use crate::shared::AppResult;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use serde_json::Value;
+use tracing;
 
 pub struct RelationshipStore {
     repository: Box<dyn RelationshipRepository>,
@@ -15,13 +16,34 @@ impl RelationshipStore {
     }
 
     pub async fn add(&self, user: &str, relation: &str, object: &str) -> AppResult<()> {
+        tracing::debug!("Creating relationship: {} → {} → {}", user, relation, object);
         let relationship = Relationship::new(
             user.to_string(),
             relation.to_string(),
             object.to_string(),
         );
-        self.repository.create(relationship).await?;
-        Ok(())
+        match self.repository.create(relationship).await {
+            Ok(created) => {
+                tracing::debug!(
+                    "Successfully created relationship: {} → {} → {} (id: {})",
+                    created.user,
+                    created.relation,
+                    created.object,
+                    created.id
+                );
+                Ok(())
+            }
+            Err(e) => {
+                tracing::error!(
+                    "Failed to create relationship: {} → {} → {}: {}",
+                    user,
+                    relation,
+                    object,
+                    e
+                );
+                Err(e)
+            }
+        }
     }
     
     /// Add relationship with optional expiration

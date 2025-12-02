@@ -32,3 +32,6 @@ chrono.workspace = true
 # Password hashing
 bcrypt.workspace = true
 
+# Logging
+tracing.workspace = true
+

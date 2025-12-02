@@ -27,8 +27,11 @@ async fn main() -> Result<(), String> {
             format!("Failed to load configuration: {}", e)
         })?;
 
-    // Initialize logger with settings
-    shared::infrastructure::logging::init_from_settings(&settings.logging);
+    // Initialize logger with settings and deployment config (single point of control for dev mode)
+    shared::infrastructure::logging::init_from_settings_with_deployment(
+        &settings.logging,
+        &settings.deployment,
+    );
 
     info!("Starting api-service on {}:{}", settings.server.host, settings.server.port);
 

@@ -2,9 +2,9 @@ use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 // Note: AppState is defined in api-service, but admin-service handlers are used by api-service
 // So we import from shared which has the generic type
-use shared::AppState;
 use std::sync::Arc;
 use uuid::Uuid;
+use tracing;
 
 // Type aliases for convenience - these match the concrete types used in api-service
 type ConcreteAppState = shared::AppState<
@@ -141,6 +141,9 @@ pub async fn initialize_setup(
     let user_str = format!("user:{}", admin_user.id);
     let org_str = format!("organization:{}", org_id);
     
+    // Log relationship creation (logger config controls visibility based on dev mode)
+    tracing::debug!("Creating Zanzibar relationships for super admin user {}", admin_user.id);
+    
     // Organization ownership and membership
     if let Err(e) = state.relationship_store.add(&user_str, "owner", &org_str).await {
         e.log_with_operation(location, "initialize_setup");
@@ -152,6 +155,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → owner → {}", user_str, org_str);
     
     if let Err(e) = state.relationship_store.add(&user_str, "member", &org_str).await {
         e.log_with_operation(location, "initialize_setup");
@@ -163,6 +167,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → member → {}", user_str, org_str);
     
     // Admin role relationship
     if let Err(e) = state.relationship_store.add(&user_str, "has_role", "role:admin").await {
@@ -175,6 +180,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → has_role → role:admin", user_str);
     
     // Reverse: organization admin
     if let Err(e) = state.relationship_store.add(&org_str, "admin", &user_str).await {
@@ -187,6 +193,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → admin → {}", org_str, user_str);
 
     // App access relationships - admin gets access to all apps
     if let Err(e) = state.relationship_store.add(&user_str, "can_access", "app:admin-ui").await {
@@ -199,6 +206,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → can_access → app:admin-ui", user_str);
     
     if let Err(e) = state.relationship_store.add(&user_str, "can_access", "app:client-app").await {
         e.log_with_operation(location, "initialize_setup");
@@ -210,6 +218,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → can_access → app:client-app", user_str);
     
     if let Err(e) = state.relationship_store.add(&user_str, "can_access", "app:mobile").await {
         e.log_with_operation(location, "initialize_setup");
@@ -221,8 +230,11 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: {} → can_access → app:mobile", user_str);
 
     // Create role-to-app relationships for all roles
+    tracing::debug!("Creating role-to-app access relationships");
+    
     // Admin role
     if let Err(e) = state.relationship_store.add("role:admin", "can_access", "app:admin-ui").await {
         e.log_with_operation(location, "initialize_setup");
@@ -234,6 +246,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:admin → can_access → app:admin-ui");
     
     if let Err(e) = state.relationship_store.add("role:admin", "can_access", "app:client-app").await {
         e.log_with_operation(location, "initialize_setup");
@@ -245,6 +258,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:admin → can_access → app:client-app");
     
     if let Err(e) = state.relationship_store.add("role:admin", "can_access", "app:mobile").await {
         e.log_with_operation(location, "initialize_setup");
@@ -256,6 +270,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:admin → can_access → app:mobile");
 
     // Doctor role
     if let Err(e) = state.relationship_store.add("role:doctor", "can_access", "app:client-app").await {
@@ -268,6 +283,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:doctor → can_access → app:client-app");
     
     if let Err(e) = state.relationship_store.add("role:doctor", "can_access", "app:mobile").await {
         e.log_with_operation(location, "initialize_setup");
@@ -279,6 +295,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:doctor → can_access → app:mobile");
 
     // Nurse role
     if let Err(e) = state.relationship_store.add("role:nurse", "can_access", "app:client-app").await {
@@ -291,6 +308,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:nurse → can_access → app:client-app");
     
     if let Err(e) = state.relationship_store.add("role:nurse", "can_access", "app:mobile").await {
         e.log_with_operation(location, "initialize_setup");
@@ -302,6 +320,7 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:nurse → can_access → app:mobile");
 
     // Receptionist role
     if let Err(e) = state.relationship_store.add("role:receptionist", "can_access", "app:client-app").await {
@@ -314,15 +333,65 @@ pub async fn initialize_setup(
         )
             .into_response();
     }
+    tracing::debug!("✓ Created relationship: role:receptionist → can_access → app:client-app");
 
     // Admin role assignment is already done via Zanzibar relationship above
     // No need to insert into user_roles table anymore
+
+    // Verify relationships were created
+    tracing::info!("Verifying relationships for super admin user {}", admin_user.id);
+    let mut verified_count = 0;
+    let mut failed_verifications = Vec::new();
+    
+    let relationships_to_verify = vec![
+        (user_str.as_str(), "owner", org_str.as_str()),
+        (user_str.as_str(), "member", org_str.as_str()),
+        (user_str.as_str(), "has_role", "role:admin"),
+        (user_str.as_str(), "can_access", "app:admin-ui"),
+        (user_str.as_str(), "can_access", "app:client-app"),
+        (user_str.as_str(), "can_access", "app:mobile"),
+    ];
+    
+    let total_relationships = relationships_to_verify.len();
+    for (user, relation, object) in relationships_to_verify {
+        match state.relationship_store.check(user, relation, object).await {
+            Ok(true) => {
+                verified_count += 1;
+                tracing::debug!("✓ Verified relationship: {} → {} → {}", user, relation, object);
+            }
+            Ok(false) => {
+                failed_verifications.push(format!("{} → {} → {}", user, relation, object));
+                tracing::warn!("✗ Failed to verify relationship: {} → {} → {}", user, relation, object);
+            }
+            Err(e) => {
+                failed_verifications.push(format!("{} → {} → {} (error: {})", user, relation, object, e));
+                tracing::warn!("✗ Error verifying relationship: {} → {} → {}: {}", user, relation, object, e);
+            }
+        }
+    }
+    
+    tracing::info!(
+        "Relationship verification complete: {}/{} relationships verified for user {}",
+        verified_count,
+        total_relationships,
+        admin_user.id
+    );
+    
+    if !failed_verifications.is_empty() {
+        tracing::warn!(
+            "Some relationships failed verification: {:?}",
+            failed_verifications
+        );
+    }
 
     (
         StatusCode::OK,
         Json(SetupResponse {
             success: true,
-            message: "Setup completed successfully".to_string(),
+            message: format!(
+                "Setup completed successfully. {} relationships created and verified.",
+                verified_count
+            ),
             organization_id: org_id,
             admin_user_id: admin_user.id,
         }),
