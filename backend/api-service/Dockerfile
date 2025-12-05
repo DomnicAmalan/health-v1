@@ -19,6 +19,9 @@ WORKDIR /app
 # Copy workspace Cargo.toml
 COPY backend/Cargo.toml backend/
 
+# Copy Cargo configuration for low-memory builds
+COPY backend/.cargo backend/.cargo
+
 # Copy all crate Cargo.toml files
 COPY backend/shared/Cargo.toml backend/shared/
 COPY backend/authz-core/Cargo.toml backend/authz-core/
@@ -41,15 +44,18 @@ ENV SQLX_OFFLINE=false
 # Build based on mode and skip checks flag
 # In dev mode, we skip building here - cargo run will build on first start
 WORKDIR /app/backend
+# Limit parallel jobs to reduce memory usage during compilation
+ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN if [ "$BUILD_MODE" = "dev" ]; then \
         echo "Dev mode: Skipping build, will use cargo run directly"; \
     elif [ "$SKIP_CHECKS" = "true" ]; then \
-        echo "Skipping type checks, building in release mode..."; \
-        RUSTFLAGS="-C link-arg=-s -A warnings" cargo build --release --bin api-service; \
+        echo "Skipping type checks, building in release mode with limited parallelism..."; \
+        RUSTFLAGS="-C link-arg=-s -A warnings" cargo build --release --bin api-service -j${CARGO_BUILD_JOBS}; \
         cp target/release/api-service /app/api-service; \
     else \
-        echo "Running full build with checks..."; \
-        RUSTFLAGS="-C link-arg=-s" cargo build --release --bin api-service; \
+        echo "Running full build with checks and limited parallelism..."; \
+        RUSTFLAGS="-C link-arg=-s" cargo build --release --bin api-service -j${CARGO_BUILD_JOBS}; \
         cp target/release/api-service /app/api-service; \
     fi
 
@@ -72,6 +78,7 @@ WORKDIR /app/backend
 # Note: docker-compose.dev.yml mounts these as volumes for hot reload
 # But we need them in the image as fallback if volumes aren't mounted
 COPY backend/Cargo.toml ./
+COPY backend/.cargo ./.cargo
 COPY backend/shared/Cargo.toml ./shared/
 COPY backend/authz-core/Cargo.toml ./authz-core/
 COPY backend/admin-service/Cargo.toml ./admin-service/
@@ -79,6 +86,10 @@ COPY backend/api-service/Cargo.toml ./api-service/
 
 # Copy migrations (always needed, even in dev mode)
 COPY backend/migrations ./migrations
+
+# Set environment variables for low-memory builds
+ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 # Expose port
 EXPOSE 8080

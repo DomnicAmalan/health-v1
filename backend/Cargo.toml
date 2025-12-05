@@ -80,6 +80,11 @@ petgraph = "0.8"
 # LRU Cache
 lru = "0.12"
 
+[profile.dev]
+# Reduce memory usage during development builds
+incremental = true
+codegen-units = 4  # More units = less memory per unit, faster compilation
+
 [profile.release]
 opt-level = "z"  # Optimize for size
 lto = true        # Link-time optimization

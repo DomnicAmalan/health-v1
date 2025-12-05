@@ -59,6 +59,7 @@ services:
       args:
         - BUILD_MODE=${BUILD_MODE:-release}
         - SKIP_CHECKS=${SKIP_CHECKS:-false}
+        - CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
       # Uncomment to skip build and use existing image:
       # target: builder
     container_name: health-api-service
@@ -114,6 +115,7 @@ services:
       ENABLE_LOCALSTACK: ${ENABLE_LOCALSTACK:-false}
       ENABLE_NATS: ${ENABLE_NATS:-false}
       ENABLE_KAFKA: ${ENABLE_KAFKA:-false}
+      ENABLE_SONARQUBE: ${ENABLE_SONARQUBE:-false}
       
       # Service Connection URLs (internal Docker network)
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT:-http://localstack:4566}
@@ -330,6 +332,44 @@ services:
     profiles:
       - kafka
 
+  # SonarQube - Code Quality Analysis
+  sonarqube:
+    image: sonarqube:${SONARQUBE_VERSION:-community}
+    container_name: health-sonarqube
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/${SONARQUBE_DB:-sonar}
+      SONAR_JDBC_USERNAME: ${POSTGRES_USER:-auth_user}
+      SONAR_JDBC_PASSWORD: ${POSTGRES_PASSWORD:-auth_password}
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: ${SONAR_ES_BOOTSTRAP_CHECKS_DISABLE:-true}
+      SONAR_CE_JAVAOPTS: ${SONAR_CE_JAVAOPTS:--Xmx512m -Xms128m}
+      SONAR_WEB_JAVAOPTS: ${SONAR_WEB_JAVAOPTS:--Xmx512m -Xms128m}
+    ports:
+      - "${SONARQUBE_PORT:-9000}:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - health-network
+    restart: unless-stopped
+    profiles:
+      - sonarqube
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 512m
+
 volumes:
   postgres_data:
     driver: local
@@ -340,6 +380,12 @@ volumes:
   localstack_data:
     driver: local
   kafka_data:
+    driver: local
+  sonarqube_data:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  sonarqube_logs:
     driver: local
 
 networks:

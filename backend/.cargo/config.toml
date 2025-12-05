@@ -1,0 +1,9 @@
+# Cargo configuration for low-memory systems
+[build]
+# Limit parallel jobs to reduce memory usage
+jobs = 2
+
+[net]
+# Use git CLI for fetching to reduce memory usage
+git-fetch-with-cli = true
+

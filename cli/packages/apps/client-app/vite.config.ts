@@ -19,12 +19,27 @@ export default defineConfig({
     outDir: process.env.VITE_BUILD_OUT_DIR || resolve(__dirname, "dist"),
     sourcemap: process.env.VITE_SOURCEMAP === "true",
     minify: process.env.VITE_MINIFY !== "false" ? "esbuild" : false,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor libraries
+          "react-vendor": ["react", "react-dom", "@tanstack/react-router"],
+          "query-vendor": ["@tanstack/react-query"],
+          "ui-vendor": ["@radix-ui/react-avatar", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+          // Shared libraries
+          "shared": ["@health-v1/shared"],
+        },
+      },
+    },
+    // Enable tree shaking
+    treeshake: true,
   },
   server: {
     port: Number(process.env.VITE_PORT) || 5173,
     host: process.env.VITE_HOST || "localhost",
     strictPort: process.env.VITE_STRICT_PORT !== "false",
-    open: process.env.VITE_OPEN !== "false",
+    open: process.env.VITE_OPEN === "true",
   },
   clearScreen: false,
   envPrefix: ["VITE_", "TAURI_"],

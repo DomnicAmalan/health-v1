@@ -186,3 +186,8 @@ cli/packages/apps/*/venv/
 # ============================================
 **/src-tauri/target/release/bundle/
 **/src-tauri/target/debug/bundle/
+
+# SonarQube
+.sonar/
+.scannerwork/
+sonar-project.properties.local

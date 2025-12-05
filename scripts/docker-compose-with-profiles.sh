@@ -25,6 +25,10 @@ if [ -f .env ]; then
     if grep -qiE "^[[:space:]]*ENABLE_KAFKA[[:space:]]*=[[:space:]]*true" .env 2>/dev/null; then
         PROFILES="$PROFILES kafka"
     fi
+    
+    if grep -qiE "^[[:space:]]*ENABLE_SONARQUBE[[:space:]]*=[[:space:]]*true" .env 2>/dev/null; then
+        PROFILES="$PROFILES sonarqube"
+    fi
 fi
 
 # Build --profile flags

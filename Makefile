@@ -1,4 +1,5 @@
-.PHONY: help build build-dev up-build-all up-build-dev down down-dev restart restart-dev logs logs-dev ps ps-dev
+.PHONY: help build build-dev up-build-all up-build-dev down down-dev restart restart-dev logs logs-dev ps ps-dev \
+	sonar-up sonar-down sonar-logs sonar-status sonar-scan-backend sonar-scan-admin-ui sonar-scan-client-app sonar-scan-all
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -44,3 +45,58 @@ ps: ## Show running containers
 
 ps-dev: ## Show running containers in dev mode
 	docker-compose -f docker-compose.dev.yml ps
+
+# SonarQube targets
+sonar-up: ## Start SonarQube service (or set ENABLE_SONARQUBE=true in .env)
+	@if [ -f .env ] && grep -qiE "^[[:space:]]*ENABLE_SONARQUBE[[:space:]]*=[[:space:]]*true" .env 2>/dev/null; then \
+		echo "SonarQube is enabled in .env, starting with docker-compose..."; \
+		docker-compose --profile sonarqube up -d sonarqube; \
+	else \
+		echo "Starting SonarQube directly..."; \
+		echo "To enable automatically, add ENABLE_SONARQUBE=true to your .env file"; \
+		docker-compose --profile sonarqube up -d sonarqube; \
+	fi
+	@echo "SonarQube starting... Access at http://localhost:$${SONARQUBE_PORT:-9000}"
+	@echo "Default credentials: admin/admin (change on first login)"
+
+sonar-down: ## Stop SonarQube service
+	docker-compose --profile sonarqube down sonarqube
+
+sonar-logs: ## Show SonarQube logs
+	docker-compose --profile sonarqube logs -f sonarqube
+
+sonar-status: ## Check SonarQube status
+	@echo "Checking SonarQube status..."
+	@curl -s http://localhost:$${SONARQUBE_PORT:-9000}/api/system/status || echo "SonarQube is not running or not accessible"
+
+sonar-scan-backend: ## Scan backend (Rust) code with SonarQube
+	@if [ -z "$$SONAR_TOKEN" ]; then \
+		echo "Error: SONAR_TOKEN environment variable is not set"; \
+		echo "Get your token from SonarQube: http://localhost:$${SONARQUBE_PORT:-9000}"; \
+		exit 1; \
+	fi
+	@./scripts/sonar-scan.sh backend
+
+sonar-scan-admin-ui: ## Scan admin UI (TypeScript/React) code with SonarQube
+	@if [ -z "$$SONAR_TOKEN" ]; then \
+		echo "Error: SONAR_TOKEN environment variable is not set"; \
+		echo "Get your token from SonarQube: http://localhost:$${SONARQUBE_PORT:-9000}"; \
+		exit 1; \
+	fi
+	@./scripts/sonar-scan.sh admin-ui
+
+sonar-scan-client-app: ## Scan client app (TypeScript/React) code with SonarQube
+	@if [ -z "$$SONAR_TOKEN" ]; then \
+		echo "Error: SONAR_TOKEN environment variable is not set"; \
+		echo "Get your token from SonarQube: http://localhost:$${SONARQUBE_PORT:-9000}"; \
+		exit 1; \
+	fi
+	@./scripts/sonar-scan.sh client-app
+
+sonar-scan-all: ## Scan all projects (backend, admin-ui, client-app) with SonarQube
+	@if [ -z "$$SONAR_TOKEN" ]; then \
+		echo "Error: SONAR_TOKEN environment variable is not set"; \
+		echo "Get your token from SonarQube: http://localhost:$${SONARQUBE_PORT:-9000}"; \
+		exit 1; \
+	fi
+	@./scripts/sonar-scan.sh all
