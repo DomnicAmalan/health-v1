@@ -10,14 +10,41 @@ This project includes SonarQube configuration for code quality analysis across a
 
 ## Setup
 
-### 1. Start SonarQube Server
+### 1. SonarQube Database
 
+SonarQube uses its **own separate PostgreSQL database** (not shared with the main application). The database is automatically created when you start the `postgres-sonar` service.
+
+**Database Configuration:**
+- **Container**: `health-postgres-sonar`
+- **Port**: `5444` (default, configurable via `SONARQUBE_DB_PORT`)
+- **Database**: `sonar` (default, configurable via `SONARQUBE_DB`)
+- **User**: `sonar` (default, configurable via `SONARQUBE_DB_USER`)
+- **Password**: `sonar_password` (default, configurable via `SONARQUBE_DB_PASSWORD`)
+
+### 2. Start SonarQube Server
+
+**Option A: Using Make (Recommended)**
+```bash
+make sonar-up
+```
+
+**Option B: Using Docker Compose**
 ```bash
 # Using Docker Compose with sonarqube profile
-docker-compose --profile sonarqube up -d sonarqube
+# This will start both postgres-sonar and sonarqube
+docker-compose --profile sonarqube up -d postgres-sonar sonarqube
 
 # Or using dev compose
-docker-compose -f docker-compose.dev.yml --profile sonarqube up -d sonarqube
+docker-compose -f docker-compose.dev.yml --profile sonarqube up -d postgres-sonar sonarqube
+```
+
+**Option C: Enable in .env (Auto-start)**
+```bash
+# Add to .env file
+ENABLE_SONARQUBE=true
+
+# Then start all services
+make up-build-all
 ```
 
 SonarQube will be available at: http://localhost:9000
@@ -26,7 +53,7 @@ Default credentials:
 - Username: `admin`
 - Password: `admin` (change on first login)
 
-### 2. Configure Environment Variables
+### 3. Configure Environment Variables
 
 Add to your `.env` file:
 
@@ -35,12 +62,17 @@ Add to your `.env` file:
 SONARQUBE_PORT=9000
 SONARQUBE_VERSION=community
 SONARQUBE_DB=sonar
+# SonarQube Database (Separate PostgreSQL instance)
+SONARQUBE_DB_USER=sonar
+SONARQUBE_DB_PASSWORD=sonar_password
+SONARQUBE_DB_PORT=5444
+# SonarQube Server
 SONAR_HOST_URL=http://localhost:9000
 SONAR_TOKEN=your-sonarqube-token-here
 SONAR_ORGANIZATION=your-org  # Optional, for SonarCloud
 ```
 
-### 3. Generate SonarQube Token
+### 4. Generate SonarQube Token
 
 1. Log in to SonarQube (http://localhost:9000)
 2. Go to: **My Account** → **Security** → **Generate Token**
@@ -64,32 +96,56 @@ SONAR_ORGANIZATION=your-org  # Optional, for SonarCloud
 
 #### Backend (Rust)
 
+**Note:** For self-hosted SonarQube, the project will be created automatically on first scan. You don't need `sonar.organization` (that's only for SonarCloud).
+
 ```bash
 cd backend
 sonar-scanner \
   -Dsonar.projectKey=health-v1-backend \
+  -Dsonar.sources=. \
   -Dsonar.host.url=$SONAR_HOST_URL \
-  -Dsonar.login=$SONAR_TOKEN
+  -Dsonar.token=$SONAR_TOKEN
 ```
+
+**If you get an error about `sonar.organization` being required:**
+- Make sure you're using `http://localhost:9000` (not `https://`)
+- The project will be auto-created on first scan
+- Do NOT set `sonar.organization` for self-hosted SonarQube
 
 #### Admin UI (TypeScript/React)
 
+**Using npm Scanner (Recommended for TypeScript/React projects):**
+
+First, install the npm scanner:
+```bash
+npm install -g @sonar/scan
+```
+
+Then run the scan:
 ```bash
 cd cli/packages/apps/admin
-sonar-scanner \
+sonar \
   -Dsonar.projectKey=health-v1-admin-ui \
   -Dsonar.host.url=$SONAR_HOST_URL \
-  -Dsonar.login=$SONAR_TOKEN
+  -Dsonar.token=$SONAR_TOKEN
 ```
 
 #### Client App (TypeScript/React)
 
+**Using npm Scanner (Recommended for TypeScript/React projects):**
+
+First, install the npm scanner:
+```bash
+npm install -g @sonar/scan
+```
+
+Then run the scan:
 ```bash
 cd cli/packages/apps/client-app
-sonar-scanner \
-  -Dsonar.projectKey=health-v1-client-app \
+sonar \
+  -Dsonar.projectKey=health-v1-client-ui \
   -Dsonar.host.url=$SONAR_HOST_URL \
-  -Dsonar.login=$SONAR_TOKEN
+  -Dsonar.token=$SONAR_TOKEN
 ```
 
 ### Using Docker (if sonar-scanner not installed)
@@ -130,6 +186,9 @@ All SonarQube settings are environment-based:
 - `SONARQUBE_PORT`: SonarQube web port (default: 9000)
 - `SONARQUBE_VERSION`: SonarQube image version (default: community)
 - `SONARQUBE_DB`: Database name for SonarQube (default: sonar)
+- `SONARQUBE_DB_USER`: PostgreSQL user for SonarQube database (default: sonar)
+- `SONARQUBE_DB_PASSWORD`: PostgreSQL password for SonarQube database (default: sonar_password)
+- `SONARQUBE_DB_PORT`: External port for SonarQube PostgreSQL (default: 5444)
 
 ## Memory Optimization
 

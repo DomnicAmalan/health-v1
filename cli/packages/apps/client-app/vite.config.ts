@@ -40,6 +40,19 @@ export default defineConfig({
     host: process.env.VITE_HOST || "localhost",
     strictPort: process.env.VITE_STRICT_PORT !== "false",
     open: process.env.VITE_OPEN === "true",
+    // Reduce memory usage in dev mode
+    hmr: {
+      overlay: false, // Disable error overlay to save memory
+    },
+  },
+  // Optimize dependencies to reduce memory usage
+  optimizeDeps: {
+    entries: ["src/main.tsx"],
+    include: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-query"],
+    exclude: ["@tanstack/react-router-devtools"],
+    esbuildOptions: {
+      target: "es2020",
+    },
   },
   clearScreen: false,
   envPrefix: ["VITE_", "TAURI_"],

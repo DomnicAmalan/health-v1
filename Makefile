@@ -47,20 +47,21 @@ ps-dev: ## Show running containers in dev mode
 	docker-compose -f docker-compose.dev.yml ps
 
 # SonarQube targets
-sonar-up: ## Start SonarQube service (or set ENABLE_SONARQUBE=true in .env)
+sonar-up: ## Start SonarQube service with separate database (or set ENABLE_SONARQUBE=true in .env)
 	@if [ -f .env ] && grep -qiE "^[[:space:]]*ENABLE_SONARQUBE[[:space:]]*=[[:space:]]*true" .env 2>/dev/null; then \
 		echo "SonarQube is enabled in .env, starting with docker-compose..."; \
-		docker-compose --profile sonarqube up -d sonarqube; \
+		docker-compose --profile sonarqube up -d postgres-sonar sonarqube; \
 	else \
-		echo "Starting SonarQube directly..."; \
+		echo "Starting SonarQube with separate database..."; \
 		echo "To enable automatically, add ENABLE_SONARQUBE=true to your .env file"; \
-		docker-compose --profile sonarqube up -d sonarqube; \
+		docker-compose --profile sonarqube up -d postgres-sonar sonarqube; \
 	fi
 	@echo "SonarQube starting... Access at http://localhost:$${SONARQUBE_PORT:-9000}"
 	@echo "Default credentials: admin/admin (change on first login)"
+	@echo "SonarQube uses its own PostgreSQL database (postgres-sonar) on port $${SONARQUBE_DB_PORT:-5444}"
 
-sonar-down: ## Stop SonarQube service
-	docker-compose --profile sonarqube down sonarqube
+sonar-down: ## Stop SonarQube service and its database
+	docker-compose --profile sonarqube down sonarqube postgres-sonar
 
 sonar-logs: ## Show SonarQube logs
 	docker-compose --profile sonarqube logs -f sonarqube

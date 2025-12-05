@@ -21,8 +21,9 @@ EXPOSE 5174
 # Set working directory to admin app
 WORKDIR /app/packages/apps/admin
 
-# Start Vite dev server
+# Start Vite dev server with memory limits
 # Source code is mounted as volume in docker-compose.dev.yml
+# NODE_OPTIONS is set via environment variables for memory limits
 CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
 
 # Dependencies stage (for production builds)

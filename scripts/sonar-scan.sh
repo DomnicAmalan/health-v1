@@ -52,13 +52,21 @@ scan_backend() {
     
     export SONAR_HOST_URL
     export SONAR_TOKEN
-    [ -n "$SONAR_ORGANIZATION" ] && export SONAR_ORGANIZATION
     
+    # Check if token is set
+    if [ -z "$SONAR_TOKEN" ]; then
+        echo -e "${RED}Error: SONAR_TOKEN environment variable is not set${NC}"
+        echo "  Set it with: export SONAR_TOKEN=your-token"
+        return 1
+    fi
+    
+    # For self-hosted SonarQube, explicitly set host URL and token
+    # Note: Rust support requires SonarQube 2025 Release 3+ and Clippy installed
     sonar-scanner \
         -Dsonar.projectKey=health-v1-backend \
-        -Dsonar.host.url="$SONAR_HOST_URL" \
-        ${SONAR_TOKEN:+-Dsonar.login="$SONAR_TOKEN"} \
-        ${SONAR_ORGANIZATION:+-Dsonar.organization="$SONAR_ORGANIZATION"}
+        -Dsonar.sources=. \
+        -Dsonar.host.url="${SONAR_HOST_URL:-http://localhost:9000}" \
+        -Dsonar.token="$SONAR_TOKEN"
     
     cd ..
     echo -e "${GREEN}Backend scan completed${NC}"
@@ -73,10 +81,11 @@ scan_admin_ui() {
         return 1
     fi
     
-    # Check if sonar-scanner is available
-    if ! command -v sonar-scanner &> /dev/null; then
-        echo -e "${YELLOW}Warning: sonar-scanner not found. Install it or use Docker:${NC}"
-        echo "  docker run --rm -v \$(pwd):/usr/src sonarsource/sonar-scanner-cli"
+    # Check if npm sonar scanner is available
+    if ! command -v sonar &> /dev/null; then
+        echo -e "${YELLOW}Warning: @sonar/scan not found. Installing...${NC}"
+        echo "  Run: npm install -g @sonar/scan"
+        echo "  Or use Docker: docker run --rm -v \$(pwd):/usr/src sonarsource/sonar-scanner-cli"
         return 1
     fi
     
@@ -84,10 +93,11 @@ scan_admin_ui() {
     export SONAR_TOKEN
     [ -n "$SONAR_ORGANIZATION" ] && export SONAR_ORGANIZATION
     
-    sonar-scanner \
+    # Use npm sonar scanner for TypeScript/React projects
+    sonar \
         -Dsonar.projectKey=health-v1-admin-ui \
         -Dsonar.host.url="$SONAR_HOST_URL" \
-        ${SONAR_TOKEN:+-Dsonar.login="$SONAR_TOKEN"} \
+        ${SONAR_TOKEN:+-Dsonar.token="$SONAR_TOKEN"} \
         ${SONAR_ORGANIZATION:+-Dsonar.organization="$SONAR_ORGANIZATION"}
     
     cd ../../..
@@ -103,10 +113,11 @@ scan_client_app() {
         return 1
     fi
     
-    # Check if sonar-scanner is available
-    if ! command -v sonar-scanner &> /dev/null; then
-        echo -e "${YELLOW}Warning: sonar-scanner not found. Install it or use Docker:${NC}"
-        echo "  docker run --rm -v \$(pwd):/usr/src sonarsource/sonar-scanner-cli"
+    # Check if npm sonar scanner is available
+    if ! command -v sonar &> /dev/null; then
+        echo -e "${YELLOW}Warning: @sonar/scan not found. Installing...${NC}"
+        echo "  Run: npm install -g @sonar/scan"
+        echo "  Or use Docker: docker run --rm -v \$(pwd):/usr/src sonarsource/sonar-scanner-cli"
         return 1
     fi
     
@@ -114,10 +125,11 @@ scan_client_app() {
     export SONAR_TOKEN
     [ -n "$SONAR_ORGANIZATION" ] && export SONAR_ORGANIZATION
     
-    sonar-scanner \
-        -Dsonar.projectKey=health-v1-client-app \
+    # Use npm sonar scanner for TypeScript/React projects
+    sonar \
+        -Dsonar.projectKey=health-v1-client-ui \
         -Dsonar.host.url="$SONAR_HOST_URL" \
-        ${SONAR_TOKEN:+-Dsonar.login="$SONAR_TOKEN"} \
+        ${SONAR_TOKEN:+-Dsonar.token="$SONAR_TOKEN"} \
         ${SONAR_ORGANIZATION:+-Dsonar.organization="$SONAR_ORGANIZATION"}
     
     cd ../../..

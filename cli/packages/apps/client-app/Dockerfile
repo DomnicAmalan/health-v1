@@ -2,14 +2,7 @@
 # Build context should be ./cli directory (monorepo root)
 
 # Dev stage (runs vite dev server) - OPTIMIZED: comes first to skip builder in dev mode
-FROM node:22-alpine AS runner-dev
-
-# Install Bun for dev server
-RUN apk add --no-cache curl unzip python3 make g++ bash && \
-    curl -fsSL https://bun.sh/install | bash && \
-    mv /root/.bun/bin/bun /usr/local/bin/bun && \
-    chmod +x /usr/local/bin/bun && \
-    rm -rf /root/.bun
+FROM oven/bun:1.1.0-alpine AS runner-dev
 
 WORKDIR /app
 
@@ -28,19 +21,13 @@ EXPOSE 5173
 # Set working directory to client app
 WORKDIR /app/packages/apps/client-app
 
-# Start Vite dev server
+# Start Vite dev server with memory limits
 # Source code is mounted as volume in docker-compose.dev.yml
+# NODE_OPTIONS is set via environment variables for memory limits
 CMD ["bun", "run", "dev", "--host", "0.0.0.0"]
 
 # Dependencies stage (for production builds)
-FROM node:22-alpine AS deps
-
-# Install build dependencies, bash, and Bun
-RUN apk add --no-cache curl unzip python3 make g++ bash && \
-    curl -fsSL https://bun.sh/install | bash && \
-    mv /root/.bun/bin/bun /usr/local/bin/bun && \
-    chmod +x /usr/local/bin/bun && \
-    rm -rf /root/.bun
+FROM oven/bun:1.1.0-alpine AS deps
 
 # Set working directory to monorepo root
 WORKDIR /app
@@ -57,14 +44,7 @@ COPY packages/libs/shared/package.json ./packages/libs/shared/
 RUN bun install --frozen-lockfile || bun install
 
 # Build stage (only for production)
-FROM node:22-alpine AS builder
-
-# Install build dependencies, bash, and Bun
-RUN apk add --no-cache curl unzip python3 make g++ bash && \
-    curl -fsSL https://bun.sh/install | bash && \
-    mv /root/.bun/bin/bun /usr/local/bin/bun && \
-    chmod +x /usr/local/bin/bun && \
-    rm -rf /root/.bun
+FROM oven/bun:1.1.0-alpine AS builder
 
 WORKDIR /app
 
