@@ -103,6 +103,9 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       RUST_LOG: ${RUST_LOG:-debug}
       RUST_BACKTRACE: full
+      
+      # SQLx offline mode (use pre-generated query metadata)
+      SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
 
       # Deployment
       DEPLOYMENT_ENV: ${DEPLOYMENT_ENV:-development}
@@ -136,6 +139,10 @@ services:
       - ./backend/authz-core/Cargo.toml:/app/backend/authz-core/Cargo.toml
       - ./backend/admin-service/Cargo.toml:/app/backend/admin-service/Cargo.toml
       - ./backend/api-service/Cargo.toml:/app/backend/api-service/Cargo.toml
+      # Mount .sqlx directory for SQLx offline mode
+      - ./backend/.sqlx:/app/backend/.sqlx
+      # Mount .sqlx directory for SQLx offline mode
+      - ./backend/.sqlx:/app/backend/.sqlx
     depends_on:
       postgres:
         condition: service_healthy

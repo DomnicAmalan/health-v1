@@ -69,14 +69,16 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app/backend
 
 # Copy workspace Cargo.toml files (needed for cargo to work)
-COPY backend/Cargo.toml backend/
-COPY backend/shared/Cargo.toml backend/shared/
-COPY backend/authz-core/Cargo.toml backend/authz-core/
-COPY backend/admin-service/Cargo.toml backend/admin-service/
-COPY backend/api-service/Cargo.toml backend/api-service/
+# Note: docker-compose.dev.yml mounts these as volumes for hot reload
+# But we need them in the image as fallback if volumes aren't mounted
+COPY backend/Cargo.toml ./
+COPY backend/shared/Cargo.toml ./shared/
+COPY backend/authz-core/Cargo.toml ./authz-core/
+COPY backend/admin-service/Cargo.toml ./admin-service/
+COPY backend/api-service/Cargo.toml ./api-service/
 
 # Copy migrations (always needed, even in dev mode)
-COPY backend/migrations backend/migrations
+COPY backend/migrations ./migrations
 
 # Expose port
 EXPOSE 8080

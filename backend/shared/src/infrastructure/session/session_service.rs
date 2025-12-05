@@ -97,10 +97,33 @@ impl SessionService {
         }
 
         session.authenticate(user_id, organization_id);
-        let updated = self.repository.update(session.clone()).await?;
-        let session_token = updated.session_token.clone();
-        self.cache.set(&session_token, updated.clone());
-        Ok(updated)
+        
+        // Try to update - handle optimistic locking race conditions gracefully
+        match self.repository.update(session.clone()).await {
+            Ok(updated) => {
+                let session_token = updated.session_token.clone();
+                self.cache.set(&session_token, updated.clone());
+                Ok(updated)
+            }
+            Err(e) => {
+                // Check if it's a "no rows" error (version mismatch - race condition)
+                if let crate::shared::AppError::Database(db_err) = &e {
+                    if matches!(db_err, sqlx::Error::RowNotFound)
+                        || db_err.to_string().contains("no rows returned")
+                    {
+                        // Race condition: session was updated concurrently
+                        // Try to fetch the updated session and return it
+                        if let Ok(Some(updated_session)) = self.repository.find_by_id(session_id).await {
+                            let session_token = updated_session.session_token.clone();
+                            self.cache.set(&session_token, updated_session.clone());
+                            return Ok(updated_session);
+                        }
+                    }
+                }
+                // For other errors, propagate them
+                Err(e)
+            }
+        }
     }
 
     /// Update session activity timestamp

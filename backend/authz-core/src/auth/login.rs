@@ -142,10 +142,11 @@ impl LoginUseCase {
         };
         self.refresh_token_repository.create(refresh_token).await?;
 
-        // Update last login
+        // Update last login (best-effort, don't fail login if update fails)
+        // This is non-critical - if update fails due to optimistic locking, login still succeeds
         let mut updated_user = user.clone();
         updated_user.record_login();
-        self.user_repository.update(updated_user).await?;
+        let _ = self.user_repository.update(updated_user).await;
 
         // Create user response
         let user_response = LoginUserResponse {

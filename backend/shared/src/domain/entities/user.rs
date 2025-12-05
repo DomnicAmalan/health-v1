@@ -84,7 +84,7 @@ impl User {
     pub fn record_login(&mut self) {
         self.last_login = Some(Utc::now());
         self.updated_at = Utc::now();
-        self.version += 1;
+        // Note: version is incremented by repository update() method for optimistic locking
     }
 }
 

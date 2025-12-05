@@ -66,20 +66,20 @@ impl Session {
         self.authenticated_at = Some(Utc::now());
         self.last_activity_at = Utc::now();
         self.updated_at = Utc::now();
-        self.version += 1;
+        // Note: version is incremented by repository update() method for optimistic locking
     }
 
     pub fn update_activity(&mut self) {
         self.last_activity_at = Utc::now();
         self.updated_at = Utc::now();
-        self.version += 1;
+        // Note: version is incremented by repository update() method for optimistic locking
     }
 
     pub fn end(&mut self) {
         self.ended_at = Some(Utc::now());
         self.is_active = false;
         self.updated_at = Utc::now();
-        self.version += 1;
+        // Note: version is incremented by repository update() method for optimistic locking
     }
 
     pub fn is_expired(&self) -> bool {
