@@ -13,6 +13,7 @@ use super::super::AppState;
 
 /// Middleware to check if user can access the app
 /// Checks X-App-Name header and verifies user has access via Zanzibar with organization scoping
+#[allow(dead_code)]
 pub async fn app_access_middleware(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,

@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 pub struct SetupOrganizationUseCase {
     setup_repository: Box<dyn SetupRepository>,
+    #[allow(dead_code)]
     user_repository: Box<dyn UserRepository>,
 }
 

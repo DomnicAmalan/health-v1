@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 pub struct RegisterFieldUseCase {
     ui_entity_repository: Box<dyn UiEntityRepository>,
+    #[allow(dead_code)]
     relationship_store: Arc<RelationshipStore>,
 }
 

@@ -1,16 +1,5 @@
 mod presentation;
 
-use shared::AppResult;
-use shared::AppError;
-use shared::RequestContext;
-use shared::config::Settings;
-use shared::infrastructure::database::{create_pool, DatabaseService};
-use shared::infrastructure::database::migrations;
-use shared::infrastructure::repositories;
-use shared::infrastructure::zanzibar;
-use authz_core::*;
-use admin_service::*;
-
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
@@ -160,7 +149,6 @@ async fn main() -> Result<(), String> {
 
     // Initialize setup components
     let setup_repository = Arc::new(shared::infrastructure::repositories::SetupRepositoryImpl::new(pool.clone()));
-    let user_repository_for_setup = Box::new(shared::infrastructure::repositories::UserRepositoryImpl::new(database_service.clone()));
     
     let setup_organization_use_case = Arc::new(admin_service::use_cases::setup::SetupOrganizationUseCase::new(
         Box::new(shared::infrastructure::repositories::SetupRepositoryImpl::new(pool.clone())),
@@ -318,8 +306,11 @@ async fn main() -> Result<(), String> {
     let public_routes = axum::Router::new()
         .route("/health", axum::routing::get(|| async { "OK" }))
         .route("/auth/login", axum::routing::post(crate::presentation::api::handlers::login))
+        .route("/setup/status", axum::routing::get(admin_service::handlers::check_setup_status))
         .route("/api/setup/status", axum::routing::get(admin_service::handlers::check_setup_status))
+        .route("/setup/initialize", axum::routing::post(admin_service::handlers::initialize_setup))
         .route("/api/setup/initialize", axum::routing::post(admin_service::handlers::initialize_setup))
+        .route("/services/status", axum::routing::get(crate::presentation::api::handlers::get_service_status))
         .route("/api/services/status", axum::routing::get(crate::presentation::api::handlers::get_service_status))
         .with_state(app_state_arc.clone());
     
@@ -388,7 +379,10 @@ async fn main() -> Result<(), String> {
             crate::presentation::api::middleware::session_middleware,
         ))
         .layer(axum::middleware::from_fn(crate::presentation::api::middleware::request_id_middleware))
-        .layer(tower_http::cors::CorsLayer::permissive());
+        .layer(
+            tower_http::cors::CorsLayer::permissive()
+                .allow_credentials(true)
+        );
 
     // Start server
     let addr = SocketAddr::from(([0, 0, 0, 0], settings.server.port));

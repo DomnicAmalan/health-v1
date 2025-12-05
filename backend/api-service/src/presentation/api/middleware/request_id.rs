@@ -5,7 +5,6 @@ use axum::{
     http::HeaderValue,
 };
 use uuid::Uuid;
-use tracing::Instrument;
 
 /// Middleware that generates a unique request ID for each request
 /// Adds X-Request-ID header to both request and response
@@ -44,6 +43,7 @@ pub async fn request_id_middleware(
 }
 
 /// Extract request ID from request extensions
+#[allow(dead_code)]
 pub fn get_request_id(request: &Request) -> Option<String> {
     request.extensions().get::<String>().cloned()
 }

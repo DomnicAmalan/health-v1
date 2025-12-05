@@ -12,13 +12,58 @@ use shared::infrastructure::repositories::UserRepositoryImpl;
 use super::super::AppState;
 use super::session_middleware::get_session;
 
-/// Authentication middleware that validates JWT tokens and extracts user context
+/// Hybrid authentication middleware that supports both session-based and JWT token authentication.
+/// 
+/// Priority:
+/// 1. Check for authenticated session (for web UIs using cookies)
+/// 2. Fall back to JWT token validation (for mobile/API clients)
 pub async fn auth_middleware(
     State(state): State<Arc<AppState>>,
     mut request: Request,
     next: Next,
 ) -> Result<Response, (StatusCode, axum::Json<serde_json::Value>)> {
-    // Extract token from Authorization header
+    // Get request ID from extensions (set by request_id_middleware)
+    let request_id = request.extensions()
+        .get::<String>()
+        .cloned()
+        .unwrap_or_else(|| Uuid::new_v4().to_string());
+
+    // Priority 1: Check for authenticated session (session-based auth for web UIs)
+    if let Some(session) = get_session(&request) {
+        if !session.is_ghost_session() {
+            // Session is authenticated - use it to create RequestContext
+            if let Some(user_id) = session.user_id {
+                // Fetch user info to get email, role, and permissions
+                match state.userinfo_use_case.execute(user_id).await {
+                    Ok(user_info) => {
+                        let mut context = RequestContext::new(
+                            request_id,
+                            user_id,
+                            user_info.email,
+                            user_info.role,
+                            user_info.permissions.unwrap_or_default(),
+                        )
+                        .with_session(session.id)
+                        .with_ip_address(session.ip_address);
+
+                        if let Some(org_id) = session.organization_id {
+                            context = context.with_organization(org_id);
+                        }
+
+                        request.extensions_mut().insert(context);
+                        let response = next.run(request).await;
+                        return Ok(response);
+                    }
+                    Err(e) => {
+                        tracing::error!("Failed to fetch user info from session: {}", e);
+                        // Fall through to JWT authentication
+                    }
+                }
+            }
+        }
+    }
+
+    // Priority 2: Fall back to JWT token authentication (for mobile/API clients)
     let auth_header = request.headers()
         .get("Authorization")
         .and_then(|h| h.to_str().ok())
@@ -26,7 +71,7 @@ pub async fn auth_middleware(
             (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(serde_json::json!({
-                    "error": "Missing Authorization header"
+                    "error": "Missing Authorization header - no authenticated session or token provided"
                 })),
             )
         })?;
@@ -63,12 +108,6 @@ pub async fn auth_middleware(
                 })),
             )
         })?;
-
-    // Get request ID from extensions (set by request_id_middleware)
-    let request_id = request.extensions()
-        .get::<String>()
-        .cloned()
-        .unwrap_or_else(|| Uuid::new_v4().to_string());
 
     // Get user to retrieve organization_id
     let user_repository = UserRepositoryImpl::new(state.database_service.clone());
@@ -135,4 +174,3 @@ pub async fn auth_middleware(
     let response = next.run(request).await;
     Ok(response)
 }
-

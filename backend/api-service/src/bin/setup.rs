@@ -239,10 +239,6 @@ async fn main() {
             process::exit(1);
         });
 
-    // Track what we create for rollback
-    let mut org_id: Option<uuid::Uuid> = None;
-    let mut user_id: Option<uuid::Uuid> = None;
-
     // Helper function to rollback everything
     async fn rollback_all(pool: &sqlx::PgPool, org_id: Option<uuid::Uuid>, user_id: Option<uuid::Uuid>) {
         println!("\n=== Rolling back all changes ===");
@@ -315,7 +311,8 @@ async fn main() {
         Box::new(UserRepositoryImpl::new(database_service.clone())),
     );
 
-    org_id = match setup_org_use_case
+    // Track what we create for rollback
+    let org_id = match setup_org_use_case
         .execute(&org_name, &org_slug, org_domain.as_deref(), false)
         .await
     {
@@ -342,7 +339,7 @@ async fn main() {
         .await
     {
         Ok(user) => {
-            user_id = Some(user.id);
+            let _user_id = Some(user.id);
             println!("✓ Super admin created: {} ({})", user.email, user.username);
             println!("\n=== Setup Complete! ===\n");
             println!("Organization: {} ({})", org_name, org_slug);
@@ -352,7 +349,7 @@ async fn main() {
         }
         Err(e) => {
             eprintln!("Failed to create super admin: {}", e);
-            rollback_all(&pool, org_id, user_id).await;
+            rollback_all(&pool, org_id, None).await;
             process::exit(1);
         }
     }

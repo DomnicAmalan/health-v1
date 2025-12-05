@@ -1,7 +1,8 @@
-use axum::{Json, extract::{State, Request}, http::StatusCode, response::IntoResponse};
+use axum::{Json, extract::{State, Request}, http::{StatusCode, HeaderValue}, response::IntoResponse};
 use authz_core::dto::{LoginRequest, RefreshTokenRequest};
 use shared::RequestContext;
 use super::super::AppState;
+use super::super::middleware::session_middleware::get_session;
 use std::sync::Arc;
 
 pub async fn login(
@@ -72,11 +73,18 @@ pub async fn login(
 
 pub async fn logout(
     State(state): State<Arc<AppState>>,
-    headers: axum::http::HeaderMap,
+    request: Request,
 ) -> impl IntoResponse {
-    // Extract refresh token from Authorization header
-    // The client should send refresh token in Authorization header for logout
-    let refresh_token = headers
+    // Extract session from request extensions (set by session_middleware)
+    if let Some(session) = get_session(&request) {
+        // End the session (for web UIs using session-based auth)
+        if let Err(e) = state.session_service.end_session(session.id).await {
+            tracing::warn!("Failed to end session on logout: {}", e);
+        }
+    }
+
+    // Extract refresh token from Authorization header (for mobile/API clients using JWT)
+    let refresh_token = request.headers()
         .get("authorization")
         .and_then(|h| h.to_str().ok())
         .and_then(|h| h.strip_prefix("Bearer "))
@@ -88,7 +96,32 @@ pub async fn logout(
         let _ = state.logout_use_case.execute(&refresh_token).await;
     }
 
-    (StatusCode::OK, Json(serde_json::json!({"message": "Logged out"}))).into_response()
+    // Clear session cookie by setting it to expire immediately
+    let mut response = (StatusCode::OK, Json(serde_json::json!({"message": "Logged out"}))).into_response();
+    
+    // Determine if we should use Secure flag (must match cookie setting)
+    let is_secure = request.headers()
+        .get("X-Forwarded-Proto")
+        .and_then(|h| h.to_str().ok())
+        .map(|s| s == "https")
+        .unwrap_or_else(|| {
+            std::env::var("SESSION_COOKIE_SECURE")
+                .unwrap_or_else(|_| "false".to_string())
+                .parse::<bool>()
+                .unwrap_or(false)
+        });
+    let secure_flag = if is_secure { "; Secure" } else { "" };
+    
+    // Set cookie to expire immediately (clear session cookie) - must match cookie attributes
+    let clear_cookie = format!(
+        "session_token=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly{}",
+        secure_flag
+    );
+    if let Ok(header_value) = HeaderValue::from_str(&clear_cookie) {
+        response.headers_mut().insert("Set-Cookie", header_value);
+    }
+
+    response
 }
 
 pub async fn refresh_token(

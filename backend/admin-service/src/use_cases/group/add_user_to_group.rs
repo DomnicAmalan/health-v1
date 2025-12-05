@@ -27,7 +27,7 @@ impl AddUserToGroupUseCase {
     ) -> AppResult<()> {
         let location = concat!(file!(), ":", line!());
         // Verify user exists
-        let user = self.user_repository
+        let _user = self.user_repository
             .find_by_id(user_id)
             .await
             .map_err(|e| {

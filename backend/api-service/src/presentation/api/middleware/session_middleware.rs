@@ -5,7 +5,6 @@ use axum::{
     response::Response,
 };
 use shared::domain::entities::Session;
-use shared::infrastructure::session::SessionService;
 use std::net::IpAddr;
 use std::sync::Arc;
 use super::super::AppState;
@@ -141,10 +140,26 @@ pub async fn session_middleware(
 
     // Set session cookie if it's a new session (check if cookie was in request)
     if extract_session_token_from_cookies(&headers).is_none() {
-        // Note: In production, set HttpOnly, Secure, SameSite attributes
+        // Determine if we should use Secure flag (HTTPS only)
+        // Check if request is over HTTPS or if environment variable is set
+        let is_secure = headers
+            .get("X-Forwarded-Proto")
+            .and_then(|h| h.to_str().ok())
+            .map(|s| s == "https")
+            .unwrap_or_else(|| {
+                // Check environment variable as fallback
+                std::env::var("SESSION_COOKIE_SECURE")
+                    .unwrap_or_else(|_| "false".to_string())
+                    .parse::<bool>()
+                    .unwrap_or(false)
+            });
+
+        // Build secure cookie string
+        let secure_flag = if is_secure { "; Secure" } else { "" };
         let cookie = format!(
-            "session_token={}; Path=/; Max-Age={}; SameSite=Lax",
-            session_token, 3600 * 24 * 7 // 7 days
+            "session_token={}; Path=/; Max-Age={}; SameSite=Lax; HttpOnly{}",
+            session_token, 3600 * 24 * 7, // 7 days
+            secure_flag
         );
         if let Ok(header_value) = HeaderValue::from_str(&cookie) {
             response.headers_mut().insert("Set-Cookie", header_value);
@@ -160,6 +175,7 @@ pub fn get_session(request: &Request) -> Option<Session> {
 }
 
 /// Extract session ID from request extensions
+#[allow(dead_code)]
 pub fn get_session_id(request: &Request) -> Option<Uuid> {
     request.extensions().get::<Uuid>().copied()
 }

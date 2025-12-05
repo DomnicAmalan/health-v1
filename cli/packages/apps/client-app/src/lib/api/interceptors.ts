@@ -47,7 +47,8 @@ export function getRefreshToken(): string | null {
 }
 
 /**
- * Request interceptor - adds auth token, request ID, and timestamp
+ * Request interceptor - adds request ID and timestamp
+ * Session-based auth: No token injection needed, session is in cookie
  */
 export async function requestInterceptor(
   _url: string,
@@ -57,12 +58,6 @@ export async function requestInterceptor(
     "Content-Type": "application/json",
     ...config.headers,
   };
-
-  // Add authorization token if available (from sessionStorage)
-  const accessToken = getAccessToken();
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
 
   // Add request ID for audit trail
   const requestId = crypto.randomUUID();
@@ -84,28 +79,11 @@ export async function responseInterceptor<T>(
   response: Response,
   url: string
 ): Promise<ApiResponse<T>> {
-  // Handle 401 Unauthorized - trigger token refresh via auth store
+  // Handle 401 Unauthorized - session expired or invalid
   if (response.status === 401) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken && !refreshPromise) {
-      // Use auth store to refresh token (handles state updates and persistence)
-      const { useAuthStore } = await import("@/stores/authStore");
-      refreshPromise = useAuthStore.getState().refreshAccessToken();
-      try {
-        await refreshPromise;
-        // Tokens are now updated in sessionStorage by auth store
-      } catch (error) {
-        // Refresh failed, clear tokens via auth store
-        useAuthStore.getState().logout();
-        throw error;
-      } finally {
-        refreshPromise = null;
-      }
-    } else {
-      // No refresh token, clear tokens via auth store
-      const { useAuthStore } = await import("@/stores/authStore");
-      useAuthStore.getState().logout();
-    }
+    // Session-based auth: Just logout, no token refresh
+    const { useAuthStore } = await import("@/stores/authStore");
+    useAuthStore.getState().logout();
   }
 
   // Handle 403 Forbidden - log and show access denied

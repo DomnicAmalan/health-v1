@@ -119,7 +119,7 @@ impl PermissionChecker {
                 
                 // 4b. Group role inheritance: group#has_role@role → role#relation@resource
                 // Get group relationships (filtered by organization if provided)
-                let group_relationships = if let Some(org_id) = organization_id {
+                let group_relationships = if let Some(_org_id) = organization_id {
                     // For groups, we need to check relationships in the same org
                     // Groups themselves might not have organization_id, but their relationships should
                     self.store.get_valid_relationships(group_str).await?
