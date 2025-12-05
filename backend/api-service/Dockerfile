@@ -33,9 +33,10 @@ COPY backend/api-service/src backend/api-service/src
 COPY backend/migrations backend/migrations
 
 # Build the application
-# Since we're using runtime SQLx queries (not compile-time macros), 
-# no database connection is needed during build
+# SQLx compile-time macros will validate queries against database at build time
+# To enable offline builds, set SQLX_OFFLINE=true and ensure .sqlx directory exists
 ENV RUST_BACKTRACE=1
+ENV SQLX_OFFLINE=false
 
 # Build based on mode and skip checks flag
 # In dev mode, we skip building here - cargo run will build on first start

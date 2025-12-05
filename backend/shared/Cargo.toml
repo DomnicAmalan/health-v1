@@ -60,5 +60,5 @@ axum.workspace = true
 jsonwebtoken.workspace = true
 
 # Graph algorithms
-petgraph = "0.6"
+petgraph.workspace = true
 

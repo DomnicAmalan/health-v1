@@ -20,3 +20,4 @@ DROP COLUMN IF EXISTS request_id;
 ALTER TABLE refresh_tokens
 DROP COLUMN IF EXISTS request_id;
 
+

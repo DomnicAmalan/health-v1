@@ -332,15 +332,6 @@ async fn main() -> Result<(), String> {
         .route("/users/{id}", axum::routing::get(admin_service::handlers::get_user))
         .route("/users/{id}", axum::routing::post(admin_service::handlers::update_user))
         .route("/users/{id}", axum::routing::delete(admin_service::handlers::delete_user))
-        // UI Entity routes
-        .route("/api/admin/ui/pages", axum::routing::post(admin_service::handlers::register_page))
-        .route("/api/admin/ui/pages", axum::routing::get(admin_service::handlers::list_pages))
-        .route("/api/admin/ui/pages/{id}/buttons", axum::routing::get(admin_service::handlers::list_buttons_for_page))
-        .route("/api/admin/ui/pages/{id}/fields", axum::routing::get(admin_service::handlers::list_fields_for_page))
-        .route("/api/admin/ui/buttons", axum::routing::post(admin_service::handlers::register_button))
-        .route("/api/admin/ui/fields", axum::routing::post(admin_service::handlers::register_field))
-        .route("/api/admin/ui/apis", axum::routing::post(admin_service::handlers::register_api))
-        .route("/api/admin/ui/apis", axum::routing::get(admin_service::handlers::list_apis))
         // Permission check routes
         .route("/api/admin/permissions/check", axum::routing::post(admin_service::handlers::check_permission))
         .route("/api/admin/permissions/check-batch", axum::routing::post(admin_service::handlers::check_permissions_batch))
@@ -352,6 +343,15 @@ async fn main() -> Result<(), String> {
         .route("/api/admin/permissions/assign", axum::routing::post(admin_service::handlers::assign_permission))
         .route("/api/admin/permissions/assign-batch", axum::routing::post(admin_service::handlers::assign_permissions_batch))
         .route("/api/admin/permissions/revoke", axum::routing::delete(admin_service::handlers::revoke_permission))
+        // UI Entity routes
+        .route("/api/admin/ui/pages", axum::routing::post(admin_service::handlers::register_page))
+        .route("/api/admin/ui/pages", axum::routing::get(admin_service::handlers::list_pages))
+        .route("/api/admin/ui/pages/{id}/buttons", axum::routing::get(admin_service::handlers::list_buttons_for_page))
+        .route("/api/admin/ui/pages/{id}/fields", axum::routing::get(admin_service::handlers::list_fields_for_page))
+        .route("/api/admin/ui/buttons", axum::routing::post(admin_service::handlers::register_button))
+        .route("/api/admin/ui/fields", axum::routing::post(admin_service::handlers::register_field))
+        .route("/api/admin/ui/apis", axum::routing::post(admin_service::handlers::register_api))
+        .route("/api/admin/ui/apis", axum::routing::get(admin_service::handlers::list_apis))
         // Groups routes
         .route("/api/admin/groups", axum::routing::get(admin_service::handlers::list_groups))
         .route("/api/admin/groups", axum::routing::post(admin_service::handlers::create_group))

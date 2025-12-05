@@ -104,24 +104,46 @@ impl SessionService {
     }
 
     /// Update session activity timestamp
+    /// This is a best-effort operation that handles race conditions gracefully
     pub async fn update_activity(&self, session_id: Uuid) -> AppResult<()> {
-        let mut session = self
-            .repository
-            .find_by_id(session_id)
-            .await?
-            .ok_or_else(|| {
-                crate::shared::AppError::NotFound(format!("Session {} not found", session_id))
-            })?;
+        // Try to find the session - if it doesn't exist, that's okay (might have been deleted)
+        let mut session = match self.repository.find_by_id(session_id).await? {
+            Some(s) => s,
+            None => {
+                // Session doesn't exist - this is fine for background updates
+                return Ok(());
+            }
+        };
 
         if !session.is_active || session.is_expired() {
             return Ok(()); // Don't update inactive/expired sessions
         }
 
         session.update_activity();
-        let updated = self.repository.update(session.clone()).await?;
-        let session_token = updated.session_token.clone();
-        self.cache.set(&session_token, updated.clone());
-        Ok(())
+        
+        // Try to update - if it fails due to version mismatch or session not found,
+        // that's okay (race condition with another request)
+        match self.repository.update(session.clone()).await {
+            Ok(updated) => {
+                let session_token = updated.session_token.clone();
+                self.cache.set(&session_token, updated.clone());
+                Ok(())
+            }
+            Err(e) => {
+                // Check if it's a "no rows" error (version mismatch or session deleted)
+                // This happens when the WHERE clause (id + version) doesn't match any rows
+                if let crate::shared::AppError::Database(db_err) = &e {
+                    // Check for RowNotFound variant or error message containing "no rows"
+                    if matches!(db_err, sqlx::Error::RowNotFound) 
+                        || db_err.to_string().contains("no rows returned") {
+                        // This is expected in race conditions - just return Ok
+                        return Ok(());
+                    }
+                }
+                // For other errors, propagate them
+                Err(e)
+            }
+        }
     }
 
     /// End a session (logout or timeout)
