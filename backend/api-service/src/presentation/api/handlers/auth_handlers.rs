@@ -3,7 +3,6 @@ use authz_core::dto::{LoginRequest, RefreshTokenRequest};
 use shared::RequestContext;
 use super::super::AppState;
 use super::super::middleware::session_middleware::{get_session, get_app_type, get_app_device};
-use axum::extract::Request;
 use std::sync::Arc;
 
 pub async fn login(
