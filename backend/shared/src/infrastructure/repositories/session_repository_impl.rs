@@ -11,10 +11,10 @@ use uuid::Uuid;
 #[derive(Debug)]
 struct SessionRow {
     id: Uuid,
-    session_token: String,
+    session_token: Option<String>,
     user_id: Option<Uuid>,
     organization_id: Option<Uuid>,
-    ip_address_str: String,
+    ip_address_str: Option<String>,
     user_agent: Option<String>,
     started_at: DateTime<Utc>,
     authenticated_at: Option<DateTime<Utc>>,
@@ -36,14 +36,15 @@ impl From<SessionRow> for Session {
     fn from(row: SessionRow) -> Self {
         // PostgreSQL INET type may include subnet mask (e.g., "127.0.0.1/32")
         // Extract just the IP address part
-        let ip_str = row.ip_address_str.split('/').next().unwrap_or(&row.ip_address_str);
+        let ip_str = row.ip_address_str.as_deref().expect("ip_address is NOT NULL");
+        let ip_str = ip_str.split('/').next().unwrap_or(ip_str);
         let ip_address = ip_str.parse().unwrap_or_else(|_| {
             tracing::warn!("Failed to parse IP address: {}, using 127.0.0.1", ip_str);
             "127.0.0.1".parse().unwrap()
         });
         Session {
             id: row.id,
-            session_token: row.session_token,
+            session_token: row.session_token.expect("session_token is NOT NULL"),
             user_id: row.user_id,
             organization_id: row.organization_id,
             ip_address,
