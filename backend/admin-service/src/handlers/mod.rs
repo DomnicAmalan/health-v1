@@ -7,6 +7,7 @@ pub mod permission_check_handlers;
 pub mod encryption_handlers;
 pub mod graph_handlers;
 pub mod ui_entity_handlers;
+pub mod dashboard_handlers;
 
 pub use admin_handlers::*;
 pub use setup_handlers::*;
@@ -17,4 +18,5 @@ pub use permission_check_handlers::*;
 pub use encryption_handlers::*;
 pub use graph_handlers::*;
 pub use ui_entity_handlers::*;
+pub use dashboard_handlers::*;
 

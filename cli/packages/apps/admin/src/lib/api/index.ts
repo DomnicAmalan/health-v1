@@ -11,3 +11,4 @@ export * from "./ui-entities";
 export * from "./encryption";
 export * from "./setup";
 export * from "./services";
+export * from "./dashboard";

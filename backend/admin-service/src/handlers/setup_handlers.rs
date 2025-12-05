@@ -424,22 +424,58 @@ pub async fn check_setup_status(
     State(state): State<Arc<ConcreteAppState>>,
 ) -> impl IntoResponse {
     let location = concat!(file!(), ":", line!());
-    match state.setup_repository.is_setup_completed().await {
-        Ok(is_completed) => (
-            StatusCode::OK,
-            Json(serde_json::json!({
-                "setup_completed": is_completed
-            })),
-        )
-            .into_response(),
-        Err(e) => {
-            e.log_with_operation(location, "check_setup_status");
+    let pool = state.database_pool.as_ref();
+    
+    // Get full setup status information
+    let result = sqlx::query!(
+        r#"
+        SELECT 
+            setup_completed,
+            setup_completed_at,
+            setup_completed_by
+        FROM setup_status 
+        ORDER BY created_at DESC 
+        LIMIT 1
+        "#
+    )
+    .fetch_optional(pool)
+    .await;
+    
+    match result {
+        Ok(Some(row)) => {
+            let setup_completed = row.setup_completed;
+            let setup_completed_at = row.setup_completed_at.map(|dt| dt.to_rfc3339());
+            let setup_completed_by = row.setup_completed_by.map(|id| id.to_string());
+            
             (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({
-                "error": format!("Failed to check setup status: {}", e)
-            })),
-        )
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "setup_completed": setup_completed,
+                    "setup_completed_at": setup_completed_at,
+                    "setup_completed_by": setup_completed_by
+                })),
+            )
+                .into_response()
+        }
+        Ok(None) => {
+            // No setup status record exists, return default
+            (
+                StatusCode::OK,
+                Json(serde_json::json!({
+                    "setup_completed": false
+                })),
+            )
+                .into_response()
+        }
+        Err(e) => {
+            let error = shared::AppError::Database(e);
+            error.log_with_operation(location, "check_setup_status");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": format!("Failed to check setup status: {}", error)
+                })),
+            )
                 .into_response()
         }
     }

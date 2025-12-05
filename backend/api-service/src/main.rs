@@ -360,6 +360,8 @@ async fn main() -> Result<(), String> {
         .route("/api/admin/groups/{group_id}/users/{user_id}", axum::routing::post(admin_service::handlers::add_user_to_group))
         .route("/api/admin/groups/{group_id}/users/{user_id}", axum::routing::delete(admin_service::handlers::remove_user_from_group))
         .route("/api/admin/groups/{group_id}/roles/{role_id}", axum::routing::post(admin_service::handlers::assign_role_to_group))
+        // Dashboard routes
+        .route("/api/admin/dashboard/stats", axum::routing::get(admin_service::handlers::get_dashboard_stats))
         .with_state(app_state_arc.clone())
         .layer(axum::middleware::from_fn_with_state(
             app_state_arc.clone(),
