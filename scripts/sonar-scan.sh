@@ -4,6 +4,13 @@
 
 set -e
 
+# Get the script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root to ensure relative paths work
+cd "$PROJECT_ROOT"
+
 # Load environment variables
 if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
@@ -36,7 +43,7 @@ print_usage() {
 
 scan_backend() {
     echo -e "${GREEN}Scanning backend (Rust)...${NC}"
-    cd backend
+    cd "$PROJECT_ROOT/backend"
     
     if [ ! -f sonar-project.properties ]; then
         echo -e "${RED}Error: sonar-project.properties not found in backend directory${NC}"
@@ -68,13 +75,13 @@ scan_backend() {
         -Dsonar.host.url="${SONAR_HOST_URL:-http://localhost:9000}" \
         -Dsonar.token="$SONAR_TOKEN"
     
-    cd ..
+    cd "$PROJECT_ROOT"
     echo -e "${GREEN}Backend scan completed${NC}"
 }
 
 scan_admin_ui() {
     echo -e "${GREEN}Scanning admin UI (TypeScript/React)...${NC}"
-    cd cli/packages/apps/admin
+    cd "$PROJECT_ROOT/cli/packages/apps/admin"
     
     if [ ! -f sonar-project.properties ]; then
         echo -e "${RED}Error: sonar-project.properties not found in admin directory${NC}"
@@ -100,13 +107,13 @@ scan_admin_ui() {
         ${SONAR_TOKEN:+-Dsonar.token="$SONAR_TOKEN"} \
         ${SONAR_ORGANIZATION:+-Dsonar.organization="$SONAR_ORGANIZATION"}
     
-    cd ../../..
+    cd "$PROJECT_ROOT"
     echo -e "${GREEN}Admin UI scan completed${NC}"
 }
 
 scan_client_app() {
     echo -e "${GREEN}Scanning client app (TypeScript/React)...${NC}"
-    cd cli/packages/apps/client-app
+    cd "$PROJECT_ROOT/cli/packages/apps/client-app"
     
     if [ ! -f sonar-project.properties ]; then
         echo -e "${RED}Error: sonar-project.properties not found in client-app directory${NC}"
@@ -132,7 +139,7 @@ scan_client_app() {
         ${SONAR_TOKEN:+-Dsonar.token="$SONAR_TOKEN"} \
         ${SONAR_ORGANIZATION:+-Dsonar.organization="$SONAR_ORGANIZATION"}
     
-    cd ../../..
+    cd "$PROJECT_ROOT"
     echo -e "${GREEN}Client app scan completed${NC}"
 }
 
