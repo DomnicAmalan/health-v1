@@ -40,3 +40,4 @@ echo "Using profiles: $PROFILES" >&2
 exec docker-compose -f "$COMPOSE_FILE" $PROFILE_FLAGS "$@"
 
 
+

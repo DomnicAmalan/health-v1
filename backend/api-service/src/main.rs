@@ -4,8 +4,25 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
 
-#[tokio::main]
-async fn main() -> Result<(), String> {
+fn main() -> Result<(), String> {
+    // Configure Tokio runtime for low-memory systems
+    let tokio_worker_threads: usize = std::env::var("TOKIO_WORKER_THREADS")
+        .unwrap_or_else(|_| "2".to_string())
+        .parse()
+        .unwrap_or(2);
+    
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(tokio_worker_threads)
+        .max_blocking_threads(2)
+        .thread_stack_size(256 * 1024) // 256KB stack size
+        .enable_all()
+        .build()
+        .map_err(|e| format!("Failed to create Tokio runtime: {}", e))?;
+    
+    rt.block_on(async_main())
+}
+
+async fn async_main() -> Result<(), String> {
     // Load environment variables
     dotenv::dotenv().ok();
 
@@ -23,11 +40,23 @@ async fn main() -> Result<(), String> {
     );
 
     info!("Starting api-service on {}:{}", settings.server.host, settings.server.port);
+    info!("Tokio runtime configured: worker_threads={}, max_blocking_threads=2", 
+        std::env::var("TOKIO_WORKER_THREADS").unwrap_or_else(|_| "2".to_string()));
 
     // Initialize database connection using database service
     info!("Connecting to database...");
-    let pool = shared::infrastructure::database::create_pool(&settings.database.url).await
-        .map_err(|e| format!("Failed to connect to database: {}", e))?;
+    use std::time::Duration;
+    let pool = shared::infrastructure::database::create_pool_with_options(
+        &settings.database.url,
+        settings.database.max_connections,
+        settings.database.min_connections,
+        Duration::from_secs(10),
+    )
+    .await
+    .map_err(|e| format!("Failed to connect to database: {}", e))?;
+    info!("Database pool configured: max={}, min={}", 
+        settings.database.max_connections, 
+        settings.database.min_connections);
     
     // Create shared DatabaseService instance for all repositories
     let database_service = Arc::new(shared::infrastructure::database::DatabaseService::new(pool.clone()));
@@ -133,8 +162,15 @@ async fn main() -> Result<(), String> {
     // Initialize graph cache for complex authorization queries
     info!("Initializing graph cache...");
     use shared::infrastructure::zanzibar::GraphCache;
-    let graph_cache = Arc::new(GraphCache::with_default_ttl());
-    info!("Graph cache initialized");
+    let graph_cache = if settings.graph_cache.enabled {
+        Arc::new(GraphCache::new(settings.graph_cache.ttl_seconds, true))
+    } else {
+        info!("Graph cache disabled");
+        Arc::new(GraphCache::disabled())
+    };
+    info!("Graph cache initialized: enabled={}, ttl={}s", 
+        settings.graph_cache.enabled, 
+        settings.graph_cache.ttl_seconds);
 
     // Permission checker (uses relationship_store with optional graph cache)
     let permission_checker = Arc::new(
@@ -270,7 +306,10 @@ async fn main() -> Result<(), String> {
     // Initialize session service
     info!("Initializing session service...");
     let session_repository = Arc::new(shared::infrastructure::repositories::SessionRepositoryImpl::new(database_service.clone()));
-    let session_cache = Arc::new(shared::infrastructure::session::SessionCache::new());
+    let session_cache = Arc::new(shared::infrastructure::session::SessionCache::with_max_entries(
+        settings.session.cache_max_entries,
+    ));
+    info!("Session cache configured with max {} entries", settings.session.cache_max_entries);
     let session_service = Arc::new(shared::infrastructure::session::SessionService::new(
         session_repository,
         session_cache,

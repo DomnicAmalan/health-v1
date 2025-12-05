@@ -16,18 +16,24 @@ struct CacheEntry {
 pub struct GraphCache {
     cache: Arc<RwLock<Option<CacheEntry>>>,
     ttl: Duration,
+    enabled: bool,
 }
 
 impl GraphCache {
-    pub fn new(ttl_seconds: i64) -> Self {
+    pub fn new(ttl_seconds: i64, enabled: bool) -> Self {
         Self {
             cache: Arc::new(RwLock::new(None)),
             ttl: Duration::seconds(ttl_seconds),
+            enabled,
         }
     }
     
     pub fn with_default_ttl() -> Self {
-        Self::new(300) // 5 minutes default TTL
+        Self::new(60, true) // 60 seconds default TTL, enabled by default
+    }
+
+    pub fn disabled() -> Self {
+        Self::new(0, false)
     }
     
     /// Get graph from cache or build new one
@@ -35,6 +41,11 @@ impl GraphCache {
         &self,
         repository: &dyn RelationshipRepository,
     ) -> AppResult<Arc<AuthorizationGraph>> {
+        // If cache is disabled, always build fresh
+        if !self.enabled {
+            return Ok(Arc::new(self.build_graph(repository).await?));
+        }
+
         // Check cache
         {
             let cache = self.cache.read().unwrap();
@@ -92,12 +103,20 @@ impl GraphCache {
     
     /// Check if cache is valid
     pub fn is_valid(&self) -> bool {
+        if !self.enabled {
+            return false;
+        }
         let cache = self.cache.read().unwrap();
         if let Some(entry) = cache.as_ref() {
             Utc::now() < entry.expires_at
         } else {
             false
         }
+    }
+
+    /// Check if cache is enabled
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
     }
     
     /// Get cached graph (if valid) without building

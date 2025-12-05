@@ -12,6 +12,7 @@ pub struct Settings {
     pub logging: LoggingConfig,
     pub deployment: DeploymentConfig,
     pub session: SessionConfig,
+    pub graph_cache: GraphCacheConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,6 +26,8 @@ pub struct ServerConfig {
 pub struct DatabaseConfig {
     pub url: String,
     pub local_db_path: String,
+    pub max_connections: u32,
+    pub min_connections: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,6 +65,13 @@ pub struct SessionConfig {
     pub api_ttl_hours: u64,
     pub admin_ui_cors_origins: Vec<String>,
     pub client_ui_cors_origins: Vec<String>,
+    pub cache_max_entries: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GraphCacheConfig {
+    pub enabled: bool,
+    pub ttl_seconds: i64,
 }
 
 impl Settings {
@@ -84,6 +94,14 @@ impl Settings {
             url: env::var("DATABASE_URL")
                 .unwrap_or_else(|_| "postgresql://user:password@localhost:5432/auth_db".to_string()),
             local_db_path: env::var("LOCAL_DB_PATH").unwrap_or_else(|_| "./data/local.db".to_string()),
+            max_connections: env::var("DATABASE_MAX_CONNECTIONS")
+                .unwrap_or_else(|_| "5".to_string())
+                .parse()
+                .unwrap_or(5),
+            min_connections: env::var("DATABASE_MIN_CONNECTIONS")
+                .unwrap_or_else(|_| "1".to_string())
+                .parse()
+                .unwrap_or(1),
         };
 
         let encryption = EncryptionConfig {
@@ -142,6 +160,21 @@ impl Settings {
                 .map(|s| s.trim().to_string())
                 .filter(|s| !s.is_empty())
                 .collect(),
+            cache_max_entries: env::var("SESSION_CACHE_MAX_ENTRIES")
+                .unwrap_or_else(|_| "1000".to_string())
+                .parse()
+                .unwrap_or(1000),
+        };
+
+        let graph_cache = GraphCacheConfig {
+            enabled: env::var("GRAPH_CACHE_ENABLED")
+                .unwrap_or_else(|_| "true".to_string())
+                .parse()
+                .unwrap_or(true),
+            ttl_seconds: env::var("GRAPH_CACHE_TTL_SECONDS")
+                .unwrap_or_else(|_| "60".to_string())
+                .parse()
+                .unwrap_or(60),
         };
 
         Ok(Settings {
@@ -153,6 +186,7 @@ impl Settings {
             logging,
             deployment,
             session,
+            graph_cache,
         })
     }
 }

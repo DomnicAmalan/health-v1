@@ -62,3 +62,6 @@ jsonwebtoken.workspace = true
 # Graph algorithms
 petgraph.workspace = true
 
+# LRU Cache
+lru.workspace = true
+

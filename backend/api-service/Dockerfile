@@ -45,11 +45,11 @@ RUN if [ "$BUILD_MODE" = "dev" ]; then \
         echo "Dev mode: Skipping build, will use cargo run directly"; \
     elif [ "$SKIP_CHECKS" = "true" ]; then \
         echo "Skipping type checks, building in release mode..."; \
-        RUSTFLAGS="-A warnings" cargo build --release --bin api-service; \
+        RUSTFLAGS="-C link-arg=-s -A warnings" cargo build --release --bin api-service; \
         cp target/release/api-service /app/api-service; \
     else \
         echo "Running full build with checks..."; \
-        cargo build --release --bin api-service; \
+        RUSTFLAGS="-C link-arg=-s" cargo build --release --bin api-service; \
         cp target/release/api-service /app/api-service; \
     fi
 
@@ -91,7 +91,7 @@ EXPOSE 8080
 CMD ["cargo", "run", "--bin", "api-service"]
 
 # Production runtime stage
-FROM debian:trixie-slim AS runner-prod
+FROM debian:bookworm-slim AS runner-prod
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \

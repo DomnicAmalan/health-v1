@@ -80,6 +80,7 @@ pub async fn create_pool(database_url: &str) -> AppResult<PgPool> {
 }
 
 /// Create a database pool with configuration options
+/// Note: Connection timeout is handled by sqlx defaults (30s)
 pub async fn create_pool_with_options(
     database_url: &str,
     max_connections: u32,

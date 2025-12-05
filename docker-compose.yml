@@ -79,6 +79,8 @@ services:
       
       # Database
       DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-5}
+      DATABASE_MIN_CONNECTIONS: ${DATABASE_MIN_CONNECTIONS:-1}
       
       # Encryption/KMS
       KMS_PROVIDER: ${KMS_PROVIDER:-hashicorp}
@@ -117,6 +119,12 @@ services:
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT:-http://localstack:4566}
       NATS_URL: ${NATS_URL:-nats://nats:4222}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
+      
+      # Memory optimization settings
+      GRAPH_CACHE_ENABLED: ${GRAPH_CACHE_ENABLED:-true}
+      GRAPH_CACHE_TTL_SECONDS: ${GRAPH_CACHE_TTL_SECONDS:-60}
+      SESSION_CACHE_MAX_ENTRIES: ${SESSION_CACHE_MAX_ENTRIES:-1000}
+      TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
     ports:
       - "${API_SERVICE_PORT:-8080}:8080"
     volumes:
@@ -135,6 +143,12 @@ services:
     networks:
       - health-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 300m
+        reservations:
+          memory: 200m
 
   # Admin UI (React Frontend)
   admin-ui:
@@ -166,6 +180,12 @@ services:
     networks:
       - health-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 150m
+        reservations:
+          memory: 100m
 
   # Client App (React Frontend)
   client-app:
@@ -192,6 +212,12 @@ services:
     networks:
       - health-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 150m
+        reservations:
+          memory: 100m
 
   # LocalStack - Local AWS Services (S3, KMS, etc.)
   localstack:

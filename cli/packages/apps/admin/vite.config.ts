@@ -20,6 +20,21 @@ export default defineConfig({
     outDir: process.env.VITE_BUILD_OUT_DIR || "dist",
     sourcemap: process.env.VITE_SOURCEMAP === "true",
     minify: process.env.VITE_MINIFY !== "false" ? "esbuild" : false,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor libraries
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "query-vendor": ["@tanstack/react-query"],
+          "ui-vendor": ["@health-v1/ui-components"],
+          // Shared libraries
+          "shared": ["@health-v1/shared"],
+        },
+      },
+    },
+    // Enable tree shaking
+    treeshake: true,
   },
   clearScreen: false,
   envPrefix: ["VITE_", "TAURI_"],
