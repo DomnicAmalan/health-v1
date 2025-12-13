@@ -1,4 +1,4 @@
-import { Link, useLocation } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { LayoutDashboard, Lock, Globe, Settings, LogOut, Shield, Key, Users } from 'lucide-react';
 import { cn } from '@health-v1/ui-components';
 import { useAuthStore } from '@/stores/authStore';
@@ -57,7 +57,13 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: '/login' });
+  };
 
   return (
     <div className="w-64 border-r bg-background h-full flex flex-col">
@@ -92,7 +98,7 @@ export function Sidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start"
-          onClick={() => logout()}
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Logout

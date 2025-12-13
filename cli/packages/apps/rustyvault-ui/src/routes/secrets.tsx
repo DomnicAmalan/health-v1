@@ -1,33 +1,423 @@
-import { Card, CardContent, CardHeader, CardTitle, Stack, Button } from '@health-v1/ui-components';
-import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { secretsApi } from '@/lib/api';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Badge,
+  Alert,
+  AlertDescription,
+} from '@health-v1/ui-components';
+import { Plus, Trash2, Edit, Folder, File, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+interface SecretPath {
+  path: string;
+  isDirectory: boolean;
+}
 
 export function SecretsPage() {
-  return (
-    <div className="p-6">
-      <Stack spacing="lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Secrets</h1>
-            <p className="text-muted-foreground">Manage your secrets and key-value pairs</p>
-          </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Secret
-          </Button>
-        </div>
+  const queryClient = useQueryClient();
+  const [currentPath, setCurrentPath] = useState('');
+  const [selectedSecret, setSelectedSecret] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newSecretPath, setNewSecretPath] = useState('');
+  const [secretData, setSecretData] = useState<Record<string, string>>({});
+  const [newKey, setNewKey] = useState('');
+  const [newValue, setNewValue] = useState('');
 
-        <Card>
+  // Fetch secrets list
+  const { data: secrets, isLoading, error } = useQuery({
+    queryKey: ['secrets', currentPath],
+    queryFn: () => secretsApi.list(currentPath),
+    enabled: true,
+  });
+
+  // Fetch selected secret
+  const { data: secretDetails, isLoading: isLoadingSecret } = useQuery({
+    queryKey: ['secret', selectedSecret],
+    queryFn: () => secretsApi.read(selectedSecret!),
+    enabled: !!selectedSecret,
+    onSuccess: (data) => {
+      setSecretData(data.data || {});
+    },
+  });
+
+  // Create/update secret mutation
+  const saveSecretMutation = useMutation({
+    mutationFn: ({ path, data }: { path: string; data: Record<string, any> }) =>
+      secretsApi.write(path, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['secrets'] });
+      queryClient.invalidateQueries({ queryKey: ['secret', selectedSecret] });
+      setIsCreating(false);
+      setNewSecretPath('');
+      setSecretData({});
+    },
+  });
+
+  // Delete secret mutation
+  const deleteSecretMutation = useMutation({
+    mutationFn: (path: string) => secretsApi.delete(path),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['secrets'] });
+      if (selectedSecret === currentPath) {
+        setSelectedSecret(null);
+      }
+    },
+  });
+
+  const handleCreateSecret = () => {
+    if (newSecretPath && Object.keys(secretData).length > 0) {
+      saveSecretMutation.mutate({ path: newSecretPath, data: secretData });
+    }
+  };
+
+  const handleUpdateSecret = () => {
+    if (selectedSecret && Object.keys(secretData).length > 0) {
+      saveSecretMutation.mutate({ path: selectedSecret, data: secretData });
+    }
+  };
+
+  const handleAddKeyValue = () => {
+    if (newKey && newValue) {
+      setSecretData({ ...secretData, [newKey]: newValue });
+      setNewKey('');
+      setNewValue('');
+    }
+  };
+
+  const handleRemoveKey = (key: string) => {
+    const newData = { ...secretData };
+    delete newData[key];
+    setSecretData(newData);
+  };
+
+  const pathParts = currentPath.split('/').filter(Boolean);
+  const breadcrumbs = pathParts.map((part, index) => ({
+    name: part,
+    path: pathParts.slice(0, index + 1).join('/'),
+  }));
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Secrets</h1>
+          <p className="text-muted-foreground">Manage your secrets and key-value pairs</p>
+        </div>
+        <Button
+          onClick={() => {
+            setIsCreating(true);
+            setSelectedSecret(null);
+            setNewSecretPath('');
+            setSecretData({});
+          }}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Secret
+        </Button>
+      </div>
+
+      {/* Breadcrumbs */}
+      {currentPath && (
+        <div className="flex items-center gap-2 text-sm">
+          <button
+            onClick={() => setCurrentPath('')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            root
+          </button>
+          {breadcrumbs.map((crumb) => (
+            <div key={crumb.path} className="flex items-center gap-2">
+              <span className="text-muted-foreground">/</span>
+              <button
+                onClick={() => setCurrentPath(crumb.path)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {crumb.name}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Secrets List */}
+        <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Secrets Management</CardTitle>
+            <CardTitle className="text-lg">Secrets</CardTitle>
+            <CardDescription>
+              {isLoading ? 'Loading...' : `${secrets?.length || 0} ${secrets?.length === 1 ? 'item' : 'items'}`}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Secrets management interface will be implemented here using shared components.
-            </p>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {error instanceof Error ? error.message : 'Failed to load secrets'}
+                </AlertDescription>
+              </Alert>
+            ) : secrets && secrets.length > 0 ? (
+              <div className="space-y-2">
+                {secrets.map((secret) => {
+                  const isDirectory = secret.endsWith('/');
+                  const secretName = isDirectory ? secret.slice(0, -1) : secret;
+                  const fullPath = currentPath ? `${currentPath}/${secretName}` : secretName;
+
+                  return (
+                    <div
+                      key={secret}
+                      className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
+                        selectedSecret === fullPath
+                          ? 'bg-primary/10 border-primary'
+                          : 'hover:bg-accent'
+                      }`}
+                      onClick={() => {
+                        if (isDirectory) {
+                          setCurrentPath(fullPath);
+                          setSelectedSecret(null);
+                        } else {
+                          setSelectedSecret(fullPath);
+                          setIsCreating(false);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isDirectory ? (
+                          <Folder className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <File className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="font-medium">{secretName}</span>
+                      </div>
+                      {isDirectory && (
+                        <Badge variant="secondary">Directory</Badge>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No secrets found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
-      </Stack>
+
+        {/* Secret Editor */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">
+              {isCreating ? 'Create New Secret' : selectedSecret ? `Secret: ${selectedSecret}` : 'Select a Secret'}
+            </CardTitle>
+            <CardDescription>
+              {isCreating
+                ? 'Create a new secret with key-value pairs'
+                : selectedSecret
+                ? 'View and edit secret data'
+                : 'Select a secret from the list to view details'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isCreating ? (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="secret-path">Secret Path</Label>
+                  <Input
+                    id="secret-path"
+                    value={newSecretPath}
+                    onChange={(e) => setNewSecretPath(e.target.value)}
+                    placeholder="myapp/database/password"
+                    className="font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Use forward slashes (/) to create nested paths
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Key-Value Pairs</Label>
+                  {Object.keys(secretData).length > 0 ? (
+                    <div className="space-y-2 border rounded-md p-3">
+                      {Object.entries(secretData).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <div className="flex-1 grid grid-cols-2 gap-2">
+                            <Input value={key} readOnly className="font-mono text-sm" />
+                            <Input value={value} readOnly className="font-mono text-sm" />
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveKey(key)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No key-value pairs added yet</p>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Key"
+                    value={newKey}
+                    onChange={(e) => setNewKey(e.target.value)}
+                    className="font-mono"
+                  />
+                  <Input
+                    placeholder="Value"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                    className="font-mono"
+                    type="password"
+                  />
+                  <Button onClick={handleAddKeyValue} disabled={!newKey || !newValue}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCreateSecret}
+                    disabled={saveSecretMutation.isPending || !newSecretPath || Object.keys(secretData).length === 0}
+                  >
+                    {saveSecretMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Create Secret
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsCreating(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : selectedSecret ? (
+              <div className="space-y-4">
+                {isLoadingSecret ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label>Key-Value Pairs</Label>
+                      {Object.keys(secretData).length > 0 ? (
+                        <div className="space-y-2 border rounded-md p-3">
+                          {Object.entries(secretData).map(([key, value]) => (
+                            <div key={key} className="flex items-center gap-2">
+                              <div className="flex-1 grid grid-cols-2 gap-2">
+                                <Input
+                                  value={key}
+                                  onChange={(e) => {
+                                    const newData = { ...secretData };
+                                    delete newData[key];
+                                    newData[e.target.value] = value;
+                                    setSecretData(newData);
+                                  }}
+                                  className="font-mono text-sm"
+                                />
+                                <Input
+                                  value={value}
+                                  onChange={(e) => setSecretData({ ...secretData, [key]: e.target.value })}
+                                  className="font-mono text-sm"
+                                  type="password"
+                                />
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveKey(key)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No data in this secret</p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Key"
+                        value={newKey}
+                        onChange={(e) => setNewKey(e.target.value)}
+                        className="font-mono"
+                      />
+                      <Input
+                        placeholder="Value"
+                        value={newValue}
+                        onChange={(e) => setNewValue(e.target.value)}
+                        className="font-mono"
+                        type="password"
+                      />
+                      <Button onClick={handleAddKeyValue} disabled={!newKey || !newValue}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleUpdateSecret}
+                        disabled={saveSecretMutation.isPending || Object.keys(secretData).length === 0}
+                      >
+                        {saveSecretMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Save Changes
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => deleteSecretMutation.mutate(selectedSecret)}
+                        disabled={deleteSecretMutation.isPending}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {deleteSecretMutation.isPending ? 'Deleting...' : 'Delete'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Select a secret from the list to view and edit</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
-

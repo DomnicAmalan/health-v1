@@ -30,36 +30,45 @@ export interface SecretListResponse {
 }
 
 export const secretsApi = {
-  read: async (mountPath: string, path: string, version?: number): Promise<SecretResponse> => {
-    const url = `/${mountPath}/data/${path}`;
-    const params = version ? { version: version.toString() } : undefined;
-    return apiClient.get<SecretResponse>(url, { params });
+  read: async (path: string): Promise<SecretResponse> => {
+    // Backend uses /v1/secret/{path} for KV v1
+    const url = `/secret/${path}`;
+    const response = await apiClient.get<{ data: SecretData }>(url);
+    return {
+      data: response.data || {},
+      metadata: {
+        created_time: new Date().toISOString(),
+        current_version: 1,
+        max_versions: 0,
+        oldest_version: 1,
+        updated_time: new Date().toISOString(),
+        versions: {},
+      },
+    };
   },
 
-  write: async (mountPath: string, path: string, data: SecretData): Promise<void> => {
-    const url = `/${mountPath}/data/${path}`;
-    await apiClient.post(url, { data });
+  write: async (path: string, data: SecretData): Promise<void> => {
+    // Backend uses /v1/secret/{path} for KV v1
+    const url = `/secret/${path}`;
+    await apiClient.post(url, data);
   },
 
-  list: async (mountPath: string, path: string = ''): Promise<string[]> => {
-    const url = `/${mountPath}/data/${path}`.replace(/\/+$/, '') || `/${mountPath}/data`;
-    const response = await apiClient.list<SecretListResponse>(url);
-    return response.keys || [];
+  list: async (path: string = ''): Promise<string[]> => {
+    // Backend uses /v1/secret/{path}/ for listing (trailing slash)
+    const url = path ? `/secret/${path}/` : '/secret/';
+    try {
+      const response = await apiClient.get<SecretListResponse>(url);
+      return response.keys || [];
+    } catch (error) {
+      // If list fails, return empty array
+      return [];
+    }
   },
 
-  getMetadata: async (mountPath: string, path: string): Promise<SecretMetadata> => {
-    const url = `/${mountPath}/metadata/${path}`;
-    return apiClient.get<SecretMetadata>(url);
-  },
-
-  delete: async (mountPath: string, path: string, versions: number[]): Promise<void> => {
-    const url = `/${mountPath}/delete/${path}`;
-    await apiClient.post(url, { versions });
-  },
-
-  destroy: async (mountPath: string, path: string, versions: number[]): Promise<void> => {
-    const url = `/${mountPath}/destroy/${path}`;
-    await apiClient.post(url, { versions });
+  delete: async (path: string): Promise<void> => {
+    // Backend uses /v1/secret/{path} for deletion
+    const url = `/secret/${path}`;
+    await apiClient.delete(url);
   },
 };
 

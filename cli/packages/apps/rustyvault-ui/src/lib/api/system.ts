@@ -59,13 +59,25 @@ export interface UnsealResponse {
   progress: number;
 }
 
+export interface InitRequest {
+  secret_shares?: number;
+  secret_threshold?: number;
+}
+
+export interface InitResponse {
+  keys: string[];
+  keys_base64: string[];
+  root_token: string;
+  warning?: string;
+}
+
 export const systemApi = {
   getSealStatus: async (): Promise<SealStatus> => {
     return apiClient.get<SealStatus>('/sys/seal-status');
   },
 
   unseal: async (key: string, reset: boolean = false): Promise<UnsealResponse> => {
-    return apiClient.put<UnsealResponse>('/sys/unseal', { key, reset });
+    return apiClient.post<UnsealResponse>('/sys/unseal', { key, reset });
   },
 
   seal: async (): Promise<void> => {
@@ -94,6 +106,14 @@ export const systemApi = {
 
   disableAuthMethod: async (path: string): Promise<void> => {
     await apiClient.delete(`/sys/auth/${path}`);
+  },
+
+  init: async (request: InitRequest): Promise<InitResponse> => {
+    return apiClient.post<InitResponse>('/sys/init', request);
+  },
+
+  getHealth: async (): Promise<SealStatus> => {
+    return apiClient.get<SealStatus>('/sys/health');
   },
 };
 

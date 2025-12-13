@@ -7,6 +7,7 @@
 export * from "./lib/utils";
 
 // UI Components
+export * from "./components/alert";
 export * from "./components/avatar";
 export * from "./components/badge";
 export * from "./components/box";

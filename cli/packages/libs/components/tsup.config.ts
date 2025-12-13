@@ -3,6 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/components/alert.tsx",
     "src/components/button.tsx",
     "src/components/input.tsx",
     "src/components/label.tsx",
