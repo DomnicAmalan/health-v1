@@ -3,12 +3,15 @@
 use axum::{
     Router,
     middleware,
+    http::HeaderValue,
 };
 use std::sync::Arc;
+use tower_http::cors::{CorsLayer, AllowOrigin};
 use crate::http::handlers::{sys_handlers, secrets_handlers, policy_handlers, auth_handlers};
 use crate::http::middleware::auth_middleware;
 use crate::modules::auth::{TokenStore, UserPassBackend};
 use crate::modules::policy::PolicyStore;
+use crate::config::VaultSettings;
 
 /// App state for routes
 pub struct AppState {
@@ -20,7 +23,46 @@ pub struct AppState {
 
 /// Create the vault API router
 /// Using closures to capture state (no State extractor needed)
-pub fn create_router(state: Arc<AppState>) -> Router {
+pub fn create_router(state: Arc<AppState>, settings: &VaultSettings) -> Router {
+    // Configure CORS
+    // Note: Cannot use allow_credentials(true) with AllowOrigin::any() (*)
+    // When credentials are needed, must specify exact origins
+    let cors_layer = {
+        let origins: Vec<HeaderValue> = if settings.server.cors_allowed_origins.contains(&"*".to_string()) {
+            // If wildcard is specified, don't allow credentials (security restriction)
+            // For development, use specific origins instead
+            vec![
+                HeaderValue::from_static("http://localhost:5176"),
+                HeaderValue::from_static("http://localhost:3000"),
+                HeaderValue::from_static("http://localhost:5174"),
+                HeaderValue::from_static("http://localhost:5175"),
+            ]
+        } else {
+            // Allow specific origins
+            settings.server.cors_allowed_origins.iter()
+                .filter_map(|origin| origin.parse().ok())
+                .collect()
+        };
+        
+        CorsLayer::new()
+            .allow_origin(AllowOrigin::list(origins))
+            .allow_methods([
+                axum::http::Method::GET,
+                axum::http::Method::POST,
+                axum::http::Method::PUT,
+                axum::http::Method::DELETE,
+                axum::http::Method::PATCH,
+                axum::http::Method::OPTIONS,
+            ])
+            .allow_headers([
+                axum::http::header::CONTENT_TYPE,
+                axum::http::header::AUTHORIZATION,
+                axum::http::header::ACCEPT,
+                axum::http::HeaderName::from_static("x-rustyvault-token"),
+                axum::http::HeaderName::from_static("x-vault-token"),
+            ])
+            .allow_credentials(true)
+    };
     // Public routes (no auth required)
     let state_clone = state.clone();
     let public_routes = Router::new()
@@ -289,4 +331,5 @@ pub fn create_router(state: Arc<AppState>) -> Router {
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
+        .layer(cors_layer)
 }

@@ -9,6 +9,7 @@ use serde_json::{json, Value};
 use std::sync::Arc;
 use base64::Engine;
 use crate::http::routes::AppState;
+use crate::modules::auth::CreateTokenRequest;
 
 /// Health check endpoint
 pub async fn health_check() -> Result<Json<Value>, StatusCode> {
@@ -153,10 +154,33 @@ pub async fn init_with_state(
         .map(|k| base64::engine::general_purpose::STANDARD.encode(k.as_slice()))
         .collect();
 
-    Ok(Json(json!({
-        "keys": keys,
-        "keys_base64": keys,
-        "root_token": result.root_token,
-    })))
+    // Create root token in token store (vault is unsealed at this point)
+    if let Some(token_store) = &state.token_store {
+        match token_store.create_root_token().await {
+            Ok(stored_root_token) => {
+                // Use the stored root token instead of the UUID
+                Ok(Json(json!({
+                    "keys": keys,
+                    "keys_base64": keys,
+                    "root_token": stored_root_token,
+                })))
+            }
+            Err(e) => {
+                // Fallback to UUID if token creation fails
+                Ok(Json(json!({
+                    "keys": keys,
+                    "keys_base64": keys,
+                    "root_token": result.root_token,
+                    "warning": format!("Failed to create root token in store: {}", e),
+                })))
+            }
+        }
+    } else {
+        Ok(Json(json!({
+            "keys": keys,
+            "keys_base64": keys,
+            "root_token": result.root_token,
+        })))
+    }
 }
 

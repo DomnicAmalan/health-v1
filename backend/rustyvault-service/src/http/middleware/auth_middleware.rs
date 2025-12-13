@@ -57,6 +57,7 @@ const PUBLIC_PATHS: &[&str] = &[
     "/v1/sys/init",
     "/v1/sys/seal-status",
     "/v1/sys/unseal",
+    "/v1/auth/token/lookup", // Allow token validation without auth
 ];
 
 /// Paths that require authentication but always allowed (for token lookup)

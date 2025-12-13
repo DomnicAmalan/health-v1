@@ -190,4 +190,4 @@ cli/packages/apps/*/venv/
 # SonarQube
 .sonar/
 .scannerwork/
-sonar-project.properties.local
+sonar-project.properties.localVAULT_CREDENTIALS.md

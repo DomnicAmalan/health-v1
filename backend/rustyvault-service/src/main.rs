@@ -76,7 +76,7 @@ async fn async_main() -> Result<(), String> {
     info!("Skipping migrations (handled by api-service)");
 
     // Initialize physical storage for barrier data
-    let storage_path = settings.storage.path
+    let storage_path = settings.storage.path.clone()
         .unwrap_or_else(|| "./vault-data".to_string());
     let physical_backend = Arc::new(storage::physical_file::FileBackend::new(&storage_path)
         .map_err(|e| format!("Failed to create file backend: {}", e))?);
@@ -127,7 +127,7 @@ async fn async_main() -> Result<(), String> {
     });
 
     // Create router - using closures to capture state
-    let app = http::routes::create_router(app_state);
+    let app = http::routes::create_router(app_state, &settings);
 
     // Start server - need to convert Router<Arc<AppState>> to service
     let addr = SocketAddr::from(([0, 0, 0, 0], settings.server.port));

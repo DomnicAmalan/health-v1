@@ -190,7 +190,7 @@ services:
       VAULT_SERVER_PORT: ${VAULT_SERVER_PORT:-8200}
       
       # CORS Configuration
-      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS:-*}
+      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS:-http://localhost:5176,http://localhost:5174,http://localhost:5175}
       
       # Database
       DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
@@ -219,7 +219,7 @@ services:
       # Memory optimization
       TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
     ports:
-      - "${VAULT_SERVICE_PORT:-8200}:8200"
+      - "${VAULT_SERVICE_PORT:-8201}:8200"
     volumes:
       - rustyvault_data:/app/vault-data
       - rustyvault_service_data:/app/data

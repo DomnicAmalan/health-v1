@@ -12,12 +12,6 @@ export default defineConfig({
   server: {
     port: Number(process.env.VITE_PORT) || 3000,
     host: process.env.VITE_HOST || "localhost",
-    proxy: {
-      "/v1": {
-        target: process.env.VITE_API_BASE_URL || "http://127.0.0.1:8201",
-        changeOrigin: true,
-      },
-    },
   },
   build: {
     outDir: "dist",
