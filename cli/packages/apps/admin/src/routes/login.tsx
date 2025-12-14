@@ -11,11 +11,13 @@ import {
   Stack,
 } from "@lazarus-life/ui-components";
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, isLoading, error, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState("");
@@ -36,12 +38,12 @@ export function LoginPage() {
 
     // Basic validation
     if (!email || !password) {
-      setLocalError("Email and password are required");
+      setLocalError(t("login.errors.emailPasswordRequired"));
       return;
     }
 
     if (!email.includes("@")) {
-      setLocalError("Please enter a valid email address");
+      setLocalError(t("login.errors.invalidEmail"));
       return;
     }
 
@@ -52,7 +54,7 @@ export function LoginPage() {
       navigate({ to: redirectTo as "/" });
     } catch (err) {
       // Error is handled by auth store
-      setLocalError(err instanceof Error ? err.message : "Login failed");
+      setLocalError(err instanceof Error ? err.message : t("login.errors.loginFailed"));
     }
   };
 
@@ -64,19 +66,22 @@ export function LoginPage() {
       direction="column"
     >
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Admin Login</CardTitle>
-          <CardDescription>Sign in to access the admin panel</CardDescription>
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/logo-main.png" alt={t("login.title")} className="h-16 w-16" />
+          </div>
+          <CardTitle>{t("login.title")}</CardTitle>
+          <CardDescription>{t("login.subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <Stack spacing="md">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("login.fields.email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder={t("login.placeholders.email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
@@ -87,11 +92,11 @@ export function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("login.fields.password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("login.placeholders.password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -115,10 +120,10 @@ export function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t("login.actions.signingIn")}
                 </>
               ) : (
-                "Sign In"
+                t("login.actions.signIn")
               )}
             </Button>
           </form>

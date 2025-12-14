@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Stack } from "@/components/ui/stack";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { Settings } from "lucide-react";
 import { ColorBlindModeSelector } from "./ColorBlindModeSelector";
 import { FontSizeSelector } from "./FontSizeSelector";
@@ -28,6 +29,7 @@ interface AccessibilityPanelProps {
 }
 
 export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelProps) {
+  const { t } = useTranslation();
   const { isOpen, onClose, onToggle } = useDisclosure("accessibility-panel");
   const preferences = useAccessibilityStore((state) => state.preferences);
   const resetPreferences = useAccessibilityStore((state) => state.resetPreferences);
@@ -39,8 +41,8 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Open accessibility settings"
-            title="Accessibility Settings"
+            aria-label={t("accessibility.openAccessibilitySettings")}
+            title={t("accessibility.accessibilitySettings")}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -48,13 +50,13 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
       )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Accessibility Settings</DialogTitle>
+          <DialogTitle>{t("accessibility.accessibilitySettings")}</DialogTitle>
         </DialogHeader>
 
         <Stack spacing="lg" className="mt-4">
           {/* Visual Accessibility */}
           <Box>
-            <h3 className="text-lg font-semibold mb-4">Visual Accessibility</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("accessibility.visualAccessibility")}</h3>
             <Stack spacing="md">
               <HighContrastToggle />
               <FontSizeSelector />
@@ -66,11 +68,11 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
 
           {/* Voice Commands */}
           <Box>
-            <h3 className="text-lg font-semibold mb-4">Voice Commands</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("accessibility.voiceCommands")}</h3>
             <Stack spacing="md">
               <Box className="flex items-center justify-between">
                 <label htmlFor="voice-enabled" className="text-sm">
-                  Enable Voice Commands
+                  {t("accessibility.enableVoiceCommands")}
                 </label>
                 <input
                   id="voice-enabled"
@@ -89,7 +91,7 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
                   <Box className="flex items-center gap-2">
                     <VoiceCommandButton />
                     <span className="text-xs text-muted-foreground">
-                      Click to start/stop voice recognition
+                      {t("accessibility.clickToStartStopVoice")}
                     </span>
                   </Box>
                   <Separator />
@@ -103,11 +105,11 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
 
           {/* Screen Reader */}
           <Box>
-            <h3 className="text-lg font-semibold mb-4">Screen Reader</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("accessibility.screenReader")}</h3>
             <Stack spacing="sm">
               <Box className="flex items-center justify-between">
                 <label htmlFor="screen-reader-optimized" className="text-sm">
-                  Screen Reader Optimized
+                  {t("accessibility.screenReaderOptimized")}
                 </label>
                 <input
                   id="screen-reader-optimized"
@@ -123,7 +125,7 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
               </Box>
               <Box className="flex items-center justify-between">
                 <label htmlFor="announce-changes" className="text-sm">
-                  Announce Page Changes
+                  {t("accessibility.announcePageChanges")}
                 </label>
                 <input
                   id="announce-changes"
@@ -145,9 +147,9 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
           {/* Actions */}
           <Box className="flex justify-end gap-2">
             <Button variant="outline" onClick={resetPreferences}>
-              Reset to Defaults
+              {t("common.resetToDefaults")}
             </Button>
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClose}>{t("common.close")}</Button>
           </Box>
         </Stack>
       </DialogContent>

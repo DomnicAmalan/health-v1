@@ -40,6 +40,7 @@
     }
   },
   "navigation": {
+    "title": "Lazarus Life Vault",
     "dashboard": "Dashboard",
     "secrets": "Secrets",
     "policies": "Policies",
@@ -73,5 +74,66 @@
     "quickActionsDescription": "Manage your secrets, realms, and system configuration from the navigation menu.",
     "progress": "Progress",
     "unableToLoadStatus": "Unable to load system status"
+  },
+  "system": {
+    "title": "System",
+    "subtitle": "System operations and configuration",
+    "sealStatus": {
+      "status": "Status",
+      "version": "Version",
+      "unsealProgress": "Unseal Progress",
+      "storageType": "Storage Type",
+      "initialized": "Initialized",
+      "sealed": "Sealed",
+      "unableToLoad": "Unable to load seal status"
+    },
+    "unsealVault": "Unseal Vault",
+    "unsealKeyPlaceholder": "Enter unseal key",
+    "initializeVault": "Initialize Vault",
+    "secretShares": "Secret Shares",
+    "secretThreshold": "Secret Threshold",
+    "warnings": {
+      "storeKeysSeparately": "Store keys in separate secure locations",
+      "neverShareKeys": "Never share keys over insecure channels",
+      "cannotRecoverKeys": "You cannot recover these keys if lost"
+    },
+    "downloadUnsealKeys": "Download Unseal Keys",
+    "downloadTokenPlaceholder": "Enter download token from initialization",
+    "healthCheck": "Health Check"
+  },
+  "secrets": {
+    "title": "Secrets",
+    "secretPath": "Secret Path",
+    "secretPathPlaceholder": "myapp/database/password",
+    "noSecretsFound": "No secrets found",
+    "noDataInSecret": "No data in this secret",
+    "selectSecretToView": "Select a secret from the list to view and edit",
+    "keyPlaceholder": "Key",
+    "valuePlaceholder": "Value"
+  },
+  "policies": {
+    "title": "Policies",
+    "aclPolicies": "ACL Policies",
+    "policyNamePlaceholder": "my-policy",
+    "policyJsonPlaceholder": "Enter policy JSON..."
+  },
+  "tokens": {
+    "tokenNamePlaceholder": "my-app-token",
+    "policiesPlaceholder": "default, my-policy"
+  },
+  "users": {
+    "usernamePlaceholder": "johndoe",
+    "policiesPlaceholder": "default, my-policy"
+  },
+  "realms": {
+    "title": "Realms",
+    "notImplemented": "Realms feature is not yet implemented",
+    "features": {
+      "tenantIsolation": "Provide tenant isolation and security"
+    },
+    "comingSoon": "Coming Soon"
+  },
+  "security": {
+    "accessDenied": "Access Denied"
   }
 }

@@ -1,11 +1,13 @@
-import type { FormFieldProps } from "@lazarus-life/shared/types/components/form";
+import type { FormFieldProps as BaseFormFieldProps } from "@lazarus-life/shared/types/components/form";
 import type * as React from "react";
 import { cn } from "../lib/utils";
 import { Input } from "./input";
 import { Label } from "./label";
 
-// Re-export from shared
-export type { FormFieldProps };
+export interface FormFieldProps extends BaseFormFieldProps {
+  /** Screen reader label for required indicator */
+  requiredLabel?: string;
+}
 
 /**
  * Individual form field component
@@ -25,6 +27,7 @@ export function FormField({
   description,
   help,
   className,
+  requiredLabel = "required",
 }: FormFieldProps) {
   const hasError = Boolean(error);
 
@@ -33,7 +36,7 @@ export function FormField({
       <Label htmlFor={id} help={help}>
         {label}
         {required && (
-          <span className="text-destructive ml-1" aria-label="required">
+          <span className="text-destructive ml-1" aria-label={requiredLabel}>
             *
           </span>
         )}

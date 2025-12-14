@@ -27,28 +27,32 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = "DialogOverlay";
 
-const DialogContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof BaseDialog.Popup>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <BaseDialog.Popup
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[ending-style]:animate-out data-[ending-style]:fade-out-0 data-[ending-style]:zoom-out-95 data-[starting-style]:animate-in data-[starting-style]:fade-in-0 data-[starting-style]:zoom-in-95 sm:rounded-lg",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <BaseDialog.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </BaseDialog.Close>
-    </BaseDialog.Popup>
-  </DialogPortal>
-));
+interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof BaseDialog.Popup> {
+  /** Screen reader label for close button */
+  closeLabel?: string;
+}
+
+const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
+  ({ className, children, closeLabel = "Close", ...props }, ref) => (
+    <DialogPortal>
+      <DialogOverlay />
+      <BaseDialog.Popup
+        ref={ref}
+        className={cn(
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[ending-style]:animate-out data-[ending-style]:fade-out-0 data-[ending-style]:zoom-out-95 data-[starting-style]:animate-in data-[starting-style]:fade-in-0 data-[starting-style]:zoom-in-95 sm:rounded-lg",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        <BaseDialog.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+          <X className="h-4 w-4" />
+          <span className="sr-only">{closeLabel}</span>
+        </BaseDialog.Close>
+      </BaseDialog.Popup>
+    </DialogPortal>
+  )
+);
 DialogContent.displayName = "DialogContent";
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

@@ -9,7 +9,8 @@
     "name": "Full Name",
     "mobile": "Mobile Number",
     "email": "Email",
-    "required": "This field is required"
+    "required": "This field is required",
+    "newPatientRegistration": "New Patient Registration"
   },
   "actions": {
     "fillForm": "Fill Form",
@@ -24,6 +25,202 @@
     "fontSize": "Font Size",
     "colorBlindMode": "Color Blind Mode",
     "showCaptions": "Show Captions",
-    "keyboardNavigation": "Keyboard Navigation"
+    "keyboardNavigation": "Keyboard Navigation",
+    "visualAccessibility": "Visual Accessibility",
+    "screenReader": "Screen Reader",
+    "enableVoiceCommands": "Enable Voice Commands",
+    "clickToStartStopVoice": "Click to start/stop voice recognition",
+    "screenReaderOptimized": "Screen Reader Optimized",
+    "announcePageChanges": "Announce Page Changes",
+    "keyboardShortcuts": "Keyboard Shortcuts",
+    "toggleHighContrast": "Toggle high contrast mode",
+    "selectFontSize": "Select font size",
+    "selectColorBlindMode": "Select color blind mode",
+    "openVoiceCommandChatbox": "Open voice command chatbox",
+    "voiceCommandChatbox": "Voice command chatbox",
+    "closeChatbox": "Close chatbox",
+    "voiceCommandMessages": "Voice command messages",
+    "typeCommandOrUseVoice": "Type a command or use voice...",
+    "commandInput": "Command input",
+    "sendCommand": "Send command",
+    "commandRecognized": "Command recognized",
+    "voiceSpeed": "Voice Speed",
+    "voicePitch": "Voice Pitch",
+    "volume": "Volume"
+  },
+  "dashboard": {
+    "title": "Clinical Dashboard",
+    "welcomeBack": "Welcome back, {{name}}. Here's your overview.",
+    "quickActions": "Quick Actions",
+    "criticalAlerts": "Critical Alerts",
+    "upcomingTasks": "Upcoming Tasks",
+    "todaysPendingTasks": "Today's pending tasks",
+    "itemsRequiringAttention": "Items requiring immediate attention",
+    "fromLastWeek": "from last week"
+  },
+  "stats": {
+    "activePatients": "Active Patients",
+    "pendingOrders": "Pending Orders",
+    "resultsPendingReview": "Results Pending Review",
+    "todaysAppointments": "Today's Appointments"
+  },
+  "quickActions": {
+    "registerNewPatient": "Register New Patient",
+    "addNewPatient": "Add a new patient to the system",
+    "createClinicalNote": "Create Clinical Note",
+    "documentPatientEncounter": "Document patient encounter",
+    "enterOrder": "Enter Order",
+    "placeOrder": "Place lab, radiology, or medication order",
+    "scheduleAppointment": "Schedule Appointment",
+    "bookPatientAppointment": "Book patient appointment"
+  },
+  "alerts": {
+    "abnormalLabResults": "Abnormal Lab Results",
+    "resultsPendingReview": "{{count}} results pending physician review",
+    "medicationInteractions": "Medication Interactions",
+    "potentialInteractions": "{{count}} potential interactions detected",
+    "dischargeSummaries": "Discharge Summaries",
+    "pendingCompletion": "{{count}} pending completion",
+    "clinicalNotes": "Clinical Notes",
+    "notesAwaitingSignature": "{{count}} notes awaiting signature"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "profile": "Profile",
+    "updatePersonalInfo": "Update your personal information",
+    "notifications": "Notifications",
+    "configureNotifications": "Configure your notification preferences",
+    "emailNotifications": "Email Notifications",
+    "receiveEmailUpdates": "Receive email updates",
+    "pushNotifications": "Push Notifications",
+    "receivePushNotifications": "Receive push notifications",
+    "security": "Security",
+    "managePrivacySecurity": "Manage your privacy and security settings",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password"
+  },
+  "login": {
+    "title": "Sign In",
+    "secureAuth": "Secure authentication powered by OIDC",
+    "placeholders": {
+      "email": "you@example.com",
+      "password": "Enter your password"
+    }
+  },
+  "setup": {
+    "title": "Initial Setup",
+    "organizationDetails": "Organization Details",
+    "superAdminAccount": "Super Admin Account",
+    "fields": {
+      "organizationName": "Organization Name",
+      "organizationSlug": "Organization Slug",
+      "primaryDomain": "Primary Domain",
+      "adminEmail": "Admin Email",
+      "adminUsername": "Admin Username",
+      "adminPassword": "Admin Password",
+      "confirmPassword": "Confirm Password"
+    },
+    "placeholders": {
+      "organizationName": "Acme Healthcare",
+      "organizationSlug": "acme-healthcare",
+      "primaryDomain": "acme.com",
+      "adminEmail": "admin@example.com",
+      "adminUsername": "admin",
+      "adminPassword": "Enter a strong password",
+      "confirmPassword": "Confirm your password"
+    }
+  },
+  "clinical": {
+    "title": "Clinical Documentation",
+    "documentationTemplates": "Documentation Templates",
+    "selectTemplate": "Select a template to create documentation",
+    "templates": {
+      "progressNote": "Progress Note",
+      "progressNoteDesc": "Daily progress documentation",
+      "historyPhysical": "History & Physical",
+      "historyPhysicalDesc": "Initial patient assessment",
+      "dischargeSummary": "Discharge Summary",
+      "dischargeSummaryDesc": "Patient discharge documentation",
+      "operativeReport": "Operative Report",
+      "operativeReportDesc": "Procedure documentation"
+    }
+  },
+  "orders": {
+    "title": "Orders Management",
+    "subtitle": "Create and manage clinical orders",
+    "laboratory": "Laboratory",
+    "labOrders": "Lab orders and panels",
+    "radiology": "Radiology",
+    "imagingStudies": "Imaging studies",
+    "medications": "Medications",
+    "prescriptionOrders": "Prescription orders"
+  },
+  "patients": {
+    "overview": "Patient Overview",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "gender": "Gender",
+    "primaryCare": "Primary Care",
+    "lastVisit": "Last Visit",
+    "actions": {
+      "menu": "Patient actions menu",
+      "createNote": "Create new clinical note",
+      "scheduleAppointment": "Schedule appointment",
+      "viewResults": "View test results",
+      "viewMedications": "View medications"
+    }
+  },
+  "scheduling": {
+    "title": "Scheduling",
+    "subtitle": "Manage appointments and resource scheduling",
+    "appointmentsToday": "Appointments for today"
+  },
+  "pharmacy": {
+    "title": "Pharmacy",
+    "subtitle": "Medication management and prescription orders",
+    "medicationManagement": "Medication Management",
+    "prescriptionsAndOrders": "Prescriptions and medication orders"
+  },
+  "results": {
+    "title": "Results Review",
+    "resultsRequiringReview": "Results requiring physician review"
+  },
+  "revenue": {
+    "title": "Revenue Cycle",
+    "pendingClaims": "Pending Claims",
+    "awaitingSubmission": "Awaiting submission",
+    "arDays": "AR Days",
+    "avgDaysOutstanding": "Average days outstanding"
+  },
+  "analytics": {
+    "patientVolume": "Patient Volume",
+    "activePatients": "Active patients",
+    "admissionRate": "Admission Rate",
+    "thisMonth": "This month"
+  },
+  "security": {
+    "accessDenied": "Access Denied",
+    "noPermission": "You don't have permission to access this {{type}}.",
+    "requiredPermissions": "Required Permissions",
+    "vaultAccessRequired": "Vault Access Required",
+    "contactAdminVault": "Contact your administrator to update your vault policy."
+  },
+  "formBuilder": {
+    "title": "Physical Form Builder",
+    "formSettings": "Form Settings",
+    "addFields": "Add Fields",
+    "noFieldsYet": "No fields yet",
+    "addFieldsToStart": "Add fields from the sidebar to start building",
+    "fieldProperties": "Field Properties",
+    "groupProperties": "Group Properties",
+    "sectionProperties": "Section Properties",
+    "validation": "Validation",
+    "generatedCode": "Generated Code",
+    "quickPresets": "Quick Presets",
+    "canvasSettings": "Canvas Settings",
+    "snapToGrid": "Snap to Grid",
+    "wrapOverflow": "Wrap Overflow",
+    "printPreview": "Print Preview"
   }
 }

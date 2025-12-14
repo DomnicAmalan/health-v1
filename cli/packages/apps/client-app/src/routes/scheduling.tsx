@@ -2,6 +2,7 @@ import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Button } from "@lazarus-life/ui-components";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, Plus } from "lucide-react";
 
@@ -18,28 +19,30 @@ function SchedulingComponent() {
 }
 
 function SchedulingComponentInner() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Scheduling</h1>
-          <p className="text-muted-foreground mt-2">Manage appointments and resource scheduling</p>
+          <h1 className="text-3xl font-bold">{t("scheduling.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("scheduling.subtitle")}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Schedule Appointment
+          {t("quickActions.scheduleAppointment")}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Today's Schedule</CardTitle>
-          <CardDescription>Appointments for today</CardDescription>
+          <CardTitle>{t("scheduling.title")}</CardTitle>
+          <CardDescription>{t("scheduling.appointmentsToday")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No appointments scheduled for today.</p>
+            <p>{t("table.noData")}</p>
           </div>
         </CardContent>
       </Card>

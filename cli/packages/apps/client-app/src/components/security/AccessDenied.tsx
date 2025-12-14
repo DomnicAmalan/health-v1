@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Stack } from "@/components/ui/stack";
 import { usePermissions } from "@/hooks/security/usePermissions";
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { AlertCircle, Lock, Shield } from "lucide-react";
 
 interface AccessDeniedProps {
@@ -29,6 +30,7 @@ export function AccessDenied({
   onRequestAccess,
   vaultPath,
 }: AccessDeniedProps) {
+  const { t } = useTranslation();
   const { permissions, role } = usePermissions();
   const displayPermissions = currentPermissions || permissions;
 
@@ -40,20 +42,19 @@ export function AccessDenied({
         </Box>
 
         <Stack spacing="sm" align="center">
-          <h3 className="text-lg font-semibold">Access Denied</h3>
+          <h3 className="text-lg font-semibold">{t("security.accessDenied")}</h3>
           <p className="text-sm text-muted-foreground text-center">
-            You don't have permission to access this{" "}
-            {type === "route" ? "page" : type === "tab" ? "tab" : "resource"}.
+            {t("security.noPermission", { type: type === "route" ? "page" : type === "tab" ? "tab" : "resource" })}
           </p>
         </Stack>
 
         <Stack spacing="xs" className="w-full">
-          <Box className="text-sm font-medium">Resource:</Box>
+          <Box className="text-sm font-medium">{t("common.resource")}:</Box>
           <Box className="text-sm text-muted-foreground">{resource}</Box>
         </Stack>
 
         <Stack spacing="xs" className="w-full">
-          <Box className="text-sm font-medium">Required Permissions:</Box>
+          <Box className="text-sm font-medium">{t("security.requiredPermissions")}:</Box>
           <Stack spacing="xs">
             {requiredPermissions.map((perm) => (
               <Box key={perm} className="flex items-center gap-2 text-sm">
@@ -74,27 +75,27 @@ export function AccessDenied({
           <Stack spacing="xs" className="w-full">
             <Box className="text-sm font-medium flex items-center gap-2">
               <Shield className="h-4 w-4" />
-              Vault Access Required:
+              {t("security.vaultAccessRequired")}:
             </Box>
             <Box className="text-sm text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
               {vaultPath}
             </Box>
             <Box className="text-xs text-muted-foreground">
-              Contact your administrator to update your vault policy.
+              {t("security.contactAdminVault")}
             </Box>
           </Stack>
         )}
 
         {role && (
           <Stack spacing="xs" className="w-full">
-            <Box className="text-sm font-medium">Your Role:</Box>
+            <Box className="text-sm font-medium">{t("common.yourRole")}:</Box>
             <Box className="text-sm text-muted-foreground">{role}</Box>
           </Stack>
         )}
 
         {onRequestAccess && (
           <button onClick={onRequestAccess} className="text-sm text-primary hover:underline">
-            Request Access
+            {t("common.requestAccess")}
           </button>
         )}
       </Stack>

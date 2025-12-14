@@ -5,6 +5,7 @@
 
 import { Link, useLocation } from "@tanstack/react-router";
 import { useCanAccess } from "../../lib/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
   LayoutDashboard,
   Users,
@@ -20,7 +21,7 @@ import {
 import { cn } from "@lazarus-life/ui-components";
 
 interface NavItem {
-  name: string;
+  nameKey: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
   permission?: string; // Zanzibar resource for permission check
@@ -28,62 +29,62 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    name: "Dashboard",
+    nameKey: "navigation.dashboard",
     path: "/",
     icon: LayoutDashboard,
     permission: "page:dashboard",
   },
   {
-    name: "Users",
+    nameKey: "navigation.users",
     path: "/users",
     icon: Users,
     permission: "page:users",
   },
   {
-    name: "Organizations",
+    nameKey: "navigation.organizations",
     path: "/organizations",
     icon: Building2,
     permission: "page:organizations",
   },
   {
-    name: "Permissions",
+    nameKey: "navigation.permissions",
     path: "/permissions",
     icon: Shield,
     permission: "page:permissions",
   },
   {
-    name: "Zanzibar Relationships",
+    nameKey: "navigation.zanzibarRelationships",
     path: "/zanzibar-relationships",
     icon: Network,
     permission: "page:permissions",
   },
   {
-    name: "Roles",
+    nameKey: "navigation.roles",
     path: "/roles",
     icon: UserCog,
     permission: "page:roles",
   },
   {
-    name: "Groups",
+    nameKey: "navigation.groups",
     path: "/groups",
     icon: UsersRound,
     permission: "page:groups",
   },
   {
-    name: "UI Entities",
+    nameKey: "navigation.uiEntities",
     path: "/ui-entities",
     icon: FileText,
     permission: "page:ui-entities",
   },
   {
-    name: "Encryption",
+    nameKey: "navigation.encryption",
     path: "/encryption",
     icon: Key,
     permission: "page:encryption",
     // This is a parent item, we'll handle sub-items separately
   },
   {
-    name: "Services",
+    nameKey: "navigation.services",
     path: "/services",
     icon: Settings,
     permission: "page:services",
@@ -91,6 +92,7 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   
   // Check permissions for all nav items upfront
@@ -129,8 +131,9 @@ export function Sidebar() {
 
   return (
     <div className="w-64 border-r bg-background h-full">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">Lazarus Life Admin</h2>
+      <div className="p-4 flex items-center gap-2">
+        <img src="/logo-main.png" alt={t("navigation.adminPanel")} className="h-8 w-8" />
+        <h2 className="text-lg font-semibold">{t("navigation.adminPanel")}</h2>
       </div>
       <nav className="px-2 space-y-1">
         {visibleItems.map((item) => {
@@ -152,7 +155,7 @@ export function Sidebar() {
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.name}
+                  {t(item.nameKey)}
                 </Link>
                 {/* Encryption sub-items */}
                 {isActive && (
@@ -168,7 +171,7 @@ export function Sidebar() {
                         )}
                       >
                         <span className="w-2 h-2 rounded-full bg-current" />
-                        DEK Management
+                        {t("navigation.dekManagement")}
                       </Link>
                     )}
                     {canViewMasterKey && (
@@ -182,7 +185,7 @@ export function Sidebar() {
                         )}
                       >
                         <span className="w-2 h-2 rounded-full bg-current" />
-                        Master Key
+                        {t("navigation.masterKey")}
                       </Link>
                     )}
                   </div>
@@ -203,7 +206,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.name}
+              {t(item.nameKey)}
             </Link>
           );
         })}

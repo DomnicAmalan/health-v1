@@ -1,10 +1,13 @@
 {
   "branding": {
     "foundation": "Lazarus Life Foundation",
-    "tagline": "Empowering Healthcare"
+    "tagline": "Empowering Healthcare",
+    "appName": "Lazarus Life HIMS",
+    "hipaaCompliant": "HIPAA Compliant"
   },
   "common": {
     "save": "Save",
+    "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "delete": "Delete",
     "submit": "Submit",
@@ -25,6 +28,7 @@
     "no": "No",
     "create": "Create",
     "update": "Update",
+    "updatePassword": "Update Password",
     "add": "Add",
     "remove": "Remove",
     "view": "View",
@@ -47,6 +51,7 @@
     "filter": "Filter",
     "clear": "Clear",
     "reset": "Reset",
+    "resetToDefaults": "Reset to Defaults",
     "refresh": "Refresh",
     "export": "Export",
     "import": "Import",
@@ -55,7 +60,49 @@
     "copy": "Copy",
     "copied": "Copied!",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "requestAccess": "Request Access",
+    "somethingWentWrong": "Something went wrong",
+    "resource": "Resource",
+    "yourRole": "Your Role",
+    "comingSoon": "Coming Soon"
+  },
+  "sizes": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "extraLarge": "Extra Large",
+    "fullWidth": "Full Width",
+    "halfWidth": "Half Width",
+    "thirdWidth": "Third Width",
+    "quarterWidth": "Quarter Width",
+    "auto": "Auto"
+  },
+  "status": {
+    "critical": "Critical",
+    "urgent": "Urgent",
+    "pending": "Pending",
+    "completed": "Completed",
+    "directory": "Directory",
+    "system": "System"
+  },
+  "accessibility": {
+    "close": "Close",
+    "required": "required",
+    "openAccessibilitySettings": "Open accessibility settings",
+    "accessibilitySettings": "Accessibility Settings",
+    "dragToReorder": "Drag to reorder",
+    "skipToMainContent": "Skip to main content",
+    "mainNavigation": "Main navigation",
+    "mainContent": "Main content",
+    "pageActions": "Page actions",
+    "applicationTabs": "Application tabs"
+  },
+  "layout": {
+    "singleColumn": "Single Column",
+    "twoColumns": "Two Columns",
+    "threeColumns": "Three Columns",
+    "fourColumns": "Four Columns"
   },
   "errors": {
     "generic": "An error occurred",

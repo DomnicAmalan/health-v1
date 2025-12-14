@@ -2,6 +2,7 @@ import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Button } from "@lazarus-life/ui-components";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
@@ -18,36 +19,38 @@ function OrdersComponent() {
 }
 
 function OrdersComponentInner() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Orders Management</h1>
-          <p className="text-muted-foreground mt-2">Create and manage clinical orders</p>
+          <h1 className="text-3xl font-bold">{t("orders.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("orders.subtitle")}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          New Order
+          {t("quickActions.enterOrder")}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Laboratory</CardTitle>
-            <CardDescription>Lab orders and panels</CardDescription>
+            <CardTitle>{t("orders.laboratory")}</CardTitle>
+            <CardDescription>{t("orders.labOrders")}</CardDescription>
           </CardHeader>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Radiology</CardTitle>
-            <CardDescription>Imaging studies</CardDescription>
+            <CardTitle>{t("orders.radiology")}</CardTitle>
+            <CardDescription>{t("orders.imagingStudies")}</CardDescription>
           </CardHeader>
         </Card>
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Medications</CardTitle>
-            <CardDescription>Prescription orders</CardDescription>
+            <CardTitle>{t("orders.medications")}</CardTitle>
+            <CardDescription>{t("orders.prescriptionOrders")}</CardDescription>
           </CardHeader>
         </Card>
       </div>

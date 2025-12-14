@@ -1,6 +1,7 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Pill } from "lucide-react";
 
@@ -17,22 +18,24 @@ function PharmacyComponent() {
 }
 
 function PharmacyComponentInner() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Pharmacy</h1>
-        <p className="text-muted-foreground mt-2">Medication management and prescription orders</p>
+        <h1 className="text-3xl font-bold">{t("pharmacy.title")}</h1>
+        <p className="text-muted-foreground mt-2">{t("pharmacy.subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Medication Management</CardTitle>
-          <CardDescription>Prescriptions and medication orders</CardDescription>
+          <CardTitle>{t("pharmacy.medicationManagement")}</CardTitle>
+          <CardDescription>{t("pharmacy.prescriptionsAndOrders")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Pharmacy module coming soon.</p>
+            <p>{t("common.comingSoon")}</p>
           </div>
         </CardContent>
       </Card>

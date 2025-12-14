@@ -5,6 +5,7 @@ import { Input } from "@lazarus-life/ui-components";
 import { Label } from "@/components/ui/label";
 import { Stack } from "@/components/ui/stack";
 import { useAuthStore } from "@/stores/authStore";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, isLoading, error, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState("");
@@ -34,12 +36,12 @@ function LoginPage() {
 
     // Basic validation
     if (!email || !password) {
-      setLocalError("Email and password are required");
+      setLocalError(t("validation.required"));
       return;
     }
 
     if (!email.includes("@")) {
-      setLocalError("Please enter a valid email address");
+      setLocalError(t("validation.invalidEmail"));
       return;
     }
 
@@ -50,7 +52,7 @@ function LoginPage() {
       navigate({ to: redirectTo as "/" });
     } catch (err) {
       // Error is handled by auth store
-      setLocalError(err instanceof Error ? err.message : "Login failed");
+      setLocalError(err instanceof Error ? err.message : t("errors.generic"));
     }
   };
 
@@ -64,20 +66,23 @@ function LoginPage() {
       <Box className="w-full max-w-md space-y-8 rounded-lg border bg-card p-8 shadow-lg">
         <Stack spacing="lg">
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Sign In</h1>
+            <div className="flex justify-center mb-4">
+              <img src="/logo-main.png" alt={t("branding.appName")} className="h-16 w-16" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">{t("auth.signIn")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Enter your credentials to access your account
+              {t("login.title")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <Stack spacing="md">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("login.placeholders.email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
@@ -88,11 +93,11 @@ function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("login.placeholders.password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -116,16 +121,16 @@ function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t("auth.signingIn")}
                 </>
               ) : (
-                "Sign In"
+                t("auth.signIn")
               )}
             </Button>
           </form>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>Secure authentication powered by OIDC</p>
+            <p>{t("login.secureAuth")}</p>
           </div>
         </Stack>
       </Box>

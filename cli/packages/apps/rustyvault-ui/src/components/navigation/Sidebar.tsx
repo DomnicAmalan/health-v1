@@ -3,9 +3,10 @@ import { LayoutDashboard, Lock, Globe, Settings, LogOut, Shield, Key, Users } fr
 import { cn } from '@lazarus-life/ui-components';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@lazarus-life/ui-components';
+import { useTranslation } from '@lazarus-life/shared/i18n';
 
 interface NavItem {
-  name: string;
+  nameKey: string;
   path: string;
   icon: React.ComponentType<{ className?: string }>;
   section?: string;
@@ -13,42 +14,42 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    name: 'Dashboard',
+    nameKey: 'navigation.dashboard',
     path: '/',
     icon: LayoutDashboard,
   },
   {
-    name: 'Secrets',
+    nameKey: 'navigation.secrets',
     path: '/secrets',
     icon: Lock,
     section: 'Secrets',
   },
   {
-    name: 'Policies',
+    nameKey: 'navigation.policies',
     path: '/policies',
     icon: Shield,
     section: 'Access Control',
   },
   {
-    name: 'Tokens',
+    nameKey: 'navigation.tokens',
     path: '/tokens',
     icon: Key,
     section: 'Authentication',
   },
   {
-    name: 'Users',
+    nameKey: 'navigation.users',
     path: '/users',
     icon: Users,
     section: 'Authentication',
   },
   {
-    name: 'Realms',
+    nameKey: 'navigation.realms',
     path: '/realms',
     icon: Globe,
     section: 'Multi-tenancy',
   },
   {
-    name: 'System',
+    nameKey: 'navigation.system',
     path: '/system',
     icon: Settings,
     section: 'Administration',
@@ -56,6 +57,7 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
@@ -67,8 +69,9 @@ export function Sidebar() {
 
   return (
     <div className="w-64 border-r bg-background h-full flex flex-col">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Lazarus Life Vault</h2>
+      <div className="p-4 border-b flex items-center gap-2">
+        <img src="/logo-main.png" alt={t("navigation.title")} className="h-8 w-8" />
+        <h2 className="text-lg font-semibold">{t("navigation.title")}</h2>
       </div>
       <nav className="px-2 py-4 space-y-1 flex-1">
         {navItems.map((item) => {
@@ -89,7 +92,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.name}
+              {t(item.nameKey)}
             </Link>
           );
         })}
@@ -101,7 +104,7 @@ export function Sidebar() {
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />
-          Logout
+          {t("common.logout")}
         </Button>
       </div>
     </div>

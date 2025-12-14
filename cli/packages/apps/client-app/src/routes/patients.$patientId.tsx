@@ -5,6 +5,7 @@ import { Button } from "@lazarus-life/ui-components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerComponent } from "@/components/ui/component-registry";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Calendar, FileText, Pill } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -22,6 +23,7 @@ function PatientDetailComponent() {
 }
 
 function PatientDetailComponentInner() {
+  const { t } = useTranslation();
   const { patientId } = Route.useParams();
   const newNoteButtonRef = useRef<HTMLButtonElement>(null);
   const scheduleButtonRef = useRef<HTMLButtonElement>(null);
@@ -145,8 +147,8 @@ function PatientDetailComponentInner() {
         </div>
         <div className="flex gap-2">
           <Badge variant="secondary">{patient.status}</Badge>
-          <Button variant="outline" aria-label="Patient actions menu">
-            Actions
+          <Button variant="outline" aria-label={t("patients.actions.menu")}>
+            {t("common.actions")}
           </Button>
         </div>
       </div>
@@ -154,20 +156,20 @@ function PatientDetailComponentInner() {
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Patient Overview</CardTitle>
+            <CardTitle>{t("patients.overview")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Gender</p>
+                <p className="text-sm text-muted-foreground">{t("patients.gender")}</p>
                 <p className="font-medium">{patient.gender}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Primary Care</p>
+                <p className="text-sm text-muted-foreground">{t("patients.primaryCare")}</p>
                 <p className="font-medium">{patient.primaryCare}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Last Visit</p>
+                <p className="text-sm text-muted-foreground">{t("patients.lastVisit")}</p>
                 <p className="font-medium">{patient.lastVisit}</p>
               </div>
             </div>
@@ -176,57 +178,57 @@ function PatientDetailComponentInner() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle>{t("patients.quickActions")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button
               ref={newNoteButtonRef}
               variant="outline"
               className="w-full justify-start"
-              aria-label="Create new clinical note"
+              aria-label={t("patients.actions.createNote")}
               onClick={() => {
                 // In a real app, this would open a note creation form
                 console.log("New note clicked");
               }}
             >
               <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
-              New Note
+              {t("quickActions.createClinicalNote")}
             </Button>
             <Button
               ref={scheduleButtonRef}
               variant="outline"
               className="w-full justify-start"
-              aria-label="Schedule appointment"
+              aria-label={t("patients.actions.scheduleAppointment")}
               onClick={() => {
                 console.log("Schedule clicked");
               }}
             >
               <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
-              Schedule
+              {t("quickActions.scheduleAppointment")}
             </Button>
             <Button
               ref={viewResultsButtonRef}
               variant="outline"
               className="w-full justify-start"
-              aria-label="View test results"
+              aria-label={t("patients.actions.viewResults")}
               onClick={() => {
                 console.log("View results clicked");
               }}
             >
               <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
-              View Results
+              {t("results.title")}
             </Button>
             <Button
               ref={medicationsButtonRef}
               variant="outline"
               className="w-full justify-start"
-              aria-label="View medications"
+              aria-label={t("patients.actions.viewMedications")}
               onClick={() => {
                 console.log("Medications clicked");
               }}
             >
               <Pill className="mr-2 h-4 w-4" aria-hidden="true" />
-              Medications
+              {t("orders.medications")}
             </Button>
           </CardContent>
         </Card>
@@ -234,11 +236,11 @@ function PatientDetailComponentInner() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>{t("patients.recentActivity")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
-            <p>No recent activity found.</p>
+            <p>{t("table.noData")}</p>
           </div>
         </CardContent>
       </Card>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
 import { useOpenTab } from "@/stores/tabStore";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/")({
 });
 
 function DashboardComponent() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const openTab = useOpenTab();
 
@@ -39,14 +41,14 @@ function DashboardComponent() {
   };
   const stats = [
     {
-      title: "Active Patients",
+      title: t("stats.activePatients"),
       value: "1,247",
       change: "+12%",
       icon: Users,
       link: "/patients",
     },
     {
-      title: "Pending Orders",
+      title: t("stats.pendingOrders"),
       value: "23",
       change: "-5%",
       icon: ClipboardList,
@@ -54,14 +56,14 @@ function DashboardComponent() {
       urgent: true,
     },
     {
-      title: "Results Pending Review",
+      title: t("stats.resultsPendingReview"),
       value: "47",
       change: "+8%",
       icon: Activity,
       link: "/results",
     },
     {
-      title: "Today's Appointments",
+      title: t("stats.todaysAppointments"),
       value: "156",
       change: "+3%",
       icon: Calendar,
@@ -71,29 +73,29 @@ function DashboardComponent() {
 
   const quickActions = [
     {
-      title: "Register New Patient",
-      description: "Add a new patient to the system",
+      title: t("quickActions.registerNewPatient"),
+      description: t("quickActions.addNewPatient"),
       icon: Users,
       link: "/patients/new",
       color: "primary",
     },
     {
-      title: "Create Clinical Note",
-      description: "Document patient encounter",
+      title: t("quickActions.createClinicalNote"),
+      description: t("quickActions.documentPatientEncounter"),
       icon: FileText,
       link: "/clinical/new",
       color: "secondary",
     },
     {
-      title: "Enter Order",
-      description: "Place lab, radiology, or medication order",
+      title: t("quickActions.enterOrder"),
+      description: t("quickActions.placeOrder"),
       icon: ClipboardList,
       link: "/orders/new",
       color: "secondary",
     },
     {
-      title: "Schedule Appointment",
-      description: "Book patient appointment",
+      title: t("quickActions.scheduleAppointment"),
+      description: t("quickActions.bookPatientAppointment"),
       icon: Calendar,
       link: "/scheduling/new",
       color: "secondary",
@@ -103,8 +105,8 @@ function DashboardComponent() {
   return (
     <Stack spacing="lg">
       <Stack spacing="xs">
-        <h1 className="text-3xl font-bold">Clinical Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, Dr. John Doe. Here's your overview.</p>
+        <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
+        <p className="text-muted-foreground">{t("dashboard.welcomeBack", { name: "Dr. John Doe" })}</p>
       </Stack>
 
       {/* Stats Grid */}
@@ -126,11 +128,11 @@ function DashboardComponent() {
               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                 {stat.urgent && (
                   <Badge variant="destructive" className="text-xs">
-                    Urgent
+                    {t("status.urgent")}
                   </Badge>
                 )}
                 <span className={stat.change.startsWith("+") ? "text-green-600" : "text-red-600"}>
-                  {stat.change} from last week
+                  {stat.change} {t("dashboard.fromLastWeek")}
                 </span>
               </div>
             </CardContent>
@@ -140,7 +142,7 @@ function DashboardComponent() {
 
       {/* Quick Actions */}
       <Box>
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("dashboard.quickActions")}</h2>
         <Box className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => (
             <Card
@@ -168,25 +170,25 @@ function DashboardComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
-              Critical Alerts
+              {t("dashboard.criticalAlerts")}
             </CardTitle>
-            <CardDescription>Items requiring immediate attention</CardDescription>
+            <CardDescription>{t("dashboard.itemsRequiringAttention")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Stack spacing="md">
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
-                  <p className="font-medium">Abnormal Lab Results</p>
+                  <p className="font-medium">{t("alerts.abnormalLabResults")}</p>
                   <p className="text-sm text-muted-foreground">
-                    3 results pending physician review
+                    {t("alerts.resultsPendingReview", { count: 3 })}
                   </p>
                 </Box>
                 <Badge variant="destructive">3</Badge>
               </Flex>
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
-                  <p className="font-medium">Medication Interactions</p>
-                  <p className="text-sm text-muted-foreground">2 potential interactions detected</p>
+                  <p className="font-medium">{t("alerts.medicationInteractions")}</p>
+                  <p className="text-sm text-muted-foreground">{t("alerts.potentialInteractions", { count: 2 })}</p>
                 </Box>
                 <Badge variant="destructive">2</Badge>
               </Flex>
@@ -198,23 +200,23 @@ function DashboardComponent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Upcoming Tasks
+              {t("dashboard.upcomingTasks")}
             </CardTitle>
-            <CardDescription>Today's pending tasks</CardDescription>
+            <CardDescription>{t("dashboard.todaysPendingTasks")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Stack spacing="md">
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
-                  <p className="font-medium">Discharge Summaries</p>
-                  <p className="text-sm text-muted-foreground">5 pending completion</p>
+                  <p className="font-medium">{t("alerts.dischargeSummaries")}</p>
+                  <p className="text-sm text-muted-foreground">{t("alerts.pendingCompletion", { count: 5 })}</p>
                 </Box>
                 <Badge variant="secondary">5</Badge>
               </Flex>
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
-                  <p className="font-medium">Clinical Notes</p>
-                  <p className="text-sm text-muted-foreground">12 notes awaiting signature</p>
+                  <p className="font-medium">{t("alerts.clinicalNotes")}</p>
+                  <p className="text-sm text-muted-foreground">{t("alerts.notesAwaitingSignature", { count: 12 })}</p>
                 </Box>
                 <Badge variant="secondary">12</Badge>
               </Flex>

@@ -72,5 +72,72 @@
     "setupNotCompletedMessage": "Please complete the initial setup to begin using the system.",
     "checkingSetupStatus": "Checking setup status...",
     "unableToLoadSetupStatus": "Unable to load setup status"
+  },
+  "search": {
+    "users": "Search users...",
+    "organizations": "Search organizations...",
+    "permissions": "Search permissions...",
+    "roles": "Search roles...",
+    "groups": "Search groups...",
+    "services": "Search services...",
+    "pages": "Search pages...",
+    "apis": "Search APIs...",
+    "relationships": "Search relationships..."
+  },
+  "placeholders": {
+    "userId": "User ID...",
+    "reasonForAccess": "e.g., Password reset, Security event"
+  },
+  "uiEntities": {
+    "title": "UI Entities",
+    "pages": "Pages",
+    "apis": "APIs",
+    "registerPage": {
+      "identifier": "Page Identifier",
+      "identifierPlaceholder": "users, organizations, etc.",
+      "path": "Path",
+      "pathPlaceholder": "/users, /organizations, etc.",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the page"
+    },
+    "registerApi": {
+      "path": "API Path",
+      "pathPlaceholder": "/api/admin/users, /api/admin/users/:id, etc.",
+      "method": "HTTP Method",
+      "methodPlaceholder": "Select method",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the API endpoint"
+    },
+    "registerButton": {
+      "page": "Page",
+      "pagePlaceholder": "Select a page",
+      "identifier": "Button Identifier",
+      "identifierPlaceholder": "create-user, delete-user, etc.",
+      "label": "Display Label",
+      "labelPlaceholder": "Create User",
+      "action": "Action",
+      "actionPlaceholder": "create, delete, edit, etc."
+    },
+    "registerField": {
+      "page": "Page",
+      "pagePlaceholder": "Select a page",
+      "identifier": "Field Identifier",
+      "identifierPlaceholder": "user-email, user-password, etc.",
+      "label": "Display Label",
+      "labelPlaceholder": "Email Address",
+      "fieldType": "Field Type",
+      "fieldTypePlaceholder": "Select field type"
+    }
+  },
+  "permissions": {
+    "assignPermission": {
+      "selectType": "Select type",
+      "selectRelation": "Select relation",
+      "objectPlaceholder": "page:users, button:create-user, field:user-email, etc."
+    },
+    "noAccess": "No access"
+  },
+  "encryption": {
+    "dekManagement": "DEK Management"
   }
 }

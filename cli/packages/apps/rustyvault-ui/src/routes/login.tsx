@@ -86,9 +86,12 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">{t('login.title')}</CardTitle>
-          <CardDescription className="text-center">{t('login.subtitle')}</CardDescription>
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/logo-main.png" alt={t('login.title')} className="h-16 w-16" />
+          </div>
+          <CardTitle className="text-2xl font-bold">{t('login.title')}</CardTitle>
+          <CardDescription>{t('login.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">

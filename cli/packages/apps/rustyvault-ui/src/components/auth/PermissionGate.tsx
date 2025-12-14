@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useCapabilities, useAuthStore } from '@/stores/authStore';
+import { useTranslation } from '@lazarus-life/shared/i18n';
 import { AlertCircle, Lock } from 'lucide-react';
 import { Card, CardContent } from '@lazarus-life/ui-components';
 
@@ -36,6 +37,7 @@ export function PermissionGate({
   showLoading = false,
   showDenied = false,
 }: PermissionGateProps) {
+  const { t } = useTranslation();
   const { capabilities, loading, isDenied } = useCapabilities(path);
   const { isRoot } = useAuthStore();
 
@@ -85,9 +87,9 @@ export function PermissionGate({
         <CardContent className="flex items-center gap-3 py-4">
           <Lock className="h-5 w-5 text-destructive" />
           <div>
-            <p className="font-medium text-destructive">Access Denied</p>
+            <p className="font-medium text-destructive">{t("security.accessDenied")}</p>
             <p className="text-sm text-muted-foreground">
-              You don't have {capability} permission for this path
+              {t("errors.forbidden")}
             </p>
           </div>
         </CardContent>

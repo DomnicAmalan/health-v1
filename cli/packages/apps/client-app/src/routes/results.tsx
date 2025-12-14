@@ -2,6 +2,7 @@ import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 
@@ -18,12 +19,14 @@ function ResultsComponent() {
 }
 
 function ResultsComponentInner() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Results Review</h1>
+        <h1 className="text-3xl font-bold">{t("results.title")}</h1>
         <p className="text-muted-foreground mt-2">
-          Review lab, radiology, and other clinical results
+          {t("results.resultsRequiringReview")}
         </p>
       </div>
 
@@ -31,9 +34,9 @@ function ResultsComponentInner() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-destructive" />
-            Results Pending Review
+            {t("stats.resultsPendingReview")}
           </CardTitle>
-          <CardDescription>Results requiring physician review</CardDescription>
+          <CardDescription>{t("results.resultsRequiringReview")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -43,7 +46,7 @@ function ResultsComponentInner() {
                   <p className="font-medium">Patient: John Doe (MRN: 123456)</p>
                   <p className="text-sm text-muted-foreground">Complete Blood Count - Abnormal</p>
                 </div>
-                <Badge variant="destructive">Critical</Badge>
+                <Badge variant="destructive">{t("status.critical")}</Badge>
               </div>
             </div>
           </div>

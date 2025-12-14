@@ -5,6 +5,7 @@ import { Input } from "@lazarus-life/ui-components";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Shield, User } from "lucide-react";
 
@@ -21,11 +22,13 @@ function SettingsComponent() {
 }
 
 function SettingsComponentInner() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+        <h1 className="text-3xl font-bold">{t("settings.title")}</h1>
+        <p className="text-muted-foreground mt-2">{t("settings.subtitle")}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -33,17 +36,17 @@ function SettingsComponentInner() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Profile Settings
+              {t("settings.profile")}
             </CardTitle>
-            <CardDescription>Update your personal information</CardDescription>
+            <CardDescription>{t("settings.updatePersonalInfo")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("common.name")}</Label>
               <Input id="name" placeholder="John Doe" defaultValue="John Doe" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -51,7 +54,7 @@ function SettingsComponentInner() {
                 defaultValue="john@example.com"
               />
             </div>
-            <Button>Save Changes</Button>
+            <Button>{t("common.saveChanges")}</Button>
           </CardContent>
         </Card>
 
@@ -59,28 +62,28 @@ function SettingsComponentInner() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Notifications
+              {t("settings.notifications")}
             </CardTitle>
-            <CardDescription>Configure your notification preferences</CardDescription>
+            <CardDescription>{t("settings.configureNotifications")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Email Notifications</p>
-                <p className="text-xs text-muted-foreground">Receive email updates</p>
+                <p className="text-sm font-medium">{t("settings.emailNotifications")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.receiveEmailUpdates")}</p>
               </div>
               <Button variant="outline" size="sm">
-                Enable
+                {t("common.enabled")}
               </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Push Notifications</p>
-                <p className="text-xs text-muted-foreground">Receive push notifications</p>
+                <p className="text-sm font-medium">{t("settings.pushNotifications")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.receivePushNotifications")}</p>
               </div>
               <Button variant="outline" size="sm">
-                Enable
+                {t("common.enabled")}
               </Button>
             </div>
           </CardContent>
@@ -90,20 +93,20 @@ function SettingsComponentInner() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Privacy & Security
+              {t("settings.security")}
             </CardTitle>
-            <CardDescription>Manage your privacy and security settings</CardDescription>
+            <CardDescription>{t("settings.managePrivacySecurity")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="current-password">Current Password</Label>
+              <Label htmlFor="current-password">{t("settings.currentPassword")}</Label>
               <Input id="current-password" type="password" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="new-password">New Password</Label>
+              <Label htmlFor="new-password">{t("settings.newPassword")}</Label>
               <Input id="new-password" type="password" />
             </div>
-            <Button>Update Password</Button>
+            <Button>{t("common.updatePassword")}</Button>
           </CardContent>
         </Card>
       </div>

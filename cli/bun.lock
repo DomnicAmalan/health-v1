@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "health-v1-cli",
+      "name": "lazarus-life-monorepo",
       "dependencies": {
         "@base-ui/react": "^1.0.0",
         "@tailwindcss/postcss": "^4.1.18",
