@@ -89,7 +89,7 @@ export function PoliciesPage() {
         <div>
           <h1 className="text-2xl font-bold">Policies</h1>
           <p className="text-muted-foreground">
-            Manage access control policies for RustyVault
+            Manage access control policies for Lazarus Life Vault
           </p>
         </div>
         <Button onClick={() => {

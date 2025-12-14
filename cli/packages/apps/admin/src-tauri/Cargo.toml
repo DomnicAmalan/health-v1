@@ -1,8 +1,8 @@
 [package]
-name = "admin-ui"
+name = "lazarus-life-admin"
 version = "0.1.0"
-description = "Health V1 Admin UI"
-authors = ["Health V1 Team"]
+description = "Lazarus Life Admin Panel"
+authors = ["Lazarus Life Foundation"]
 license = ""
 repository = ""
 edition = "2021"

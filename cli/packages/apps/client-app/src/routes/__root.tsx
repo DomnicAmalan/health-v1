@@ -237,9 +237,9 @@ function RootComponentInner() {
   useEffect(() => {
     const activeTab = tabs.find((t) => t.id === activeTabId);
     if (activeTab) {
-      document.title = `${activeTab.label} - Salk Commons Health`;
+      document.title = `${activeTab.label} - Lazarus Life HIMS`;
     } else {
-      document.title = "Salk Commons Health";
+      document.title = "Lazarus Life HIMS";
     }
   }, [tabs, activeTabId]);
 

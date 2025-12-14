@@ -1,5 +1,5 @@
 /**
- * RustyVault API Client
+ * Lazarus Life Vault API Client
  * Universal vault client for all health-v1 UIs
  */
 

@@ -41,7 +41,7 @@ export async function openNewWindow(
       // Create new Tauri window
       const webview = new WebviewWindow(windowLabel, {
         url: url,
-        title: `${label} - Salk Commons Health`,
+        title: `${label} - Lazarus Life HIMS`,
         width: options?.width || 1200,
         height: options?.height || 800,
         x: options?.x,
@@ -62,7 +62,7 @@ export async function openNewWindow(
       const mockWindow: MockWindow = {
         closed: false,
         document: {
-          title: `${label} - Salk Commons Health`,
+          title: `${label} - Lazarus Life HIMS`,
         },
         focus: async () => {
           await webview.setFocus();

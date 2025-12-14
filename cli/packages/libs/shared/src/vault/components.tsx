@@ -1,5 +1,5 @@
 /**
- * RustyVault React Components
+ * Lazarus Life Vault React Components
  * Reusable components for vault integration in all UIs
  */
 

@@ -27,7 +27,7 @@ export function AdminTranslationProvider({
 }
 
 /**
- * Translation Provider for RustyVault UI
+ * Translation Provider for Lazarus Life Vault
  */
 export function VaultTranslationProvider({ 
   children, 

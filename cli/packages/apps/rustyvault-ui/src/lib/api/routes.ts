@@ -1,6 +1,6 @@
 /**
- * RustyVault API Routes
- * Centralized constants for all RustyVault service endpoints
+ * Lazarus Life Vault API Routes
+ * Centralized constants for all Lazarus Life Vault service endpoints
  * 
  * Note: The base URL already includes /v1, so routes here are relative
  * (e.g., '/sys/health' becomes '/v1/sys/health')

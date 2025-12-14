@@ -1,5 +1,5 @@
 /**
- * RustyVault Store
+ * Lazarus Life Vault Store
  * Zustand store for vault state management across all UIs
  */
 

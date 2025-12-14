@@ -2,7 +2,7 @@
  * Zanzibar-Vault Sync Service
  * 
  * Provides real-time synchronization between Zanzibar permission changes
- * and RustyVault ACL policies.
+ * and Lazarus Life Vault ACL policies.
  */
 
 import type { VaultCapability } from './types';

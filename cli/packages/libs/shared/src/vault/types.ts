@@ -1,5 +1,5 @@
 /**
- * RustyVault Types
+ * Lazarus Life Vault Types
  * Shared types for vault integration across all UIs
  */
 

@@ -1,6 +1,6 @@
-# RustyVault UI
+# Lazarus Life Vault
 
-A professional web UI for RustyVault, built using the shared component library from health-v1 monorepo.
+A professional web UI for Lazarus Life Vault, built using the shared component library from Lazarus Life monorepo.
 
 ## Features
 
@@ -14,7 +14,7 @@ A professional web UI for RustyVault, built using the shared component library f
 ### Prerequisites
 
 - Bun (latest version)
-- RustyVault server running on `http://127.0.0.1:8200`
+- Lazarus Life Vault server running on `http://127.0.0.1:8200`
 
 ### Installation
 
@@ -89,7 +89,7 @@ The basic structure is in place. To complete the migration:
 
 ## Migration from Old UI
 
-The old UI in `RustyVault/ui/` can be removed once this migration is complete. All functionality has been migrated to use:
+The old UI in `Vault/ui/` can be removed once this migration is complete. All functionality has been migrated to use:
 
 - Shared components instead of custom components
 - TanStack Router instead of React Router

@@ -1,5 +1,5 @@
 /**
- * RustyVault Integration for all health-v1 UIs
+ * Lazarus Life Vault Integration for all Lazarus Life UIs
  * 
  * This module provides unified secrets access and ACL checking
  * across admin, client, and vault UIs.

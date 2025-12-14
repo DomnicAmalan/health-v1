@@ -1,4 +1,4 @@
-# Multi-stage build for RustyVault UI
+# Multi-stage build for Lazarus Life Vault UI
 # Build context should be ./cli directory (monorepo root)
 
 # Dev stage (runs vite dev server) - OPTIMIZED: comes first to skip builder in dev mode

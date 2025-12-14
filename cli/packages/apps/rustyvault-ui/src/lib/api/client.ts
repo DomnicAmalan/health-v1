@@ -1,5 +1,5 @@
 /**
- * RustyVault API Client
+ * Lazarus Life Vault API Client
  * Vault token-based authentication using the shared base client
  */
 

@@ -70,7 +70,7 @@ function buildAppTranslations(appLocales: Record<string, Record<string, unknown>
 export const adminTranslations = buildAppTranslations({ en: adminEn });
 
 /**
- * Pre-built translations for RustyVault UI
+ * Pre-built translations for Lazarus Life Vault
  * Usage: <TranslationProvider translations={vaultTranslations}>
  */
 export const vaultTranslations = buildAppTranslations({ en: vaultEn });

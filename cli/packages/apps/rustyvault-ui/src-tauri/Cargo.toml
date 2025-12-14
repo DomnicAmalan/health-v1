@@ -1,8 +1,8 @@
 [package]
-name = "rustyvault-ui"
+name = "lazarus-life-vault"
 version = "0.1.0"
-description = "RustyVault UI - Vault Management Interface"
-authors = ["Health V1 Team"]
+description = "Lazarus Life Vault - Vault Management Interface"
+authors = ["Lazarus Life Foundation"]
 license = ""
 repository = ""
 edition = "2021"

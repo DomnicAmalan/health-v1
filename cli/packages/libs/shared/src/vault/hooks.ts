@@ -1,5 +1,5 @@
 /**
- * RustyVault React Hooks
+ * Lazarus Life Vault React Hooks
  * Custom hooks for vault integration in React components
  */
 
