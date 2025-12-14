@@ -8,7 +8,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@health-v1/shared": path.resolve(__dirname, "../../libs/shared"),
     },
   },
   server: {

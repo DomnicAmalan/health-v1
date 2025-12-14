@@ -3,7 +3,7 @@
  * Extends shared base styles with custom cursors
  */
 
-@import "@health-v1/shared/styles/base.css";
+@import "../../../libs/shared/src/styles/base.css";
 
 /* Client-specific: Custom cursor styles */
 @layer base {
