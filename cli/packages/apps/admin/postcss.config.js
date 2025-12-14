@@ -1,6 +1,2 @@
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
+import sharedConfig from "@health-v1/shared/styles/postcss.config";
+export default sharedConfig;

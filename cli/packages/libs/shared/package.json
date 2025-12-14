@@ -81,7 +81,13 @@
     "./i18n/TranslationProvider": {
       "types": "./dist/i18n/TranslationProvider.d.ts",
       "default": "./dist/i18n/TranslationProvider.js"
-    }
+    },
+    "./styles/base.css": "./src/styles/base.css",
+    "./styles/tailwind.config": {
+      "types": "./dist/styles/tailwind.config.d.ts",
+      "default": "./src/styles/tailwind.config.ts"
+    },
+    "./styles/postcss.config": "./src/styles/postcss.config.js"
   },
   "scripts": {
     "build": "tsup",

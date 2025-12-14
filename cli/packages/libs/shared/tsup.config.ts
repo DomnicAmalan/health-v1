@@ -33,6 +33,7 @@ export default defineConfig({
     "src/i18n/TranslationProvider.tsx",
     "src/i18n/providers.tsx",
     "src/i18n/translations/index.ts",
+    "src/styles/tailwind.config.ts",
   ],
   format: ["esm"],
   dts: true,

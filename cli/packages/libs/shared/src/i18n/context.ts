@@ -48,7 +48,8 @@ export function getTranslation(
   params?: Record<string, string | number>
 ): string {
   const localeTranslations = translations[locale] || translations.en || {};
-  let translation = getNestedValue(localeTranslations, key) || key;
+  // Direct lookup since translations are already flattened to dot-notation keys
+  let translation = localeTranslations[key] || key;
 
   // Replace parameters
   if (params) {

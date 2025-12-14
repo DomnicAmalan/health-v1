@@ -1,203 +1,16 @@
-@import "tailwindcss";
+/**
+ * Client App Styles
+ * Extends shared base styles with custom cursors
+ */
 
-@theme {
-  /* ============================================
-     SALK COMMONS HEALTH - MICROSOFT 365 INSPIRED COLOR PALETTE
-     Inspired by Jonas Salk's legacy of compassion and open-source values
-     ============================================ */
+@import "@health-v1/shared/styles/base.css";
 
-  /* Core/Default App Color: Microsoft 365 Blue (WCAG AA Compliant)
-     - #0078D4 - Microsoft 365 primary blue, reflects Salk's scientific rigor
-     - Usage: Default UI, headers, nav bars, primary actions
-  */
-  --color-primary: hsl(207 100% 42%);
-  --color-primary-foreground: hsl(0 0% 100%);
-
-  /* Health-Care Primary Blue: Compassionate Clinical Blue (WCAG AA Compliant)
-     - Slightly softer blue inspired by Salk's compassionate approach
-     - Usage: Clinical screens, patient dashboards, health modules
-  */
-  --color-health: hsl(201 60% 42%);
-  --color-health-foreground: hsl(0 0% 100%);
-
-  /* Success / Wellness / Confirmation: Deep Green (WCAG AA Compliant)
-     - #1E8D4C - Deep green (Excel-green inspired)
-     - Usage: Success states, health metrics OK status, confirmations
-  */
-  --color-accent: hsl(145 65% 33%);
-  --color-accent-foreground: hsl(0 0% 100%);
-
-  /* Warning / Attention / Alerts: Warm Orange-Red (WCAG AA Compliant)
-     - #D6461F - Slightly darker orange-red for better contrast
-     - Usage: Warnings, critical alerts, urgent messages
-  */
-  --color-warning: hsl(12 75% 48%);
-  --color-warning-foreground: hsl(0 0% 100%);
-
-  /* Info / Secondary Modules: Modern Purple (WCAG AA Compliant)
-     - #9C27B0 - Modern purple (MS app palettes)
-     - Usage: Secondary modules, optional features, user-management UI
-  */
-  --color-info: hsl(292 70% 42%);
-  --color-info-foreground: hsl(0 0% 100%);
-
-  /* Accent / Highlights: Bright Yellow (WCAG AA on Dark Only)
-     - #FFC900 - Bright yellow (used sparingly, only on dark backgrounds)
-     - Usage: Buttons, notifications, badges, highlights
-  */
-  --color-highlight: hsl(48 100% 50%);
-  --color-highlight-foreground: hsl(0 0% 9%);
-
-  /* Neutrals - Clean Microsoft 365 Gray Scale
-     - Scientific, sterile, professional aesthetic
-  */
-  --color-background: hsl(0 0% 100%);
-  --color-card: hsl(0 0% 98%);
-  --color-popover: hsl(0 0% 100%);
-  --color-secondary: hsl(0 0% 96%);
-
-  /* Neutrals - Text / Dark Mode Base (WCAG AAA Compliant) */
-  --color-foreground: hsl(0 0% 11%); /* #1C1C1E - AAA */
-  --color-card-foreground: hsl(0 0% 11%);
-  --color-popover-foreground: hsl(0 0% 11%);
-  --color-secondary-foreground: hsl(0 0% 15%);
-  --color-muted: hsl(210 13% 95%);
-  --color-muted-foreground: hsl(0 0% 29%); /* #4A4A4E - AAA */
-
-  /* Semantic Colors (WCAG Compliant) */
-  --color-destructive: hsl(12 75% 48%); /* #D6461F - AA */
-  --color-destructive-foreground: hsl(0 0% 100%);
-
-  /* UI Element Colors - Microsoft 365 Clean Aesthetic */
-  --color-border: hsl(0 0% 90%);
-  --color-input: hsl(0 0% 98%);
-  --color-ring: hsl(207 100% 42%);
-}
-
+/* Client-specific: Custom cursor styles */
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 11%;
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
-    --primary: 207 100% 42%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 15%;
-    --muted: 0 0% 98%;
-    --muted-foreground: 0 0% 29%;
-    --accent: 145 65% 33%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 12 75% 48%;
-    --destructive-foreground: 0 0% 100%;
-    --warning: 12 75% 48%;
-    --warning-foreground: 0 0% 100%;
-    --info: 292 70% 42%;
-    --info-foreground: 0 0% 100%;
-    --health: 201 60% 42%;
-    --health-foreground: 0 0% 100%;
-    --highlight: 48 100% 50%;
-    --highlight-foreground: 0 0% 11%;
-    --border: 0 0% 90%;
-    --input: 0 0% 98%;
-    --ring: 207 100% 42%;
-    --radius: 4px;
-    --radius-xs: 2px;
-    --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
-    --radius-full: 100px;
-  }
-}
-
-/* Color Blind Modes - Outside @layer base for proper specificity */
-/* Red-blind mode (Protanopia) */
-:root[data-cb="protan"] {
-  --primary: 210 90% 45%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 50 100% 55%;
-  --secondary-foreground: 24 20% 15%;
-  --destructive: 8 70% 42%;
-  --destructive-foreground: 210 40% 98%;
-  --warning: 38 95% 52%;
-  --warning-foreground: 24 20% 15%;
-  --info: 195 80% 45%;
-  --info-foreground: 210 40% 98%;
-  --health: 160 55% 40%;
-  --health-foreground: 210 40% 98%;
-  --highlight: 280 65% 52%;
-  --highlight-foreground: 210 40% 98%;
-  --chart-1: 210 90% 45%;
-  --chart-2: 50 100% 55%;
-  --chart-3: 160 55% 40%;
-  --chart-4: 280 65% 52%;
-  --chart-5: 195 80% 45%;
-}
-
-/* Green-blind mode (Deuteranopia) */
-:root[data-cb="deutan"] {
-  --primary: 210 85% 46%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 40 96% 52%;
-  --secondary-foreground: 24 20% 15%;
-  --destructive: 0 72% 44%;
-  --destructive-foreground: 210 40% 98%;
-  --warning: 32 94% 53%;
-  --warning-foreground: 24 20% 15%;
-  --info: 195 82% 48%;
-  --info-foreground: 210 40% 98%;
-  --health: 170 60% 38%;
-  --health-foreground: 210 40% 98%;
-  --highlight: 285 70% 55%;
-  --highlight-foreground: 210 40% 98%;
-  --chart-1: 210 85% 46%;
-  --chart-2: 40 96% 52%;
-  --chart-3: 170 60% 38%;
-  --chart-4: 285 70% 55%;
-  --chart-5: 195 82% 48%;
-}
-
-/* Blue-blind mode (Tritanopia) */
-:root[data-cb="tritan"] {
-  --primary: 260 70% 55%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 32 96% 54%;
-  --secondary-foreground: 24 20% 15%;
-  --destructive: 0 75% 45%;
-  --destructive-foreground: 210 40% 98%;
-  --warning: 45 95% 55%;
-  --warning-foreground: 24 20% 15%;
-  --info: 180 60% 44%;
-  --info-foreground: 210 40% 98%;
-  --health: 140 55% 42%;
-  --health-foreground: 210 40% 98%;
-  --highlight: 310 70% 55%;
-  --highlight-foreground: 210 40% 98%;
-  --chart-1: 260 70% 55%;
-  --chart-2: 32 96% 54%;
-  --chart-3: 180 60% 44%;
-  --chart-4: 140 55% 42%;
-  --chart-5: 310 70% 55%;
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-background text-foreground text-[15px] leading-relaxed font-normal;
-    font-family:
-      "Avenir Next", "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     cursor: url("/cursors/cursor-default.png") 0 0, default;
   }
 
-  /* Microsoft-style cursor behavior for interactive elements with Flaticon support */
   a,
   button,
   [role="button"],
@@ -224,166 +37,9 @@
   [aria-disabled="true"] {
     cursor: url("/cursors/cursor-not-allowed.png") 0 0, not-allowed;
   }
-
-  /* Microsoft-inspired Typography Scale */
-  h1 {
-    @apply text-[32px] leading-tight font-bold;
-  }
-
-  h2 {
-    @apply text-[24px] leading-tight font-semibold;
-  }
-
-  h3 {
-    @apply text-[20px] leading-tight font-medium;
-  }
-
-  small,
-  .text-small {
-    @apply text-[13px] leading-normal font-medium;
-  }
 }
 
 @layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Screen Reader Only - Accessible but visually hidden */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-
-  .sr-only-focusable:focus,
-  .sr-only-focusable:active {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: inherit;
-    margin: inherit;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-  }
-
-  /* Focus visible styles for keyboard navigation */
-  .focus-visible-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-  }
-
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    * {
-      border-color: currentColor;
-    }
-
-    button,
-    a,
-    [role="button"] {
-      border: 2px solid currentColor;
-    }
-  }
-
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms;
-      animation-iteration-count: 1;
-      transition-duration: 0.01ms;
-      scroll-behavior: auto;
-    }
-  }
-
-  /* Microsoft Fluent UI Border Radius System */
-  .radius-xs {
-    border-radius: 2px; /* Table cells, chips, inputs */
-  }
-
-  .radius-sm {
-    border-radius: 4px; /* Buttons, tabs */
-  }
-
-  .radius-md {
-    border-radius: 6px; /* Cards, floating panels */
-  }
-
-  .radius-lg {
-    border-radius: 8px; /* Modal windows, navigation panes */
-  }
-
-  .radius-full {
-    border-radius: 100px; /* Tags, round loaders */
-  }
-
-  /* Microsoft Fluent UI Shadow System (Elevation Levels) */
-  .shadow-fluent-1 {
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12); /* Level 1 - Low (cards, dropdowns) */
-  }
-
-  .shadow-fluent-2 {
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16); /* Level 2 - Medium (hover states, menus) */
-  }
-
-  .shadow-fluent-3 {
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.18); /* Level 3 - High (modals, panels) */
-  }
-
-  .shadow-fluent-4 {
-    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2); /* Level 4 - Popover / Floating UI */
-  }
-
-  /* Microsoft Fluent UI Motion / Transitions */
-  .transition-fluent {
-    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .transition-fluent-fast {
-    transition: all 0.1s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .transition-fluent-medium {
-    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .transition-fluent-slow {
-    transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  /* Fluent UI Blur Loader */
-  .blur-loader {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-
-  /* Spinner animation */
-  @keyframes spin-fluent {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .animate-spin-fluent {
-    animation: spin-fluent 0.9s linear infinite;
-  }
-
   .cursor-default {
     cursor: url("/cursors/cursor-default.png") 0 0, default;
   }
@@ -424,43 +80,6 @@
     cursor: url("/cursors/cursor-crosshair.png") 0 0, crosshair;
   }
 
-  /* Resize cursors - Microsoft style with Flaticon support */
-  .cursor-resize {
-    cursor: url("/cursors/cursor-resize.png") 0 0, resize;
-  }
-
-  .cursor-resize-n {
-    cursor: url("/cursors/cursor-resize-n.png") 0 0, n-resize;
-  }
-
-  .cursor-resize-s {
-    cursor: url("/cursors/cursor-resize-s.png") 0 0, s-resize;
-  }
-
-  .cursor-resize-e {
-    cursor: url("/cursors/cursor-resize-e.png") 0 0, e-resize;
-  }
-
-  .cursor-resize-w {
-    cursor: url("/cursors/cursor-resize-w.png") 0 0, w-resize;
-  }
-
-  .cursor-resize-ne {
-    cursor: url("/cursors/cursor-resize-ne.png") 0 0, ne-resize;
-  }
-
-  .cursor-resize-nw {
-    cursor: url("/cursors/cursor-resize-nw.png") 0 0, nw-resize;
-  }
-
-  .cursor-resize-se {
-    cursor: url("/cursors/cursor-resize-se.png") 0 0, se-resize;
-  }
-
-  .cursor-resize-sw {
-    cursor: url("/cursors/cursor-resize-sw.png") 0 0, sw-resize;
-  }
-
   .cursor-resize-ew {
     cursor: url("/cursors/cursor-resize-ew.png") 0 0, ew-resize;
   }
@@ -469,41 +88,12 @@
     cursor: url("/cursors/cursor-resize-ns.png") 0 0, ns-resize;
   }
 
-  .cursor-resize-nesw {
-    cursor: url("/cursors/cursor-resize-nesw.png") 0 0, nesw-resize;
-  }
-
   .cursor-resize-nwse {
     cursor: url("/cursors/cursor-resize-nwse.png") 0 0, nwse-resize;
   }
 
-  /* Microsoft Fluent UI specific cursor states with Flaticon support */
-  .cursor-context-menu {
-    cursor: url("/cursors/cursor-context-menu.png") 0 0, context-menu;
-  }
-
-  .cursor-progress {
-    cursor: url("/cursors/cursor-progress.png") 0 0, progress;
-  }
-
-  .cursor-cell {
-    cursor: url("/cursors/cursor-cell.png") 0 0, cell;
-  }
-
-  .cursor-copy {
-    cursor: url("/cursors/cursor-copy.png") 0 0, copy;
-  }
-
-  .cursor-alias {
-    cursor: url("/cursors/cursor-alias.png") 0 0, alias;
-  }
-
-  .cursor-no-drop {
-    cursor: url("/cursors/cursor-no-drop.png") 0 0, no-drop;
-  }
-
-  .cursor-vertical-text {
-    cursor: url("/cursors/cursor-vertical-text.png") 0 0, vertical-text;
+  .cursor-resize-nesw {
+    cursor: url("/cursors/cursor-resize-nesw.png") 0 0, nesw-resize;
   }
 
   .cursor-zoom-in {
@@ -514,25 +104,6 @@
     cursor: url("/cursors/cursor-zoom-out.png") 0 0, zoom-out;
   }
 
-  /* Microsoft-style hover cursor states */
-  .cursor-hover-pointer:hover {
-    cursor: pointer;
-  }
-
-  .cursor-hover-grab:hover {
-    cursor: grab;
-  }
-
-  .cursor-hover-grabbing:active {
-    cursor: grabbing;
-  }
-
-  /* Custom cursor for interactive elements with Flaticon support */
-  .cursor-interactive {
-    cursor: url("/cursors/cursor-pointer.png") 0 0, pointer;
-  }
-
-  /* Microsoft-style drag cursor */
   .cursor-drag {
     cursor: url("/cursors/cursor-grab.png") 0 0, grab;
   }
@@ -541,148 +112,15 @@
     cursor: url("/cursors/cursor-grabbing.png") 0 0, grabbing;
   }
 
-  /* Microsoft-style selection cursor */
-  .cursor-select {
-    cursor: url("/cursors/cursor-text.png") 0 0, text;
-  }
-
-  /* Microsoft-style link cursor */
-  .cursor-link {
+  .cursor-interactive {
     cursor: url("/cursors/cursor-pointer.png") 0 0, pointer;
   }
 
-  /* Microsoft-style button cursor */
-  .cursor-button {
-    cursor: url("/cursors/cursor-pointer.png") 0 0, pointer;
-  }
-
-  /* Microsoft-style disabled cursor */
   .cursor-disabled {
     cursor: url("/cursors/cursor-not-allowed.png") 0 0, not-allowed;
   }
 
-  /* Microsoft-style loading cursor */
   .cursor-loading {
     cursor: url("/cursors/cursor-wait.png") 0 0, wait;
-  }
-
-  /* Microsoft-style resize handle cursor */
-  .cursor-resize-handle {
-    cursor: url("/cursors/cursor-resize-nwse.png") 0 0, nwse-resize;
-  }
-
-  /* Microsoft-style column resize cursor */
-  .cursor-resize-column {
-    cursor: url("/cursors/cursor-resize-ew.png") 0 0, col-resize;
-  }
-
-  /* Microsoft-style row resize cursor */
-  .cursor-resize-row {
-    cursor: url("/cursors/cursor-resize-ns.png") 0 0, row-resize;
-  }
-
-  /* ============================================
-     ACCESSIBILITY CLASSES
-     ============================================ */
-
-  /* High Contrast Mode */
-  .high-contrast {
-    --color-primary: hsl(210 100% 20%);
-    --color-background: hsl(0 0% 100%);
-    --color-foreground: hsl(0 0% 0%);
-    --color-muted: hsl(0 0% 20%);
-    --color-muted-foreground: hsl(0 0% 80%);
-    filter: contrast(1.2);
-  }
-
-  /* Font Size Scaling */
-  .font-size-small {
-    font-size: 0.875rem;
-  }
-
-  .font-size-medium {
-    font-size: 1rem;
-  }
-
-  .font-size-large {
-    font-size: 1.125rem;
-  }
-
-  .font-size-extra-large {
-    font-size: 1.25rem;
-  }
-
-  /* Font Family Options */
-  .font-dyslexic {
-    font-family: "OpenDyslexic", "Comic Sans MS", sans-serif;
-  }
-
-  .font-monospace {
-    font-family: "Courier New", monospace;
-  }
-
-  /* Color Blind Mode Filters */
-  .color-blind-protanopia {
-    filter: url("#protanopia-filter");
-  }
-
-  .color-blind-deuteranopia {
-    filter: url("#deuteranopia-filter");
-  }
-
-  .color-blind-tritanopia {
-    filter: url("#tritanopia-filter");
-  }
-
-  /* Focus Indicators */
-  .focus-indicator-small:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  .focus-indicator-medium:focus-visible {
-    outline: 3px solid var(--color-primary);
-    outline-offset: 3px;
-  }
-
-  .focus-indicator-large:focus-visible {
-    outline: 4px solid var(--color-primary);
-    outline-offset: 4px;
-  }
-
-  /* Reduced Motion */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms;
-      animation-iteration-count: 1;
-      transition-duration: 0.01ms;
-      scroll-behavior: auto;
-    }
-  }
-
-  /* Screen Reader Only */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-
-  .sr-only:focus {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: inherit;
-    margin: inherit;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
   }
 }

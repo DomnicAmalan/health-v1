@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import sharedConfig from "../../libs/components/tailwind.config.js";
+import sharedConfig from "@health-v1/shared/styles/tailwind.config";
 
 export default {
   ...sharedConfig,
