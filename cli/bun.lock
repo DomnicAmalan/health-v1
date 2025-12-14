@@ -40,6 +40,10 @@
       "dependencies": {
         "@health-v1/shared": "workspace:*",
         "@health-v1/ui-components": "workspace:*",
+        "@tauri-apps/api": "^2.5.0",
+      },
+      "devDependencies": {
+        "@tauri-apps/cli": "^2.5.0",
       },
     },
     "packages/apps/client-app": {
@@ -47,6 +51,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@base-ui/react": "^1.0.0",
+        "@tauri-apps/api": "^2.5.0",
       },
       "devDependencies": {
         "@axe-core/react": "^4.11.0",
@@ -55,6 +60,7 @@
         "@playwright/test": "^1.57.0",
         "@tanstack/router-plugin": "^1.141.2",
         "@tanstack/router-vite-plugin": "^1.141.2",
+        "@tauri-apps/cli": "^2.5.0",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.0",
         "@vitest/ui": "^4.0.15",
@@ -75,7 +81,11 @@
       "dependencies": {
         "@health-v1/shared": "workspace:*",
         "@health-v1/ui-components": "workspace:*",
+        "@tauri-apps/api": "^2.5.0",
         "axios": "^1.13.2",
+      },
+      "devDependencies": {
+        "@tauri-apps/cli": "^2.5.0",
       },
     },
     "packages/libs/components": {

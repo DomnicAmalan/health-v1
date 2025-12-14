@@ -348,6 +348,8 @@ export abstract class BaseApiClient {
 | API clients | Medium (different implementations) | Pending - Extract base patterns |
 | Sidebar components | Low (different requirements) | Keep separate |
 | PermissionGate | Low (different systems) | Keep separate |
+| Tauri Setup | N/A | **FIXED** - All 3 apps now have Tauri |
+| Radix UI → Base UI | High | **FIXED** - Migrated to Base UI |
 
 ## Changes Made
 
