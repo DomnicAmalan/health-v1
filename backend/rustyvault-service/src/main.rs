@@ -7,6 +7,7 @@ mod storage;
 mod http;
 mod config;
 mod shamir;
+mod services;
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -69,14 +70,17 @@ async fn async_main() -> Result<(), String> {
 
     // Initialize storage
     let metadata_store = Arc::new(storage::MetadataStore::new(Arc::new(pool.clone())));
-    let barrier_store = Arc::new(storage::BarrierStore::new(physical_backend.clone()));
+    
+    // Create barrier once and share it between BarrierStore and VaultCore
+    let barrier = Arc::new(storage::barrier_aes_gcm::AESGCMBarrier::new(physical_backend.clone()));
+    let barrier_store = Arc::new(storage::BarrierStore::with_barrier(barrier.clone()));
     let storage_adapter = Arc::new(storage::StorageAdapter::new(
         metadata_store,
         barrier_store.clone(),
     ));
 
-    // Initialize vault core
-    let vault_core = Arc::new(core::VaultCore::new(storage_adapter));
+    // Initialize vault core with the same barrier instance
+    let vault_core = Arc::new(core::VaultCore::with_barrier(storage_adapter, barrier.clone()));
     
     // Register default KV backend at "secret" mount
     let kv_backend = Arc::new(modules::kv::KvBackend::new(
@@ -104,12 +108,17 @@ async fn async_main() -> Result<(), String> {
     ));
     info!("UserPass backend initialized");
 
+    // Initialize key storage for temporary credential storage
+    let key_storage = Arc::new(crate::services::key_storage::KeyStorage::new());
+    info!("Key storage service initialized");
+
     // Create app state
     let app_state = Arc::new(http::routes::AppState {
         core: vault_core,
         policy_store: Some(policy_store),
         token_store: Some(token_store),
         userpass: Some(userpass_backend),
+        key_storage,
     });
 
     // Create router - using closures to capture state

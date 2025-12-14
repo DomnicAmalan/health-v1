@@ -19,6 +19,12 @@ impl BarrierStore {
         }
     }
 
+    pub fn with_barrier(barrier: Arc<AESGCMBarrier>) -> Self {
+        Self {
+            barrier,
+        }
+    }
+
     pub fn barrier(&self) -> Arc<AESGCMBarrier> {
         self.barrier.clone()
     }

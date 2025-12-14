@@ -12,6 +12,7 @@ pub mod storage;
 pub mod http;
 pub mod config;
 pub mod shamir;
+pub mod services;
 
 // Re-export commonly used types
 pub use errors::VaultError;

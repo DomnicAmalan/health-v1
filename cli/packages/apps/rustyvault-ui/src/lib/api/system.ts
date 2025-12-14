@@ -12,6 +12,19 @@ export interface SealStatus {
   storage_type?: string;
 }
 
+export interface HealthStatus {
+  initialized: boolean;
+  sealed: boolean;
+  version?: string;
+  standby?: boolean;
+  performance_standby?: boolean;
+  replication_performance_mode?: string;
+  replication_dr_mode?: string;
+  server_time_utc?: number;
+  cluster_name?: string;
+  cluster_id?: string;
+}
+
 export interface Mount {
   type: string;
   description?: string;
@@ -69,6 +82,8 @@ export interface InitResponse {
   keys: string[];
   keys_base64: string[];
   root_token: string;
+  download_token?: string;
+  keys_download_url?: string;
   warning?: string;
 }
 
@@ -89,7 +104,7 @@ export const systemApi = {
     return apiClient.get<MountsResponse>(VAULT_ROUTES.SYS.MOUNTS);
   },
 
-  enableMount: async (path: string, mount: Partial<Mount>): Promise<void> => {
+  enableMount: async (path: string, mount: Partial<Mount>) => {
     await apiClient.post(VAULT_ROUTES.SYS.MOUNT(path), mount);
   },
 
@@ -113,8 +128,49 @@ export const systemApi = {
     return apiClient.post<InitResponse>(VAULT_ROUTES.SYS.INIT, request);
   },
 
-  getHealth: async (): Promise<SealStatus> => {
-    return apiClient.get<SealStatus>(VAULT_ROUTES.SYS.HEALTH);
+  getHealth: async (): Promise<HealthStatus> => {
+    return apiClient.get<HealthStatus>(VAULT_ROUTES.SYS.HEALTH);
+  },
+
+  downloadKeysFile: async (token: string) => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8201/v1';
+    const url = `${baseURL}${VAULT_ROUTES.SYS.KEYS_DOWNLOAD}?token=${encodeURIComponent(token)}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/plain',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to download keys file: ${response.statusText}`);
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    
+    // Get filename from Content-Disposition header or use default
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'rustyvault-credentials.txt';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+    
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
+
+  getKeysAuthenticated: async (token: string): Promise<InitResponse> => {
+    return apiClient.get<InitResponse>(`${VAULT_ROUTES.SYS.KEYS_AUTH}?token=${encodeURIComponent(token)}`);
   },
 };
 

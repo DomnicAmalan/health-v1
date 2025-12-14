@@ -14,6 +14,8 @@ export const VAULT_ROUTES = {
     SEAL: '/sys/seal',
     UNSEAL: '/sys/unseal',
     INIT: '/sys/init',
+    KEYS_DOWNLOAD: '/sys/init/keys.txt',
+    KEYS_AUTH: '/sys/init/keys',
     MOUNTS: '/sys/mounts',
     MOUNT: (path: string) => `/sys/mounts/${path}`,
     AUTH: '/sys/auth',

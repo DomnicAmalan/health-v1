@@ -12,6 +12,7 @@ use crate::http::middleware::auth_middleware;
 use crate::modules::auth::{TokenStore, UserPassBackend};
 use crate::modules::policy::PolicyStore;
 use crate::config::VaultSettings;
+use crate::services::key_storage::KeyStorage;
 
 /// App state for routes
 pub struct AppState {
@@ -19,6 +20,7 @@ pub struct AppState {
     pub policy_store: Option<Arc<PolicyStore>>,
     pub token_store: Option<Arc<TokenStore>>,
     pub userpass: Option<Arc<UserPassBackend>>,
+    pub key_storage: Arc<KeyStorage>,
 }
 
 /// Create the vault API router
@@ -66,7 +68,15 @@ pub fn create_router(state: Arc<AppState>, settings: &VaultSettings) -> Router {
     // Public routes (no auth required)
     let state_clone = state.clone();
     let public_routes = Router::new()
-        .route("/v1/sys/health", axum::routing::get(sys_handlers::health_check))
+        .route("/v1/sys/health", axum::routing::get({
+            let state = state_clone.clone();
+            move || {
+                let state = state.clone();
+                async move {
+                    sys_handlers::health_check_with_state(state).await
+                }
+            }
+        }))
         .route("/v1/sys/init", axum::routing::post({
             let state = state_clone.clone();
             move |payload: axum::extract::Json<serde_json::Value>| {
@@ -95,6 +105,16 @@ pub fn create_router(state: Arc<AppState>, settings: &VaultSettings) -> Router {
                 }
             }
         }))
+        // Keys download endpoint (token-based, no auth required)
+        .route("/v1/sys/init/keys.txt", axum::routing::get({
+            let state = state_clone.clone();
+            move |query: axum::extract::Query<std::collections::HashMap<String, String>>| {
+                let state = state.clone();
+                async move {
+                    sys_handlers::download_keys_file_with_state(state, query.0).await
+                }
+            }
+        }))
         // UserPass login doesn't require auth
         .route("/v1/auth/userpass/login/{username}", axum::routing::post({
             let state = state_clone.clone();
@@ -111,6 +131,16 @@ pub fn create_router(state: Arc<AppState>, settings: &VaultSettings) -> Router {
     let state_clone2 = state.clone();
     let protected_routes = Router::new()
         // System routes
+        // Authenticated key retrieval endpoint
+        .route("/v1/sys/init/keys", axum::routing::get({
+            let state = state_clone2.clone();
+            move |query: axum::extract::Query<std::collections::HashMap<String, String>>| {
+                let state = state.clone();
+                async move {
+                    sys_handlers::get_keys_authenticated_with_state(state, query.0).await
+                }
+            }
+        }))
         .route("/v1/sys/seal", axum::routing::post({
             let state = state_clone2.clone();
             move || {

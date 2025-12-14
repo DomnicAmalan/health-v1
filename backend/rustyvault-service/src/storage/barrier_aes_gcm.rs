@@ -138,6 +138,9 @@ impl AESGCMBarrier {
 #[async_trait]
 impl SecurityBarrier for AESGCMBarrier {
     async fn inited(&self) -> VaultResult<bool> {
+        // Check if the barrier init file exists in the physical backend
+        // We need to check the physical backend directly, not through the barrier's encrypted interface
+        // The file is stored encrypted, but we just need to know if it exists
         let res = self.backend.get(BARRIER_INIT_PATH).await?;
         Ok(res.is_some())
     }

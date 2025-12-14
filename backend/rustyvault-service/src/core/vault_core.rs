@@ -77,6 +77,15 @@ impl VaultCore {
         }
     }
 
+    pub fn with_barrier(storage: Arc<dyn StorageBackend>, barrier: Arc<AESGCMBarrier>) -> Self {
+        Self {
+            storage,
+            barrier,
+            router: Arc::new(Router::new()),
+            state: Arc::new(std::sync::Mutex::new(CoreState::default())),
+        }
+    }
+
     pub async fn init(&self, seal_config: &SealConfig) -> VaultResult<InitResult> {
         seal_config.validate()?;
         
@@ -223,13 +232,31 @@ impl VaultCore {
         state.sealed
     }
 
-    pub fn seal_config(&self) -> VaultResult<SealConfig> {
-        // This would need to be async in real implementation
-        // For now, return a default
+    pub fn unseal_progress(&self) -> usize {
+        let state = self.state.lock().unwrap();
+        state.unseal_key_shares.len()
+    }
+
+    pub async fn seal_config(&self) -> VaultResult<SealConfig> {
+        // Try to get from storage first
+        match self.storage.get(SEAL_CONFIG_PATH).await {
+            Ok(Some(config_data)) => {
+                match serde_json::from_slice::<SealConfig>(&config_data) {
+                    Ok(seal_config) => Ok(seal_config),
+                    Err(_) => Ok(SealConfig {
+                        secret_shares: 5,
+                        secret_threshold: 3,
+                    }),
+                }
+            }
+            _ => {
+                // Fallback to default if not found or error
         Ok(SealConfig {
             secret_shares: 5,
             secret_threshold: 3,
         })
+            }
+        }
     }
 }
 
