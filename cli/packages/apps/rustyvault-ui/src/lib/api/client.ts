@@ -1,14 +1,16 @@
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
-import { useAuthStore } from '@/stores/authStore';
+/**
+ * RustyVault API Client
+ * Vault token-based authentication using the shared base client
+ */
 
-// Use localhost directly - connect to external port
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8201/v1';
+import { BaseApiClient, ApiClientError, type ApiResponse } from "@health-v1/shared/api";
+import { useAuthStore } from "@/stores/authStore";
 
-export interface ApiResponse<T = any> {
-  data?: T;
-  errors?: string[];
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8201/v1";
 
+/**
+ * Custom error class for Vault API errors (legacy compatibility)
+ */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -16,99 +18,80 @@ export class ApiError extends Error {
     public errors?: string[]
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
-class ApiClient {
-  private client: AxiosInstance;
-
+/**
+ * Vault API Client
+ * Uses X-RustyVault-Token header and unwraps { data: T } responses
+ */
+class VaultApiClient extends BaseApiClient {
   constructor() {
-    this.client = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        'Content-Type': 'application/json',
+    super({
+      baseUrl: API_BASE_URL,
+      auth: {
+        type: "custom",
+        getHeaders: () => {
+          const token = useAuthStore.getState().accessToken;
+          return token ? { "X-RustyVault-Token": token } : {};
+        },
+        onAuthError: async () => {
+          useAuthStore.getState().logout();
+          return false;
+        },
       },
+      unwrapData: true,
+      dataKey: "data",
+      debug: import.meta.env.DEV,
     });
-
-    // Request interceptor to add auth token
-    this.client.interceptors.request.use(
-      (config) => {
-        const token = useAuthStore.getState().accessToken;
-        if (token) {
-          config.headers['X-RustyVault-Token'] = token;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor for error handling
-    this.client.interceptors.response.use(
-      (response) => {
-        // RustyVault API returns data in response.data.data or response.data
-        return response;
-      },
-      (error: AxiosError) => {
-        if (error.response) {
-          const status = error.response.status;
-          const data = error.response.data as any;
-
-          // Handle 401 Unauthorized - token invalid or missing
-          if (status === 401) {
-            useAuthStore.getState().logout();
-          }
-
-          const message = data?.errors?.[0] || data?.error || error.message || 'An error occurred';
-          const errors = data?.errors || [message];
-
-          return Promise.reject(new ApiError(message, status, errors));
-        }
-
-        if (error.request) {
-          return Promise.reject(new ApiError('Network error: Could not reach server', 0));
-        }
-
-        return Promise.reject(new ApiError(error.message || 'An unexpected error occurred'));
-      }
-    );
   }
 
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.get<ApiResponse<T>>(url, config);
-    return response.data.data || response.data;
-  }
-
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.post<ApiResponse<T> | T>(url, data, config);
-    // Handle both wrapped and unwrapped responses
-    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-      return (response.data as ApiResponse<T>).data || (response.data as T);
+  /**
+   * Vault LIST operation (special HTTP method)
+   */
+  async list<T>(endpoint: string): Promise<T> {
+    const result = await this.request<T>(endpoint, { method: "LIST" });
+    if (result.error) {
+      throw new ApiError(result.error.message, result.error.status, [result.error.message]);
     }
-    return response.data as T;
+    return result.data as T;
   }
 
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.put<ApiResponse<T>>(url, data, config);
-    return response.data.data || response.data;
+  // Override methods to throw errors instead of returning ApiResponse
+  // This maintains backward compatibility with existing code
+  async get<T>(endpoint: string): Promise<T> {
+    const result = await super.get<T>(endpoint);
+    if (result.error) {
+      throw new ApiError(result.error.message, result.error.status, [result.error.message]);
+    }
+    return result.data as T;
   }
 
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.delete<ApiResponse<T>>(url, config);
-    return response.data.data || response.data;
+  async post<T>(endpoint: string, body?: unknown): Promise<T> {
+    const result = await super.post<T>(endpoint, body);
+    if (result.error) {
+      throw new ApiError(result.error.message, result.error.status, [result.error.message]);
+    }
+    return result.data as T;
   }
 
-  async list<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.request<ApiResponse<T>>({
-      method: 'LIST',
-      url,
-      ...config,
-    });
-    return response.data.data || response.data;
+  async put<T>(endpoint: string, body?: unknown): Promise<T> {
+    const result = await super.put<T>(endpoint, body);
+    if (result.error) {
+      throw new ApiError(result.error.message, result.error.status, [result.error.message]);
+    }
+    return result.data as T;
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    const result = await super.delete<T>(endpoint);
+    if (result.error) {
+      throw new ApiError(result.error.message, result.error.status, [result.error.message]);
+    }
+    return result.data as T;
   }
 }
 
-export const apiClient = new ApiClient();
-
+// Export singleton instance
+export const apiClient = new VaultApiClient();

@@ -1,46 +1,53 @@
 /**
- * API Client
- * Secure fetch wrapper with interceptors, token refresh, and error handling
+ * Client App API Client
+ * Token-based authentication with interceptors using the shared base client
  */
 
-import { API_CONFIG } from "@health-v1/shared/api/config";
-import { API_ROUTES } from "@health-v1/shared/api/routes";
-const API_BASE_URL = API_CONFIG.BASE_URL;
-const API_TIMEOUT = API_CONFIG.TIMEOUT;
+import { BaseApiClient, type ApiResponse, type RequestConfig } from "@health-v1/shared/api";
 import {
   errorInterceptor,
   requestInterceptor,
   responseInterceptor,
   setTokens,
+  getAccessToken,
 } from "./interceptors";
-import type { ApiError, ApiResponse, RequestConfig } from "./types";
 
-export class ApiClient {
-  private baseUrl: string;
-  private defaultTimeout: number;
-  private retryAttempts: number;
-  private retryDelay: number;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
 
-  constructor(
-    baseUrl: string = API_BASE_URL,
-    timeout: number = API_TIMEOUT,
-    retryAttempts: number = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
-    retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
-  ) {
-    this.baseUrl = baseUrl;
-    this.defaultTimeout = timeout;
-    this.retryAttempts = retryAttempts;
-    this.retryDelay = retryDelay;
+/**
+ * Client-specific API client with interceptor support
+ */
+class ClientApiClient extends BaseApiClient {
+  constructor() {
+    super({
+      baseUrl: API_BASE_URL,
+      timeout: API_TIMEOUT,
+      credentials: "include",
+      retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
+      retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
+      auth: {
+        type: "bearer",
+        getToken: () => getAccessToken(),
+      },
+      requestInterceptors: [
+        async (url, config) => {
+          // Apply the existing request interceptor
+          const intercepted = await requestInterceptor(url, config);
+          return { ...config, headers: intercepted.headers || config.headers };
+        },
+      ],
+      debug: import.meta.env.DEV,
+    });
   }
 
   /**
-   * Make an API request with automatic token injection, error handling, and retry logic
+   * Override request to use existing interceptors for full compatibility
    */
   async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
-    const timeout = config.timeout || this.defaultTimeout;
+    const url = this.buildUrl(endpoint);
+    const timeout = config.timeout || this.timeout;
 
-    // Create abort controller for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -51,32 +58,25 @@ export class ApiClient {
         signal: config.signal || controller.signal,
       });
 
-      // Make request with credentials for cookie-based authentication
       const response = await fetch(url, {
         method: config.method || "GET",
         headers: interceptedConfig.headers,
         body: config.body ? JSON.stringify(config.body) : undefined,
         signal: interceptedConfig.signal,
-        credentials: "include", // Include cookies for session-based auth
+        credentials: "include",
       });
 
       clearTimeout(timeoutId);
 
-      // Handle non-OK responses
       if (!response.ok) {
-        // Apply error interceptor
         const error = errorInterceptor(response, url);
-        return {
-          error,
-        };
+        return { error };
       }
 
-      // Apply response interceptor
       return await responseInterceptor<T>(response, url);
     } catch (error) {
       clearTimeout(timeoutId);
 
-      // Handle abort (timeout)
       if (error instanceof Error && error.name === "AbortError") {
         return {
           error: {
@@ -86,65 +86,9 @@ export class ApiClient {
         };
       }
 
-      // Apply error interceptor
       const apiError = errorInterceptor(error, url);
-      return {
-        error: apiError,
-      };
+      return { error: apiError };
     }
-  }
-
-  /**
-   * GET request
-   */
-  async get<T>(
-    endpoint: string,
-    config?: Omit<RequestConfig, "method" | "body">
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: "GET" });
-  }
-
-  /**
-   * POST request
-   */
-  async post<T>(
-    endpoint: string,
-    body?: unknown,
-    config?: Omit<RequestConfig, "method" | "body">
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: "POST", body });
-  }
-
-  /**
-   * PUT request
-   */
-  async put<T>(
-    endpoint: string,
-    body?: unknown,
-    config?: Omit<RequestConfig, "method" | "body">
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: "PUT", body });
-  }
-
-  /**
-   * PATCH request
-   */
-  async patch<T>(
-    endpoint: string,
-    body?: unknown,
-    config?: Omit<RequestConfig, "method" | "body">
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: "PATCH", body });
-  }
-
-  /**
-   * DELETE request
-   */
-  async delete<T>(
-    endpoint: string,
-    config?: Omit<RequestConfig, "method" | "body">
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: "DELETE" });
   }
 
   /**
@@ -152,6 +96,27 @@ export class ApiClient {
    */
   setAuthTokens(accessToken: string | null, refreshToken: string | null): void {
     setTokens(accessToken, refreshToken);
+  }
+}
+
+// Legacy ApiClient class for backward compatibility
+export class ApiClient extends ClientApiClient {
+  private _baseUrl: string;
+  private _timeout: number;
+  private _retryAttempts: number;
+  private _retryDelay: number;
+
+  constructor(
+    baseUrl: string = API_BASE_URL,
+    timeout: number = API_TIMEOUT,
+    retryAttempts: number = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
+    retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
+  ) {
+    super();
+    this._baseUrl = baseUrl;
+    this._timeout = timeout;
+    this._retryAttempts = retryAttempts;
+    this._retryDelay = retryDelay;
   }
 }
 

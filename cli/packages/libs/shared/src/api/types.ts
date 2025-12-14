@@ -5,17 +5,22 @@
 
 import type { User } from "../types/user";
 
-export interface ApiError {
-  message: string;
-  code?: string;
-  details?: unknown;
-}
-
-export interface ApiResponse<T> {
-  data?: T;
-  error?: ApiError;
-  message?: string;
-}
+// Re-export base client types for convenience
+export type {
+  ApiError,
+  ApiResponse,
+  HttpMethod,
+  RequestConfig,
+  RequestInterceptor,
+  ResponseInterceptor,
+  ErrorInterceptor,
+  AuthProvider,
+  ResponseTransformer,
+  AuthErrorHandler,
+  AuthType,
+  AuthConfig,
+  BaseClientConfig,
+} from "./baseClient";
 
 // Authentication types
 export interface LoginRequest {
@@ -39,9 +44,6 @@ export interface RefreshTokenResponse {
   refreshToken: string;
   expiresIn: number;
 }
-
-// UserInfo is exported from types/user, not here
-// This was causing duplicate export errors
 
 // Setup types
 export interface SetupRequest {

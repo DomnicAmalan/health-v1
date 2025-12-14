@@ -1,13 +1,6 @@
 /**
  * Common utility types
+ * Re-exports from api/baseClient for backward compatibility
  */
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-export interface RequestConfig {
-  method?: HttpMethod;
-  headers?: Record<string, string>;
-  body?: unknown;
-  timeout?: number;
-  signal?: AbortSignal;
-}
+export type { HttpMethod, RequestConfig } from "../api/baseClient";
