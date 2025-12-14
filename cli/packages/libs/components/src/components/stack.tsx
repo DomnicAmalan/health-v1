@@ -1,6 +1,6 @@
-import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import { cn } from "../lib/utils";
+import { Slot } from "../lib/slot";
 
 export interface StackProps extends React.HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
@@ -44,7 +44,7 @@ const Stack = React.forwardRef<HTMLDivElement, StackProps>(
 
     return (
       <Comp
-        ref={ref}
+        ref={ref as React.Ref<HTMLDivElement>}
         className={cn(
           "flex",
           direction === "column" ? "flex-col" : "flex-row",

@@ -26,7 +26,7 @@ export default defineConfig({
           // Vendor libraries
           "react-vendor": ["react", "react-dom", "@tanstack/react-router"],
           "query-vendor": ["@tanstack/react-query"],
-          "ui-vendor": ["@radix-ui/react-avatar", "@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+          "ui-vendor": ["@base-ui/react"],
           // Shared libraries
           "shared": ["@health-v1/shared"],
         },

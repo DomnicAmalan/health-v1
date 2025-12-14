@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
-import * as LabelPrimitive from "@radix-ui/react-label";
 import { type VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
 import { HelpHint } from "./component-registry";
 
 export interface LabelProps
-  extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>,
+  extends React.LabelHTMLAttributes<HTMLLabelElement>,
     VariantProps<typeof labelVariants> {
   help?: {
     content: string | React.ReactNode;
@@ -17,9 +16,9 @@ const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
-const Label = React.forwardRef<React.ElementRef<typeof LabelPrimitive.Root>, LabelProps>(
+const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, help, children, ...props }, ref) => (
-    <LabelPrimitive.Root
+    <label
       ref={ref}
       className={cn(labelVariants(), "inline-flex items-center gap-1.5", className)}
       {...props}
@@ -34,9 +33,9 @@ const Label = React.forwardRef<React.ElementRef<typeof LabelPrimitive.Root>, Lab
           position="inline"
         />
       )}
-    </LabelPrimitive.Root>
+    </label>
   )
 );
-Label.displayName = LabelPrimitive.Root.displayName;
+Label.displayName = "Label";
 
 export { Label };

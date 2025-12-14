@@ -1,6 +1,6 @@
-import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import { cn } from "../lib/utils";
+import { Slot } from "../lib/slot";
 
 export interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
@@ -70,7 +70,7 @@ const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
 
     return (
       <Comp
-        ref={ref}
+        ref={ref as React.Ref<HTMLDivElement>}
         className={cn(
           "flex",
           directionClasses[direction],

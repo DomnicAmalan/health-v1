@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
+import { Slot } from "../lib/slot";
 import { HoverHelp } from "./hover-help";
 
 const buttonVariants = cva(
@@ -76,7 +76,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <div className="relative inline-flex group">
         <Comp
           className={cn(buttonVariants({ variant, size, className }))}
-          ref={ref}
+          ref={ref as React.Ref<HTMLButtonElement>}
           aria-label={buttonAriaLabel}
           {...props}
         >
