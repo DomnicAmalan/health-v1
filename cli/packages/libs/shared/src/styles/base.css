@@ -12,6 +12,9 @@
 
 @import "tailwindcss";
 
+/* Tailwind v4: Scan the ui-components library for utility classes */
+@source "../../../components/src/**/*.{js,ts,jsx,tsx}";
+
 @theme {
   /* ============================================
      SALK COMMONS HEALTH - MICROSOFT 365 INSPIRED COLOR PALETTE
