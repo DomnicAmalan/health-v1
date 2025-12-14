@@ -5,7 +5,7 @@ import { Slot } from "../lib/slot";
 import { HoverHelp } from "./hover-help";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-button font-semibold ring-offset-background transition-fluent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] aria-disabled:opacity-50 aria-disabled:cursor-not-allowed",
+  "btn-ripple relative overflow-hidden cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-button font-semibold ring-offset-background transition-fluent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] aria-disabled:opacity-50 aria-disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -21,12 +21,12 @@ const buttonVariants = cva(
         health:
           "bg-health text-health-foreground hover:bg-health/90 shadow-fluent-1 hover:shadow-fluent-2",
         highlight:
-          "bg-highlight text-highlight-foreground hover:bg-highlight/90 shadow-fluent-1 hover:shadow-fluent-2",
+          "btn-ripple-dark bg-highlight text-highlight-foreground hover:bg-highlight/90 shadow-fluent-1 hover:shadow-fluent-2",
         outline:
-          "border border-[#E1E4E8] bg-background hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E] transition-fluent",
+          "btn-ripple-dark border border-[#E1E4E8] bg-background hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E] transition-fluent",
         secondary:
-          "bg-[#F4F6F8] text-[#1C1C1E] hover:bg-[#E9EEF3] border border-[#E1E4E8] hover:border-[#D0D6DB] shadow-fluent-1 hover:shadow-fluent-2",
-        ghost: "hover:bg-accent/50 hover:text-accent-foreground",
+          "btn-ripple-dark bg-[#F4F6F8] text-[#1C1C1E] hover:bg-[#E9EEF3] border border-[#E1E4E8] hover:border-[#D0D6DB] shadow-fluent-1 hover:shadow-fluent-2",
+        ghost: "btn-ripple-dark hover:bg-accent/50 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
