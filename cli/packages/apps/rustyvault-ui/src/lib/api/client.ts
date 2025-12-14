@@ -3,7 +3,7 @@
  * Vault token-based authentication using the shared base client
  */
 
-import { BaseApiClient, ApiClientError, type ApiResponse } from "@health-v1/shared/api";
+import { BaseApiClient, ApiClientError, type ApiResponse } from "@lazarus-life/shared/api";
 import { useAuthStore } from "@/stores/authStore";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8201/v1";

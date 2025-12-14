@@ -11,7 +11,7 @@ import {
   Input,
   Label,
   Badge,
-} from '@health-v1/ui-components';
+} from '@lazarus-life/ui-components';
 import { Plus, Trash2, Edit, FileText } from 'lucide-react';
 
 export function PoliciesPage() {

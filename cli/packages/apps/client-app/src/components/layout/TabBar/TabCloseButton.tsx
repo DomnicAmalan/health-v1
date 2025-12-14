@@ -1,4 +1,4 @@
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { X } from "lucide-react";
 
 interface TabCloseButtonProps {

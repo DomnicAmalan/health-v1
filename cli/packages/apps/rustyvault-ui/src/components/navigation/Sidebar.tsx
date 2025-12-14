@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { LayoutDashboard, Lock, Globe, Settings, LogOut, Shield, Key, Users } from 'lucide-react';
-import { cn } from '@health-v1/ui-components';
+import { cn } from '@lazarus-life/ui-components';
 import { useAuthStore } from '@/stores/authStore';
-import { Button } from '@health-v1/ui-components';
+import { Button } from '@lazarus-life/ui-components';
 
 interface NavItem {
   name: string;
@@ -68,7 +68,7 @@ export function Sidebar() {
   return (
     <div className="w-64 border-r bg-background h-full flex flex-col">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">RustyVault</h2>
+        <h2 className="text-lg font-semibold">Lazarus Life Vault</h2>
       </div>
       <nav className="px-2 py-4 space-y-1 flex-1">
         {navItems.map((item) => {

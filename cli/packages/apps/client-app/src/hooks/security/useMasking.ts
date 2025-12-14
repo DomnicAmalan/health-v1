@@ -3,7 +3,7 @@
  * Hook for contextual masking based on user role
  */
 
-import type { MaskingLevel } from "@health-v1/shared/constants/security"
+import type { MaskingLevel } from "@lazarus-life/shared/constants/security"
 import { useCallback } from "react"
 import {
   contextualMask,

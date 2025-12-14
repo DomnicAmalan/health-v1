@@ -3,7 +3,7 @@
  * Toggle voice commands on/off
  */
 
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { getVoiceCommandExecutor } from "@/lib/voice/voiceCommandExecutor";
 import { getVoiceCommandParser } from "@/lib/voice/voiceCommandParser";

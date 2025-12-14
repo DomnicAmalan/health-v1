@@ -8,7 +8,7 @@ import {
   CardTitle,
   Input,
   Stack,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,

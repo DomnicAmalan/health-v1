@@ -4,7 +4,7 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import {
   Dialog,
   DialogContent,

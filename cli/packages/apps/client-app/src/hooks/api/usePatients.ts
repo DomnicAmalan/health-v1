@@ -3,7 +3,7 @@
  * TanStack Query hooks for patient data with automatic masking
  */
 
-import { API_ROUTES } from "@health-v1/shared/api/routes"
+import { API_ROUTES } from "@lazarus-life/shared/api/routes"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuditLog } from "@/hooks/security/useAuditLog"
 import { apiClient } from "@/lib/api/client"

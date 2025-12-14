@@ -13,9 +13,9 @@ export type {
   UserInfo,
   ServiceInfo,
   ServiceStatusResponse,
-} from "@health-v1/shared/api/types";
+} from "@lazarus-life/shared/api/types";
 
-export type { User } from "@health-v1/shared/types/user";
-export type { Patient } from "@health-v1/shared/types/patient";
-export type { AuditEntry } from "@health-v1/shared/types/audit";
-export type { HttpMethod, RequestConfig } from "@health-v1/shared/types/common";
+export type { User } from "@lazarus-life/shared/types/user";
+export type { Patient } from "@lazarus-life/shared/types/patient";
+export type { AuditEntry } from "@lazarus-life/shared/types/audit";
+export type { HttpMethod, RequestConfig } from "@lazarus-life/shared/types/common";

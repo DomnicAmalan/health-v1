@@ -8,7 +8,7 @@ import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/card";
 import { Stack } from "@/components/ui/stack";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@health-v1/shared/constants/permissions";
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { AlertCircle, Lock, Shield } from "lucide-react";
 
 interface AccessDeniedProps {

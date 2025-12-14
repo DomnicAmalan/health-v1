@@ -6,7 +6,7 @@
  * 
  * Apps should extend this config:
  * @example
- * import baseConfig from "@health-v1/shared/styles/tailwind.config";
+ * import baseConfig from "@lazarus-life/shared/styles/tailwind.config";
  * export default {
  *   ...baseConfig,
  *   content: ["./src/**\/*.{js,ts,jsx,tsx}"],

@@ -22,8 +22,8 @@ export default defineConfig({
         manualChunks: {
           "react-vendor": ["react", "react-dom"],
           "query-vendor": ["@tanstack/react-query"],
-          "ui-vendor": ["@health-v1/ui-components"],
-          "shared": ["@health-v1/shared"],
+          "ui-vendor": ["@lazarus-life/ui-components"],
+          "shared": ["@lazarus-life/shared"],
         },
       },
     },

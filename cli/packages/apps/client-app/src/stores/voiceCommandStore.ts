@@ -9,7 +9,7 @@ import type {
   VoiceCommandActions,
   VoiceCommandState,
   VoiceCommandStore,
-} from "@health-v1/shared/types/stores/voice";
+} from "@lazarus-life/shared/types/stores/voice";
 
 // Re-export types
 export type { VoiceCommandState, VoiceCommandActions, VoiceCommandStore };

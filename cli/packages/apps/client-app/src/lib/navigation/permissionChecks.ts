@@ -3,8 +3,8 @@
  * Utilities for checking permissions in navigation
  */
 
-import type { Permission } from "@health-v1/shared/constants/permissions";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 
 /**
  * Get required permission for a route

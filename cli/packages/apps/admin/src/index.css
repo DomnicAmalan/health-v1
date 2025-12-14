@@ -3,7 +3,7 @@
  * Extends shared base styles
  */
 
-@import "@health-v1/shared/styles/base.css";
+@import "@lazarus-life/shared/styles/base.css";
 
 /* App-specific styles below */
 #root {

@@ -6,7 +6,7 @@
 import { AccessDenied } from "@/components/security/AccessDenied";
 import { Container } from "@/components/ui/container";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/access-denied")({

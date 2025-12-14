@@ -13,7 +13,7 @@ import {
   Badge,
   Alert,
   AlertDescription,
-} from '@health-v1/ui-components';
+} from '@lazarus-life/ui-components';
 import { Plus, Trash2, Edit, Folder, File, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface SecretPath {

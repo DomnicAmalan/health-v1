@@ -3,7 +3,7 @@
  * Relationship-based permission checking and management
  */
 
-import { API_ROUTES } from "@health-v1/shared/api/routes";
+import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { apiClient } from "./client";
 import type { ApiResponse } from "./types";
 

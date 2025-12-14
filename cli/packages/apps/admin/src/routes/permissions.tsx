@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
   Badge,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { Plus, Search, Shield, Trash2, User } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../lib/permissions";
 import { getUserPermissions, revokePermission } from "../lib/api/permissions";

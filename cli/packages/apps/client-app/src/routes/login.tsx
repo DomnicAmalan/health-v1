@@ -1,7 +1,7 @@
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Flex } from "@/components/ui/flex";
-import { Input } from "@health-v1/ui-components";
+import { Input } from "@lazarus-life/ui-components";
 import { Label } from "@/components/ui/label";
 import { Stack } from "@/components/ui/stack";
 import { useAuthStore } from "@/stores/authStore";

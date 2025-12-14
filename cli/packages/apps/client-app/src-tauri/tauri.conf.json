@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "salk-commons-health",
+  "productName": "Lazarus Life HIMS",
   "version": "0.1.0",
-  "identifier": "com.salkcommonshealth.app",
+  "identifier": "com.lazaruslife.hims",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Salk Commons Health",
+        "title": "Lazarus Life HIMS",
         "width": 1920,
         "height": 1080,
         "minWidth": 1280,

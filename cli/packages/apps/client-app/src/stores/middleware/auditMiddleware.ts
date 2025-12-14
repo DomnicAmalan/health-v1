@@ -3,7 +3,7 @@
  * Logs all state changes involving PHI for audit trail
  */
 
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
+import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
 import type { StateCreator } from "zustand";
 import { useAuditStore } from "../auditStore";
 import { useAuthStore } from "../authStore";

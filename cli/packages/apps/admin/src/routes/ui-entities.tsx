@@ -23,7 +23,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { Plus, Search, FileText, Globe } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../lib/permissions";
 import {
@@ -43,7 +43,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 
 export function UiEntitiesPage() {
   const [searchQuery, setSearchQuery] = useState("");

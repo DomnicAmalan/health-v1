@@ -1,6 +1,6 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 import { CreditCard, DollarSign, TrendingUp } from "lucide-react";
 

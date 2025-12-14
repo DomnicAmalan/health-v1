@@ -8,7 +8,7 @@ import {
   PERMISSIONS,
   type Permission,
   ROLE_PERMISSIONS,
-} from "@health-v1/shared/constants/permissions";
+} from "@lazarus-life/shared/constants/permissions";
 import { useCallback, useMemo } from "react";
 
 export function usePermissions() {

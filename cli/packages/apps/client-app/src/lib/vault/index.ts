@@ -52,13 +52,13 @@ export {
   type VaultState,
   type VaultActions,
   type VaultStore,
-} from '@health-v1/shared/vault';
+} from '@lazarus-life/shared/vault';
 
 import { useCallback, useMemo } from 'react';
 import { usePermissions } from '@/hooks/security/usePermissions';
-import { useVaultCapabilities } from '@health-v1/shared/vault';
-import { getVaultPathForPermission, permissionRequiresVault } from '@health-v1/shared/vault';
-import type { Permission } from '@health-v1/shared/constants/permissions';
+import { useVaultCapabilities } from '@lazarus-life/shared/vault';
+import { getVaultPathForPermission, permissionRequiresVault } from '@lazarus-life/shared/vault';
+import type { Permission } from '@lazarus-life/shared/constants/permissions';
 
 /**
  * Hook that combines health-v1 role permissions with vault ACLs

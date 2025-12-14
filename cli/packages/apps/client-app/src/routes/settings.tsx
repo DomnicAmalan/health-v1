@@ -1,10 +1,10 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@health-v1/ui-components";
+import { Input } from "@lazarus-life/ui-components";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Shield, User } from "lucide-react";
 

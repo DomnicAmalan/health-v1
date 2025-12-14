@@ -1,6 +1,6 @@
 import { Flex } from "@/components/ui/flex";
 import type { FieldLayout, FormField } from "@/components/ui/form-builder";
-import { Input } from "@health-v1/ui-components";
+import { Input } from "@lazarus-life/ui-components";
 import { Label } from "@/components/ui/label";
 import { Stack } from "@/components/ui/stack";
 import { cn } from "@/lib/utils";

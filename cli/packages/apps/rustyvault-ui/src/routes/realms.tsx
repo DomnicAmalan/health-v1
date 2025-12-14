@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Stack, Alert, AlertDescription } from '@health-v1/ui-components';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Stack, Alert, AlertDescription } from '@lazarus-life/ui-components';
 import { AlertCircle, Globe } from 'lucide-react';
 
 export function RealmsPage() {

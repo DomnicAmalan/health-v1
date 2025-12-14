@@ -4,7 +4,7 @@ A professional web UI for RustyVault, built using the shared component library f
 
 ## Features
 
-- **Professional Design**: Uses shared `@health-v1/ui-components` library
+- **Professional Design**: Uses shared `@lazarus-life/ui-components` library
 - **Modern Stack**: TanStack Router, React Query, Zustand
 - **Type-Safe**: Full TypeScript support
 - **Consistent**: Matches admin app design patterns
@@ -73,7 +73,7 @@ src/
 - **TanStack Router** - Type-safe routing
 - **TanStack React Query** - Data fetching
 - **Zustand** - State management
-- **@health-v1/ui-components** - Shared component library
+- **@lazarus-life/ui-components** - Shared component library
 - **Tailwind CSS** - Styling
 - **Biome.js** - Linting and formatting
 

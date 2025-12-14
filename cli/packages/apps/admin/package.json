@@ -1,5 +1,5 @@
 {
-  "name": "admin-app",
+  "name": "lazarus-life-admin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,8 +18,8 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
-    "@health-v1/shared": "workspace:*",
-    "@health-v1/ui-components": "workspace:*",
+    "@lazarus-life/shared": "workspace:*",
+    "@lazarus-life/ui-components": "workspace:*",
     "@tauri-apps/api": "^2.5.0"
   },
   "devDependencies": {

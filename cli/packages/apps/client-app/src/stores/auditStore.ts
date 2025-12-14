@@ -4,12 +4,12 @@
  */
 
 import { maskObject } from "@/lib/api/masking";
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
-import type { AuditEntry } from "@health-v1/shared/types/audit";
+import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
+import type { AuditEntry } from "@lazarus-life/shared/types/audit";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import type { AuditActions, AuditState, AuditStore } from "@health-v1/shared/types/stores/audit";
+import type { AuditActions, AuditState, AuditStore } from "@lazarus-life/shared/types/stores/audit";
 
 // Re-export types
 export type { AuditState, AuditActions, AuditStore };

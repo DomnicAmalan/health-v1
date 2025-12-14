@@ -3,7 +3,7 @@
  * Configured for healthcare security requirements
  */
 
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
+import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
 import { QueryClient } from "@tanstack/react-query";
 
 export const queryClient = new QueryClient({

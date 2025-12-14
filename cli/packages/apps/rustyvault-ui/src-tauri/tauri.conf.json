@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "RustyVault UI",
+  "productName": "Lazarus Life Vault",
   "version": "0.1.0",
-  "identifier": "com.healthv1.rustyvault",
+  "identifier": "com.lazaruslife.vault",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5175",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "RustyVault UI",
+        "title": "Lazarus Life Vault",
         "width": 1400,
         "height": 900,
         "minWidth": 1200,

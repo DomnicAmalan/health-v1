@@ -40,9 +40,9 @@ export default defineConfig({
           // Vendor libraries
           "react-vendor": ["react", "react-dom", "react-router-dom"],
           "query-vendor": ["@tanstack/react-query"],
-          "ui-vendor": ["@health-v1/ui-components"],
+          "ui-vendor": ["@lazarus-life/ui-components"],
           // Shared libraries
-          "shared": ["@health-v1/shared"],
+          "shared": ["@lazarus-life/shared"],
         },
       },
     },

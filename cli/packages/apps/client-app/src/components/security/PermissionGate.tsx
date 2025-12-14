@@ -7,10 +7,10 @@
 import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@health-v1/shared/constants/permissions";
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { AccessDenied } from "./AccessDenied";
-import { useVaultCapabilities } from "@health-v1/shared/vault";
-import { getVaultPathForPermission, permissionRequiresVault } from "@health-v1/shared/vault";
+import { useVaultCapabilities } from "@lazarus-life/shared/vault";
+import { getVaultPathForPermission, permissionRequiresVault } from "@lazarus-life/shared/vault";
 import { useMemo } from "react";
 
 interface PermissionGateProps {

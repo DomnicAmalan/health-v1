@@ -14,9 +14,9 @@ export type {
   ServiceStatusResponse,
   SetupRequest,
   SetupStatusResponse,
-} from "@health-v1/shared/api/types"
+} from "@lazarus-life/shared/api/types"
 
-export type { UserInfo } from "@health-v1/shared/types/user"
+export type { UserInfo } from "@lazarus-life/shared/types/user"
 
 // Note: Admin app uses snake_case for LoginResponse, but shared uses camelCase
 // This is a compatibility layer - consider migrating admin to camelCase
@@ -27,7 +27,7 @@ export interface LoginResponseSnakeCase {
   expires_in: number
 }
 
-import type { UserInfo } from "@health-v1/shared/types/user"
+import type { UserInfo } from "@lazarus-life/shared/types/user"
 
 // Admin-specific UserInfo with organization_id
 export interface UserInfoWithOrg extends Omit<UserInfo, "sub"> {

@@ -1,7 +1,7 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 

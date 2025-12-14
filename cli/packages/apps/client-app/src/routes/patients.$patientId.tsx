@@ -1,10 +1,10 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerComponent } from "@/components/ui/component-registry";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Calendar, FileText, Pill } from "lucide-react";
 import { useEffect, useRef } from "react";

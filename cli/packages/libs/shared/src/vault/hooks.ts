@@ -237,7 +237,7 @@ export function useCombinedPermissions(
   );
 
   // This hook is meant to be used alongside the existing usePermissions hook
-  // from @health-v1/shared or the app's own permission system
+  // from @lazarus-life/shared or the app's own permission system
   
   return {
     vaultCapabilities: vaultCaps,

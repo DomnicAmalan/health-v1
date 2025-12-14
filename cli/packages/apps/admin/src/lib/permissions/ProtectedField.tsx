@@ -4,7 +4,7 @@
  */
 
 import { useCanAccess } from "./context";
-import { Input, type InputProps } from "@health-v1/ui-components";
+import { Input, type InputProps } from "@lazarus-life/ui-components";
 
 interface ProtectedFieldProps extends InputProps {
   fieldId: string; // e.g., "user-email", "user-password"

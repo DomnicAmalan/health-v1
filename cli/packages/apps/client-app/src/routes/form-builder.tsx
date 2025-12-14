@@ -1,6 +1,6 @@
 import { FormCanvasBuilder } from "@/components/forms/canvas";
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Flex } from "@/components/ui/flex";
 import { FormPlaygroundWithResizer } from "@/components/ui/form-playground-with-resizer";
 import { Stack } from "@/components/ui/stack";

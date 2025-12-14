@@ -4,11 +4,11 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Flex } from "@/components/ui/flex";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { useMasking } from "@/hooks/security/useMasking";
-import type { MaskingLevel } from "@health-v1/shared/constants/security";
+import type { MaskingLevel } from "@lazarus-life/shared/constants/security";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
 

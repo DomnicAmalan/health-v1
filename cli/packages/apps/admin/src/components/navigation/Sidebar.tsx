@@ -17,7 +17,7 @@ import {
   Settings,
   Network,
 } from "lucide-react";
-import { cn } from "@health-v1/ui-components";
+import { cn } from "@lazarus-life/ui-components";
 
 interface NavItem {
   name: string;
@@ -130,7 +130,7 @@ export function Sidebar() {
   return (
     <div className="w-64 border-r bg-background h-full">
       <div className="p-4">
-        <h2 className="text-lg font-semibold">Admin Panel</h2>
+        <h2 className="text-lg font-semibold">Lazarus Life Admin</h2>
       </div>
       <nav className="px-2 space-y-1">
         {visibleItems.map((item) => {

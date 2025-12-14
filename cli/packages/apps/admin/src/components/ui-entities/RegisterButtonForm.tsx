@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Input, Label, Select, SelectItem, SelectValue, Stack } from "@health-v1/ui-components";
+import { Button, Input, Label, Select, SelectItem, SelectValue, Stack } from "@lazarus-life/ui-components";
 import { registerButton, type RegisterButtonRequest } from "../../lib/api/ui-entities";
 import { useQuery } from "@tanstack/react-query";
 import { listPages } from "../../lib/api/ui-entities";

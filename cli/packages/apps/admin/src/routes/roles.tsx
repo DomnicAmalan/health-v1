@@ -17,7 +17,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { Plus, Search, Shield, Edit, Trash2 } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../lib/permissions";
 import { listRoles, deleteRole } from "../lib/api/roles";

@@ -1,5 +1,5 @@
 {
-  "name": "@health-v1/ui-components",
+  "name": "@lazarus-life/ui-components",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -61,7 +61,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@health-v1/shared": "workspace:*",
+    "@lazarus-life/shared": "workspace:*",
     "@base-ui/react": "^1.0.0"
   },
   "peerDependencies": {

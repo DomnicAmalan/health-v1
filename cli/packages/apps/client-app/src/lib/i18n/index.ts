@@ -3,4 +3,4 @@
  * Re-export everything from shared
  */
 
-export * from "@health-v1/shared/i18n";
+export * from "@lazarus-life/shared/i18n";

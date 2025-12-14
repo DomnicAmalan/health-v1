@@ -3,7 +3,7 @@
  * Re-export from shared package
  */
 
-export { API_CONFIG, API_ROUTES, getApiUrl } from "@health-v1/shared/api";
+export { API_CONFIG, API_ROUTES, getApiUrl } from "@lazarus-life/shared/api";
 
 // Legacy exports for backward compatibility
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";

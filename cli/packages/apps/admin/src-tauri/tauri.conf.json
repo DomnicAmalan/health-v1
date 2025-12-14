@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Health V1 Admin",
+  "productName": "Lazarus Life Admin Panel",
   "version": "0.1.0",
-  "identifier": "com.healthv1.admin",
+  "identifier": "com.lazaruslife.admin",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5174",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Health V1 Admin",
+        "title": "Lazarus Life Admin Panel",
         "width": 1400,
         "height": 900,
         "minWidth": 1200,

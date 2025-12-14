@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, Stack, Badge } from '@health-v1/ui-components';
+import { Card, CardContent, CardHeader, CardTitle, Stack, Badge } from '@lazarus-life/ui-components';
 import { Activity, CheckCircle2, XCircle, Globe, Lock, Settings } from 'lucide-react';
 import { systemApi, realmsApi, secretsApi } from '@/lib/api';
 

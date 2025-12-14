@@ -10,8 +10,8 @@ import {
   refreshAccessToken,
 } from "@/lib/api/auth";
 import { apiClient } from "@/lib/api/client";
-import { SECURITY_CONFIG } from "@health-v1/shared/constants/security";
-import type { User } from "@health-v1/shared/types/user";
+import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
+import type { User } from "@lazarus-life/shared/types/user";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

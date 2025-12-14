@@ -28,7 +28,7 @@ export default defineConfig({
           "query-vendor": ["@tanstack/react-query"],
           "ui-vendor": ["@base-ui/react"],
           // Shared libraries
-          "shared": ["@health-v1/shared"],
+          "shared": ["@lazarus-life/shared"],
         },
       },
     },

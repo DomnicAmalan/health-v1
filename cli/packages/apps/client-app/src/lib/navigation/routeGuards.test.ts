@@ -3,7 +3,7 @@
  */
 
 import { useAuthStore } from "@/stores/authStore";
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { checkRoutePermission, createRouteGuard } from "./routeGuards";
 

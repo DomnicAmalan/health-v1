@@ -1,9 +1,9 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle, Stack, Label } from '@health-v1/ui-components';
+import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle, Stack, Label } from '@lazarus-life/ui-components';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { useTranslation } from '@health-v1/shared/i18n';
+import { useTranslation } from '@lazarus-life/shared/i18n';
 
 export function LoginPage() {
   const { t } = useTranslation();

@@ -1,6 +1,11 @@
 {
+  "app": {
+    "name": "Lazarus Life Admin Panel",
+    "shortName": "Admin",
+    "foundation": "Lazarus Life Foundation"
+  },
   "login": {
-    "title": "Admin Login",
+    "title": "Lazarus Life Admin",
     "subtitle": "Sign in to access the admin panel",
     "fields": {
       "email": "Email",
@@ -21,7 +26,7 @@
     }
   },
   "navigation": {
-    "adminPanel": "Admin Panel",
+    "adminPanel": "Lazarus Life Admin",
     "dashboard": "Dashboard",
     "users": "Users",
     "organizations": "Organizations",

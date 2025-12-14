@@ -10,7 +10,7 @@ import type {
   SectionStructure,
   ComponentConfig as SharedComponentConfig,
   ValidationRules,
-} from "@health-v1/shared/types/components/registry";
+} from "@lazarus-life/shared/types/components/registry";
 import type * as React from "react";
 import { cn } from "../lib/utils";
 import { HelpButton, type HelpButtonProps } from "./help-button";

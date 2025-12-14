@@ -21,7 +21,7 @@ import { getLayoutForRoute } from "@/lib/layouts/routeLayouts";
 import { useAuthStore } from "@/stores/authStore";
 import { useActiveTabId, useOpenTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
 import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore";
-import { PERMISSIONS, type Permission } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS, type Permission } from "@lazarus-life/shared/constants/permissions";
 import {
   Outlet,
   createRootRoute,

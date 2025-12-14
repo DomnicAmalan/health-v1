@@ -5,7 +5,7 @@
  * Framework-agnostic CSS that works with any build tool
  * 
  * Usage in app index.css:
- * @import "@health-v1/shared/styles/base.css";
+ * @import "@lazarus-life/shared/styles/base.css";
  * 
  * Then add app-specific styles below the import.
  */

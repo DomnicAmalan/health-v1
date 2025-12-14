@@ -1,2 +1,2 @@
-import sharedConfig from "@health-v1/shared/styles/postcss.config";
+import sharedConfig from "@lazarus-life/shared/styles/postcss.config";
 export default sharedConfig;

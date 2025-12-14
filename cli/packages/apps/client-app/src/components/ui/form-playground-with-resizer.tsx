@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Button, Input, Label } from "@health-v1/ui-components"
+import { Button, Input, Label } from "@lazarus-life/ui-components"
 import { Card, CardContent, CardHeader, CardTitle } from "./card"
 import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder"
 

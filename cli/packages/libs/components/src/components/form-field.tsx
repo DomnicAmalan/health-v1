@@ -1,4 +1,4 @@
-import type { FormFieldProps } from "@health-v1/shared/types/components/form";
+import type { FormFieldProps } from "@lazarus-life/shared/types/components/form";
 import type * as React from "react";
 import { cn } from "../lib/utils";
 import { Input } from "./input";

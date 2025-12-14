@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import sharedConfig from "@health-v1/shared/styles/tailwind.config";
+import sharedConfig from "@lazarus-life/shared/styles/tailwind.config";
 
 export default {
   ...sharedConfig,

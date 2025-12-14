@@ -4,9 +4,9 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@health-v1/ui-components";
+import { Input } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 import { MessageSquare, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

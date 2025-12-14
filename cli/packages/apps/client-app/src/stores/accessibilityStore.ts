@@ -12,7 +12,7 @@ import type {
   AccessibilityPreferences,
   AccessibilityState,
   AccessibilityStore,
-} from "@health-v1/shared/types/stores/accessibility";
+} from "@lazarus-life/shared/types/stores/accessibility";
 
 // Re-export types
 export type {

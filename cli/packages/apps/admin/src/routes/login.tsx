@@ -9,7 +9,7 @@ import {
   Input,
   Label,
   Stack,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";

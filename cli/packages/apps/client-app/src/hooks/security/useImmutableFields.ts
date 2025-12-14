@@ -3,8 +3,8 @@
  * Hook for validating and protecting immutable fields
  */
 
-import { FIELD_DEFINITIONS } from "@health-v1/shared/constants";
-import type { EntityType, FieldName } from "@health-v1/shared/constants/fields";
+import { FIELD_DEFINITIONS } from "@lazarus-life/shared/constants";
+import type { EntityType, FieldName } from "@lazarus-life/shared/constants/fields";
 import { useCallback } from "react";
 
 export function useImmutableFields() {

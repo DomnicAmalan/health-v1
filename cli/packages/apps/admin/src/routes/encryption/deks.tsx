@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
   Label,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { Search, Key, RotateCw, AlertCircle } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../../lib/permissions";
 import {

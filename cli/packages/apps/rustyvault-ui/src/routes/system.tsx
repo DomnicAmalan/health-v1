@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, Stack, Button, Input, Label, Badge, Alert, AlertDescription } from '@health-v1/ui-components';
+import { Card, CardContent, CardHeader, CardTitle, Stack, Button, Input, Label, Badge, Alert, AlertDescription } from '@lazarus-life/ui-components';
 import { systemApi, type HealthStatus } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { Lock, Unlock, RefreshCw, AlertCircle, CheckCircle2, Loader2, Copy, Download } from 'lucide-react';

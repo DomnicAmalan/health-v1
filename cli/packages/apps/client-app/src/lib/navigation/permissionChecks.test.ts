@@ -2,7 +2,7 @@
  * Permission Checks Tests
  */
 
-import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { describe, expect, it } from "vitest";
 import { canAccessRoute, getRoutePermission } from "./permissionChecks";
 

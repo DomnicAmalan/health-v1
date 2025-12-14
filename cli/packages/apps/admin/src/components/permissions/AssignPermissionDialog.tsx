@@ -18,7 +18,7 @@ import {
   Select,
   SelectItem,
   SelectValue,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { assignPermission, type AssignPermissionRequest } from "../../lib/api/permissions";
 
 interface AssignPermissionDialogProps {

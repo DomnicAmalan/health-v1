@@ -1,4 +1,8 @@
 {
+  "branding": {
+    "foundation": "Lazarus Life Foundation",
+    "tagline": "Empowering Healthcare"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

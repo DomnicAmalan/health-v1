@@ -11,7 +11,7 @@ import {
   Input,
   Label,
   Badge,
-} from '@health-v1/ui-components';
+} from '@lazarus-life/ui-components';
 import { Key, RefreshCw, Trash2, Plus, Copy, Check } from 'lucide-react';
 
 export function TokensPage() {

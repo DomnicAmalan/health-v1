@@ -22,7 +22,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   outDir: "dist",
-  external: ["react", "react-dom", "@health-v1/shared"],
+  external: ["react", "react-dom", "@lazarus-life/shared"],
   esbuildOptions(options) {
     options.jsx = "automatic";
   },

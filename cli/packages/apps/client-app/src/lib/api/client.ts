@@ -3,7 +3,7 @@
  * Token-based authentication with interceptors using the shared base client
  */
 
-import { BaseApiClient, type ApiResponse, type RequestConfig } from "@health-v1/shared/api";
+import { BaseApiClient, type ApiResponse, type RequestConfig } from "@lazarus-life/shared/api";
 import {
   errorInterceptor,
   requestInterceptor,

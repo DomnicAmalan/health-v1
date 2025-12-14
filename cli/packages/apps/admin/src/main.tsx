@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import Router from "./router";
 import { PermissionProvider } from "./lib/permissions";
-import { AdminTranslationProvider } from "@health-v1/shared/i18n";
+import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
 import "./index.css";
 
 // Create a client

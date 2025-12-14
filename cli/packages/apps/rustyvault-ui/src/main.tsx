@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { VaultTranslationProvider } from '@health-v1/shared/i18n';
+import { VaultTranslationProvider } from '@lazarus-life/shared/i18n';
 import Router from './router';
 import './index.css';
 

@@ -1,6 +1,11 @@
 {
+  "app": {
+    "name": "Lazarus Life Vault",
+    "shortName": "Vault",
+    "foundation": "Lazarus Life Foundation"
+  },
   "login": {
-    "title": "RustyVault",
+    "title": "Lazarus Life Vault",
     "subtitle": "Sign in to continue",
     "methods": {
       "token": "Token",
@@ -52,7 +57,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Overview of RustyVault system status",
+    "subtitle": "Overview of Lazarus Life Vault system status",
     "sealStatus": "Seal Status",
     "sealed": "Sealed",
     "unsealed": "Unsealed",

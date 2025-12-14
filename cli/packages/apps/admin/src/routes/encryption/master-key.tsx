@@ -19,7 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@health-v1/ui-components";
+} from "@lazarus-life/ui-components";
 import { Key, RotateCw, AlertTriangle, Shield, Calendar } from "lucide-react";
 import { ProtectedPage, ProtectedButton } from "../../lib/permissions";
 import {

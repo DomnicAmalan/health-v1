@@ -4,7 +4,7 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@health-v1/ui-components";
+import { Button } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";

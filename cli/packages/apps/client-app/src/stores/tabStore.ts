@@ -9,8 +9,8 @@ import { reorderTabsArray } from "@/lib/dragUtils";
 import { canAccessRoute, getRoutePermission } from "@/lib/navigation/permissionChecks";
 import { useAuditStore } from "@/stores/auditStore";
 import { useAuthStore } from "@/stores/authStore";
-import type { Permission } from "@health-v1/shared/constants/permissions";
-import type { Tab, TabActions, TabState, TabStore } from "@health-v1/shared/types/stores/tab";
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import type { Tab, TabActions, TabState, TabStore } from "@lazarus-life/shared/types/stores/tab";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

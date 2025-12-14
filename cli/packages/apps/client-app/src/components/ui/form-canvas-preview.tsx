@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Input, Label } from "@health-v1/ui-components";
+import { Input, Label } from "@lazarus-life/ui-components";
 
 interface PreviewField {
   id: string;

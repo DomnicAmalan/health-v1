@@ -98,7 +98,7 @@ export interface FormFieldGroup {
 
 // Form-builder has its own more detailed types
 // Re-export shared FormFieldProps for compatibility
-export type { FormFieldProps } from "@health-v1/shared/types/components/form";
+export type { FormFieldProps } from "@lazarus-life/shared/types/components/form";
 
 // Re-export the refactored FormBuilder component
 export { FormBuilder } from "@/components/forms/builder";

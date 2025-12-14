@@ -4,7 +4,7 @@
  */
 
 import { useCanAccess } from "./context";
-import { Button, type ButtonProps } from "@health-v1/ui-components";
+import { Button, type ButtonProps } from "@lazarus-life/ui-components";
 
 interface ProtectedButtonProps extends ButtonProps {
   buttonId: string; // e.g., "create-user", "delete-user"

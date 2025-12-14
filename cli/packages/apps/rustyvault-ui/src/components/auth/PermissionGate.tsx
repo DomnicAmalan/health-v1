@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useCapabilities, useAuthStore } from '@/stores/authStore';
 import { AlertCircle, Lock } from 'lucide-react';
-import { Card, CardContent } from '@health-v1/ui-components';
+import { Card, CardContent } from '@lazarus-life/ui-components';
 
 interface PermissionGateProps {
   /** The vault path to check permissions for */

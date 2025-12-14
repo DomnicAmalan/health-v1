@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { UIActions, UIState, UIStore } from "@health-v1/shared/types/stores/ui";
+import type { UIActions, UIState, UIStore } from "@lazarus-life/shared/types/stores/ui";
 
 // Re-export types
 export type { UIState, UIActions, UIStore };

@@ -3,7 +3,7 @@
  * Validates data before state updates to ensure data integrity
  */
 
-import { FIELD_DEFINITIONS } from "@health-v1/shared/constants/fields";
+import { FIELD_DEFINITIONS } from "@lazarus-life/shared/constants/fields";
 import type { StateCreator } from "zustand";
 
 interface ValidationError {

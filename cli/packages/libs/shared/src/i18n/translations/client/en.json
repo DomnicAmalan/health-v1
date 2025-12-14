@@ -1,4 +1,9 @@
 {
+  "app": {
+    "name": "Lazarus Life HIMS",
+    "shortName": "HIMS",
+    "foundation": "Lazarus Life Foundation"
+  },
   "forms": {
     "patientRegistration": "Patient Registration Form",
     "name": "Full Name",
