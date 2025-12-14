@@ -4,7 +4,7 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Card } from "@/components/ui/card";
 import { Stack } from "@/components/ui/stack";
 import { AlertCircle } from "lucide-react";

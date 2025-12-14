@@ -4,7 +4,7 @@
  */
 
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Flex } from "@/components/ui/flex";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { useMasking } from "@/hooks/security/useMasking";

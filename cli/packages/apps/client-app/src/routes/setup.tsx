@@ -1,8 +1,8 @@
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flex } from "@/components/ui/flex";
-import { Input } from "@/components/ui/input";
+import { Input } from "@health-v1/ui-components";
 import { Label } from "@/components/ui/label";
 import { Stack } from "@/components/ui/stack";
 import { checkSetupStatus, initializeSetup } from "@/lib/api/setup";

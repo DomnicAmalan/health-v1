@@ -1,7 +1,7 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerComponent } from "@/components/ui/component-registry";
 import { PERMISSIONS } from "@health-v1/shared/constants/permissions";

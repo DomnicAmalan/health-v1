@@ -1,5 +1,5 @@
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@health-v1/shared/constants/permissions";
 import { createFileRoute } from "@tanstack/react-router";

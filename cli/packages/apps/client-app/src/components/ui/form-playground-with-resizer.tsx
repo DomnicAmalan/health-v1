@@ -12,11 +12,9 @@ import {
 } from "lucide-react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Button } from "./button"
+import { Button, Input, Label } from "@health-v1/ui-components"
 import { Card, CardContent, CardHeader, CardTitle } from "./card"
 import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder"
-import { Input } from "./input"
-import { Label } from "./label"
 
 /**
  * Enhanced Form Builder with Drag & Drop, Resizers, and Visual Placement

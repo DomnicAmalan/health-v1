@@ -1,5 +1,5 @@
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
+import { Button } from "@health-v1/ui-components";
 import { Flex } from "@/components/ui/flex";
 import type { FormBuilderProps, FormField } from "@/components/ui/form-builder";
 import { Label } from "@/components/ui/label";

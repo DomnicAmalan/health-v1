@@ -3,7 +3,7 @@ import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "l
 import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel"
 import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Button } from "@health-v1/ui-components"
 import {
   DropdownMenu,
   DropdownMenuContent,

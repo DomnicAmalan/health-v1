@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import type * as React from "react";
-import { Input } from "./input";
-import { Label } from "./label";
+import { Input, Label } from "@health-v1/ui-components";
 
 export interface FormFieldProps {
   id: string;

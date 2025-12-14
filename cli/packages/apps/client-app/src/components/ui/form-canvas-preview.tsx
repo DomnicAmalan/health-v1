@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Input } from "./input";
-import { Label } from "./label";
+import { Input, Label } from "@health-v1/ui-components";
 
 interface PreviewField {
   id: string;
