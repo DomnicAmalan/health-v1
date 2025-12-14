@@ -2,6 +2,8 @@
  * Base Tailwind Configuration
  * Shared across all apps for consistent styling
  * 
+ * Framework-agnostic Tailwind config that works with any build tool
+ * 
  * Apps should extend this config:
  * @example
  * import baseConfig from "@health-v1/shared/styles/tailwind.config";
@@ -109,6 +111,10 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        ringOffset: {
+          DEFAULT: "hsl(var(--background))",
+          background: "hsl(var(--background))",
+        },
         chart: {
           1: "hsl(var(--chart-1))",
           2: "hsl(var(--chart-2))",

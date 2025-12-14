@@ -2,6 +2,8 @@
  * Base PostCSS Configuration
  * Shared across all apps
  * 
+ * Framework-agnostic PostCSS config that works with any build tool
+ * 
  * Apps can use this directly or extend it:
  * @example
  * // postcss.config.js

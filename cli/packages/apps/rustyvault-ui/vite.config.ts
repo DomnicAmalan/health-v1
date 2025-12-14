@@ -23,9 +23,15 @@ export default defineConfig({
           "react-vendor": ["react", "react-dom"],
           "query-vendor": ["@tanstack/react-query"],
           "ui-vendor": ["@health-v1/ui-components"],
+          "shared": ["@health-v1/shared"],
         },
       },
     },
+  },
+  // Optimize dependencies to ensure CSS is processed
+  optimizeDeps: {
+    entries: ["src/main.tsx"],
+    include: ["react", "react-dom", "@tanstack/react-query"],
   },
   envPrefix: ["VITE_"],
 });

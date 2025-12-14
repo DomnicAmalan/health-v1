@@ -2,6 +2,8 @@
  * Base Styles - Shared across all apps
  * Microsoft 365 Fluent UI inspired design system
  * 
+ * Framework-agnostic CSS that works with any build tool
+ * 
  * Usage in app index.css:
  * @import "@health-v1/shared/styles/base.css";
  * 
@@ -170,7 +172,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
@@ -206,6 +208,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -255,6 +258,7 @@
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -332,6 +336,7 @@
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }
