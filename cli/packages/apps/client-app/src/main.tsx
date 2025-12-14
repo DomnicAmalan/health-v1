@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initializeAxe } from "./lib/accessibility/axe";
 import { validateEnv } from "./lib/env";
-import { TranslationProvider } from "./lib/i18n/TranslationProvider";
+import { ClientTranslationProvider } from "@health-v1/shared/i18n";
 import { queryClient } from "./lib/queryClient";
 import Router from "./router.tsx";
 import "./index.css";
@@ -19,9 +19,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TranslationProvider defaultLocale="en">
+        <ClientTranslationProvider>
           <Router />
-        </TranslationProvider>
+        </ClientTranslationProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>

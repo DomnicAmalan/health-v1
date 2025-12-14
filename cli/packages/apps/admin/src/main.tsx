@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import Router from "./router";
 import { PermissionProvider } from "./lib/permissions";
-import { TranslationProvider } from "./lib/i18n/TranslationProvider";
+import { AdminTranslationProvider } from "@health-v1/shared/i18n";
 import "./index.css";
 
 // Create a client
@@ -44,13 +44,13 @@ async function init() {
 
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-      <TranslationProvider defaultLocale="en">
+      <AdminTranslationProvider>
         <QueryClientProvider client={queryClient}>
           <PermissionProvider>
             <Router />
           </PermissionProvider>
         </QueryClientProvider>
-      </TranslationProvider>
+      </AdminTranslationProvider>
     </React.StrictMode>
   );
 }

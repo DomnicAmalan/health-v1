@@ -5,7 +5,7 @@
  */
 
 import { getComponentConfig } from "@/components/ui/component-registry";
-import { getTranslation } from "@/lib/i18n/i18n";
+import { getTranslation } from "@/lib/i18n";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { type ActionMetadata, getActionExecutor } from "./actionExecutor";
 import { type WorkflowDefinition, type WorkflowResult, workflowRegistry } from "./workflowRegistry";

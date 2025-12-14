@@ -110,6 +110,18 @@
       "types": "./dist/i18n/locales.d.ts",
       "default": "./dist/i18n/locales.js"
     },
+    "./i18n/context": {
+      "types": "./dist/i18n/context.d.ts",
+      "default": "./dist/i18n/context.js"
+    },
+    "./i18n/useTranslation": {
+      "types": "./dist/i18n/useTranslation.d.ts",
+      "default": "./dist/i18n/useTranslation.js"
+    },
+    "./i18n/TranslationProvider": {
+      "types": "./dist/i18n/TranslationProvider.d.ts",
+      "default": "./dist/i18n/TranslationProvider.js"
+    },
     "./vault": {
       "types": "./dist/vault/index.d.ts",
       "default": "./dist/vault/index.js"
@@ -145,15 +157,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zustand": "^4.5.0"
+    "zustand": "^5.0.9"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "@types/react": "^18.0.0",
+    "@types/react": "^19.2.7",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   }
 }
