@@ -13,6 +13,7 @@ import { DekManagementPage } from "./routes/encryption/deks";
 import { MasterKeyManagementPage } from "./routes/encryption/master-key";
 import { EncryptionIndexPage } from "./routes/encryption/index";
 import { ZanzibarRelationshipsPage } from "./routes/zanzibar-relationships";
+import { AppAccessPage } from "./routes/app-access";
 
 // Root route (imported from __root.tsx which includes beforeLoad hook)
 
@@ -105,6 +106,13 @@ const zanzibarRelationshipsRoute = createRoute({
   component: ZanzibarRelationshipsPage,
 });
 
+// App Access route
+const appAccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/app-access",
+  component: AppAccessPage,
+});
+
 // Route tree
 const routeTree = rootRoute.addChildren([
   loginRoute,
@@ -120,6 +128,7 @@ const routeTree = rootRoute.addChildren([
   masterKeyManagementRoute,
   servicesRoute,
   zanzibarRelationshipsRoute,
+  appAccessRoute,
 ]);
 
 // Create router

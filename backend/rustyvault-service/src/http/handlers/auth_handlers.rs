@@ -314,6 +314,8 @@ pub async fn create_userpass_user(
         .get("max_ttl")
         .and_then(|v| v.as_i64())
         .unwrap_or(86400);
+    let email = payload.get("email").and_then(|v| v.as_str()).map(String::from);
+    let display_name = payload.get("display_name").and_then(|v| v.as_str()).map(String::from);
 
     let request = CreateUserRequest {
         username,
@@ -321,6 +323,9 @@ pub async fn create_userpass_user(
         policies,
         ttl,
         max_ttl,
+        realm_id: None, // Global user for now, realm context will be added via path
+        email,
+        display_name,
     };
 
     match userpass.create_user(&request).await {

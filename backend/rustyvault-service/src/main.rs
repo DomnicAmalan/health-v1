@@ -108,6 +108,14 @@ async fn async_main() -> Result<(), String> {
     ));
     info!("UserPass backend initialized");
 
+    // Initialize Realm store
+    let realm_store = Arc::new(modules::realm::RealmStore::new(pool.clone()));
+    info!("Realm store initialized");
+
+    // Initialize Realm Application store
+    let app_store = Arc::new(modules::realm::RealmApplicationStore::new(pool.clone()));
+    info!("Realm application store initialized");
+
     // Initialize key storage for temporary credential storage
     let key_storage = Arc::new(crate::services::key_storage::KeyStorage::new());
     info!("Key storage service initialized");
@@ -118,6 +126,8 @@ async fn async_main() -> Result<(), String> {
         policy_store: Some(policy_store),
         token_store: Some(token_store),
         userpass: Some(userpass_backend),
+        realm_store: Some(realm_store),
+        app_store: Some(app_store),
         key_storage,
     });
 

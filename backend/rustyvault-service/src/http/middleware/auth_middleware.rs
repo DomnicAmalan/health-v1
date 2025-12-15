@@ -2,9 +2,10 @@
 //!
 //! This middleware:
 //! 1. Extracts the token from headers
-//! 2. Validates the token against the TokenStore
-//! 3. Checks ACL policies for the requested path
-//! 4. Attaches token info to request for handlers
+//! 2. Extracts realm context from the request path
+//! 3. Validates the token against the TokenStore
+//! 4. Checks ACL policies for the requested path (realm-aware)
+//! 5. Attaches token info and realm context to request for handlers
 
 use axum::{
     extract::Request,
@@ -15,16 +16,31 @@ use axum::{
 };
 use serde_json::json;
 use std::sync::Arc;
+use uuid::Uuid;
 
 use crate::http::routes::AppState;
 use crate::modules::auth::TokenEntry;
-use crate::logical::request::Operation;
+use crate::logical::request::{Operation, RealmContext};
 
 /// Token information attached to requests after authentication
 #[derive(Clone, Debug)]
 pub struct AuthInfo {
     pub token: TokenEntry,
     pub raw_token: String,
+    /// Realm context extracted from the request path
+    pub realm_context: RealmContext,
+}
+
+impl AuthInfo {
+    /// Get the realm ID from the auth info
+    pub fn realm_id(&self) -> Option<Uuid> {
+        self.realm_context.realm_id
+    }
+
+    /// Check if this is a realm-scoped request
+    pub fn is_realm_scoped(&self) -> bool {
+        self.realm_context.is_realm_scoped
+    }
 }
 
 /// Extract token from headers
@@ -78,6 +94,39 @@ fn method_to_operation(method: &str) -> Operation {
     }
 }
 
+/// Check if a path is public (accounting for realm prefix)
+fn is_public_path(path: &str, realm_context: &RealmContext) -> bool {
+    let check_path = if realm_context.is_realm_scoped {
+        &realm_context.stripped_path
+    } else {
+        path
+    };
+    
+    PUBLIC_PATHS.iter().any(|p| check_path.starts_with(p))
+}
+
+/// Check if a path is a self-path (accounting for realm prefix)
+fn is_self_path(path: &str, realm_context: &RealmContext) -> bool {
+    let check_path = if realm_context.is_realm_scoped {
+        &realm_context.stripped_path
+    } else {
+        path
+    };
+    
+    SELF_PATHS.iter().any(|p| check_path == *p)
+}
+
+/// Check if a path is userpass login (accounting for realm prefix)
+fn is_userpass_login(path: &str, realm_context: &RealmContext) -> bool {
+    let check_path = if realm_context.is_realm_scoped {
+        &realm_context.stripped_path
+    } else {
+        path
+    };
+    
+    check_path.starts_with("/v1/auth/userpass/login/")
+}
+
 /// Authentication middleware
 pub async fn auth_middleware(
     state: Arc<AppState>,
@@ -87,13 +136,16 @@ pub async fn auth_middleware(
     let path = req.uri().path().to_string();
     let method = req.method().as_str().to_string();
 
+    // Extract realm context from path
+    let realm_context = RealmContext::from_path(&path);
+
     // Allow public paths without auth
-    if PUBLIC_PATHS.iter().any(|p| path.starts_with(p)) {
+    if is_public_path(&path, &realm_context) {
         return Ok(next.run(req).await);
     }
 
     // Allow userpass login without auth
-    if path.starts_with("/v1/auth/userpass/login/") {
+    if is_userpass_login(&path, &realm_context) {
         return Ok(next.run(req).await);
     }
 
@@ -167,11 +219,12 @@ pub async fn auth_middleware(
     }
 
     // Allow self-paths for any authenticated token
-    if SELF_PATHS.iter().any(|p| path == *p) {
+    if is_self_path(&path, &realm_context) {
         // Attach auth info to request
         let auth_info = AuthInfo {
             token: token_entry,
             raw_token,
+            realm_context,
         };
         req.extensions_mut().insert(auth_info);
         return Ok(next.run(req).await);
@@ -182,6 +235,7 @@ pub async fn auth_middleware(
         let auth_info = AuthInfo {
             token: token_entry,
             raw_token,
+            realm_context,
         };
         req.extensions_mut().insert(auth_info);
         return Ok(next.run(req).await);
@@ -191,16 +245,22 @@ pub async fn auth_middleware(
     if let Some(policy_store) = &state.policy_store {
         let operation = method_to_operation(&method);
         
-        // Convert path to vault path (remove /v1/ prefix)
-        let vault_path = path.trim_start_matches("/v1/").to_string();
+        // Convert path to vault path (remove /v1/ prefix and realm prefix if present)
+        let vault_path = if realm_context.is_realm_scoped {
+            // For realm-scoped requests, use the stripped path
+            realm_context.stripped_path.trim_start_matches("/v1/").to_string()
+        } else {
+            path.trim_start_matches("/v1/").to_string()
+        };
 
-        // Build ACL from token's policies
-        match policy_store.new_acl(&token_entry.policies).await {
+        // Build ACL from token's policies with realm context
+        match policy_store.new_acl(&token_entry.policies, realm_context.realm_id).await {
             Ok(acl) => {
                 // Create a request for ACL checking
                 let acl_req = crate::logical::Request {
                     path: vault_path.clone(),
                     operation,
+                    realm_id: realm_context.realm_id,
                     ..Default::default()
                 };
 
@@ -208,8 +268,9 @@ pub async fn auth_middleware(
                     Ok(result) => {
                         if !result.allowed {
                             tracing::warn!(
-                                "Access denied for path '{}' with policies {:?}",
+                                "Access denied for path '{}' (realm: {:?}) with policies {:?}",
                                 vault_path,
+                                realm_context.realm_id,
                                 token_entry.policies
                             );
                             return Err((
@@ -217,7 +278,8 @@ pub async fn auth_middleware(
                                 Json(json!({ 
                                     "error": "permission denied",
                                     "path": vault_path,
-                                    "operation": format!("{:?}", operation)
+                                    "operation": format!("{:?}", operation),
+                                    "realm_id": realm_context.realm_id.map(|id| id.to_string())
                                 })),
                             )
                                 .into_response());
@@ -250,8 +312,28 @@ pub async fn auth_middleware(
     let auth_info = AuthInfo {
         token: token_entry,
         raw_token,
+        realm_context,
     };
     req.extensions_mut().insert(auth_info);
 
     Ok(next.run(req).await)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_public_path_global() {
+        let ctx = RealmContext::from_path("/v1/sys/health");
+        assert!(is_public_path("/v1/sys/health", &ctx));
+    }
+
+    #[test]
+    fn test_is_public_path_realm_scoped() {
+        let realm_id = Uuid::new_v4();
+        let path = format!("/v1/realm/{}/sys/health", realm_id);
+        let ctx = RealmContext::from_path(&path);
+        assert!(is_public_path(&path, &ctx));
+    }
 }

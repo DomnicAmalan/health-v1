@@ -7,10 +7,11 @@ use axum::{
 };
 use std::sync::Arc;
 use tower_http::cors::{CorsLayer, AllowOrigin};
-use crate::http::handlers::{sys_handlers, secrets_handlers, policy_handlers, auth_handlers};
+use crate::http::handlers::{app_handlers, auth_handlers, policy_handlers, realm_handlers, secrets_handlers, sys_handlers};
 use crate::http::middleware::auth_middleware;
 use crate::modules::auth::{TokenStore, UserPassBackend};
 use crate::modules::policy::PolicyStore;
+use crate::modules::realm::{RealmStore, RealmApplicationStore};
 use crate::config::VaultSettings;
 use crate::services::key_storage::KeyStorage;
 
@@ -20,6 +21,8 @@ pub struct AppState {
     pub policy_store: Option<Arc<PolicyStore>>,
     pub token_store: Option<Arc<TokenStore>>,
     pub userpass: Option<Arc<UserPassBackend>>,
+    pub realm_store: Option<Arc<RealmStore>>,
+    pub app_store: Option<Arc<RealmApplicationStore>>,
     pub key_storage: Arc<KeyStorage>,
 }
 
@@ -344,6 +347,191 @@ pub fn create_router(state: Arc<AppState>, settings: &VaultSettings) -> Router {
                 let username = path.0;
                 async move {
                     auth_handlers::delete_userpass_user(state, username).await
+                }
+            }
+        }))
+        
+        // ============================================================
+        // Realm routes
+        // ============================================================
+        .route("/v1/sys/realm", axum::routing::get({
+            let state = state_clone2.clone();
+            move || {
+                let state = state.clone();
+                async move {
+                    realm_handlers::list_realms(state).await
+                }
+            }
+        }))
+        .route("/v1/sys/realm", axum::routing::post({
+            let state = state_clone2.clone();
+            move |payload: axum::extract::Json<serde_json::Value>| {
+                let state = state.clone();
+                async move {
+                    realm_handlers::create_realm(state, payload).await
+                }
+            }
+        }))
+        .route("/v1/sys/realm/{realm_id}", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    realm_handlers::get_realm(state, realm_id).await
+                }
+            }
+        }))
+        .route("/v1/sys/realm/{realm_id}", axum::routing::post({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>, payload: axum::extract::Json<serde_json::Value>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    realm_handlers::update_realm(state, realm_id, payload).await
+                }
+            }
+        }))
+        .route("/v1/sys/realm/{realm_id}", axum::routing::delete({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    realm_handlers::delete_realm(state, realm_id).await
+                }
+            }
+        }))
+        .route("/v1/sys/realm/organization/{organization_id}", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let organization_id = path.0;
+                async move {
+                    realm_handlers::get_realms_by_organization(state, organization_id).await
+                }
+            }
+        }))
+        
+        // ============================================================
+        // Realm Application routes
+        // ============================================================
+        .route("/v1/realm/{realm_id}/sys/apps", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    app_handlers::list_apps(state, realm_id).await
+                }
+            }
+        }))
+        .route("/v1/realm/{realm_id}/sys/apps", axum::routing::post({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>, payload: axum::extract::Json<serde_json::Value>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    app_handlers::create_app(state, realm_id, payload).await
+                }
+            }
+        }))
+        .route("/v1/realm/{realm_id}/sys/apps/{app_name}", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>| {
+                let state = state.clone();
+                let (realm_id, app_name) = path.0;
+                async move {
+                    app_handlers::get_app(state, realm_id, app_name).await
+                }
+            }
+        }))
+        .route("/v1/realm/{realm_id}/sys/apps/{app_name}", axum::routing::post({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>, payload: axum::extract::Json<serde_json::Value>| {
+                let state = state.clone();
+                let (realm_id, app_name) = path.0;
+                async move {
+                    app_handlers::update_app(state, realm_id, app_name, payload).await
+                }
+            }
+        }))
+        .route("/v1/realm/{realm_id}/sys/apps/{app_name}", axum::routing::delete({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>| {
+                let state = state.clone();
+                let (realm_id, app_name) = path.0;
+                async move {
+                    app_handlers::delete_app(state, realm_id, app_name).await
+                }
+            }
+        }))
+        .route("/v1/realm/{realm_id}/sys/apps/register-defaults", axum::routing::post({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    app_handlers::register_default_apps(state, realm_id).await
+                }
+            }
+        }))
+
+        // ==========================================
+        // Realm-Scoped Secret Routes
+        // ==========================================
+        // Read secret within a realm
+        .route("/v1/realm/{realm_id}/secret/data/{*path}", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>| {
+                let state = state.clone();
+                let (realm_id, secret_path) = path.0;
+                async move {
+                    secrets_handlers::read_realm_secret(state, realm_id, secret_path).await
+                }
+            }
+        }))
+        // Write secret within a realm
+        .route("/v1/realm/{realm_id}/secret/data/{*path}", axum::routing::post({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>, payload: axum::extract::Json<serde_json::Value>| {
+                let state = state.clone();
+                let (realm_id, secret_path) = path.0;
+                async move {
+                    secrets_handlers::write_realm_secret(state, realm_id, secret_path, payload).await
+                }
+            }
+        }))
+        // Delete secret within a realm
+        .route("/v1/realm/{realm_id}/secret/data/{*path}", axum::routing::delete({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>| {
+                let state = state.clone();
+                let (realm_id, secret_path) = path.0;
+                async move {
+                    secrets_handlers::delete_realm_secret(state, realm_id, secret_path).await
+                }
+            }
+        }))
+        // List secrets within a realm
+        .route("/v1/realm/{realm_id}/secret/metadata/{*path}", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<(String, String)>| {
+                let state = state.clone();
+                let (realm_id, secret_path) = path.0;
+                async move {
+                    secrets_handlers::list_realm_secrets(state, realm_id, secret_path).await
+                }
+            }
+        }))
+        // List all secrets in realm root
+        .route("/v1/realm/{realm_id}/secret/metadata/", axum::routing::get({
+            let state = state_clone2.clone();
+            move |path: axum::extract::Path<String>| {
+                let state = state.clone();
+                let realm_id = path.0;
+                async move {
+                    secrets_handlers::list_realm_secrets(state, realm_id, String::new()).await
                 }
             }
         }))

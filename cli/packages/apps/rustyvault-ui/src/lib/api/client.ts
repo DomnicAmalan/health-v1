@@ -6,6 +6,8 @@
 import { BaseApiClient, ApiClientError, type ApiResponse } from "@lazarus-life/shared/api";
 import { useAuthStore } from "@/stores/authStore";
 
+// Vault API base URL - should NOT include /api prefix
+// Vault routes are directly under /v1/ (e.g., /v1/sys/realm, /v1/sys/policies/acl)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8201/v1";
 
 /**
@@ -45,6 +47,32 @@ class VaultApiClient extends BaseApiClient {
       dataKey: "data",
       debug: import.meta.env.DEV,
     });
+  }
+
+  /**
+   * Override buildUrl to ensure Vault routes never get /api prefix
+   * Vault API doesn't use /api prefix - routes are directly under /v1/
+   * This override bypasses the parent class logic that might add /api
+   */
+  protected buildUrl(endpoint: string): string {
+    // Handle absolute URLs
+    if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
+      return endpoint;
+    }
+    
+    // For Vault API, always use direct concatenation (no /api prefix)
+    // Vault routes are: /v1/sys/*, /v1/realm/*, /v1/secret/*, etc.
+    // Never use getApiUrl() which would add /api prefix
+    const base = this.baseUrl.replace(/\/$/, "");
+    const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    const url = `${base}${path}`;
+    
+    // Debug logging
+    if (this.debug) {
+      console.log(`[VaultApiClient] buildUrl: endpoint="${endpoint}", baseUrl="${this.baseUrl}" -> "${url}"`);
+    }
+    
+    return url;
   }
 
   /**

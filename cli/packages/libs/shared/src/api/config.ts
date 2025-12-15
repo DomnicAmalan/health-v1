@@ -18,8 +18,18 @@ export const API_CONFIG = {
  * Paths that should NOT have the API prefix automatically added
  * These are typically system-level endpoints or routes that don't use the /api prefix on backend
  * Includes both unversioned (/auth/*) and versioned (/v1/auth/*) routes
+ * Vault routes (/v1/sys/*, /v1/realm/*, /v1/secret/*, etc.) are also excluded
  */
-const EXCLUDED_PATHS = ["/health", "/auth", "/v1/auth"];
+const EXCLUDED_PATHS = [
+  "/health", 
+  "/auth", 
+  "/v1/auth",
+  "/v1/sys",      // Vault system routes (e.g., /v1/sys/realm, /v1/sys/policies/acl)
+  "/v1/realm",   // Vault realm routes (e.g., /v1/realm/{id}/sys/apps)
+  "/v1/secret",  // Vault secret routes (e.g., /v1/secret/data/{path})
+  "/sys",         // Unversioned vault routes (if any)
+  "/secret",     // Unversioned vault secret routes
+];
 
 /**
  * Check if a path should have the API prefix added

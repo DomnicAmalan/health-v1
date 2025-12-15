@@ -9,5 +9,5 @@ pub mod queries;
 
 pub use local_db::LocalDb;
 pub use live_db::LiveDb;
-pub use db_service::{DatabaseService, create_pool, create_pool_with_options};
+pub use db_service::{DatabaseService, create_pool, create_pool_with_options, create_pool_from_config};
 

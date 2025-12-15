@@ -454,13 +454,54 @@ async fn create_vault_admin_access(
     // Try to create RustyVault client from environment
     let vault_client = RustyVaultClient::from_env()?;
     
-    tracing::info!("Creating RustyVault super admin policy for org: {}", org_id);
+    tracing::info!("Creating RustyVault realm and resources for org: {}", org_id);
     
-    // Create the super admin policy
+    // Step 1: Get or create realm for organization
+    let realm_id = match vault_client.get_or_create_realm_for_org(org_id).await {
+        Ok(id) => {
+            tracing::info!("✓ Got/created realm for org {}: {}", org_id, id);
+            Some(id)
+        }
+        Err(e) => {
+            tracing::warn!("Failed to create realm for org {}: {}. Continuing with global policies.", org_id, e);
+            None
+        }
+    };
+
+    // Step 2: Register default apps in realm (if realm was created)
+    if let Some(realm_id) = realm_id {
+        match vault_client.register_default_realm_apps(realm_id).await {
+            Ok(_) => tracing::info!("✓ Registered default apps in realm: {}", realm_id),
+            Err(e) => tracing::warn!("Failed to register apps in realm {}: {}", realm_id, e),
+        }
+    }
+    
+    // Step 3: Create the super admin policy
+    tracing::info!("Creating RustyVault super admin policy for org: {}", org_id);
     let policy_name = vault_client.create_super_admin_policy(org_id).await?;
     tracing::info!("✓ Created vault policy: {}", policy_name);
     
-    // Create a token for the super admin with the policy
+    // Step 4: Create realm-scoped policies if realm exists
+    if let Some(realm_id) = realm_id {
+        // Create role-based policies for the realm
+        let roles = vec!["admin", "doctor", "nurse", "receptionist", "patient"];
+        let apps = vec!["admin-ui", "client-app", "mobile"];
+        
+        for role in &roles {
+            for app in &apps {
+                let role_app_policy_name = format!("{}-{}-realm-{}", role, app, realm_id);
+                let policy = generate_role_app_policy(role, app, org_id, realm_id);
+                
+                match vault_client.create_realm_policy(realm_id, &role_app_policy_name, &policy).await {
+                    Ok(_) => tracing::debug!("✓ Created realm policy: {}", role_app_policy_name),
+                    Err(e) => tracing::warn!("Failed to create realm policy {}: {}", role_app_policy_name, e),
+                }
+            }
+        }
+        tracing::info!("✓ Created role-based realm policies for realm: {}", realm_id);
+    }
+    
+    // Step 5: Create a token for the super admin with the policy
     let token_auth = vault_client.create_super_admin_token(user_id, org_id, &policy_name).await?;
     tracing::info!("✓ Created vault token for super admin user: {}", user_id);
     
@@ -473,6 +514,30 @@ async fn create_vault_admin_access(
     };
     
     Ok((policy_name, vault_token))
+}
+
+/// Generate a role-app-specific policy for a realm
+fn generate_role_app_policy(role: &str, app: &str, org_id: Uuid, realm_id: Uuid) -> String {
+    let capabilities = match role {
+        "admin" => r#"["create", "read", "update", "delete", "list", "sudo"]"#,
+        "doctor" | "nurse" => r#"["create", "read", "update", "list"]"#,
+        "receptionist" => r#"["read", "list"]"#,
+        "patient" => r#"["read"]"#,
+        _ => r#"["read"]"#,
+    };
+    
+    format!(r#"
+# Policy for role '{}' accessing app '{}' in realm {}
+# Organization: {}
+
+path "secret/realm-{}/{}/*" {{
+    capabilities = {}
+}}
+
+path "secret/data/realm-{}/{}/*" {{
+    capabilities = {}
+}}
+"#, role, app, realm_id, org_id, realm_id, app, capabilities, realm_id, app, capabilities)
 }
 
 /// Check setup status

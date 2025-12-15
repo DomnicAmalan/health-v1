@@ -8,6 +8,8 @@ import { SystemPage } from './routes/system';
 import { PoliciesPage } from './routes/policies';
 import { TokensPage } from './routes/tokens';
 import { UsersPage } from './routes/users';
+import { ApplicationsPage } from './routes/applications';
+import { AppRolesPage } from './routes/approles';
 
 // Login route
 const loginRoute = createRoute({
@@ -58,6 +60,20 @@ const realmsRoute = createRoute({
   component: RealmsPage,
 });
 
+// Applications route (realm-scoped)
+const applicationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/applications',
+  component: ApplicationsPage,
+});
+
+// AppRoles route (realm-scoped)
+const approlesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/approles',
+  component: AppRolesPage,
+});
+
 // System route
 const systemRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -74,6 +90,8 @@ const routeTree = rootRoute.addChildren([
   tokensRoute,
   usersRoute,
   realmsRoute,
+  applicationsRoute,
+  approlesRoute,
   systemRoute,
 ]);
 

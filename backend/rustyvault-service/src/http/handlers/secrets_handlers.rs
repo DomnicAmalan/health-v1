@@ -1,4 +1,6 @@
 //! Secrets operation handlers
+//! 
+//! Supports both global secrets and realm-scoped secrets.
 
 use axum::{
     extract::{Path, State},
@@ -7,6 +9,7 @@ use axum::{
 };
 use serde_json::{json, Value, Map};
 use std::sync::Arc;
+use uuid::Uuid;
 use crate::http::routes::AppState;
 use crate::logical::{Request as LogicalRequest, Operation};
 
@@ -139,5 +142,149 @@ pub async fn list_secrets_with_state(
         format!("secret/{}/", path)
     };
     handle_secret_request(state, Method::GET, list_path, None).await
+}
+
+// ==========================================
+// Realm-Scoped Secret Handlers
+// ==========================================
+
+/// Handle realm-scoped secret operations
+async fn handle_realm_secret_request(
+    state: Arc<AppState>,
+    realm_id: Uuid,
+    method: Method,
+    path: String,
+    data: Option<Map<String, Value>>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    // Determine operation
+    let operation = match method {
+        Method::GET => {
+            if path.ends_with('/') || path.is_empty() {
+                Operation::List
+            } else {
+                Operation::Read
+            }
+        }
+        Method::POST | Method::PUT => Operation::Write,
+        Method::DELETE => Operation::Delete,
+        _ => return Err((
+            StatusCode::METHOD_NOT_ALLOWED,
+            Json(json!({"error": "Method not allowed"})),
+        )),
+    };
+
+    // Create logical request with realm context
+    let mut req = match operation {
+        Operation::Read => LogicalRequest::new_read_request(&path),
+        Operation::Write => LogicalRequest::new_write_request(&path, data),
+        Operation::Delete => LogicalRequest::new_delete_request(&path, data),
+        Operation::List => LogicalRequest::new_list_request(&path),
+    };
+
+    // Set realm_id on the request
+    req.realm_id = Some(realm_id);
+
+    // Route through core
+    let response = state.core.handle_request(&mut req).await
+        .map_err(|e| (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": e.to_string()})),
+        ))?;
+
+    match response {
+        Some(resp) => {
+            let mut result = Map::new();
+            result.insert("realm_id".to_string(), Value::String(realm_id.to_string()));
+            if let Some(data) = resp.data {
+                result.insert("data".to_string(), Value::Object(data));
+            }
+            Ok(Json(Value::Object(result)))
+        }
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "error": "Secret not found",
+                "realm_id": realm_id.to_string()
+            })),
+        )),
+    }
+}
+
+/// Read a secret from a specific realm
+pub async fn read_realm_secret(
+    state: Arc<AppState>,
+    realm_id: String,
+    path: String,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid realm ID"})),
+        )
+    })?;
+    
+    handle_realm_secret_request(state, realm_id, Method::GET, format!("secret/{}", path), None).await
+}
+
+/// Write a secret to a specific realm
+pub async fn write_realm_secret(
+    state: Arc<AppState>,
+    realm_id: String,
+    path: String,
+    payload: axum::extract::Json<Value>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid realm ID"})),
+        )
+    })?;
+    
+    let data = payload.as_object().cloned();
+    handle_realm_secret_request(state, realm_id, Method::POST, format!("secret/{}", path), data).await
+}
+
+/// Delete a secret from a specific realm
+pub async fn delete_realm_secret(
+    state: Arc<AppState>,
+    realm_id: String,
+    path: String,
+) -> Result<StatusCode, (StatusCode, Json<Value>)> {
+    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid realm ID"})),
+        )
+    })?;
+    
+    match handle_realm_secret_request(state, realm_id, Method::DELETE, format!("secret/{}", path), None).await {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => Err(e),
+    }
+}
+
+/// List secrets in a specific realm
+pub async fn list_realm_secrets(
+    state: Arc<AppState>,
+    realm_id: String,
+    prefix: String,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid realm ID"})),
+        )
+    })?;
+    
+    // For list, ensure path ends with /
+    let list_path = if prefix.is_empty() {
+        "secret/".to_string()
+    } else if prefix.ends_with('/') {
+        format!("secret/{}", prefix)
+    } else {
+        format!("secret/{}/", prefix)
+    };
+    
+    handle_realm_secret_request(state, realm_id, Method::GET, list_path, None).await
 }
 

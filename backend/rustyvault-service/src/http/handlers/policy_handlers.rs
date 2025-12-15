@@ -22,7 +22,7 @@ pub async fn list_policies(
         )
     })?;
 
-    match policy_store.list_policies().await {
+    match policy_store.list_policies_global().await {
         Ok(policies) => Ok(Json(json!({
             "keys": policies
         }))),
@@ -45,7 +45,7 @@ pub async fn read_policy(
         )
     })?;
 
-    match policy_store.get_policy(&name).await {
+    match policy_store.get_policy_global(&name).await {
         Ok(Some(policy)) => Ok(Json(json!({
             "name": policy.name,
             "policy": policy.raw,
@@ -96,8 +96,8 @@ pub async fn write_policy(
 
     policy.name = name;
 
-    // Save the policy
-    match policy_store.set_policy(&policy).await {
+    // Save the policy (global)
+    match policy_store.set_policy_global(&policy).await {
         Ok(_) => Ok(Json(json!({}))),
         Err(e) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -118,7 +118,7 @@ pub async fn delete_policy(
         )
     })?;
 
-    match policy_store.delete_policy(&name).await {
+    match policy_store.delete_policy_global(&name).await {
         Ok(_) => Ok(Json(json!({}))),
         Err(e) => {
             if e.to_string().contains("cannot delete") {
@@ -168,7 +168,7 @@ pub async fn check_capabilities(
         })
         .unwrap_or_default();
 
-    match policy_store.check_capabilities(&policies, path).await {
+    match policy_store.check_capabilities_global(&policies, path).await {
         Ok(capabilities) => Ok(Json(json!({
             "capabilities": capabilities,
             "path": path

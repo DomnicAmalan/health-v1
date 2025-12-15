@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { policiesApi } from '@/lib/api';
+import { useRealmStore } from '@/stores/realmStore';
 import {
   Button,
   Card,
@@ -11,36 +12,55 @@ import {
   Input,
   Label,
   Badge,
+  Alert,
+  AlertDescription,
 } from '@lazarus-life/ui-components';
-import { Plus, Trash2, Edit, FileText } from 'lucide-react';
+import { Plus, Trash2, Edit, FileText, Globe, AlertCircle, Loader2 } from 'lucide-react';
 
 export function PoliciesPage() {
   const queryClient = useQueryClient();
+  const { currentRealm, isGlobalMode } = useRealmStore();
+  
   const [selectedPolicy, setSelectedPolicy] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [newPolicyName, setNewPolicyName] = useState('');
   const [policyContent, setPolicyContent] = useState('');
 
-  // Fetch policies list
-  const { data: policiesData, isLoading } = useQuery({
-    queryKey: ['policies'],
-    queryFn: () => policiesApi.list(),
+  // Reset selection when realm changes
+  useEffect(() => {
+    setSelectedPolicy(null);
+    setIsCreating(false);
+    setPolicyContent('');
+  }, [currentRealm?.id, isGlobalMode]);
+
+  // Fetch policies list (realm-scoped or global)
+  const { data: policiesData, isLoading, error } = useQuery({
+    queryKey: ['policies', currentRealm?.id, isGlobalMode],
+    queryFn: () => 
+      currentRealm && !isGlobalMode
+        ? policiesApi.listForRealm(currentRealm.id)
+        : policiesApi.list(),
   });
 
   // Fetch selected policy details
   const { data: policyDetails } = useQuery({
-    queryKey: ['policy', selectedPolicy],
-    queryFn: () => policiesApi.read(selectedPolicy!),
+    queryKey: ['policy', selectedPolicy, currentRealm?.id, isGlobalMode],
+    queryFn: () =>
+      currentRealm && !isGlobalMode
+        ? policiesApi.readForRealm(currentRealm.id, selectedPolicy!)
+        : policiesApi.read(selectedPolicy!),
     enabled: !!selectedPolicy,
   });
 
   // Create/update policy mutation
   const savePolicyMutation = useMutation({
     mutationFn: ({ name, policy }: { name: string; policy: string }) =>
-      policiesApi.write(name, policy),
+      currentRealm && !isGlobalMode
+        ? policiesApi.writeForRealm(currentRealm.id, name, policy)
+        : policiesApi.write(name, policy),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['policies'] });
-      queryClient.invalidateQueries({ queryKey: ['policy', selectedPolicy] });
+      queryClient.invalidateQueries({ queryKey: ['policies', currentRealm?.id, isGlobalMode] });
+      queryClient.invalidateQueries({ queryKey: ['policy', selectedPolicy, currentRealm?.id, isGlobalMode] });
       setIsCreating(false);
       setNewPolicyName('');
       setPolicyContent('');
@@ -49,9 +69,12 @@ export function PoliciesPage() {
 
   // Delete policy mutation
   const deletePolicyMutation = useMutation({
-    mutationFn: (name: string) => policiesApi.delete(name),
+    mutationFn: (name: string) =>
+      currentRealm && !isGlobalMode
+        ? policiesApi.deleteForRealm(currentRealm.id, name)
+        : policiesApi.delete(name),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['policies'] });
+      queryClient.invalidateQueries({ queryKey: ['policies', currentRealm?.id, isGlobalMode] });
       setSelectedPolicy(null);
     },
   });
@@ -83,11 +106,22 @@ export function PoliciesPage() {
   }
 }`;
 
+  // Context indicator
+  const contextLabel = currentRealm && !isGlobalMode
+    ? `Realm: ${currentRealm.name}`
+    : 'Global';
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Policies</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Policies</h1>
+            <Badge variant={isGlobalMode ? 'default' : 'secondary'}>
+              <Globe className="h-3 w-3 mr-1" />
+              {contextLabel}
+            </Badge>
+          </div>
           <p className="text-muted-foreground">
             Manage access control policies for Lazarus Life Vault
           </p>
@@ -102,6 +136,16 @@ export function PoliciesPage() {
         </Button>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {error instanceof Error ? error.message : 'Failed to load policies'}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Policies List */}
         <Card className="lg:col-span-1">
@@ -109,17 +153,24 @@ export function PoliciesPage() {
             <CardTitle className="text-lg">ACL Policies</CardTitle>
             <CardDescription>
               {policies.length} {policies.length === 1 ? 'policy' : 'policies'}
+              {currentRealm && !isGlobalMode && (
+                <span className="block text-xs mt-1">Realm: {currentRealm.name}</span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
             ) : policies.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                No policies found
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No policies found</p>
+                <p className="text-xs mt-1">Create your first policy</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {policies.map((policy) => (
                   <div
                     key={policy}
@@ -137,9 +188,9 @@ export function PoliciesPage() {
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{policy}</span>
                     </div>
-                    {policy === 'root' || policy === 'default' ? (
+                    {(policy === 'root' || policy === 'default') && (
                       <Badge variant="secondary">System</Badge>
-                    ) : null}
+                    )}
                   </div>
                 ))}
               </div>
@@ -184,8 +235,15 @@ export function PoliciesPage() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleCreatePolicy} disabled={savePolicyMutation.isPending}>
-                    {savePolicyMutation.isPending ? 'Creating...' : 'Create Policy'}
+                  <Button onClick={handleCreatePolicy} disabled={savePolicyMutation.isPending || !newPolicyName}>
+                    {savePolicyMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Policy'
+                    )}
                   </Button>
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
@@ -232,4 +290,3 @@ export function PoliciesPage() {
     </div>
   );
 }
-

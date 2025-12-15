@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { secretsApi } from '@/lib/api';
+import { useRealmStore } from '@/stores/realmStore';
 import {
   Button,
   Card,
@@ -14,15 +15,12 @@ import {
   Alert,
   AlertDescription,
 } from '@lazarus-life/ui-components';
-import { Plus, Trash2, Edit, Folder, File, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-interface SecretPath {
-  path: string;
-  isDirectory: boolean;
-}
+import { Plus, Trash2, Edit, Folder, File, Loader2, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
 
 export function SecretsPage() {
   const queryClient = useQueryClient();
+  const { currentRealm, isGlobalMode } = useRealmStore();
+
   const [currentPath, setCurrentPath] = useState('');
   const [selectedSecret, setSelectedSecret] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -31,27 +29,43 @@ export function SecretsPage() {
   const [newKey, setNewKey] = useState('');
   const [newValue, setNewValue] = useState('');
 
-  // Fetch secrets list
+  // Reset state when realm changes
+  useEffect(() => {
+    setCurrentPath('');
+    setSelectedSecret(null);
+    setIsCreating(false);
+    setSecretData({});
+  }, [currentRealm?.id, isGlobalMode]);
+
+  // Fetch secrets list (realm-scoped or global)
   const { data: secrets, isLoading, error } = useQuery({
-    queryKey: ['secrets', currentPath],
-    queryFn: () => secretsApi.list(currentPath),
+    queryKey: ['secrets', currentPath, currentRealm?.id, isGlobalMode],
+    queryFn: () =>
+      currentRealm && !isGlobalMode
+        ? secretsApi.listForRealm(currentRealm.id, currentPath)
+        : secretsApi.list(currentPath),
     enabled: true,
   });
 
   // Fetch selected secret
   const { data: secretDetails, isLoading: isLoadingSecret } = useQuery({
-    queryKey: ['secret', selectedSecret],
-    queryFn: () => secretsApi.read(selectedSecret!),
-    enabled: !!selectedSecret,
-    onSuccess: (data) => {
-      setSecretData(data.data || {});
+    queryKey: ['secret', selectedSecret, currentRealm?.id, isGlobalMode],
+    queryFn: async () => {
+      const data = currentRealm && !isGlobalMode
+        ? await secretsApi.readForRealm(currentRealm.id, selectedSecret!)
+        : await secretsApi.read(selectedSecret!);
+      setSecretData((data.data || {}) as Record<string, string>);
+      return data;
     },
+    enabled: !!selectedSecret,
   });
 
   // Create/update secret mutation
   const saveSecretMutation = useMutation({
-    mutationFn: ({ path, data }: { path: string; data: Record<string, any> }) =>
-      secretsApi.write(path, data),
+    mutationFn: ({ path, data }: { path: string; data: Record<string, unknown> }) =>
+      currentRealm && !isGlobalMode
+        ? secretsApi.writeForRealm(currentRealm.id, path, data)
+        : secretsApi.write(path, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['secrets'] });
       queryClient.invalidateQueries({ queryKey: ['secret', selectedSecret] });
@@ -63,7 +77,10 @@ export function SecretsPage() {
 
   // Delete secret mutation
   const deleteSecretMutation = useMutation({
-    mutationFn: (path: string) => secretsApi.delete(path),
+    mutationFn: (path: string) =>
+      currentRealm && !isGlobalMode
+        ? secretsApi.deleteForRealm(currentRealm.id, path)
+        : secretsApi.delete(path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['secrets'] });
       if (selectedSecret === currentPath) {
@@ -104,11 +121,22 @@ export function SecretsPage() {
     path: pathParts.slice(0, index + 1).join('/'),
   }));
 
+  // Context indicator
+  const contextLabel = currentRealm && !isGlobalMode
+    ? `Realm: ${currentRealm.name}`
+    : 'Global';
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Secrets</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Secrets</h1>
+            <Badge variant={isGlobalMode ? 'default' : 'secondary'}>
+              <Globe className="h-3 w-3 mr-1" />
+              {contextLabel}
+            </Badge>
+          </div>
           <p className="text-muted-foreground">Manage your secrets and key-value pairs</p>
         </div>
         <Button
@@ -125,27 +153,33 @@ export function SecretsPage() {
       </div>
 
       {/* Breadcrumbs */}
-      {currentPath && (
-        <div className="flex items-center gap-2 text-sm">
-          <button
-            onClick={() => setCurrentPath('')}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            root
-          </button>
-          {breadcrumbs.map((crumb) => (
-            <div key={crumb.path} className="flex items-center gap-2">
-              <span className="text-muted-foreground">/</span>
-              <button
-                onClick={() => setCurrentPath(crumb.path)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {crumb.name}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="flex items-center gap-2 text-sm flex-wrap">
+        {currentRealm && !isGlobalMode && (
+          <>
+            <Badge variant="outline" className="text-xs">
+              {currentRealm.name}
+            </Badge>
+            <span className="text-muted-foreground">/</span>
+          </>
+        )}
+        <button
+          onClick={() => setCurrentPath('')}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          secret
+        </button>
+        {breadcrumbs.map((crumb) => (
+          <div key={crumb.path} className="flex items-center gap-2">
+            <span className="text-muted-foreground">/</span>
+            <button
+              onClick={() => setCurrentPath(crumb.path)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {crumb.name}
+            </button>
+          </div>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Secrets List */}
@@ -169,7 +203,7 @@ export function SecretsPage() {
                 </AlertDescription>
               </Alert>
             ) : secrets && secrets.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {secrets.map((secret) => {
                   const isDirectory = secret.endsWith('/');
                   const secretName = isDirectory ? secret.slice(0, -1) : secret;

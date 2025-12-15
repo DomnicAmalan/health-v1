@@ -17,6 +17,7 @@ import {
   Key,
   Settings,
   Network,
+  AppWindow,
 } from "lucide-react";
 import { cn } from "@lazarus-life/ui-components";
 
@@ -71,6 +72,12 @@ const navItems: NavItem[] = [
     permission: "page:groups",
   },
   {
+    nameKey: "navigation.appAccess",
+    path: "/app-access",
+    icon: AppWindow,
+    permission: "page:app-access",
+  },
+  {
     nameKey: "navigation.uiEntities",
     path: "/ui-entities",
     icon: FileText,
@@ -102,6 +109,7 @@ export function Sidebar() {
   const canViewPermissions = useCanAccess("can_view", "page:permissions");
   const canViewRoles = useCanAccess("can_view", "page:roles");
   const canViewGroups = useCanAccess("can_view", "page:groups");
+  const canViewAppAccess = useCanAccess("can_view", "page:app-access");
   const canViewUiEntities = useCanAccess("can_view", "page:ui-entities");
   const canViewEncryption = useCanAccess("can_view", "page:encryption");
   const canViewServices = useCanAccess("can_view", "page:services");
@@ -118,6 +126,7 @@ export function Sidebar() {
     "page:permissions": canViewPermissions,
     "page:roles": canViewRoles,
     "page:groups": canViewGroups,
+    "page:app-access": canViewAppAccess,
     "page:ui-entities": canViewUiEntities,
     "page:encryption": canViewEncryption,
     "page:services": canViewServices,

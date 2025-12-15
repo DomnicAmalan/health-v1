@@ -15,7 +15,7 @@ pub struct UpdateUserRequest {
     pub password: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserResponse {
     pub id: Uuid,
     pub email: String,

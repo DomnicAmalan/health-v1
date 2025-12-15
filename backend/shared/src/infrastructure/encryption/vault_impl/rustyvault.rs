@@ -324,6 +324,237 @@ path "sys/policies/*" {{
 
         self.create_token(&request).await
     }
+
+    // ==========================================
+    // Realm Management (Phase 9)
+    // ==========================================
+
+    /// Get or create a realm for an organization
+    pub async fn get_or_create_realm_for_org(&self, organization_id: Uuid) -> AppResult<Uuid> {
+        // First try to get existing realm
+        let path = format!("{}/v1/sys/realm/organization/{}", self.addr, organization_id);
+        
+        let response = self.client
+            .get(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault realm lookup error: {}", e)))?;
+
+        if response.status().is_success() {
+            let json: serde_json::Value = response.json().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+            
+            // Check if we got realms
+            if let Some(realms) = json.get("data").and_then(|d| d.get("realms")).and_then(|r| r.as_array()) {
+                if let Some(first_realm) = realms.first() {
+                    if let Some(id_str) = first_realm.get("id").and_then(|v| v.as_str()) {
+                        if let Ok(realm_id) = Uuid::parse_str(id_str) {
+                            return Ok(realm_id);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create new realm for organization
+        let create_path = format!("{}/v1/sys/realm", self.addr);
+        let realm_name = format!("org-{}", organization_id);
+        let data = serde_json::json!({
+            "name": realm_name,
+            "description": format!("Realm for organization {}", organization_id),
+            "organization_id": organization_id.to_string()
+        });
+
+        let response = self.client
+            .post(&create_path)
+            .header("X-RustyVault-Token", &self.token)
+            .json(&data)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault realm create error: {}", e)))?;
+
+        if response.status().is_success() {
+            let json: serde_json::Value = response.json().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+            
+            if let Some(id_str) = json.get("data").and_then(|d| d.get("id")).and_then(|v| v.as_str()) {
+                Uuid::parse_str(id_str)
+                    .map_err(|e| AppError::Encryption(format!("Invalid realm ID: {}", e)))
+            } else {
+                Err(AppError::Encryption("No realm ID in response".to_string()))
+            }
+        } else {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            Err(AppError::Encryption(format!(
+                "Failed to create realm: {} - {}", status, error_text
+            )))
+        }
+    }
+
+    /// Create a user in a realm
+    pub async fn create_realm_user(
+        &self,
+        realm_id: Uuid,
+        username: &str,
+        password: &str,
+        policies: &[String],
+    ) -> AppResult<()> {
+        let path = format!("{}/v1/realm/{}/auth/userpass/users/{}", self.addr, realm_id, username);
+        let data = serde_json::json!({
+            "password": password,
+            "policies": policies
+        });
+
+        let response = self.client
+            .post(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .json(&data)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault user create error: {}", e)))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to create realm user: {} - {}", status, error_text
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Create a token in a realm
+    pub async fn create_realm_token(
+        &self,
+        realm_id: Uuid,
+        user_id: Uuid,
+        policies: &[String],
+    ) -> AppResult<String> {
+        let path = format!("{}/v1/auth/token/create", self.addr);
+        
+        let mut meta = serde_json::Map::new();
+        meta.insert("user_id".to_string(), serde_json::json!(user_id.to_string()));
+        meta.insert("realm_id".to_string(), serde_json::json!(realm_id.to_string()));
+
+        let request = CreateTokenRequest {
+            policies: Some(policies.to_vec()),
+            ttl: Some("24h".to_string()),
+            display_name: Some(format!("user-{}-realm-{}", user_id, realm_id)),
+            meta: Some(meta),
+            renewable: Some(true),
+            num_uses: None,
+        };
+
+        let response = self.client
+            .post(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .json(&request)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault token create error: {}", e)))?;
+
+        if response.status().is_success() {
+            let token_response: TokenResponse = response.json().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+            
+            token_response.auth
+                .map(|auth| auth.client_token)
+                .ok_or_else(|| AppError::Encryption("No auth in token response".to_string()))
+        } else {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            Err(AppError::Encryption(format!(
+                "Failed to create realm token: {} - {}", status, error_text
+            )))
+        }
+    }
+
+    /// Create a policy in a realm
+    pub async fn create_realm_policy(&self, realm_id: Uuid, name: &str, policy: &str) -> AppResult<()> {
+        let path = format!("{}/v1/realm/{}/sys/policies/acl/{}", self.addr, realm_id, name);
+        let data = serde_json::json!({
+            "policy": policy
+        });
+
+        let response = self.client
+            .post(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .json(&data)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault realm policy write error: {}", e)))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to write realm policy '{}': {} - {}", name, status, error_text
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Register an application in a realm
+    pub async fn register_realm_app(
+        &self,
+        realm_id: Uuid,
+        app_name: &str,
+        app_type: &str,
+        display_name: Option<&str>,
+        allowed_auth_methods: Option<&[String]>,
+    ) -> AppResult<()> {
+        let path = format!("{}/v1/realm/{}/sys/apps", self.addr, realm_id);
+        let data = serde_json::json!({
+            "app_name": app_name,
+            "app_type": app_type,
+            "display_name": display_name,
+            "allowed_auth_methods": allowed_auth_methods
+        });
+
+        let response = self.client
+            .post(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .json(&data)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault app register error: {}", e)))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to register app '{}': {} - {}", app_name, status, error_text
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Register default apps in a realm
+    pub async fn register_default_realm_apps(&self, realm_id: Uuid) -> AppResult<()> {
+        let path = format!("{}/v1/realm/{}/sys/apps/register-defaults", self.addr, realm_id);
+
+        let response = self.client
+            .post(&path)
+            .header("X-RustyVault-Token", &self.token)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault app register error: {}", e)))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to register default apps: {} - {}", status, error_text
+            )));
+        }
+
+        Ok(())
+    }
 }
 
 // Implement base Vault trait for RustyVaultClient

@@ -33,7 +33,7 @@ async fn async_main() -> Result<(), String> {
     // Initialize database connection using database service
     info!("Connecting to database...");
     use std::time::Duration;
-    let pool = shared::infrastructure::database::create_pool_from_config(
+    let pool = shared::infrastructure::database::db_service::create_pool_from_config(
         &settings.database,
         Duration::from_secs(10),
     )

@@ -1,0 +1,153 @@
+import { useEffect } from 'react';
+import { Globe, ChevronDown, Check, AlertCircle } from 'lucide-react';
+import { useRealmStore } from '@/stores/realmStore';
+import { useAuthStore } from '@/stores/authStore';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Badge,
+} from '@lazarus-life/ui-components';
+import { cn } from '@lazarus-life/ui-components';
+import type { Realm } from '@/lib/api/realms';
+
+interface RealmSelectorProps {
+  className?: string;
+}
+
+export function RealmSelector({ className }: RealmSelectorProps) {
+  const { isRoot } = useAuthStore();
+  const {
+    currentRealm,
+    realms,
+    isGlobalMode,
+    isLoading,
+    error,
+    fetchRealms,
+    setCurrentRealm,
+    clearRealm,
+  } = useRealmStore();
+
+  // Fetch realms on mount
+  useEffect(() => {
+    fetchRealms();
+  }, [fetchRealms]);
+
+  const handleSelectRealm = (realm: Realm) => {
+    setCurrentRealm(realm);
+  };
+
+  const handleSelectGlobal = () => {
+    clearRealm();
+  };
+
+  // Display text for the dropdown trigger
+  const displayText = isGlobalMode
+    ? 'Global'
+    : currentRealm?.name || 'Select Realm';
+
+  return (
+    <div className={cn('w-full', className)}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full justify-between text-left font-normal"
+            disabled={isLoading}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <Globe className="h-4 w-4 shrink-0" />
+              <span className="truncate">{displayText}</span>
+              {isGlobalMode && isRoot() && (
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  Admin
+                </Badge>
+              )}
+            </div>
+            <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="start">
+          {/* Global option - only for root users */}
+          {isRoot() && (
+            <>
+              <DropdownMenuItem
+                onClick={handleSelectGlobal}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    <span>Global</span>
+                    <Badge variant="secondary" className="text-xs">
+                      All Realms
+                    </Badge>
+                  </div>
+                  {isGlobalMode && <Check className="h-4 w-4" />}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+              Loading realms...
+            </div>
+          )}
+
+          {/* Error state */}
+          {error && (
+            <div className="px-2 py-2 text-sm text-destructive flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
+          )}
+
+          {/* Realm list */}
+          {!isLoading && realms.length === 0 && !error && (
+            <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+              No realms available
+            </div>
+          )}
+
+          {!isLoading &&
+            realms.map((realm) => (
+              <DropdownMenuItem
+                key={realm.id}
+                onClick={() => handleSelectRealm(realm)}
+                className="cursor-pointer"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{realm.name}</span>
+                    {realm.organization_name && (
+                      <span className="text-xs text-muted-foreground">
+                        {realm.organization_name}
+                      </span>
+                    )}
+                  </div>
+                  {currentRealm?.id === realm.id && (
+                    <Check className="h-4 w-4 shrink-0" />
+                  )}
+                </div>
+              </DropdownMenuItem>
+            ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Warning indicator for global mode */}
+      {isGlobalMode && isRoot() && (
+        <div className="mt-2 px-2 py-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 rounded border border-amber-200 dark:border-amber-800">
+          <AlertCircle className="h-3 w-3 inline mr-1" />
+          Global mode: Changes affect all realms
+        </div>
+      )}
+    </div>
+  );
+}
+

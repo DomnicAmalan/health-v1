@@ -2,7 +2,7 @@ import { apiClient } from './client';
 import { VAULT_ROUTES } from './routes';
 
 export interface SecretData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SecretVersion {
@@ -30,19 +30,25 @@ export interface SecretListResponse {
   keys: string[];
 }
 
+function createDefaultMetadata(): SecretMetadata {
+  return {
+    created_time: new Date().toISOString(),
+    current_version: 1,
+    max_versions: 0,
+    oldest_version: 1,
+    updated_time: new Date().toISOString(),
+    versions: {},
+  };
+}
+
 export const secretsApi = {
+  // ============ Global Secrets ============
+
   read: async (path: string): Promise<SecretResponse> => {
     const response = await apiClient.get<{ data: SecretData }>(VAULT_ROUTES.SECRETS.READ(path));
     return {
       data: response.data || {},
-      metadata: {
-        created_time: new Date().toISOString(),
-        current_version: 1,
-        max_versions: 0,
-        oldest_version: 1,
-        updated_time: new Date().toISOString(),
-        versions: {},
-      },
+      metadata: createDefaultMetadata(),
     };
   },
 
@@ -54,7 +60,7 @@ export const secretsApi = {
     try {
       const response = await apiClient.get<SecretListResponse>(VAULT_ROUTES.SECRETS.LIST(path));
       return response.keys || [];
-    } catch (error) {
+    } catch {
       // If list fails, return empty array
       return [];
     }
@@ -62,6 +68,50 @@ export const secretsApi = {
 
   delete: async (path: string): Promise<void> => {
     await apiClient.delete(VAULT_ROUTES.SECRETS.DELETE(path));
+  },
+
+  // ============ Realm-Scoped Secrets ============
+
+  /**
+   * Read a secret from a realm
+   */
+  readForRealm: async (realmId: string, path: string): Promise<SecretResponse> => {
+    const response = await apiClient.get<{ data: SecretData }>(
+      VAULT_ROUTES.REALM_SECRETS.READ(realmId, path)
+    );
+    return {
+      data: response.data || {},
+      metadata: createDefaultMetadata(),
+    };
+  },
+
+  /**
+   * Write a secret to a realm
+   */
+  writeForRealm: async (realmId: string, path: string, data: SecretData): Promise<void> => {
+    await apiClient.post(VAULT_ROUTES.REALM_SECRETS.WRITE(realmId, path), { data });
+  },
+
+  /**
+   * List secrets in a realm
+   */
+  listForRealm: async (realmId: string, path: string = ''): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<SecretListResponse>(
+        VAULT_ROUTES.REALM_SECRETS.LIST(realmId, path)
+      );
+      return response.keys || [];
+    } catch {
+      // If list fails, return empty array
+      return [];
+    }
+  },
+
+  /**
+   * Delete a secret from a realm
+   */
+  deleteForRealm: async (realmId: string, path: string): Promise<void> => {
+    await apiClient.delete(VAULT_ROUTES.REALM_SECRETS.DELETE(realmId, path));
   },
 };
 
