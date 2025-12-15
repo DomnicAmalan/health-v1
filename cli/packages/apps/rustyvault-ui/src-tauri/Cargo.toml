@@ -1,6 +1,6 @@
 [package]
 name = "lazarus-life-vault"
-version = "0.1.0"
+version = "1.1.0"
 description = "Lazarus Life Vault - Vault Management Interface"
 authors = ["Lazarus Life Foundation"]
 license = ""
