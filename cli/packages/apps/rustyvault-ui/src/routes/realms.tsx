@@ -23,8 +23,10 @@ import {
   AlertDescription,
 } from '@lazarus-life/ui-components';
 import { Plus, Trash2, Edit, Globe, Building2, Calendar, Loader2, AlertCircle, Check } from 'lucide-react';
+import { useTranslation } from '@lazarus-life/shared/i18n';
 
 export function RealmsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { setCurrentRealm, currentRealm, refreshRealms } = useRealmStore();
   
@@ -133,9 +135,9 @@ export function RealmsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Realms</h1>
+          <h1 className="text-2xl font-bold">{t('realms.title')}</h1>
           <p className="text-muted-foreground">
-            Manage multi-tenant realms for organization isolation
+            {t('realms.subtitle')}
           </p>
         </div>
         
@@ -144,40 +146,40 @@ export function RealmsPage() {
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Realm
+              {t('realms.create.button')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Realm</DialogTitle>
+              <DialogTitle>{t('realms.create.dialogTitle')}</DialogTitle>
               <DialogDescription>
-                Create a new realm for tenant isolation. Each realm has its own policies, secrets, and users.
+                {t('realms.create.dialogDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Realm Name</Label>
+                <Label htmlFor="name">{t('realms.create.fields.name')}</Label>
                 <Input
                   id="name"
-                  placeholder="my-organization"
+                  placeholder={t('realms.create.fields.namePlaceholder')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('realms.create.fields.description')}</Label>
                 <Input
                   id="description"
-                  placeholder="Optional description"
+                  placeholder={t('realms.create.fields.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="org_id">Organization ID (Optional)</Label>
+                <Label htmlFor="org_id">{t('realms.create.fields.organizationId')}</Label>
                 <Input
                   id="org_id"
-                  placeholder="UUID of the organization"
+                  placeholder={t('realms.create.fields.organizationIdPlaceholder')}
                   value={formData.organization_id}
                   onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                 />
@@ -185,7 +187,7 @@ export function RealmsPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                Cancel
+                {t('realms.create.actions.cancel')}
               </Button>
               <Button 
                 onClick={handleCreate} 
@@ -194,10 +196,10 @@ export function RealmsPage() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
+                    {t('realms.create.creating')}
                   </>
                 ) : (
-                  'Create Realm'
+                  t('realms.create.actions.create')
                 )}
               </Button>
             </DialogFooter>
@@ -210,7 +212,7 @@ export function RealmsPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load realms'}
+            {error instanceof Error ? error.message : t('realms.errors.failedToLoad')}
           </AlertDescription>
         </Alert>
       )}
@@ -227,13 +229,13 @@ export function RealmsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Globe className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Realms Yet</h3>
+            <h3 className="text-lg font-medium mb-2">{t('realms.empty.title')}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Create your first realm to start organizing tenants
+              {t('realms.empty.description')}
             </p>
             <Button onClick={() => setIsCreateOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Realm
+              {t('realms.create.button')}
             </Button>
           </CardContent>
         </Card>
@@ -260,13 +262,13 @@ export function RealmsPage() {
                     {currentRealm?.id === realm.id && (
                       <Badge variant="default" className="mr-2">
                         <Check className="h-3 w-3 mr-1" />
-                        Selected
+                        {t('realms.list.selected')}
                       </Badge>
                     )}
                     {realm.is_active !== false ? (
-                      <Badge variant="secondary">Active</Badge>
+                      <Badge variant="secondary">{t('realms.list.active')}</Badge>
                     ) : (
-                      <Badge variant="outline">Inactive</Badge>
+                      <Badge variant="outline">{t('realms.list.inactive')}</Badge>
                     )}
                   </div>
                 </div>
@@ -287,7 +289,7 @@ export function RealmsPage() {
                   {realm.created_at && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>Created {new Date(realm.created_at).toLocaleDateString()}</span>
+                      <span>{t('realms.list.created', { date: new Date(realm.created_at).toLocaleDateString() })}</span>
                     </div>
                   )}
                 </div>
@@ -298,7 +300,7 @@ export function RealmsPage() {
                     onClick={() => openEditDialog(realm)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Edit
+                    {t('realms.list.edit')}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -307,7 +309,7 @@ export function RealmsPage() {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
+                    {t('realms.list.delete')}
                   </Button>
                 </div>
               </CardContent>
@@ -320,14 +322,14 @@ export function RealmsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Realm</DialogTitle>
+            <DialogTitle>{t('realms.edit.title')}</DialogTitle>
             <DialogDescription>
-              Update realm settings for {selectedRealm?.name}
+              {t('realms.edit.dialogDescription', { name: selectedRealm?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Realm Name</Label>
+              <Label htmlFor="edit-name">{t('realms.create.fields.name')}</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
@@ -335,7 +337,7 @@ export function RealmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
+              <Label htmlFor="edit-description">{t('realms.create.fields.description')}</Label>
               <Input
                 id="edit-description"
                 value={formData.description}
@@ -345,7 +347,7 @@ export function RealmsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              Cancel
+              {t('realms.create.actions.cancel')}
             </Button>
             <Button 
               onClick={handleUpdate}
@@ -354,10 +356,10 @@ export function RealmsPage() {
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  {t('realms.edit.saving')}
                 </>
               ) : (
-                'Save Changes'
+                t('realms.edit.saveChanges')
               )}
             </Button>
           </DialogFooter>
@@ -368,27 +370,27 @@ export function RealmsPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Realm</DialogTitle>
+            <DialogTitle>{t('realms.delete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedRealm?.name}"? This action cannot be undone.
+              {t('realms.delete.dialogDescription', { name: selectedRealm?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Deleting this realm will also delete all associated:
+              {t('realms.delete.warning')}
               <ul className="list-disc list-inside mt-2">
-                <li>Applications</li>
-                <li>Policies</li>
-                <li>Users</li>
-                <li>Secrets</li>
-                <li>AppRoles</li>
+                <li>{t('realms.delete.associatedItems.applications')}</li>
+                <li>{t('realms.delete.associatedItems.policies')}</li>
+                <li>{t('realms.delete.associatedItems.users')}</li>
+                <li>{t('realms.delete.associatedItems.secrets')}</li>
+                <li>{t('realms.delete.associatedItems.approles')}</li>
               </ul>
             </AlertDescription>
           </Alert>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
+              {t('realms.create.actions.cancel')}
             </Button>
             <Button 
               variant="destructive"
@@ -398,10 +400,10 @@ export function RealmsPage() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t('realms.delete.deleting')}
                 </>
               ) : (
-                'Delete Realm'
+                t('realms.delete.deleteRealm')
               )}
             </Button>
           </DialogFooter>

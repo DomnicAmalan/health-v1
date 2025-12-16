@@ -47,6 +47,8 @@
     "tokens": "Tokens",
     "users": "Users",
     "realms": "Realms",
+    "applications": "Applications",
+    "approles": "AppRoles",
     "system": "System",
     "sections": {
       "secrets": "Secrets",
@@ -127,13 +129,196 @@
   },
   "realms": {
     "title": "Realms",
+    "subtitle": "Manage multi-tenant realms for organization isolation",
     "notImplemented": "Realms feature is not yet implemented",
     "features": {
       "tenantIsolation": "Provide tenant isolation and security"
     },
-    "comingSoon": "Coming Soon"
+    "comingSoon": "Coming Soon",
+    "create": {
+      "title": "Create Realm",
+      "button": "Create Realm",
+      "dialogTitle": "Create New Realm",
+      "dialogDescription": "Create a new realm for tenant isolation. Each realm has its own policies, secrets, and users.",
+      "creating": "Creating...",
+      "fields": {
+        "name": "Realm Name",
+        "namePlaceholder": "my-organization",
+        "description": "Description",
+        "descriptionPlaceholder": "Optional description",
+        "organizationId": "Organization ID (Optional)",
+        "organizationIdPlaceholder": "UUID of the organization"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "create": "Create Realm"
+      }
+    },
+    "edit": {
+      "title": "Edit Realm",
+      "dialogDescription": "Update realm settings for {{name}}",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "delete": {
+      "title": "Delete Realm",
+      "dialogDescription": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "warning": "Deleting this realm will also delete all associated:",
+      "deleting": "Deleting...",
+      "deleteRealm": "Delete Realm",
+      "associatedItems": {
+        "applications": "Applications",
+        "policies": "Policies",
+        "users": "Users",
+        "secrets": "Secrets",
+        "approles": "AppRoles"
+      }
+    },
+    "empty": {
+      "title": "No Realms Yet",
+      "description": "Create your first realm to start organizing tenants"
+    },
+    "list": {
+      "selected": "Selected",
+      "active": "Active",
+      "inactive": "Inactive",
+      "edit": "Edit",
+      "delete": "Delete",
+      "created": "Created {{date}}"
+    },
+    "errors": {
+      "failedToLoad": "Failed to load realms"
+    }
+  },
+  "applications": {
+    "title": "Applications",
+    "subtitle": "Manage applications in realm: {{realmName}}",
+    "noRealmSelected": {
+      "title": "Select a Realm",
+      "description": "Applications are realm-scoped. Please select a realm from the dropdown to manage applications.",
+      "goToRealms": "Go to Realms"
+    },
+    "create": {
+      "registerApp": "Register App",
+      "registerDefaults": "Register Defaults",
+      "dialogTitle": "Register Application",
+      "dialogDescription": "Register a new application in the {{realmName}} realm.",
+      "registering": "Registering...",
+      "fields": {
+        "appName": "Application Name",
+        "appNamePlaceholder": "my-mobile-app",
+        "appType": "Application Type",
+        "appTypePlaceholder": "Select type",
+        "displayName": "Display Name (Optional)",
+        "displayNamePlaceholder": "My Mobile App",
+        "description": "Description (Optional)",
+        "descriptionPlaceholder": "Brief description",
+        "allowedAuthMethods": "Allowed Auth Methods"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "register": "Register App"
+      }
+    },
+    "edit": {
+      "title": "Edit Application",
+      "dialogDescription": "Update settings for {{appName}}",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    },
+    "delete": {
+      "title": "Delete Application",
+      "dialogDescription": "Are you sure you want to delete \"{{appName}}\"?",
+      "warning": "This will remove the application and any associated AppRoles.",
+      "deleting": "Deleting...",
+      "deleteApp": "Delete App"
+    },
+    "empty": {
+      "title": "No Applications",
+      "description": "Register your first application or use \"Register Defaults\" to create standard apps."
+    },
+    "list": {
+      "type": "Type",
+      "authMethods": "Auth Methods",
+      "edit": "Edit",
+      "delete": "Delete",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "errors": {
+      "failedToLoad": "Failed to load applications"
+    },
+    "appTypes": {
+      "admin-ui": "Admin UI",
+      "client-app": "Client App",
+      "mobile": "Mobile",
+      "api": "API"
+    },
+    "authMethods": {
+      "token": "Token",
+      "userpass": "Username/Password",
+      "approle": "AppRole",
+      "jwt": "JWT"
+    }
   },
   "security": {
     "accessDenied": "Access Denied"
+  },
+  "approles": {
+    "title": "AppRoles",
+    "subtitle": "Manage AppRole authentication for realm: {{realmName}}",
+    "noRealmSelected": {
+      "title": "Select a Realm",
+      "description": "AppRoles are realm-scoped. Please select a realm to manage AppRoles.",
+      "goToRealms": "Go to Realms"
+    },
+    "create": {
+      "button": "Create AppRole",
+      "dialogTitle": "Create AppRole",
+      "dialogDescription": "Create a new AppRole for machine-to-machine authentication.",
+      "creating": "Creating...",
+      "createRole": "Create Role",
+      "fields": {
+        "roleName": "Role Name",
+        "roleNamePlaceholder": "my-app-role",
+        "bindSecretId": "Bind Secret ID",
+        "bindSecretIdDescription": "Require secret_id for login",
+        "secretIdTtl": "Secret ID TTL (seconds)",
+        "secretIdMaxUses": "Secret ID Max Uses",
+        "secretIdMaxUsesPlaceholder": "0 = unlimited",
+        "tokenTtl": "Token TTL (seconds)",
+        "tokenMaxTtl": "Token Max TTL",
+        "policies": "Policies"
+      },
+      "actions": {
+        "cancel": "Cancel"
+      }
+    },
+    "delete": {
+      "title": "Delete AppRole",
+      "dialogDescription": "Are you sure you want to delete \"{{roleName}}\"?",
+      "warning": "This will invalidate all existing secret IDs and tokens for this role.",
+      "deleting": "Deleting...",
+      "deleteRole": "Delete Role"
+    },
+    "empty": {
+      "title": "No AppRoles",
+      "description": "Create an AppRole for machine-to-machine authentication."
+    },
+    "list": {
+      "roleId": "Role ID",
+      "tokenTtl": "Token TTL",
+      "secretUses": "Secret Uses",
+      "policies": "Policies",
+      "unlimited": "Unlimited",
+      "loading": "Loading...",
+      "secretRequired": "Secret Required",
+      "noSecret": "No Secret",
+      "generateSecret": "Generate Secret",
+      "delete": "Delete"
+    },
+    "errors": {
+      "failedToLoad": "Failed to load AppRoles"
+    }
   }
 }

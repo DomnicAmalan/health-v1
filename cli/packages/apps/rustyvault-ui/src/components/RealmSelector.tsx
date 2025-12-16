@@ -10,6 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Badge,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
 } from '@lazarus-life/ui-components';
 import { cn } from '@lazarus-life/ui-components';
 import type { Realm } from '@/lib/api/realms';
@@ -51,26 +55,39 @@ export function RealmSelector({ className }: RealmSelectorProps) {
 
   return (
     <div className={cn('w-full', className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between text-left font-normal"
-            disabled={isLoading}
+      <TooltipProvider>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="max-w-[calc(16rem-1.5rem)] justify-between text-left font-normal"
+                  disabled={isLoading}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Globe className="h-4 w-4 shrink-0" />
+                    <span className="truncate min-w-0">{displayText}</span>
+                    {isGlobalMode && isRoot() && (
+                      <Badge variant="secondary" className="text-xs shrink-0">
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{displayText}</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent 
+            className="max-w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)]" 
+            align="end"
+            side="bottom"
+            sideOffset={4}
           >
-            <div className="flex items-center gap-2 truncate">
-              <Globe className="h-4 w-4 shrink-0" />
-              <span className="truncate">{displayText}</span>
-              {isGlobalMode && isRoot() && (
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  Admin
-                </Badge>
-              )}
-            </div>
-            <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
           {/* Global option - only for root users */}
           {isRoot() && (
             <>
@@ -78,15 +95,15 @@ export function RealmSelector({ className }: RealmSelectorProps) {
                 onClick={handleSelectGlobal}
                 className="cursor-pointer"
               >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    <span>Global</span>
-                    <Badge variant="secondary" className="text-xs">
+                <div className="flex items-center justify-between ">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Globe className="h-4 w-4 shrink-0" />
+                    <span className="break-words">Global</span>
+                    <Badge variant="secondary" className="text-xs shrink-0">
                       All Realms
                     </Badge>
                   </div>
-                  {isGlobalMode && <Check className="h-4 w-4" />}
+                  {isGlobalMode && <Check className="h-4 w-4 shrink-0" />}
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -104,7 +121,7 @@ export function RealmSelector({ className }: RealmSelectorProps) {
           {error && (
             <div className="px-2 py-2 text-sm text-destructive flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              {error}
+              <span className="break-words">{error}</span>
             </div>
           )}
 
@@ -122,11 +139,11 @@ export function RealmSelector({ className }: RealmSelectorProps) {
                 onClick={() => handleSelectRealm(realm)}
                 className="cursor-pointer"
               >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{realm.name}</span>
+                <div className="flex items-center justify-between w-full gap-2 min-w-0">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="font-medium break-words">{realm.name}</span>
                     {realm.organization_name && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground break-words">
                         {realm.organization_name}
                       </span>
                     )}
@@ -137,8 +154,9 @@ export function RealmSelector({ className }: RealmSelectorProps) {
                 </div>
               </DropdownMenuItem>
             ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TooltipProvider>
 
       {/* Warning indicator for global mode */}
       {isGlobalMode && isRoot() && (

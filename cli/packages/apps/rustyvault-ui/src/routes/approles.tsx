@@ -8,6 +8,7 @@ import {
   formatTTL,
 } from '@/lib/api/approle';
 import { SecretIdDialog } from '@/components/SecretIdDialog';
+import { useTranslation } from '@lazarus-life/shared/i18n';
 import {
   Card,
   CardContent,
@@ -46,6 +47,7 @@ import { Link } from '@tanstack/react-router';
 const COMMON_POLICIES = ['default', 'admin', 'reader', 'writer'];
 
 export function AppRolesPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
 
@@ -191,12 +193,12 @@ export function AppRolesPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Globe className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Select a Realm</h3>
+            <h3 className="text-lg font-medium mb-2">{t('approles.noRealmSelected.title')}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              AppRoles are realm-scoped. Please select a realm to manage AppRoles.
+              {t('approles.noRealmSelected.description')}
             </p>
             <Link to="/realms">
-              <Button>Go to Realms</Button>
+              <Button>{t('approles.noRealmSelected.goToRealms')}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -210,9 +212,9 @@ export function AppRolesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">AppRoles</h1>
+          <h1 className="text-2xl font-bold">{t('approles.title')}</h1>
           <p className="text-muted-foreground">
-            Manage AppRole authentication for realm: <span className="font-medium">{currentRealm.name}</span>
+            {t('approles.subtitle', { realmName: currentRealm.name })}
           </p>
         </div>
 
@@ -220,22 +222,22 @@ export function AppRolesPage() {
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
-              Create AppRole
+              {t('approles.create.button')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create AppRole</DialogTitle>
+              <DialogTitle>{t('approles.create.dialogTitle')}</DialogTitle>
               <DialogDescription>
-                Create a new AppRole for machine-to-machine authentication.
+                {t('approles.create.dialogDescription')}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
               <div className="space-y-2">
-                <Label htmlFor="roleName">Role Name</Label>
+                <Label htmlFor="roleName">{t('approles.create.fields.roleName')}</Label>
                 <Input
                   id="roleName"
-                  placeholder="my-app-role"
+                  placeholder={t('approles.create.fields.roleNamePlaceholder')}
                   value={formData.roleName}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, roleName: e.target.value })}
                 />
@@ -243,9 +245,9 @@ export function AppRolesPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Bind Secret ID</Label>
+                  <Label>{t('approles.create.fields.bindSecretId')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Require secret_id for login
+                    {t('approles.create.fields.bindSecretIdDescription')}
                   </p>
                 </div>
                 <Switch
@@ -256,7 +258,7 @@ export function AppRolesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="secret_ttl">Secret ID TTL (seconds)</Label>
+                  <Label htmlFor="secret_ttl">{t('approles.create.fields.secretIdTtl')}</Label>
                   <Input
                     id="secret_ttl"
                     type="number"
@@ -265,20 +267,20 @@ export function AppRolesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="secret_uses">Secret ID Max Uses</Label>
+                  <Label htmlFor="secret_uses">{t('approles.create.fields.secretIdMaxUses')}</Label>
                   <Input
                     id="secret_uses"
                     type="number"
                     value={formData.secret_id_num_uses || ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, secret_id_num_uses: parseInt(e.target.value) || undefined })}
-                    placeholder="0 = unlimited"
+                    placeholder={t('approles.create.fields.secretIdMaxUsesPlaceholder')}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="token_ttl">Token TTL (seconds)</Label>
+                  <Label htmlFor="token_ttl">{t('approles.create.fields.tokenTtl')}</Label>
                   <Input
                     id="token_ttl"
                     type="number"
@@ -287,7 +289,7 @@ export function AppRolesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="token_max_ttl">Token Max TTL</Label>
+                  <Label htmlFor="token_max_ttl">{t('approles.create.fields.tokenMaxTtl')}</Label>
                   <Input
                     id="token_max_ttl"
                     type="number"
@@ -298,7 +300,7 @@ export function AppRolesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Policies</Label>
+                <Label>{t('approles.create.fields.policies')}</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {COMMON_POLICIES.map((policy) => (
                     <div key={policy} className="flex items-center space-x-2">
@@ -317,7 +319,7 @@ export function AppRolesPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                Cancel
+                {t('approles.create.actions.cancel')}
               </Button>
               <Button
                 onClick={handleCreate}
@@ -326,10 +328,10 @@ export function AppRolesPage() {
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
+                    {t('approles.create.creating')}
                   </>
                 ) : (
-                  'Create Role'
+                  t('approles.create.createRole')
                 )}
               </Button>
             </DialogFooter>
@@ -342,7 +344,7 @@ export function AppRolesPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load AppRoles'}
+            {error instanceof Error ? error.message : t('approles.errors.failedToLoad')}
           </AlertDescription>
         </Alert>
       )}
@@ -359,13 +361,13 @@ export function AppRolesPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <KeyRound className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No AppRoles</h3>
+            <h3 className="text-lg font-medium mb-2">{t('approles.empty.title')}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Create an AppRole for machine-to-machine authentication.
+              {t('approles.empty.description')}
             </p>
             <Button onClick={() => setIsCreateOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create AppRole
+              {t('approles.create.button')}
             </Button>
           </CardContent>
         </Card>
@@ -383,9 +385,9 @@ export function AppRolesPage() {
                     <CardTitle className="text-lg">{role.role_name}</CardTitle>
                   </div>
                   {role.bind_secret_id !== false ? (
-                    <Badge variant="secondary">Secret Required</Badge>
+                    <Badge variant="secondary">{t('approles.list.secretRequired')}</Badge>
                   ) : (
-                    <Badge variant="outline">No Secret</Badge>
+                    <Badge variant="outline">{t('approles.list.noSecret')}</Badge>
                   )}
                 </div>
               </CardHeader>
@@ -393,10 +395,10 @@ export function AppRolesPage() {
                 <div className="space-y-3">
                   {/* Role ID */}
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Role ID</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t('approles.list.roleId')}</p>
                     <div className="flex items-center gap-2">
                       <code className="text-xs bg-muted px-2 py-1 rounded truncate flex-1">
-                        {role.role_id || 'Loading...'}
+                        {role.role_id || t('approles.list.loading')}
                       </code>
                       {role.role_id && (
                         <Button
@@ -418,19 +420,19 @@ export function AppRolesPage() {
                   {/* TTL Info */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <p className="text-xs text-muted-foreground">Token TTL</p>
+                      <p className="text-xs text-muted-foreground">{t('approles.list.tokenTtl')}</p>
                       <p>{formatTTL(role.token_ttl)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Secret Uses</p>
-                      <p>{role.secret_id_num_uses === 0 ? 'Unlimited' : role.secret_id_num_uses || 1}</p>
+                      <p className="text-xs text-muted-foreground">{t('approles.list.secretUses')}</p>
+                      <p>{role.secret_id_num_uses === 0 ? t('approles.list.unlimited') : role.secret_id_num_uses || 1}</p>
                     </div>
                   </div>
 
                   {/* Policies */}
                   {role.policies && role.policies.length > 0 && (
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Policies</p>
+                      <p className="text-xs text-muted-foreground mb-1">{t('approles.list.policies')}</p>
                       <div className="flex flex-wrap gap-1">
                         {role.policies.map((policy) => (
                           <Badge key={policy} variant="outline" className="text-xs">
@@ -454,7 +456,7 @@ export function AppRolesPage() {
                     ) : (
                       <Key className="h-4 w-4 mr-1" />
                     )}
-                    Generate Secret
+                    {t('approles.list.generateSecret')}
                   </Button>
                   <Button
                     variant="outline"
@@ -463,7 +465,7 @@ export function AppRolesPage() {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
+                    {t('approles.list.delete')}
                   </Button>
                 </div>
               </CardContent>
@@ -484,20 +486,20 @@ export function AppRolesPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete AppRole</DialogTitle>
+            <DialogTitle>{t('approles.delete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedRole}"?
+              {t('approles.delete.dialogDescription', { roleName: selectedRole || '' })}
             </DialogDescription>
           </DialogHeader>
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              This will invalidate all existing secret IDs and tokens for this role.
+              {t('approles.delete.warning')}
             </AlertDescription>
           </Alert>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              Cancel
+              {t('approles.create.actions.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -507,10 +509,10 @@ export function AppRolesPage() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t('approles.delete.deleting')}
                 </>
               ) : (
-                'Delete Role'
+                t('approles.delete.deleteRole')
               )}
             </Button>
           </DialogFooter>
