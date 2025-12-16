@@ -1,5 +1,6 @@
-# Multi-stage build for Rust rustyvault-service
-FROM rust:1.91-slim as builder
+# Multi-stage build for Rust rustyvault-service using cargo-chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.91 AS chef
+WORKDIR /app
 
 # Build arguments
 ARG BUILD_MODE=release
@@ -13,39 +14,56 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
-
-# Copy workspace Cargo.toml
+# Planner stage: compute the recipe
+FROM chef AS planner
 COPY backend/Cargo.toml backend/
-
-# Copy Cargo configuration for low-memory builds
+COPY backend/Cargo.lock backend/
 COPY backend/.cargo backend/.cargo
-
-# Copy all crate Cargo.toml files first (required before Cargo reads workspace)
-# All workspace members must be present for Cargo to validate the workspace
 COPY backend/shared/Cargo.toml backend/shared/
 COPY backend/authz-core/Cargo.toml backend/authz-core/
 COPY backend/admin-service/Cargo.toml backend/admin-service/
 COPY backend/api-service/Cargo.toml backend/api-service/
 COPY backend/rustyvault-service/Cargo.toml backend/rustyvault-service/
+WORKDIR /app/backend
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Copy source code for all workspace members (Cargo needs them to validate)
-COPY backend/shared/src backend/shared/src
-COPY backend/authz-core/src backend/authz-core/src
-COPY backend/admin-service/src backend/admin-service/src
-COPY backend/api-service/src backend/api-service/src
-COPY backend/rustyvault-service/src backend/rustyvault-service/src
-COPY backend/migrations backend/migrations
+# Builder stage: cache dependencies and build application
+FROM chef AS builder
 
-# Build the application
+# Set working directory
+WORKDIR /app/backend
+
+# Copy recipe from planner
+COPY --from=planner /app/backend/recipe.json recipe.json
+
+# Build dependencies - this layer will be cached unless dependencies change
 ENV RUST_BACKTRACE=1
 ENV SQLX_OFFLINE=false
-
-# Build based on mode and skip checks flag
-WORKDIR /app/backend
 ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Copy workspace files
+COPY backend/Cargo.toml ./
+COPY backend/Cargo.lock ./
+COPY backend/.cargo ./.cargo
+
+# Copy all crate Cargo.toml files
+COPY backend/shared/Cargo.toml ./shared/
+COPY backend/authz-core/Cargo.toml ./authz-core/
+COPY backend/admin-service/Cargo.toml ./admin-service/
+COPY backend/api-service/Cargo.toml ./api-service/
+COPY backend/rustyvault-service/Cargo.toml ./rustyvault-service/
+
+# Copy source code for all workspace members
+COPY backend/shared/src ./shared/src
+COPY backend/authz-core/src ./authz-core/src
+COPY backend/admin-service/src ./admin-service/src
+COPY backend/api-service/src ./api-service/src
+COPY backend/rustyvault-service/src ./rustyvault-service/src
+COPY backend/migrations ./migrations
+
+# Build the application
 RUN if [ "$BUILD_MODE" = "dev" ]; then \
         echo "Dev mode: Skipping build, will use cargo run directly"; \
     elif [ "$SKIP_CHECKS" = "true" ]; then \
