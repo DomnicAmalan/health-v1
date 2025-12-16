@@ -143,4 +143,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Start Caddy
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
-

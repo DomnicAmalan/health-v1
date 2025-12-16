@@ -12,20 +12,20 @@ services:
     # profiles:
     #   - disabled
 
-  # Skip building Admin UI - run locally with npm/vite
-  admin-ui:
-    build: null
-    image: health-admin-ui:local
-    # Comment out if you want to run Admin UI locally (outside Docker)
-    # Uncomment to disable the container entirely:
-    # profiles:
-    #   - disabled
-
   # Skip building Client App - run locally with npm/vite
   client-app:
     build: null
     image: health-client-app:local
     # Comment out if you want to run Client App locally (outside Docker)
+    # Uncomment to disable the container entirely:
+    # profiles:
+    #   - disabled
+
+  # Skip building Admin UI - run locally with npm/vite
+  admin-ui:
+    build: null
+    image: health-admin-ui:local
+    # Comment out if you want to run Admin UI locally (outside Docker)
     # Uncomment to disable the container entirely:
     # profiles:
     #   - disabled

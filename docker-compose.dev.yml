@@ -154,46 +154,6 @@ services:
       - health-network
     restart: unless-stopped
 
-  # Admin UI (React Frontend) - Dev mode with type checks skipped
-  admin-ui:
-    build:
-      context: ./cli
-      dockerfile: packages/apps/admin/Dockerfile
-      target: runner-dev
-      args:
-        BUILD_MODE: dev
-        VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:8080}
-        SKIP_TYPE_CHECK: "true"
-    container_name: health-admin-ui
-    environment:
-      # Vite configuration
-      VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:8080}
-      VITE_OIDC_ISSUER: ${VITE_OIDC_ISSUER:-http://localhost:8080}
-      VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-default-client}
-      VITE_ENABLE_POSTGRES: ${VITE_ENABLE_POSTGRES:-true}
-      VITE_ENABLE_NATS: ${VITE_ENABLE_NATS:-false}
-      VITE_ENABLE_KAFKA: ${VITE_ENABLE_KAFKA:-false}
-    volumes:
-      # Mount source code for hot reload in dev mode
-      - ./cli/packages/apps/admin:/app/packages/apps/admin
-      - ./cli/packages/libs/components:/app/packages/libs/components
-      - ./cli/packages/libs/shared:/app/packages/libs/shared
-      - ./cli/package.json:/app/package.json
-      - ./cli/biome.json:/app/biome.json
-    ports:
-      - "${ADMIN_UI_PORT:-5174}:5174"
-    depends_on:
-      - api-service
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - health-network
-    restart: unless-stopped
-
   # Client App (React Frontend) - Dev mode with type checks skipped
   client-app:
     build:
@@ -223,6 +183,46 @@ services:
       - /app/packages/libs/shared/node_modules
     ports:
       - "${CLIENT_APP_PORT:-5173}:5173"
+    depends_on:
+      - api-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - health-network
+    restart: unless-stopped
+
+  # Admin UI (React Frontend) - Dev mode with type checks skipped
+  admin-ui:
+    build:
+      context: ./cli
+      dockerfile: packages/apps/admin/Dockerfile
+      target: runner-dev
+      args:
+        BUILD_MODE: dev
+        VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:8080}
+        SKIP_TYPE_CHECK: "true"
+    container_name: health-admin-ui
+    environment:
+      # Vite configuration
+      VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:8080}
+      VITE_OIDC_ISSUER: ${VITE_OIDC_ISSUER:-http://localhost:8080}
+      VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-default-client}
+      VITE_ENABLE_POSTGRES: ${VITE_ENABLE_POSTGRES:-true}
+      VITE_ENABLE_NATS: ${VITE_ENABLE_NATS:-false}
+      VITE_ENABLE_KAFKA: ${VITE_ENABLE_KAFKA:-false}
+    volumes:
+      # Mount source code for hot reload in dev mode
+      - ./cli/packages/apps/admin:/app/packages/apps/admin
+      - ./cli/packages/libs/components:/app/packages/libs/components
+      - ./cli/packages/libs/shared:/app/packages/libs/shared
+      - ./cli/package.json:/app/package.json
+      - ./cli/biome.json:/app/biome.json
+    ports:
+      - "${ADMIN_UI_PORT:-5174}:5174"
     depends_on:
       - api-service
     healthcheck:
@@ -362,172 +362,14 @@ services:
       - health-network
     restart: unless-stopped
 
-  # NATS - Message Broker
-  nats:
-    image: nats:latest
-    container_name: health-nats
-    ports:
-      - "${NATS_PORT:-4225}:4222"
-      - "${NATS_HTTP_PORT:-8225}:8222"
-      - "${NATS_CLUSTER_PORT:-6225}:6222"
-    command:
-      - "-js"
-      - "-m"
-      - "8222"
-      - "-p"
-      - "4222"
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8222/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - health-network
-    restart: unless-stopped
-    profiles:
-      - nats
-
-  # Kafka - Event Streaming Platform (KRaft mode - no Zookeeper)
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: health-kafka
-    ports:
-      - "${KAFKA_PORT:-9092}:9092"
-      - "${KAFKA_INTERNAL_PORT:-29092}:29092"
-      - "${KAFKA_CONTROLLER_PORT:-29093}:29093"
-    environment:
-      # KRaft mode configuration
-      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller}
-      KAFKA_NODE_ID: ${KAFKA_NODE_ID:-1}
-      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka:29093}
-      # Listeners configuration
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_INTERNAL://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      # Topic configuration
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      # Metadata configuration
-      KAFKA_METADATA_LOG_DIR: /var/lib/kafka/data/metadata-log
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    networks:
-      - health-network
-    restart: unless-stopped
-    profiles:
-      - kafka
-
-  # Kafka UI (Optional - for monitoring and managing Kafka)
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: health-kafka-ui
-    depends_on:
-      - kafka
-    ports:
-      - "${KAFKA_UI_PORT:-8081}:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-    networks:
-      - health-network
-    restart: unless-stopped
-    profiles:
-      - kafka
-
-  # PostgreSQL Database for SonarQube (Separate from main app database)
-  postgres-sonar:
-    image: postgres:17-alpine
-    container_name: health-postgres-sonar
-    environment:
-      POSTGRES_USER: ${SONARQUBE_DB_USER:-sonar}
-      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar_password}
-      POSTGRES_DB: ${SONARQUBE_DB:-sonar}
-    ports:
-      - "${SONARQUBE_DB_PORT:-5444}:5432"
-    volumes:
-      - postgres_sonar_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SONARQUBE_DB_USER:-sonar} -d ${SONARQUBE_DB:-sonar}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - health-network
-    restart: unless-stopped
-    profiles:
-      - sonarqube
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-        reservations:
-          memory: 128m
-
-  # SonarQube - Code Quality Analysis
-  sonarqube:
-    image: sonarqube:${SONARQUBE_VERSION:-community}
-    container_name: health-sonarqube
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://postgres-sonar:5432/${SONARQUBE_DB:-sonar}
-      SONAR_JDBC_USERNAME: ${SONARQUBE_DB_USER:-sonar}
-      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar_password}
-      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: ${SONAR_ES_BOOTSTRAP_CHECKS_DISABLE:-true}
-      SONAR_CE_JAVAOPTS: ${SONAR_CE_JAVAOPTS:--Xmx512m -Xms128m}
-      SONAR_WEB_JAVAOPTS: ${SONAR_WEB_JAVAOPTS:--Xmx512m -Xms128m}
-    ports:
-      - "${SONARQUBE_PORT:-9000}:9000"
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    depends_on:
-      postgres-sonar:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    networks:
-      - health-network
-    restart: unless-stopped
-    profiles:
-      - sonarqube
-    deploy:
-      resources:
-        limits:
-          memory: 1g
-        reservations:
-          memory: 512m
-
 volumes:
   postgres_data:
-    driver: local
-  postgres_sonar_data:
     driver: local
   api_service_data:
     driver: local
   rustyvault_data:
     driver: local
   rustyvault_service_data:
-    driver: local
-  kafka_data:
-    driver: local
-  sonarqube_data:
-    driver: local
-  sonarqube_extensions:
-    driver: local
-  sonarqube_logs:
     driver: local
 
 networks:

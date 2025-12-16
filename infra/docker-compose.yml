@@ -20,60 +20,6 @@ services:
     networks:
       - health-network
 
-  # LocalStack - Local AWS Services (S3, KMS, etc.)
-  localstack:
-    profiles: ["localstack"]
-    image: localstack/localstack:latest
-    container_name: health-localstack
-    environment:
-      - SERVICES=s3,kms
-      - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - AWS_DEFAULT_REGION=${AWS_REGION:-us-east-1}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
-      - SKIP_SSL_CERT_DOWNLOAD=1
-    ports:
-      - "4566:4566"            # LocalStack Gateway
-      - "4510-4559:4510-4559"  # External services port range
-    volumes:
-      - localstack_data:/var/lib/localstack
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - health-network
-
-  # OpenBao (HashiCorp Vault fork) - Key Management
-  openbao:
-    profiles: ["openbao"]
-    image: openbao/openbao:latest
-    container_name: health-openbao
-    cap_add:
-      - IPC_LOCK
-    environment:
-      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_TOKEN:-dev-root-token}
-      - VAULT_ADDR=http://0.0.0.0:8200
-      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
-      - VAULT_DEV_TLS_DISABLE=1
-    ports:
-      - "${VAULT_PORT:-8200}:8200"
-    volumes:
-      - openbao_data:/vault/file
-      - ./openbao-init:/vault/config:ro
-    command: server -dev -dev-root-token-id=${VAULT_TOKEN:-dev-root-token} -dev-listen-address=0.0.0.0:8200
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8200/v1/sys/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - health-network
-
   # NATS - Message Broker
   nats:
     profiles: ["nats"]
@@ -151,8 +97,6 @@ services:
 
 volumes:
   postgres_data:
-  localstack_data:
-  openbao_data:
   kafka_data:
 
 networks:
