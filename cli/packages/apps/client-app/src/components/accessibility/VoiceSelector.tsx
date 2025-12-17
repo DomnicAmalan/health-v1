@@ -3,6 +3,7 @@
  * Select TTS voice with accent/quality options
  */
 
+import { Input, Label, Select, SelectItem } from "@lazarus-life/ui-components";
 import { useEffect, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Stack } from "@/components/ui/stack";
@@ -157,14 +158,14 @@ export function VoiceSelector() {
     <Stack spacing="md">
       {/* Voice Selection */}
       <Box>
-        <label htmlFor="voice-select" className="text-sm font-medium mb-2 block">
+        <Label htmlFor="voice-select" className="mb-2 block">
           Voice / Accent
-        </label>
-        <select
+        </Label>
+        <Select
           id="voice-select"
           value={preferences.voiceName || ""}
           onChange={(e) => updatePreference("voiceName", e.target.value || null)}
-          className="w-full p-2 border rounded-md bg-background"
+          className="w-full"
         >
           {sortedCategories.map((category) => (
             <optgroup key={category} label={category}>
@@ -177,7 +178,7 @@ export function VoiceSelector() {
                 ))}
             </optgroup>
           ))}
-        </select>
+        </Select>
         <p className="text-xs text-muted-foreground mt-1">
           Choose a voice with your preferred accent and quality
         </p>
@@ -185,15 +186,18 @@ export function VoiceSelector() {
 
       {/* Voice Settings */}
       <Box>
-        <label className="text-sm font-medium mb-2 block">Voice Speed</label>
-        <input
+        <Label htmlFor="voice-speed" className="mb-2 block">
+          Voice Speed
+        </Label>
+        <Input
+          id="voice-speed"
           type="range"
           min="0.5"
           max="2.0"
           step="0.1"
           value={preferences.voiceRate}
           onChange={(e) => updatePreference("voiceRate", Number.parseFloat(e.target.value))}
-          className="w-full"
+          className="w-full h-2"
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>Slow (0.5x)</span>
@@ -204,15 +208,18 @@ export function VoiceSelector() {
       </Box>
 
       <Box>
-        <label className="text-sm font-medium mb-2 block">Voice Pitch</label>
-        <input
+        <Label htmlFor="voice-pitch" className="mb-2 block">
+          Voice Pitch
+        </Label>
+        <Input
+          id="voice-pitch"
           type="range"
           min="0.5"
           max="2.0"
           step="0.1"
           value={preferences.voicePitch}
           onChange={(e) => updatePreference("voicePitch", Number.parseFloat(e.target.value))}
-          className="w-full"
+          className="w-full h-2"
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>Low (0.5)</span>
@@ -223,15 +230,18 @@ export function VoiceSelector() {
       </Box>
 
       <Box>
-        <label className="text-sm font-medium mb-2 block">Volume</label>
-        <input
+        <Label htmlFor="voice-volume" className="mb-2 block">
+          Volume
+        </Label>
+        <Input
+          id="voice-volume"
           type="range"
           min="0"
           max="1"
           step="0.1"
           value={preferences.voiceVolume}
           onChange={(e) => updatePreference("voiceVolume", Number.parseFloat(e.target.value))}
-          className="w-full"
+          className="w-full h-2"
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>Quiet (0%)</span>

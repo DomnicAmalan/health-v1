@@ -1,4 +1,4 @@
-import { Button, Input, Label } from "@lazarus-life/ui-components";
+import { Button, Checkbox, Input, Label } from "@lazarus-life/ui-components";
 import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -162,15 +162,21 @@ export function FormPlayground() {
                 <Download className="h-3 w-3 mr-1" />
                 Export
               </Button>
-              <label className="flex-1">
+              <Label htmlFor="import-file" className="flex-1 cursor-pointer">
                 <Button variant="outline" size="sm" asChild className="w-full">
                   <span>
                     <Upload className="h-3 w-3 mr-1" />
                     Import
                   </span>
                 </Button>
-                <input type="file" accept=".json" onChange={importConfig} className="hidden" />
-              </label>
+                <Input
+                  id="import-file"
+                  type="file"
+                  accept=".json"
+                  onChange={importConfig}
+                  className="hidden"
+                />
+              </Label>
             </div>
           </div>
         </div>
@@ -235,10 +241,12 @@ export function FormPlayground() {
                 ) : (
                   <div className="space-y-4">
                     {fields.map((field) => (
-                      <div
+                      <button
                         key={field.id}
+                        type="button"
+                        aria-label={`Select field ${field.label}`}
                         className={cn(
-                          "group relative p-4 rounded-md border-2 transition-all",
+                          "group relative p-4 rounded-md border-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-full text-left",
                           selectedField === field.id
                             ? "border-primary bg-primary/5"
                             : "border-transparent hover:border-[#E1E4E8] bg-white"
@@ -266,7 +274,7 @@ export function FormPlayground() {
                         <div className="text-xs text-muted-foreground">
                           {field.description || field.placeholder || "No description"}
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -436,23 +444,22 @@ export function FormPlayground() {
             <div className="pt-4 border-t">
               <h4 className="text-xs font-semibold mb-3">Validation</h4>
               <div className="space-y-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                <Label htmlFor="field-required" className="flex items-center space-x-2 cursor-pointer">
+                  <Checkbox
+                    id="field-required"
                     checked={selectedFieldData.validation?.required || false}
-                    onChange={(e) =>
+                    onCheckedChange={(checked) =>
                       selectedField &&
                       updateField(selectedField, {
                         validation: {
                           ...selectedFieldData.validation,
-                          required: e.target.checked,
+                          required: checked || false,
                         },
                       })
                     }
-                    className="h-4 w-4 rounded-xs border border-[#E1E4E8]"
                   />
                   <span className="text-xs">Required</span>
-                </label>
+                </Label>
               </div>
             </div>
           </div>

@@ -3,10 +3,31 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../lib/utils";
+import { Slot } from "../lib/slot";
 
 const DropdownMenu = Menu.Root;
 
-const DropdownMenuTrigger = Menu.Trigger;
+const DropdownMenuTrigger = React.forwardRef<
+  HTMLElement,
+  React.ComponentPropsWithoutRef<typeof Menu.Trigger> & { asChild?: boolean }
+>(({ asChild, children, ...props }, ref) => {
+  if (asChild && React.isValidElement(children)) {
+    // Base UI uses render prop - clone the child and merge props
+    const childElement = children as React.ReactElement;
+    const childProps = childElement.props || {};
+    const mergedProps = { ...props, ...childProps, ref };
+    const clonedChild = React.cloneElement(childElement, mergedProps);
+    return <Menu.Trigger render={clonedChild} />;
+  }
+  return (
+    <Menu.Trigger ref={ref} {...props}>
+      {children}
+    </Menu.Trigger>
+  );
+}) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof Menu.Trigger> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+>;
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 
 const DropdownMenuGroup = Menu.Group;
 
@@ -56,10 +77,18 @@ DropdownMenuSubContent.displayName = "DropdownMenuSubContent";
 
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof Menu.Popup> & { sideOffset?: number }
->(({ className, sideOffset = 4, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof Menu.Popup> & {
+    sideOffset?: number;
+    side?: "top" | "right" | "bottom" | "left";
+    align?: "start" | "end" | "center";
+  }
+>(({ className, sideOffset = 4, side, align, ...props }, ref) => (
   <Menu.Portal>
-    <Menu.Positioner sideOffset={sideOffset}>
+    <Menu.Positioner
+      sideOffset={sideOffset}
+      {...(side && { side })}
+      {...(align && { align })}
+    >
       <Menu.Popup
         ref={ref}
         className={cn(

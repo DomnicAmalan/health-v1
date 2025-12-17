@@ -6,6 +6,7 @@
 
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import { Button } from "@lazarus-life/ui-components";
 import { AlertCircle, Lock, Shield } from "lucide-react";
 import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/card";
@@ -94,9 +95,14 @@ export function AccessDenied({
         )}
 
         {onRequestAccess && (
-          <button onClick={onRequestAccess} className="text-sm text-primary hover:underline">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onRequestAccess}
+            className="text-sm text-primary hover:underline h-auto p-0"
+          >
             {t("common.requestAccess")}
-          </button>
+          </Button>
         )}
       </Stack>
     </Card>

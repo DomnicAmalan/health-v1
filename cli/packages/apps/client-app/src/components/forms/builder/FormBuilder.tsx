@@ -84,11 +84,7 @@ export function FormBuilder({
         {field.label && (
           <Label htmlFor={field.id} help={field.help}>
             {field.label}
-            {field.validation?.required && (
-              <span className="text-destructive ml-1" aria-label="required">
-                *
-              </span>
-            )}
+            {field.validation?.required && <span className="text-destructive ml-1">*</span>}
           </Label>
         )}
         {field.description && <p className="text-sm text-muted-foreground">{field.description}</p>}

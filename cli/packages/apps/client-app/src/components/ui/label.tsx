@@ -17,10 +17,11 @@ const labelVariants = cva(
 );
 
 const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
-  ({ className, help, children, ...props }, ref) => (
+  ({ className, help, children, htmlFor, ...props }, ref) => (
     <label
       ref={ref}
       className={cn(labelVariants(), "inline-flex items-center gap-1.5", className)}
+      htmlFor={htmlFor}
       {...props}
     >
       {children}

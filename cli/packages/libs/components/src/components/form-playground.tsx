@@ -72,8 +72,10 @@ export function FormPlayground() {
   const moveField = (fromIndex: number, toIndex: number) => {
     const newFields = [...fields];
     const [moved] = newFields.splice(fromIndex, 1);
-    newFields.splice(toIndex, 0, moved!);
-    setFields(newFields);
+    if (moved) {
+      newFields.splice(toIndex, 0, moved);
+      setFields(newFields);
+    }
   };
 
   // Export form config
@@ -232,7 +234,7 @@ export function FormPlayground() {
                       fields,
                     } as FormConfig
                   }
-                  onSubmit={(data) => {
+                  onSubmit={(data: Record<string, unknown>) => {
                     console.log("Form submitted:", data);
                     alert("Form submitted! Check console.");
                   }}
@@ -253,10 +255,11 @@ export function FormPlayground() {
                 ) : (
                   <div className="space-y-4">
                     {fields.map((field, _index) => (
-                      <div
+                      <button
                         key={field.id}
+                        type="button"
                         className={cn(
-                          "group relative p-4 rounded-md border-2 transition-all",
+                          "group relative p-4 rounded-md border-2 transition-all w-full text-left",
                           selectedField === field.id
                             ? "border-primary bg-primary/5"
                             : "border-transparent hover:border-[#E1E4E8] bg-white"
@@ -284,7 +287,7 @@ export function FormPlayground() {
                         <div className="text-xs text-muted-foreground">
                           {field.description || field.placeholder || "No description"}
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -307,7 +310,11 @@ export function FormPlayground() {
               <Input
                 id="field-label"
                 value={selectedFieldData.label}
-                onChange={(e) => updateField(selectedField, { label: e.target.value })}
+                onChange={(e) => {
+                  if (selectedField) {
+                    updateField(selectedField, { label: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -319,7 +326,11 @@ export function FormPlayground() {
               <Input
                 id="field-name"
                 value={selectedFieldData.name}
-                onChange={(e) => updateField(selectedField, { name: e.target.value })}
+                onChange={(e) => {
+                  if (selectedField) {
+                    updateField(selectedField, { name: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -331,7 +342,11 @@ export function FormPlayground() {
               <Input
                 id="field-placeholder"
                 value={selectedFieldData.placeholder || ""}
-                onChange={(e) => updateField(selectedField, { placeholder: e.target.value })}
+                onChange={(e) => {
+                  if (selectedField) {
+                    updateField(selectedField, { placeholder: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -343,7 +358,11 @@ export function FormPlayground() {
               <Input
                 id="field-description"
                 value={selectedFieldData.description || ""}
-                onChange={(e) => updateField(selectedField, { description: e.target.value })}
+                onChange={(e) => {
+                  if (selectedField) {
+                    updateField(selectedField, { description: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -359,26 +378,28 @@ export function FormPlayground() {
                 <select
                   id="field-colspan"
                   value={selectedFieldData.layout?.colSpan || 12}
-                  onChange={(e) =>
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        colSpan: Number(e.target.value) as
-                          | 1
-                          | 2
-                          | 3
-                          | 4
-                          | 5
-                          | 6
-                          | 7
-                          | 8
-                          | 9
-                          | 10
-                          | 11
-                          | 12,
-                      },
-                    })
-                  }
+                  onChange={(e) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          colSpan: Number(e.target.value) as
+                            | 1
+                            | 2
+                            | 3
+                            | 4
+                            | 5
+                            | 6
+                            | 7
+                            | 8
+                            | 9
+                            | 10
+                            | 11
+                            | 12,
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
@@ -396,14 +417,16 @@ export function FormPlayground() {
                 <select
                   id="field-size"
                   value={selectedFieldData.layout?.size || "md"}
-                  onChange={(e) =>
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        size: e.target.value as "sm" | "md" | "lg" | "xl",
-                      },
-                    })
-                  }
+                  onChange={(e) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          size: e.target.value as "sm" | "md" | "lg" | "xl",
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   <option value="sm">Small</option>
@@ -420,14 +443,16 @@ export function FormPlayground() {
                 <select
                   id="field-width"
                   value={selectedFieldData.layout?.width || "full"}
-                  onChange={(e) =>
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        width: e.target.value as "auto" | "full" | "half" | "third" | "quarter",
-                      },
-                    })
-                  }
+                  onChange={(e) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          width: e.target.value as "auto" | "full" | "half" | "third" | "quarter",
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   <option value="full">Full Width</option>
@@ -447,14 +472,17 @@ export function FormPlayground() {
                   <input
                     type="checkbox"
                     checked={selectedFieldData.validation?.required || false}
-                    onChange={(e) =>
-                      updateField(selectedField, {
-                        validation: {
-                          ...selectedFieldData.validation,
-                          required: e.target.checked,
-                        },
-                      })
-                    }
+                    onChange={(e) => {
+                      const fieldId = selectedField;
+                      if (fieldId) {
+                        updateField(fieldId, {
+                          validation: {
+                            ...selectedFieldData.validation,
+                            required: e.target.checked,
+                          },
+                        });
+                      }
+                    }}
                     className="h-4 w-4 rounded-xs border border-[#E1E4E8]"
                   />
                   <span className="text-xs">Required</span>

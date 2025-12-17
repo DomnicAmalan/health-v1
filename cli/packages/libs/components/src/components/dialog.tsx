@@ -6,7 +6,27 @@ import { cn } from "../lib/utils";
 
 const Dialog = BaseDialog.Root;
 
-const DialogTrigger = BaseDialog.Trigger;
+const DialogTrigger = React.forwardRef<
+  HTMLElement,
+  React.ComponentPropsWithoutRef<typeof BaseDialog.Trigger> & { asChild?: boolean }
+>(({ asChild, children, ...props }, ref) => {
+  if (asChild && React.isValidElement(children)) {
+    // Base UI uses render prop - clone the child and merge props
+    const childElement = children as React.ReactElement;
+    const childProps = childElement.props || {};
+    const mergedProps = { ...props, ...childProps, ref };
+    const clonedChild = React.cloneElement(childElement, mergedProps);
+    return <BaseDialog.Trigger render={clonedChild} />;
+  }
+  return (
+    <BaseDialog.Trigger ref={ref} {...props}>
+      {children}
+    </BaseDialog.Trigger>
+  );
+}) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof BaseDialog.Trigger> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+>;
+DialogTrigger.displayName = "DialogTrigger";
 
 const DialogPortal = BaseDialog.Portal;
 
