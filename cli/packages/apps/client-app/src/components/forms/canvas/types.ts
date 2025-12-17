@@ -1,4 +1,4 @@
-import type { FieldType, FormField } from "@/components/ui/form-builder";
+import type { FieldType, FormField } from "@lazarus-life/ui-components";
 
 export interface CanvasField extends FormField {
   x: number; // X position on canvas

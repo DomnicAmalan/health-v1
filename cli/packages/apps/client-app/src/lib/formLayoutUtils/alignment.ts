@@ -1,4 +1,4 @@
-import type { FieldLayout } from "@/components/ui/form-builder";
+import type { FieldLayout } from "@lazarus-life/ui-components";
 
 export function getAlignmentClasses(alignment?: FieldLayout["alignment"]): string {
   if (!alignment) return "";

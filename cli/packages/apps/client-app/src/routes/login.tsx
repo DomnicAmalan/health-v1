@@ -5,7 +5,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
-import { Label } from "@/components/ui/label";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import { useAuthStore } from "@/stores/authStore";
 

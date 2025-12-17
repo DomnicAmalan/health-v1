@@ -252,7 +252,7 @@ export function FormPlaygroundWithResizer() {
       ...formConfig,
       fields,
     };
-    return `import { FormBuilder, FormConfig } from "@/components/ui/form-builder"
+    return `import { FormBuilder, FormConfig } from "@lazarus-life/ui-components"
 
 const formConfig: FormConfig = ${JSON.stringify(config, null, 2)}
 

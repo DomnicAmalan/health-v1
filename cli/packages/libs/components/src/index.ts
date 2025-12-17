@@ -16,6 +16,7 @@ export * from "./components/container";
 export * from "./components/dialog";
 export * from "./components/dropdown-menu";
 export * from "./components/flex";
+export * from "./components/form-builder";
 export * from "./components/help-button";
 export * from "./components/hover-help";
 export * from "./components/input";

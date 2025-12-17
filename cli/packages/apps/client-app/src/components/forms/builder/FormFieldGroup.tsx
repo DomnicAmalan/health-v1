@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flex } from "@/components/ui/flex";
-import type { FormFieldGroup } from "@/components/ui/form-builder";
+import type { FormFieldGroup } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 
 interface FormFieldGroupProps {

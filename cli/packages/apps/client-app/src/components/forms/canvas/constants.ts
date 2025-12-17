@@ -1,4 +1,4 @@
-import type { FieldType } from "@/components/ui/form-builder";
+import type { FieldType } from "@lazarus-life/ui-components";
 import type { FieldCategory } from "./types";
 
 export const FIELD_CATEGORIES: FieldCategory = {

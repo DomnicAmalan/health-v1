@@ -3,7 +3,8 @@ import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "./card";
-import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
+import type { FieldType, FormConfig, FormField } from "@lazarus-life/ui-components";
+import { FormBuilder } from "@/components/forms/builder";
 
 /**
  * Visual Form Builder Playground
@@ -111,7 +112,7 @@ export function FormPlayground() {
                 <Input
                   id="form-title"
                   value={formConfig.title || ""}
-                  onChange={(e) => setFormConfig({ ...formConfig, title: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormConfig({ ...formConfig, title: e.target.value })}
                   className="h-8 text-sm"
                 />
               </div>
@@ -122,7 +123,7 @@ export function FormPlayground() {
                 <Input
                   id="form-description"
                   value={formConfig.description || ""}
-                  onChange={(e) => setFormConfig({ ...formConfig, description: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormConfig({ ...formConfig, description: e.target.value })}
                   className="h-8 text-sm"
                 />
               </div>
@@ -222,7 +223,7 @@ export function FormPlayground() {
                       fields,
                     } as FormConfig
                   }
-                  onSubmit={(data) => {
+                  onSubmit={(data: Record<string, unknown>) => {
                     console.log("Form submitted:", data);
                     alert("Form submitted! Check console.");
                   }}
@@ -299,9 +300,11 @@ export function FormPlayground() {
               <Input
                 id="field-label"
                 value={selectedFieldData.label}
-                onChange={(e) =>
-                  selectedField && updateField(selectedField, { label: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { label: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -313,9 +316,11 @@ export function FormPlayground() {
               <Input
                 id="field-name"
                 value={selectedFieldData.name}
-                onChange={(e) =>
-                  selectedField && updateField(selectedField, { name: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { name: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -327,9 +332,11 @@ export function FormPlayground() {
               <Input
                 id="field-placeholder"
                 value={selectedFieldData.placeholder || ""}
-                onChange={(e) =>
-                  selectedField && updateField(selectedField, { placeholder: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { placeholder: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -341,9 +348,11 @@ export function FormPlayground() {
               <Input
                 id="field-description"
                 value={selectedFieldData.description || ""}
-                onChange={(e) =>
-                  selectedField && updateField(selectedField, { description: e.target.value })
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { description: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -359,27 +368,28 @@ export function FormPlayground() {
                 <select
                   id="field-colspan"
                   value={selectedFieldData.layout?.colSpan || 12}
-                  onChange={(e) =>
-                    selectedField &&
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        colSpan: Number(e.target.value) as
-                          | 1
-                          | 2
-                          | 3
-                          | 4
-                          | 5
-                          | 6
-                          | 7
-                          | 8
-                          | 9
-                          | 10
-                          | 11
-                          | 12,
-                      },
-                    })
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          colSpan: Number(e.target.value) as
+                            | 1
+                            | 2
+                            | 3
+                            | 4
+                            | 5
+                            | 6
+                            | 7
+                            | 8
+                            | 9
+                            | 10
+                            | 11
+                            | 12,
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
@@ -397,15 +407,16 @@ export function FormPlayground() {
                 <select
                   id="field-size"
                   value={selectedFieldData.layout?.size || "md"}
-                  onChange={(e) =>
-                    selectedField &&
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        size: e.target.value as "sm" | "md" | "lg" | "xl",
-                      },
-                    })
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          size: e.target.value as "sm" | "md" | "lg" | "xl",
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   <option value="sm">Small</option>
@@ -422,15 +433,16 @@ export function FormPlayground() {
                 <select
                   id="field-width"
                   value={selectedFieldData.layout?.width || "full"}
-                  onChange={(e) =>
-                    selectedField &&
-                    updateField(selectedField, {
-                      layout: {
-                        ...selectedFieldData.layout,
-                        width: e.target.value as "auto" | "full" | "half" | "third" | "quarter",
-                      },
-                    })
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    if (selectedField) {
+                      updateField(selectedField, {
+                        layout: {
+                          ...selectedFieldData.layout,
+                          width: e.target.value as "auto" | "full" | "half" | "third" | "quarter",
+                        },
+                      });
+                    }
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   <option value="full">Full Width</option>
@@ -453,15 +465,16 @@ export function FormPlayground() {
                   <Checkbox
                     id="field-required"
                     checked={selectedFieldData.validation?.required || false}
-                    onCheckedChange={(checked) =>
-                      selectedField &&
-                      updateField(selectedField, {
-                        validation: {
-                          ...selectedFieldData.validation,
-                          required: checked || false,
-                        },
-                      })
-                    }
+                    onCheckedChange={(checked: boolean) => {
+                      if (selectedField) {
+                        updateField(selectedField, {
+                          validation: {
+                            ...selectedFieldData.validation,
+                            required: checked || false,
+                          },
+                        });
+                      }
+                    }}
                   />
                   <span className="text-xs">Required</span>
                 </Label>

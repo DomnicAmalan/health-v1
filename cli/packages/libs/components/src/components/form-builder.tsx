@@ -3,6 +3,8 @@
  * This file contains type definitions and re-exports the FormBuilder component
  */
 
+import type * as React from "react";
+
 export type FieldType =
   | "text"
   | "email"
@@ -97,8 +99,30 @@ export interface FormFieldGroup {
 }
 
 // Form-builder has its own more detailed types
-// Re-export shared types for compatibility
-export type { FormConfig, FormFieldProps } from "@lazarus-life/shared/types/components/form";
 
-// Re-export the refactored FormBuilder component
-export { FormBuilder } from "@/components/forms/builder";
+export interface FormConfig {
+  id: string;
+  title?: string;
+  description?: string;
+  fields: FormField[];
+  groups?: FormFieldGroup[];
+  submitLabel?: string;
+  cancelLabel?: string;
+  showCancel?: boolean;
+  layout?: "single" | "two-column" | "three-column" | "four-column" | "custom";
+  gridColumns?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  gap?: "none" | "sm" | "md" | "lg" | "xl";
+  className?: string;
+}
+
+export interface FormBuilderProps {
+  config: FormConfig;
+  onSubmit: (data: Record<string, unknown>) => void | Promise<void>;
+  onCancel?: () => void;
+  initialValues?: Record<string, unknown>;
+  className?: string;
+}
+
+// FormBuilder component is implemented in client-app
+// This file only exports types. The component should be imported directly from the app.
+// If you need FormBuilder in libs, it should be moved here or re-exported properly.

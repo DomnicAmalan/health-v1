@@ -1,4 +1,4 @@
-import type { FormField, ValidationRule } from "@/components/ui/form-builder";
+import type { FormField, ValidationRule } from "@lazarus-life/ui-components";
 
 export function validateField(field: FormField, value: unknown): string | true {
   if (!field.validation) return true;

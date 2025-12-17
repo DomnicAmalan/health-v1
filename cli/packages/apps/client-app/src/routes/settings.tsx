@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Shield, User } from "lucide-react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Label } from "@lazarus-life/ui-components";
 import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/settings")({

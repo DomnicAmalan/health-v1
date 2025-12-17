@@ -6,7 +6,7 @@
  * The provider handles flattening, storage, and context management.
  */
 
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   formatCurrencyInLocale,
   formatDateInLocale,
@@ -97,7 +97,7 @@ export function TranslationProvider({
     return defaultLocale;
   });
 
-  const setLocale = (newLocale: string) => {
+  const setLocale = useCallback((newLocale: string) => {
     if (SUPPORTED_LOCALES.some((l) => l.code === newLocale)) {
       setLocaleState(newLocale);
       if (typeof window !== "undefined") {
@@ -106,7 +106,7 @@ export function TranslationProvider({
         document.documentElement.setAttribute("dir", isRTL(newLocale) ? "rtl" : "ltr");
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Set initial HTML attributes

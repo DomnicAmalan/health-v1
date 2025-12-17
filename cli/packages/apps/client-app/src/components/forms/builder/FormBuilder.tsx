@@ -1,8 +1,8 @@
 import { Button } from "@lazarus-life/ui-components";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
-import type { FormBuilderProps, FormField } from "@/components/ui/form-builder";
-import { Label } from "@/components/ui/label";
+import type { FormBuilderProps, FormField, FormFieldGroup } from "@lazarus-life/ui-components";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import { useFormBuilder } from "@/hooks/forms/useFormBuilder";
 import {
@@ -111,7 +111,7 @@ export function FormBuilder({
 
   const renderFieldsWithGroups = () => {
     if (config.groups && config.groups.length > 0) {
-      return config.groups.map((group) => {
+      return config.groups.map((group: FormFieldGroup) => {
         const groupFields = sortedFields.filter((f) => f.groupId === group.id);
         if (groupFields.length === 0) return null;
 

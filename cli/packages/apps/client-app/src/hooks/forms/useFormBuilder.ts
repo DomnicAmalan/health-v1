@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormConfig, FormField } from "@/components/ui/form-builder";
+import type { FormConfig, FormField } from "@lazarus-life/ui-components";
 import { validateField } from "@/lib/formValidationUtils";
 
 interface UseFormBuilderOptions {

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flex } from "@/components/ui/flex";
-import { Label } from "@/components/ui/label";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import type { SetupRequest } from "@/lib/api/setup";
 import { checkSetupStatus, initializeSetup } from "@/lib/api/setup";

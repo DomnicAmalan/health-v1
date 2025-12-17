@@ -1,5 +1,5 @@
 import type { CanvasField } from "@/components/forms/canvas/types";
-import type { FormConfig } from "@/components/ui/form-builder";
+import type { FormConfig } from "@lazarus-life/ui-components";
 
 export function exportCanvasConfig(
   fields: CanvasField[],
@@ -46,7 +46,7 @@ export function generateFormCode(
     ...canvasConfig,
     fields: fields.map(({ x, y, width, height, selected, ...field }) => field),
   };
-  return `import { FormBuilder, FormConfig } from "@/components/ui/form-builder"
+  return `import { FormBuilder, FormConfig } from "@lazarus-life/ui-components"
 
 const formConfig: FormConfig = ${JSON.stringify(config, null, 2)}
 

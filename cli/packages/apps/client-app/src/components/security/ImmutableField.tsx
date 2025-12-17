@@ -6,7 +6,7 @@
 import { Input } from "@lazarus-life/ui-components";
 import { Lock } from "lucide-react";
 import { Flex } from "@/components/ui/flex";
-import { Label } from "@/components/ui/label";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

@@ -1,7 +1,7 @@
 import { Button, Input } from "@lazarus-life/ui-components";
 import { Trash2 } from "lucide-react";
 import { Box } from "@/components/ui/box";
-import { Label } from "@/components/ui/label";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import type { CanvasField, CanvasGroup, CanvasSection } from "./types";
 

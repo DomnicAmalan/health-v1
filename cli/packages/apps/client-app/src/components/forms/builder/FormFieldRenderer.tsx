@@ -1,7 +1,7 @@
 import { Input } from "@lazarus-life/ui-components";
 import { Flex } from "@/components/ui/flex";
-import type { FieldLayout, FormField } from "@/components/ui/form-builder";
-import { Label } from "@/components/ui/label";
+import type { FieldLayout, FormField } from "@lazarus-life/ui-components";
+import { Label } from "@lazarus-life/ui-components";
 import { Stack } from "@/components/ui/stack";
 import { cn } from "@/lib/utils";
 

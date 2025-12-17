@@ -1,4 +1,4 @@
-import type { FieldLayout, FormConfig } from "@/components/ui/form-builder";
+import type { FieldLayout, FormConfig } from "@lazarus-life/ui-components";
 
 export function getGridColSpan(colSpan?: FieldLayout["colSpan"]): string {
   if (!colSpan) return "";

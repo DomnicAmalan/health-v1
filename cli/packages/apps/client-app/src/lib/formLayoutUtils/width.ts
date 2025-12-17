@@ -1,4 +1,4 @@
-import type { FieldLayout } from "@/components/ui/form-builder";
+import type { FieldLayout } from "@lazarus-life/ui-components";
 
 export function getWidthClasses(width?: FieldLayout["width"]): string {
   if (!width) return "w-full";

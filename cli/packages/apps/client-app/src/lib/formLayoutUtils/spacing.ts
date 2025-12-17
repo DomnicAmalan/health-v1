@@ -1,4 +1,4 @@
-import type { FieldLayout } from "@/components/ui/form-builder";
+import type { FieldLayout } from "@lazarus-life/ui-components";
 
 const spacingMap: Record<string, string> = {
   none: "0",

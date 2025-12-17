@@ -130,7 +130,9 @@ export function generateVaultPolicyRules(
       if (!rules[mapping.vaultPath]) {
         rules[mapping.vaultPath] = new Set();
       }
-      mapping.capabilities.forEach((cap) => rules[mapping.vaultPath].add(cap));
+      mapping.capabilities.forEach((cap) => {
+        rules[mapping.vaultPath].add(cap);
+      });
     }
   }
 
