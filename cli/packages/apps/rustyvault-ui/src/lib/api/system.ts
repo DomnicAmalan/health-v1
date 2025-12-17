@@ -133,7 +133,7 @@ export const systemApi = {
   },
 
   downloadKeysFile: async (token: string) => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8201/v1';
+    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4117/v1';
     const url = `${baseURL}${VAULT_ROUTES.SYS.KEYS_DOWNLOAD}?token=${encodeURIComponent(token)}`;
     
     const response = await fetch(url, {

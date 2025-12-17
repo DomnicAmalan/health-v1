@@ -114,7 +114,7 @@ RUN if [ "$BUILD_MODE" = "production" ]; then \
 WORKDIR /app/packages/apps/admin
 
 # Build the application with environment variables
-ARG VITE_API_BASE_URL=http://localhost:8080
+ARG VITE_API_BASE_URL=http://localhost:4117
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # In dev mode, just prepare (no build), in production, build

@@ -14,7 +14,7 @@ type ApiFixtures = {
 
 export const test = base.extend<ApiFixtures>({
   apiURL: async ({}, use) => {
-    const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:8080";
+    const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
     await use(apiURL);
   },
 

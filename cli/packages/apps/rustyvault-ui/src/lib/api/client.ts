@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 // Vault API base URL - should NOT include /api prefix
 // Vault routes are directly under /v1/ (e.g., /v1/sys/realm, /v1/sys/policies/acl)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8201/v1";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4117/v1";
 
 /**
  * Custom error class for Vault API errors (legacy compatibility)

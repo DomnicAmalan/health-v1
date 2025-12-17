@@ -62,9 +62,9 @@ impl VaultSettings {
         let server = ServerConfig {
             host: env::var("VAULT_SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             port: env::var("VAULT_SERVER_PORT")
-                .unwrap_or_else(|_| "8200".to_string())
+                .unwrap_or_else(|_| "4117".to_string())
                 .parse()
-                .unwrap_or(8200),
+                .unwrap_or(4117),
             cors_allowed_origins: env::var("VAULT_CORS_ORIGINS")
                 .unwrap_or_else(|_| "*".to_string())
                 .split(',')

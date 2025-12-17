@@ -24,9 +24,9 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:5173",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4115",
     /* API Base URL for api-service */
-    apiURL: process.env.PLAYWRIGHT_API_URL || "http://localhost:8080",
+    apiURL: process.env.PLAYWRIGHT_API_URL || "http://localhost:4117",
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     /* Screenshot on failure */

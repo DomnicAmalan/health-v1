@@ -41,8 +41,8 @@ export function validateEnv(): void {
  */
 export function getEnvConfig(): EnvConfig {
   return {
-    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
-    VITE_OIDC_ISSUER: import.meta.env.VITE_OIDC_ISSUER || "http://localhost:8080",
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:4117",
+    VITE_OIDC_ISSUER: import.meta.env.VITE_OIDC_ISSUER || "http://localhost:4117",
     VITE_OIDC_CLIENT_ID: import.meta.env.VITE_OIDC_CLIENT_ID || "default-client",
     VITE_OIDC_REDIRECT_URI: import.meta.env.VITE_OIDC_REDIRECT_URI || window.location.origin,
   };

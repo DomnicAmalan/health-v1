@@ -36,7 +36,7 @@ export default defineConfig({
     treeshake: true,
   },
   server: {
-    port: Number(process.env.VITE_PORT) || 5173,
+    port: Number(process.env.VITE_PORT) || 4115,
     host: process.env.VITE_HOST || "localhost",
     strictPort: process.env.VITE_STRICT_PORT !== "false",
     open: process.env.VITE_OPEN === "true",

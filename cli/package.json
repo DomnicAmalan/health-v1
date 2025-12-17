@@ -19,6 +19,8 @@
     "build:vault": "bun run build:libs && bun --filter=lazarus-life-vault run build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "lint:oxylint": "oxlint .",
+    "lint:all": "bun run lint:oxylint && bun run lint",
     "format": "biome format --write .",
     "test": "bun --filter='*' run test",
     "clean": "bun --filter='*' run clean",

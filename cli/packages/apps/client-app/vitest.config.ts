@@ -16,9 +16,9 @@ export default defineConfig({
   },
   define: {
     "import.meta.env": JSON.stringify({
-      VITE_OIDC_ISSUER: "http://localhost:8080",
+      VITE_OIDC_ISSUER: "http://localhost:4117",
       VITE_OIDC_CLIENT_ID: "test-client",
-      VITE_OIDC_REDIRECT_URI: "http://localhost:5173",
+      VITE_OIDC_REDIRECT_URI: "http://localhost:4115",
     }),
   },
 });

@@ -95,35 +95,20 @@ export function Sidebar() {
   });
 
   return (
-    <div className={cn(
-      "border-r bg-background h-full flex flex-col transition-all duration-300 ease-in-out",
-      sidebarCollapsed ? "w-16" : "w-64"
-    )}>
+    <div className="relative h-full">
       <div className={cn(
-        "border-b flex items-center gap-2 transition-all relative",
-        sidebarCollapsed ? "p-2 justify-center" : "p-4"
+        "border-r bg-background h-full flex flex-col transition-all duration-300 ease-in-out",
+        sidebarCollapsed ? "w-16" : "w-64"
       )}>
-        <img src="/logo-main.png" alt={t("navigation.title")} className="h-8 w-8 shrink-0" />
-        {!sidebarCollapsed && (
-          <h2 className="text-lg font-semibold truncate flex-1 min-w-0">{t("navigation.title")}</h2>
-        )}
-        <Button
-          // variant="ghost"
-          size="icon"
-          className={cn(
-            "shrink-0 h-6 w-6 absolute top-1/2 -translate-y-1/2",
-            sidebarCollapsed ? "left-3" : "left-7"
+        <div className={cn(
+          "border-b flex items-center gap-2 transition-all",
+          sidebarCollapsed ? "p-2 justify-center" : "p-4"
+        )}>
+          <img src="/logo-main.png" alt={t("navigation.title")} className="h-8 w-8 shrink-0" />
+          {!sidebarCollapsed && (
+            <h2 className="text-lg font-semibold truncate flex-1 min-w-0">{t("navigation.title")}</h2>
           )}
-          onClick={toggleSidebar}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? (
-            <ChevronRight className="h-3 w-3" />
-          ) : (
-            <ChevronLeft className="h-3 w-3" />
-          )}
-        </Button>
-      </div>
+        </div>
       
       {/* Realm Selector */}
       {!sidebarCollapsed && (
@@ -201,6 +186,20 @@ export function Sidebar() {
           </Tooltip>
         </div>
       </TooltipProvider>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 h-6 w-6 z-10 bg-background border border-l-0 rounded-l-none rounded-r-md shadow-sm"
+        style={{ right: '-24px' }}
+        onClick={toggleSidebar}
+        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {sidebarCollapsed ? (
+          <ChevronRight className="h-3 w-3" />
+        ) : (
+          <ChevronLeft className="h-3 w-3" />
+        )}
     </div>
   );
 }

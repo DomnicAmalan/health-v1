@@ -5,7 +5,7 @@
   "identifier": "com.lazaruslife.vault",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5175",
+    "devUrl": "http://localhost:4115",
     "beforeDevCommand": "bun run dev",
     "beforeBuildCommand": "bun run build"
   },

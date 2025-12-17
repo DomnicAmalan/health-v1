@@ -15,13 +15,13 @@ type AuthFixtures = {
 
 export const test = base.extend<AuthFixtures>({
   apiURL: async ({}, use) => {
-    const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:8080";
+    const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
     await use(apiURL);
   },
 
   loginAs: async ({ page }, use) => {
     const loginAs = async (email: string, password: string) => {
-      const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:8080";
+      const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
 
       // Navigate to login page or trigger login
       await page.goto("/");

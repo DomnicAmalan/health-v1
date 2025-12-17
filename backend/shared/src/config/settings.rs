@@ -79,11 +79,11 @@ impl Settings {
         let server = ServerConfig {
             host: env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             port: env::var("SERVER_PORT")
-                .unwrap_or_else(|_| "8080".to_string())
+                .unwrap_or_else(|_| "4117".to_string())
                 .parse()
-                .unwrap_or(8080),
+                .unwrap_or(4117),
             cors_allowed_origins: env::var("CORS_ALLOWED_ORIGINS")
-                .unwrap_or_else(|_| "http://localhost:5174,http://localhost:5173,http://localhost:5175".to_string())
+                .unwrap_or_else(|_| "http://localhost:4111,http://localhost:3000,http://localhost:4115".to_string())
                 .split(',')
                 .map(|s| s.trim().to_string())
                 .filter(|s| !s.is_empty())
@@ -92,7 +92,7 @@ impl Settings {
 
         let database = DatabaseConfig {
             url: env::var("DATABASE_URL")
-                .unwrap_or_else(|_| "postgresql://user:password@localhost:5432/auth_db".to_string()),
+                .unwrap_or_else(|_| "postgresql://user:password@localhost:4111/auth_db".to_string()),
             local_db_path: env::var("LOCAL_DB_PATH").unwrap_or_else(|_| "./data/local.db".to_string()),
             max_connections: env::var("DATABASE_MAX_CONNECTIONS")
                 .unwrap_or_else(|_| "5".to_string())
@@ -111,7 +111,7 @@ impl Settings {
         };
 
         let oidc = OidcConfig {
-            issuer: env::var("OIDC_ISSUER").unwrap_or_else(|_| "http://localhost:8080".to_string()),
+            issuer: env::var("OIDC_ISSUER").unwrap_or_else(|_| "http://localhost:4117".to_string()),
             client_id: env::var("OIDC_CLIENT_ID").unwrap_or_else(|_| "default-client".to_string()),
             client_secret: env::var("OIDC_CLIENT_SECRET")
                 .unwrap_or_else(|_| "default-secret".to_string()),
