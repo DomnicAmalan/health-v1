@@ -3,17 +3,17 @@
  * Display available keyboard shortcuts
  */
 
-import { Button } from "@lazarus-life/ui-components";
-import { Keyboard } from "lucide-react";
-import { Box } from "@/components/ui/box";
 import {
+  Box,
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Stack } from "@/components/ui/stack";
+  Stack,
+} from "@lazarus-life/ui-components";
+import { Keyboard } from "lucide-react";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { keyboardShortcutManager } from "@/lib/keyboard/shortcuts";
 

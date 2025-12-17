@@ -3,12 +3,9 @@
  * Catches errors and displays sanitized error messages (no PHI)
  */
 
-import { Button } from "@lazarus-life/ui-components";
+import { Box, Button, Card, Stack } from "@lazarus-life/ui-components";
 import { AlertCircle } from "lucide-react";
 import { Component, type ReactNode } from "react";
-import { Box } from "@/components/ui/box";
-import { Card } from "@/components/ui/card";
-import { Stack } from "@/components/ui/stack";
 
 interface Props {
   children: ReactNode;

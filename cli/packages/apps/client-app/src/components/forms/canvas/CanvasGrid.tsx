@@ -1,4 +1,4 @@
-import { Box } from "@/components/ui/box";
+import { Box } from "@lazarus-life/ui-components";
 
 interface CanvasGridProps {
   showGrid: boolean;

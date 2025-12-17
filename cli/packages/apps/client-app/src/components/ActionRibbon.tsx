@@ -1,8 +1,5 @@
-import { Button } from "@lazarus-life/ui-components";
+import { Box, Button, Flex, Separator } from "@lazarus-life/ui-components";
 import { memo, useMemo } from "react";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
-import { Separator } from "@/components/ui/separator";
 import { getTabActions } from "@/lib/tab-actions";
 import { useActiveTabId, useTabs } from "@/stores/tabStore";
 

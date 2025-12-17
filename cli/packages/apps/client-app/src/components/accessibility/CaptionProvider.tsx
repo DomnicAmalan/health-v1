@@ -3,8 +3,8 @@
  * Caption overlay for audio/video content
  */
 
+import { Box } from "@lazarus-life/ui-components";
 import { useEffect, useState } from "react";
-import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 
 export interface CaptionProviderProps {

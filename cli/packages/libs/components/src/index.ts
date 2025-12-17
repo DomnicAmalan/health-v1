@@ -17,6 +17,10 @@ export * from "./components/dialog";
 export * from "./components/dropdown-menu";
 export * from "./components/flex";
 export * from "./components/form-builder";
+export { FormCanvasPreview } from "./components/form-canvas-preview";
+export { FormField } from "./components/form-field";
+export { FormPlayground } from "./components/form-playground";
+export { FormPlaygroundWithResizer } from "./components/form-playground-with-resizer";
 export * from "./components/help-button";
 export * from "./components/hover-help";
 export * from "./components/input";
@@ -28,5 +32,6 @@ export * from "./components/switch";
 export * from "./components/table";
 export * from "./components/tabs";
 export * from "./components/tooltip";
+export * from "./lib/formLayoutUtils";
 // Core utilities
 export * from "./lib/utils";

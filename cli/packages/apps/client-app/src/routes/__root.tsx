@@ -1,4 +1,5 @@
 import { PERMISSIONS, type Permission } from "@lazarus-life/shared/constants/permissions";
+import { Box, Container, Flex } from "@lazarus-life/ui-components";
 import {
   createRootRoute,
   Outlet,
@@ -34,9 +35,6 @@ import {
   FullLayout,
   MinimalLayout,
 } from "@/components/layout/Layouts";
-import { Box } from "@/components/ui/box";
-import { Container } from "@/components/ui/container";
-import { Flex } from "@/components/ui/flex";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { initializeAccessibility, SkipToMainContent } from "@/lib/accessibility";
 import { checkSetupStatus } from "@/lib/api/setup";

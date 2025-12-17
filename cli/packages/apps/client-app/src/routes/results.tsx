@@ -1,10 +1,16 @@
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/results")({
   component: ResultsComponent,

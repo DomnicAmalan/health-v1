@@ -1,8 +1,5 @@
-import { Button, Input } from "@lazarus-life/ui-components";
+import { Box, Button, Input, Label, Stack } from "@lazarus-life/ui-components";
 import { Trash2 } from "lucide-react";
-import { Box } from "@/components/ui/box";
-import { Label } from "@lazarus-life/ui-components";
-import { Stack } from "@/components/ui/stack";
 import type { CanvasField, CanvasGroup, CanvasSection } from "./types";
 
 interface CanvasPropertyPanelProps {

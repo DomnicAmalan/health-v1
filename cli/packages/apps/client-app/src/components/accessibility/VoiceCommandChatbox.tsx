@@ -3,11 +3,9 @@
  * Displays a chatbox interface for voice command interaction
  */
 
-import { Button, Input } from "@lazarus-life/ui-components";
+import { Box, Button, Card, CardContent, CardHeader, Input } from "@lazarus-life/ui-components";
 import { MessageSquare, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";

@@ -3,7 +3,7 @@
  * Admin component for timezone selection
  */
 
-import { Box } from "@/components/ui/box";
+import { Box } from "@lazarus-life/ui-components";
 import { useTimezoneStore } from "@/stores/timezoneStore";
 import { getAllTimezones } from "./timezoneUtils";
 

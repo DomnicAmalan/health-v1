@@ -1,12 +1,8 @@
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button, Input } from "@lazarus-life/ui-components";
+import { Box, Button, Flex, Input, Label, Stack } from "@lazarus-life/ui-components";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
-import { Label } from "@lazarus-life/ui-components";
-import { Stack } from "@/components/ui/stack";
 import { useAuthStore } from "@/stores/authStore";
 
 export const Route = createFileRoute("/login")({

@@ -3,7 +3,7 @@
  * Display recognized commands and feedback
  */
 
-import { Box } from "@/components/ui/box";
+import { Box } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 

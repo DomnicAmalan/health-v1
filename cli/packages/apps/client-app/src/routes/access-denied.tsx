@@ -4,9 +4,9 @@
  */
 
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { Container } from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { AccessDenied } from "@/components/security/AccessDenied";
-import { Container } from "@/components/ui/container";
 import { usePermissions } from "@/hooks/security/usePermissions";
 
 export const Route = createFileRoute("/access-denied")({

@@ -3,14 +3,12 @@
  * Different layout configurations for different route types
  */
 
+import { Box, Container, Flex } from "@lazarus-life/ui-components";
 import { Outlet } from "@tanstack/react-router";
 import { ActionRibbon } from "@/components/ActionRibbon";
 import { Sidebar } from "@/components/layout/Sidebar";
 import type { SidebarItem } from "@/components/layout/Sidebar/SidebarItem";
 import { TabBar } from "@/components/layout/TabBar";
-import { Box } from "@/components/ui/box";
-import { Container } from "@/components/ui/container";
-import { Flex } from "@/components/ui/flex";
 import { SkipToMainContent } from "@/lib/accessibility";
 
 interface FullLayoutProps {

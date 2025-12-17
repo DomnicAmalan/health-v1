@@ -3,14 +3,19 @@
  * Demonstrates voice command interaction with patient "John Doe"
  */
 
-import { Button } from "@lazarus-life/ui-components";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Stack,
+} from "@lazarus-life/ui-components";
 import { useNavigate } from "@tanstack/react-router";
 import { User } from "lucide-react";
 import { useEffect } from "react";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerComponent } from "@/components/ui/component-registry";
-import { Stack } from "@/components/ui/stack";
 import { getVoiceCommandExecutor } from "@/lib/voice/voiceCommandExecutor";
 import { getVoiceCommandParser } from "@/lib/voice/voiceCommandParser";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";

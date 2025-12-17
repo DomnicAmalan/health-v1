@@ -1,7 +1,5 @@
+import { Box, Flex, FormCanvasPreview } from "@lazarus-life/ui-components";
 import { useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
-import { FormCanvasPreview } from "@/components/ui/form-canvas-preview";
 import { useCanvasOperations } from "@/hooks/forms/useCanvasOperations";
 import { useFormCanvas } from "@/hooks/forms/useFormCanvas";
 import { useCanvasDrag } from "@/hooks/ui/useCanvasDrag";

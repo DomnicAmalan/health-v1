@@ -1,5 +1,5 @@
+import { HelpButton, type HelpButtonProps } from "@lazarus-life/ui-components";
 import type * as React from "react";
-import { HelpButton, type HelpButtonProps } from "./help-button";
 
 /**
  * Component Registry - Centralized component configuration and customization

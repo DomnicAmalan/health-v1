@@ -1,5 +1,5 @@
-import type { CanvasField } from "@/components/forms/canvas/types";
 import type { FormConfig } from "@lazarus-life/ui-components";
+import type { CanvasField } from "@/components/forms/canvas/types";
 
 export function exportCanvasConfig(
   fields: CanvasField[],

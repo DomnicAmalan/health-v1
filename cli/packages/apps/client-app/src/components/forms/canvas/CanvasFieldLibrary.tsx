@@ -1,10 +1,6 @@
-import { Button, Input } from "@lazarus-life/ui-components";
-import { Check, Code, Download, Grid3x3, Settings, Upload } from "lucide-react";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
 import type { FieldType } from "@lazarus-life/ui-components";
-import { Label } from "@lazarus-life/ui-components";
-import { Stack } from "@/components/ui/stack";
+import { Box, Button, Flex, Input, Label, Stack } from "@lazarus-life/ui-components";
+import { Check, Code, Download, Grid3x3, Settings, Upload } from "lucide-react";
 import type { FieldCategory } from "./types";
 import { SHEET_SIZES } from "./types";
 

@@ -1,5 +1,5 @@
-import type { CanvasField } from "@/components/forms/canvas/types";
 import type { FieldType } from "@lazarus-life/ui-components";
+import type { CanvasField } from "@/components/forms/canvas/types";
 
 export function createCanvasField(
   type: FieldType | "image" | "line-horizontal" | "line-vertical" | "box",

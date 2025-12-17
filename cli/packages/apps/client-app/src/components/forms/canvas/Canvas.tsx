@@ -1,5 +1,4 @@
-import { Box } from "@/components/ui/box";
-import { Card } from "@/components/ui/card";
+import { Box, Card } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 import { CanvasField } from "./CanvasField";
 import { CanvasGrid } from "./CanvasGrid";

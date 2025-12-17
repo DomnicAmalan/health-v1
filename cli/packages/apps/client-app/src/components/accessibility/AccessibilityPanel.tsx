@@ -4,18 +4,18 @@
  */
 
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button } from "@lazarus-life/ui-components";
-import { Settings } from "lucide-react";
-import { Box } from "@/components/ui/box";
 import {
+  Box,
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { Stack } from "@/components/ui/stack";
+  Separator,
+  Stack,
+} from "@lazarus-life/ui-components";
+import { Settings } from "lucide-react";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { ColorBlindModeSelector } from "./ColorBlindModeSelector";

@@ -1,10 +1,16 @@
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button } from "@lazarus-life/ui-components";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, Plus } from "lucide-react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/scheduling")({
   component: SchedulingComponent,

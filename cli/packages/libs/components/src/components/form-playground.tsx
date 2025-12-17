@@ -19,7 +19,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
-import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
+import type { FieldType, FormConfig, FormField } from "./form-builder";
+// FormBuilder is app-specific, should be passed as prop or imported from app
 import { Input } from "./input";
 import { Label } from "./label";
 
@@ -226,20 +227,13 @@ export function FormPlayground() {
           {previewMode ? (
             <Card className="max-w-4xl mx-auto">
               <CardContent className="p-6">
-                <FormBuilder
-                  config={
-                    {
-                      id: "preview-form",
-                      ...formConfig,
-                      fields,
-                    } as FormConfig
-                  }
-                  onSubmit={(data: Record<string, unknown>) => {
-                    console.log("Form submitted:", data);
-                    alert("Form submitted! Check console.");
-                  }}
-                  onCancel={() => setPreviewMode(false)}
-                />
+                <div className="text-center py-12 text-muted-foreground">
+                  <p className="text-lg mb-2">Preview not available</p>
+                  <p className="text-sm">FormBuilder component is required for preview mode</p>
+                  <p className="text-xs mt-2">
+                    Import FormBuilder from your app and pass it as a prop
+                  </p>
+                </div>
               </CardContent>
             </Card>
           ) : (

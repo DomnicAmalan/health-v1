@@ -3,8 +3,8 @@
  * Adjust font size for better readability
  */
 
+import { Box } from "@lazarus-life/ui-components";
 import { useEffect } from "react";
-import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 
 export function FontSizeSelector() {

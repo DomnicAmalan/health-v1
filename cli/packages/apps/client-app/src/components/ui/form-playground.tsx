@@ -1,10 +1,10 @@
+import type { FieldType, FormConfig, FormField } from "@lazarus-life/ui-components";
 import { Button, Checkbox, Input, Label } from "@lazarus-life/ui-components";
 import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
+import { FormBuilder } from "@/components/forms/builder";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "./card";
-import type { FieldType, FormConfig, FormField } from "@lazarus-life/ui-components";
-import { FormBuilder } from "@/components/forms/builder";
 
 /**
  * Visual Form Builder Playground
@@ -112,7 +112,9 @@ export function FormPlayground() {
                 <Input
                   id="form-title"
                   value={formConfig.title || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormConfig({ ...formConfig, title: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormConfig({ ...formConfig, title: e.target.value })
+                  }
                   className="h-8 text-sm"
                 />
               </div>
@@ -123,7 +125,9 @@ export function FormPlayground() {
                 <Input
                   id="form-description"
                   value={formConfig.description || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormConfig({ ...formConfig, description: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormConfig({ ...formConfig, description: e.target.value })
+                  }
                   className="h-8 text-sm"
                 />
               </div>

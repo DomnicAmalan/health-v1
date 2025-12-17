@@ -1,5 +1,4 @@
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
+import { Box, Flex } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 
 interface TabDragPreviewProps {

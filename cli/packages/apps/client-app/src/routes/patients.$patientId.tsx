@@ -1,13 +1,18 @@
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button } from "@lazarus-life/ui-components";
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Calendar, FileText, Pill } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Badge } from "@/components/ui/badge";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerComponent } from "@/components/ui/component-registry";
 
 export const Route = createFileRoute("/patients/$patientId")({

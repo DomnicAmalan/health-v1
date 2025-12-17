@@ -1,8 +1,5 @@
-import { Input } from "@lazarus-life/ui-components";
-import { Flex } from "@/components/ui/flex";
 import type { FieldLayout, FormField } from "@lazarus-life/ui-components";
-import { Label } from "@lazarus-life/ui-components";
-import { Stack } from "@/components/ui/stack";
+import { Flex, Input, Label, Stack } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 
 interface FormFieldRendererProps {

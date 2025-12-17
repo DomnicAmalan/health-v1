@@ -1,4 +1,4 @@
-import { Stack } from "@/components/ui/stack";
+import { Stack } from "@lazarus-life/ui-components";
 import { type SidebarItem, SidebarItemComponent } from "./SidebarItem";
 
 export type { SidebarItem };

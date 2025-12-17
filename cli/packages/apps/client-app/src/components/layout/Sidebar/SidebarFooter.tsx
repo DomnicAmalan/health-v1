@@ -1,5 +1,5 @@
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Box } from "@/components/ui/box";
+import { Box } from "@lazarus-life/ui-components";
 
 interface SidebarFooterProps {
   isCollapsed: boolean;

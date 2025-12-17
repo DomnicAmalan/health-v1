@@ -1,7 +1,6 @@
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button } from "@lazarus-life/ui-components";
+import { Button, Flex } from "@lazarus-life/ui-components";
 import { ChevronLeft } from "lucide-react";
-import { Flex } from "@/components/ui/flex";
 
 interface SidebarHeaderProps {
   isCollapsed: boolean;

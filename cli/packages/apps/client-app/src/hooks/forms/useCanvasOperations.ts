@@ -1,3 +1,4 @@
+import type { FieldType } from "@lazarus-life/ui-components";
 import { useState } from "react";
 import type {
   CanvasField,
@@ -5,7 +6,6 @@ import type {
   CanvasGroup,
   CanvasSection,
 } from "@/components/forms/canvas/types";
-import type { FieldType } from "@lazarus-life/ui-components";
 import {
   createCanvasField,
   createCanvasGroup,

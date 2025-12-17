@@ -1,12 +1,19 @@
-import { Button, Input } from "@lazarus-life/ui-components";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Flex,
+  Input,
+  Label,
+  Stack,
+} from "@lazarus-life/ui-components";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flex } from "@/components/ui/flex";
-import { Label } from "@lazarus-life/ui-components";
-import { Stack } from "@/components/ui/stack";
 import type { SetupRequest } from "@/lib/api/setup";
 import { checkSetupStatus, initializeSetup } from "@/lib/api/setup";
 

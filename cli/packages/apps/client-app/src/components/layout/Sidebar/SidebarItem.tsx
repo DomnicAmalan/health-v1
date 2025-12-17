@@ -1,14 +1,14 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { memo } from "react";
-import { Box } from "@/components/ui/box";
 import {
+  Box,
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { Stack } from "@/components/ui/stack";
+  Stack,
+} from "@lazarus-life/ui-components";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { memo } from "react";
 import { getNavActions, getNavContextActions } from "@/lib/nav-actions";
 import { cn } from "@/lib/utils";
 

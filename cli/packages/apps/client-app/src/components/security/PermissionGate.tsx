@@ -10,8 +10,8 @@ import {
   permissionRequiresVault,
   useVaultCapabilities,
 } from "@lazarus-life/shared/vault";
+import { Box } from "@lazarus-life/ui-components";
 import { useMemo } from "react";
-import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
 import { AccessDenied } from "./AccessDenied";

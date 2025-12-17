@@ -3,10 +3,8 @@
  * Select TTS voice with accent/quality options
  */
 
-import { Input, Label, Select, SelectItem } from "@lazarus-life/ui-components";
+import { Box, Input, Label, Select, SelectItem, Stack } from "@lazarus-life/ui-components";
 import { useEffect, useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Stack } from "@/components/ui/stack";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 
 interface Voice {

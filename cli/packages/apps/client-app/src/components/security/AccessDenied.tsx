@@ -6,11 +6,8 @@
 
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button } from "@lazarus-life/ui-components";
+import { Box, Button, Card, Stack } from "@lazarus-life/ui-components";
 import { AlertCircle, Lock, Shield } from "lucide-react";
-import { Box } from "@/components/ui/box";
-import { Card } from "@/components/ui/card";
-import { Stack } from "@/components/ui/stack";
 import { usePermissions } from "@/hooks/security/usePermissions";
 
 interface AccessDeniedProps {

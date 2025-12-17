@@ -4,11 +4,9 @@
  */
 
 import type { MaskingLevel } from "@lazarus-life/shared/constants/security";
-import { Button } from "@lazarus-life/ui-components";
+import { Box, Button, Flex } from "@lazarus-life/ui-components";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { useMasking } from "@/hooks/security/useMasking";
 

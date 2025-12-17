@@ -17,7 +17,9 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
-import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
+import type { FieldType, FormConfig, FormField } from "./form-builder";
+// Note: FormBuilder component is app-specific and should be imported from the app
+// This component accepts FormBuilder as an optional prop for preview mode
 import { Input } from "./input";
 import { Label } from "./label";
 
@@ -29,7 +31,17 @@ import { Label } from "./label";
  * - Grid overlay for placement
  * - Real-time preview
  */
-export function FormPlaygroundWithResizer() {
+interface FormPlaygroundWithResizerProps {
+  FormBuilderComponent?: React.ComponentType<{
+    config: FormConfig;
+    onSubmit: (data: Record<string, unknown>) => void | Promise<void>;
+    onCancel?: () => void;
+  }>;
+}
+
+export function FormPlaygroundWithResizer({
+  FormBuilderComponent,
+}: FormPlaygroundWithResizerProps = {}) {
   const [fields, setFields] = React.useState<FormField[]>([]);
   const [selectedField, setSelectedField] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<"edit" | "code" | "preview">("edit");
@@ -173,7 +185,9 @@ export function FormPlaygroundWithResizer() {
 
     const newFields = [...fields];
     const [removed] = newFields.splice(draggedIndex, 1);
-    newFields.splice(dropIndex, 0, removed!);
+    if (removed) {
+      newFields.splice(dropIndex, 0, removed);
+    }
 
     setFields(newFields);
     setDraggedField(null);
@@ -257,7 +271,8 @@ export function FormPlaygroundWithResizer() {
       ...formConfig,
       fields,
     };
-    return `import { FormBuilder, FormConfig } from "./form-builder"
+    return `import { FormBuilder } from "@/components/forms/builder"
+import type { FormConfig } from "@lazarus-life/ui-components"
 
 const formConfig: FormConfig = ${JSON.stringify(config, null, 2)}
 
@@ -301,7 +316,9 @@ export function MyForm() {
                 <Input
                   id="form-title"
                   value={formConfig.title || ""}
-                  onChange={(e) => setFormConfig({ ...formConfig, title: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormConfig({ ...formConfig, title: e.target.value })
+                  }
                   className="h-8 text-sm"
                 />
               </div>
@@ -312,12 +329,12 @@ export function MyForm() {
                 <select
                   id="form-layout"
                   value={formConfig.layout || "two-column"}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     setFormConfig({
                       ...formConfig,
                       layout: e.target.value as FormConfig["layout"],
-                    })
-                  }
+                    });
+                  }}
                   className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                 >
                   <option value="single">Single Column</option>
@@ -330,7 +347,9 @@ export function MyForm() {
                 <input
                   type="checkbox"
                   checked={showGrid}
-                  onChange={(e) => setShowGrid(e.target.checked)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setShowGrid(e.target.checked)
+                  }
                   className="h-4 w-4 rounded-xs border border-[#E1E4E8]"
                 />
                 <span className="text-xs flex items-center gap-1">
@@ -423,8 +442,11 @@ export function MyForm() {
           {showGrid && (
             <div className="absolute inset-0 pointer-events-none opacity-20">
               <div className="grid grid-cols-12 gap-4 h-full p-6">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <div key={i} className="border border-dashed border-primary/30" />
+                {Array.from({ length: 12 }, (_, i) => i).map((colIndex) => (
+                  <div
+                    key={`grid-col-${colIndex}`}
+                    className="border border-dashed border-primary/30"
+                  />
                 ))}
               </div>
             </div>
@@ -453,14 +475,13 @@ export function MyForm() {
                           onDragLeave={handleDragLeave}
                           onDrop={(e) => handleDrop(e, index)}
                           className={cn(
-                            "group relative rounded-md border-2 transition-all cursor-move",
+                            "group relative rounded-md border-2 transition-all",
                             selectedField === field.id
                               ? "border-primary bg-primary/5 shadow-fluent-1"
                               : "border-transparent hover:border-[#E1E4E8] bg-white",
                             draggedField === field.id && "opacity-50",
                             dragOverIndex === index && "border-primary border-dashed"
                           )}
-                          onClick={() => setSelectedField(field.id)}
                           style={{
                             width: `${colWidth}%`,
                             minWidth: "200px",
@@ -474,6 +495,7 @@ export function MyForm() {
                             className="absolute right-0 top-0 bottom-0 w-2 bg-transparent group-hover:bg-primary/20 cursor-ew-resize flex items-center justify-center"
                             onMouseDown={(e) => handleResizeStart(e, field.id)}
                             onClick={(e) => e.stopPropagation()}
+                            title={`Resize column span (current: ${field.layout?.colSpan || 12}/12)`}
                           >
                             <div className="w-0.5 h-full bg-primary opacity-0 group-hover:opacity-100" />
                           </div>
@@ -565,20 +587,27 @@ export function MyForm() {
           {activeTab === "preview" && (
             <Card className="max-w-5xl mx-auto">
               <CardContent className="p-6">
-                <FormBuilder
-                  config={
-                    {
-                      id: "preview-form",
-                      ...formConfig,
-                      fields,
-                    } as FormConfig
-                  }
-                  onSubmit={(data) => {
-                    console.log("Form submitted:", data);
-                    alert("Form submitted! Check console.");
-                  }}
-                  onCancel={() => setActiveTab("edit")}
-                />
+                {FormBuilderComponent ? (
+                  <FormBuilderComponent
+                    config={
+                      {
+                        id: "preview-form",
+                        ...formConfig,
+                        fields,
+                      } as FormConfig
+                    }
+                    onSubmit={(data: Record<string, unknown>) => {
+                      console.log("Form submitted:", data);
+                      alert("Form submitted! Check console.");
+                    }}
+                    onCancel={() => setActiveTab("edit")}
+                  />
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-lg mb-2">Preview not available</p>
+                    <p className="text-sm">FormBuilder component is required for preview mode</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -598,7 +627,11 @@ export function MyForm() {
               <Input
                 id="field-label"
                 value={selectedFieldData.label}
-                onChange={(e) => updateField(selectedField, { label: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { label: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -610,7 +643,11 @@ export function MyForm() {
               <Input
                 id="field-name"
                 value={selectedFieldData.name}
-                onChange={(e) => updateField(selectedField, { name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (selectedField) {
+                    updateField(selectedField, { name: e.target.value });
+                  }
+                }}
                 className="h-8 text-sm"
               />
             </div>
@@ -634,26 +671,28 @@ export function MyForm() {
                     min="1"
                     max="12"
                     value={selectedFieldData.layout?.colSpan || 12}
-                    onChange={(e) =>
-                      updateField(selectedField, {
-                        layout: {
-                          ...selectedFieldData.layout,
-                          colSpan: Number(e.target.value) as
-                            | 1
-                            | 2
-                            | 3
-                            | 4
-                            | 5
-                            | 6
-                            | 7
-                            | 8
-                            | 9
-                            | 10
-                            | 11
-                            | 12,
-                        },
-                      })
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (selectedField) {
+                        updateField(selectedField, {
+                          layout: {
+                            ...selectedFieldData.layout,
+                            colSpan: Number(e.target.value) as
+                              | 1
+                              | 2
+                              | 3
+                              | 4
+                              | 5
+                              | 6
+                              | 7
+                              | 8
+                              | 9
+                              | 10
+                              | 11
+                              | 12,
+                          },
+                        });
+                      }
+                    }}
                     className="w-full h-2 bg-[#E1E4E8] rounded-lg appearance-none cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -670,14 +709,16 @@ export function MyForm() {
                   <select
                     id="field-size"
                     value={selectedFieldData.layout?.size || "md"}
-                    onChange={(e) =>
-                      updateField(selectedField, {
-                        layout: {
-                          ...selectedFieldData.layout,
-                          size: e.target.value as "sm" | "md" | "lg" | "xl",
-                        },
-                      })
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      if (selectedField) {
+                        updateField(selectedField, {
+                          layout: {
+                            ...selectedFieldData.layout,
+                            size: e.target.value as "sm" | "md" | "lg" | "xl",
+                          },
+                        });
+                      }
+                    }}
                     className="flex h-8 w-full rounded-xs border border-[#E1E4E8] bg-background px-3 text-sm"
                   >
                     <option value="sm">Small</option>
@@ -699,14 +740,16 @@ export function MyForm() {
                     variant="outline"
                     size="sm"
                     className="h-8 text-xs"
-                    onClick={() =>
-                      updateField(selectedField, {
-                        layout: {
-                          ...selectedFieldData.layout,
-                          colSpan: cols as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
-                        },
-                      })
-                    }
+                    onClick={() => {
+                      if (selectedField) {
+                        updateField(selectedField, {
+                          layout: {
+                            ...selectedFieldData.layout,
+                            colSpan: cols as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
+                          },
+                        });
+                      }
+                    }}
                   >
                     {cols}/12
                   </Button>

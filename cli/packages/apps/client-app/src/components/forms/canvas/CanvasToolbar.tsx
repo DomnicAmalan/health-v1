@@ -1,6 +1,5 @@
-import { Button } from "@lazarus-life/ui-components";
+import { Button, Flex } from "@lazarus-life/ui-components";
 import { Eye, Settings } from "lucide-react";
-import { Flex } from "@/components/ui/flex";
 
 interface CanvasToolbarProps {
   viewMode: "edit" | "preview";

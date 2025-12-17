@@ -3,8 +3,8 @@
  * Show when listening for voice commands
  */
 
+import { Box } from "@lazarus-life/ui-components";
 import { Mic } from "lucide-react";
-import { Box } from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 

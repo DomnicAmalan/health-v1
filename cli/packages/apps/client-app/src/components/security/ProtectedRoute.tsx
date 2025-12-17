@@ -4,8 +4,8 @@
  */
 
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import { Box } from "@lazarus-life/ui-components";
 import { Navigate } from "@tanstack/react-router";
-import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
 

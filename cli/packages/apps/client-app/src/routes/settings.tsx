@@ -1,12 +1,19 @@
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Button, Input } from "@lazarus-life/ui-components";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Separator,
+} from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Shield, User } from "lucide-react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@lazarus-life/ui-components";
-import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,

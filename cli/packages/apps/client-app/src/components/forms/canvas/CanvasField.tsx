@@ -1,5 +1,4 @@
-import { Box } from "@/components/ui/box";
-import { Stack } from "@/components/ui/stack";
+import { Box, Stack } from "@lazarus-life/ui-components";
 import { cn } from "@/lib/utils";
 import type { CanvasField as CanvasFieldType } from "./types";
 

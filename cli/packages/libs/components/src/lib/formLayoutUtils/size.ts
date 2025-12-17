@@ -1,4 +1,4 @@
-import type { FieldLayout } from "@lazarus-life/ui-components";
+import type { FieldLayout } from "../../components/form-builder";
 
 export function getFieldSizeClasses(size?: FieldLayout["size"]): string {
   switch (size) {

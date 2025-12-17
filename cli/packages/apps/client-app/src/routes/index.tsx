@@ -1,4 +1,15 @@
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import {
+  Badge,
+  Box,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Flex,
+  Stack,
+} from "@lazarus-life/ui-components";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Activity,
@@ -9,11 +20,6 @@ import {
   FileText,
   Users,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flex } from "@/components/ui/flex";
-import { Stack } from "@/components/ui/stack";
 import { useOpenTab } from "@/stores/tabStore";
 
 export const Route = createFileRoute("/")({

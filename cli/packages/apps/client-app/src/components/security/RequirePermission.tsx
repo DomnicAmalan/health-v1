@@ -4,7 +4,7 @@
  */
 
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
-import { Box } from "@/components/ui/box";
+import { Box } from "@lazarus-life/ui-components";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
 import { AccessDenied } from "./AccessDenied";
