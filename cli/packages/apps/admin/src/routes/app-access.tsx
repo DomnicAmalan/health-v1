@@ -1,26 +1,14 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
-  Badge,
-  Alert,
-  AlertDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Checkbox,
   Dialog,
   DialogContent,
@@ -28,21 +16,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@lazarus-life/ui-components';
-import { useTranslation } from '@lazarus-life/shared/i18n';
-import {
-  AppWindow,
-  Users,
-  Loader2,
-  AlertCircle,
-  Check,
-  X,
-  Filter,
-  Download,
-} from 'lucide-react';
-import { ProtectedPage } from '../lib/permissions';
-import { appAccessApi, type AppAccessMatrix } from '@/lib/api/app-access';
-import { apiClient } from '@/lib/api/client';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, AppWindow, Check, Download, Filter, Loader2, Users, X } from "lucide-react";
+import { useState } from "react";
+import { type AppAccessMatrix, appAccessApi } from "@/lib/api/app-access";
+import { apiClient } from "@/lib/api/client";
+import { ProtectedPage } from "../lib/permissions";
 
 interface Organization {
   id: string;
@@ -55,48 +46,59 @@ interface OrganizationsListResponse {
 
 const organizationsApi = {
   list: async (): Promise<Organization[]> => {
-    const response = await apiClient.get<OrganizationsListResponse>('/organizations');
+    const response = await apiClient.get<OrganizationsListResponse>("/organizations");
     return response.organizations || [];
   },
 };
 
-type AccessLevel = 'read' | 'write' | 'admin' | null;
+type AccessLevel = "read" | "write" | "admin" | null;
 
 const ACCESS_COLORS: Record<string, string> = {
-  read: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  write: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  read: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  write: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  admin: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
 };
 
 export function AppAccessPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [selectedOrg, setSelectedOrg] = useState<string>("");
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
-  const [bulkAction, setBulkAction] = useState<'grant' | 'revoke'>('grant');
-  const [bulkApp, setBulkApp] = useState<string>('');
-  const [bulkLevel, setBulkLevel] = useState<'read' | 'write' | 'admin'>('read');
+  const [bulkAction, setBulkAction] = useState<"grant" | "revoke">("grant");
+  const [bulkApp, setBulkApp] = useState<string>("");
+  const [bulkLevel, setBulkLevel] = useState<"read" | "write" | "admin">("read");
 
   // Fetch organizations
   const { data: organizations = [] } = useQuery({
-    queryKey: ['organizations'],
+    queryKey: ["organizations"],
     queryFn: organizationsApi.list,
   });
 
   // Fetch access matrix
-  const { data: matrix, isLoading, error } = useQuery({
-    queryKey: ['app-access-matrix', selectedOrg],
+  const {
+    data: matrix,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["app-access-matrix", selectedOrg],
     queryFn: () => appAccessApi.getMatrix(selectedOrg || undefined),
   });
 
   // Grant mutation
   const grantMutation = useMutation({
-    mutationFn: ({ userId, appName, level }: { userId: string; appName: string; level: 'read' | 'write' | 'admin' }) =>
-      appAccessApi.grant(userId, appName, level),
+    mutationFn: ({
+      userId,
+      appName,
+      level,
+    }: {
+      userId: string;
+      appName: string;
+      level: "read" | "write" | "admin";
+    }) => appAccessApi.grant(userId, appName, level),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['app-access-matrix'] });
+      queryClient.invalidateQueries({ queryKey: ["app-access-matrix"] });
     },
   });
 
@@ -105,7 +107,7 @@ export function AppAccessPage() {
     mutationFn: ({ userId, appName }: { userId: string; appName: string }) =>
       appAccessApi.revoke(userId, appName),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['app-access-matrix'] });
+      queryClient.invalidateQueries({ queryKey: ["app-access-matrix"] });
     },
   });
 
@@ -118,7 +120,7 @@ export function AppAccessPage() {
         access_level: bulkLevel,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['app-access-matrix'] });
+      queryClient.invalidateQueries({ queryKey: ["app-access-matrix"] });
       setBulkDialogOpen(false);
       setSelectedUsers(new Set());
     },
@@ -132,7 +134,7 @@ export function AppAccessPage() {
         app_name: bulkApp,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['app-access-matrix'] });
+      queryClient.invalidateQueries({ queryKey: ["app-access-matrix"] });
       setBulkDialogOpen(false);
       setSelectedUsers(new Set());
     },
@@ -164,21 +166,25 @@ export function AppAccessPage() {
       revokeMutation.mutate({ userId, appName });
     } else {
       // Grant read access by default
-      grantMutation.mutate({ userId, appName, level: 'read' });
+      grantMutation.mutate({ userId, appName, level: "read" });
     }
   };
 
-  const handleAccessLevelChange = (userId: string, appName: string, newLevel: 'read' | 'write' | 'admin') => {
+  const handleAccessLevelChange = (
+    userId: string,
+    appName: string,
+    newLevel: "read" | "write" | "admin"
+  ) => {
     grantMutation.mutate({ userId, appName, level: newLevel });
   };
 
-  const openBulkDialog = (action: 'grant' | 'revoke') => {
+  const openBulkDialog = (action: "grant" | "revoke") => {
     setBulkAction(action);
     setBulkDialogOpen(true);
   };
 
   const handleBulkSubmit = () => {
-    if (bulkAction === 'grant') {
+    if (bulkAction === "grant") {
       bulkGrantMutation.mutate();
     } else {
       bulkRevokeMutation.mutate();
@@ -190,7 +196,10 @@ export function AppAccessPage() {
   const access = matrix?.access || {};
 
   return (
-    <ProtectedPage pageName="app-access" fallback={<div className="p-6">{t('errors.forbidden')}</div>}>
+    <ProtectedPage
+      pageName="app-access"
+      fallback={<div className="p-6">{t("errors.forbidden")}</div>}
+    >
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -202,11 +211,11 @@ export function AppAccessPage() {
           <div className="flex items-center gap-2">
             {selectedUsers.size > 0 && (
               <>
-                <Button variant="outline" onClick={() => openBulkDialog('grant')}>
+                <Button variant="outline" onClick={() => openBulkDialog("grant")}>
                   <Check className="h-4 w-4 mr-2" />
                   Grant ({selectedUsers.size})
                 </Button>
-                <Button variant="outline" onClick={() => openBulkDialog('revoke')}>
+                <Button variant="outline" onClick={() => openBulkDialog("revoke")}>
                   <X className="h-4 w-4 mr-2" />
                   Revoke ({selectedUsers.size})
                 </Button>
@@ -249,7 +258,7 @@ export function AppAccessPage() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {error instanceof Error ? error.message : 'Failed to load access matrix'}
+              {error instanceof Error ? error.message : "Failed to load access matrix"}
             </AlertDescription>
           </Alert>
         )}
@@ -290,8 +299,8 @@ export function AppAccessPage() {
                     <p className="text-lg font-medium">No users found</p>
                     <p className="text-sm text-muted-foreground">
                       {selectedOrg
-                        ? 'No users in this organization'
-                        : 'Provision users to manage their app access'}
+                        ? "No users in this organization"
+                        : "Provision users to manage their app access"}
                     </p>
                   </div>
                 </div>
@@ -349,7 +358,7 @@ export function AppAccessPage() {
                               {level ? (
                                 <Select
                                   value={level}
-                                  onValueChange={(value: 'read' | 'write' | 'admin') =>
+                                  onValueChange={(value: "read" | "write" | "admin") =>
                                     handleAccessLevelChange(user.id, app, value)
                                   }
                                 >
@@ -389,11 +398,9 @@ export function AppAccessPage() {
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {bulkAction === 'grant' ? 'Grant Access' : 'Revoke Access'}
-            </DialogTitle>
+            <DialogTitle>{bulkAction === "grant" ? "Grant Access" : "Revoke Access"}</DialogTitle>
             <DialogDescription>
-              {bulkAction === 'grant'
+              {bulkAction === "grant"
                 ? `Grant access to ${selectedUsers.size} selected users`
                 : `Revoke access from ${selectedUsers.size} selected users`}
             </DialogDescription>
@@ -414,10 +421,13 @@ export function AppAccessPage() {
                 </SelectContent>
               </Select>
             </div>
-            {bulkAction === 'grant' && (
+            {bulkAction === "grant" && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Access Level</label>
-                <Select value={bulkLevel} onValueChange={(v: 'read' | 'write' | 'admin') => setBulkLevel(v)}>
+                <Select
+                  value={bulkLevel}
+                  onValueChange={(v: "read" | "write" | "admin") => setBulkLevel(v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -437,17 +447,17 @@ export function AppAccessPage() {
             <Button
               onClick={handleBulkSubmit}
               disabled={!bulkApp || bulkGrantMutation.isPending || bulkRevokeMutation.isPending}
-              variant={bulkAction === 'revoke' ? 'destructive' : 'default'}
+              variant={bulkAction === "revoke" ? "destructive" : "default"}
             >
-              {(bulkGrantMutation.isPending || bulkRevokeMutation.isPending) ? (
+              {bulkGrantMutation.isPending || bulkRevokeMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Processing...
                 </>
-              ) : bulkAction === 'grant' ? (
-                'Grant Access'
+              ) : bulkAction === "grant" ? (
+                "Grant Access"
               ) : (
-                'Revoke Access'
+                "Revoke Access"
               )}
             </Button>
           </DialogFooter>
@@ -456,4 +466,3 @@ export function AppAccessPage() {
     </ProtectedPage>
   );
 }
-

@@ -1,8 +1,8 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
-export type AppType = 'admin-ui' | 'client-app' | 'mobile' | 'api';
-export type AuthMethod = 'token' | 'userpass' | 'approle' | 'jwt';
+export type AppType = "admin-ui" | "client-app" | "mobile" | "api";
+export type AuthMethod = "token" | "userpass" | "approle" | "jwt";
 
 export interface RealmApplication {
   id: string;
@@ -54,9 +54,7 @@ export const appsApi = {
    * List all applications in a realm
    */
   list: async (realmId: string): Promise<RealmApplication[]> => {
-    const response = await apiClient.get<AppListResponse>(
-      VAULT_ROUTES.REALM_APPS.LIST(realmId)
-    );
+    const response = await apiClient.get<AppListResponse>(VAULT_ROUTES.REALM_APPS.LIST(realmId));
     return response.apps || [];
   },
 
@@ -65,7 +63,7 @@ export const appsApi = {
    */
   get: async (realmId: string, appName: string): Promise<RealmApplication> => {
     const response = await apiClient.get<AppResponse>(
-      VAULT_ROUTES.REALM_APPS.GET(realmId, appName)
+      VAULT_ROUTES.REALM_APPS.GET(realmId, appName),
     );
     return response.app || (response as unknown as RealmApplication);
   },
@@ -76,7 +74,7 @@ export const appsApi = {
   create: async (realmId: string, request: CreateAppRequest): Promise<RealmApplication> => {
     const response = await apiClient.post<AppResponse>(
       VAULT_ROUTES.REALM_APPS.CREATE(realmId),
-      request
+      request,
     );
     return response.app || (response as unknown as RealmApplication);
   },
@@ -87,11 +85,11 @@ export const appsApi = {
   update: async (
     realmId: string,
     appName: string,
-    request: UpdateAppRequest
+    request: UpdateAppRequest,
   ): Promise<RealmApplication> => {
     const response = await apiClient.post<AppResponse>(
       VAULT_ROUTES.REALM_APPS.UPDATE(realmId, appName),
-      request
+      request,
     );
     return response.app || (response as unknown as RealmApplication);
   },
@@ -109,7 +107,7 @@ export const appsApi = {
    */
   registerDefaults: async (realmId: string): Promise<RegisterDefaultsResponse> => {
     const response = await apiClient.post<RegisterDefaultsResponse>(
-      VAULT_ROUTES.REALM_APPS.REGISTER_DEFAULTS(realmId)
+      VAULT_ROUTES.REALM_APPS.REGISTER_DEFAULTS(realmId),
     );
     return response;
   },
@@ -120,16 +118,16 @@ export const appsApi = {
  */
 export function getAppTypeIcon(appType: AppType): string {
   switch (appType) {
-    case 'admin-ui':
-      return '💻';
-    case 'client-app':
-      return '🌐';
-    case 'mobile':
-      return '📱';
-    case 'api':
-      return '🔌';
+    case "admin-ui":
+      return "💻";
+    case "client-app":
+      return "🌐";
+    case "mobile":
+      return "📱";
+    case "api":
+      return "🔌";
     default:
-      return '📦';
+      return "📦";
   }
 }
 
@@ -138,14 +136,14 @@ export function getAppTypeIcon(appType: AppType): string {
  */
 export function getAppTypeLabel(appType: AppType): string {
   switch (appType) {
-    case 'admin-ui':
-      return 'Admin UI';
-    case 'client-app':
-      return 'Client App';
-    case 'mobile':
-      return 'Mobile App';
-    case 'api':
-      return 'API / Product';
+    case "admin-ui":
+      return "Admin UI";
+    case "client-app":
+      return "Client App";
+    case "mobile":
+      return "Mobile App";
+    case "api":
+      return "API / Product";
     default:
       return appType;
   }
@@ -155,9 +153,8 @@ export function getAppTypeLabel(appType: AppType): string {
  * Default auth methods for each app type
  */
 export const defaultAuthMethods: Record<AppType, AuthMethod[]> = {
-  'admin-ui': ['token', 'userpass'],
-  'client-app': ['token', 'userpass'],
-  'mobile': ['jwt', 'approle'],
-  'api': ['approle'],
+  "admin-ui": ["token", "userpass"],
+  "client-app": ["token", "userpass"],
+  mobile: ["jwt", "approle"],
+  api: ["approle"],
 };
-

@@ -1,8 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { usersApi, CreateUserRequest } from '@/lib/api';
-import { useRealmStore } from '@/stores/realmStore';
 import {
+  Alert,
+  AlertDescription,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -11,11 +10,21 @@ import {
   CardTitle,
   Input,
   Label,
-  Badge,
-  Alert,
-  AlertDescription,
-} from '@lazarus-life/ui-components';
-import { Plus, Trash2, Edit, User as UserIcon, Users, Globe, AlertCircle, Loader2 } from 'lucide-react';
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  Edit,
+  Globe,
+  Loader2,
+  Plus,
+  Trash2,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { type CreateUserRequest, usersApi } from "@/lib/api";
+import { useRealmStore } from "@/stores/realmStore";
 
 export function UsersPage() {
   const queryClient = useQueryClient();
@@ -25,13 +34,13 @@ export function UsersPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<CreateUserRequest & { username: string }>({
-    username: '',
-    password: '',
+    username: "",
+    password: "",
     policies: [],
     ttl: 3600,
     max_ttl: 86400,
   });
-  const [policiesInput, setPoliciesInput] = useState('');
+  const [policiesInput, setPoliciesInput] = useState("");
 
   // Reset selection when realm changes
   useEffect(() => {
@@ -42,17 +51,19 @@ export function UsersPage() {
   }, [currentRealm?.id, isGlobalMode]);
 
   // Fetch users list (realm-scoped or global)
-  const { data: usersData, isLoading, error } = useQuery({
-    queryKey: ['users', currentRealm?.id, isGlobalMode],
+  const {
+    data: usersData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users", currentRealm?.id, isGlobalMode],
     queryFn: () =>
-      currentRealm && !isGlobalMode
-        ? usersApi.listForRealm(currentRealm.id)
-        : usersApi.list(),
+      currentRealm && !isGlobalMode ? usersApi.listForRealm(currentRealm.id) : usersApi.list(),
   });
 
   // Fetch selected user details
   const { data: userDetails } = useQuery({
-    queryKey: ['user', selectedUser, currentRealm?.id, isGlobalMode],
+    queryKey: ["user", selectedUser, currentRealm?.id, isGlobalMode],
     queryFn: () =>
       currentRealm && !isGlobalMode
         ? usersApi.readForRealm(currentRealm.id, selectedUser!)
@@ -67,8 +78,10 @@ export function UsersPage() {
         ? usersApi.writeForRealm(currentRealm.id, username, request)
         : usersApi.write(username, request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', currentRealm?.id, isGlobalMode] });
-      queryClient.invalidateQueries({ queryKey: ['user', selectedUser, currentRealm?.id, isGlobalMode] });
+      queryClient.invalidateQueries({ queryKey: ["users", currentRealm?.id, isGlobalMode] });
+      queryClient.invalidateQueries({
+        queryKey: ["user", selectedUser, currentRealm?.id, isGlobalMode],
+      });
       setIsCreating(false);
       setIsEditing(false);
       resetForm();
@@ -82,25 +95,25 @@ export function UsersPage() {
         ? usersApi.deleteForRealm(currentRealm.id, username)
         : usersApi.delete(username),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', currentRealm?.id, isGlobalMode] });
+      queryClient.invalidateQueries({ queryKey: ["users", currentRealm?.id, isGlobalMode] });
       setSelectedUser(null);
     },
   });
 
   const resetForm = () => {
     setFormData({
-      username: '',
-      password: '',
+      username: "",
+      password: "",
       policies: [],
       ttl: 3600,
       max_ttl: 86400,
     });
-    setPoliciesInput('');
+    setPoliciesInput("");
   };
 
   const handleSaveUser = () => {
     const policies = policiesInput
-      .split(',')
+      .split(",")
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
     saveUserMutation.mutate({ ...formData, policies });
@@ -111,12 +124,12 @@ export function UsersPage() {
       const user = userDetails.data;
       setFormData({
         username: user.username,
-        password: '', // Password is not returned
+        password: "", // Password is not returned
         policies: user.policies,
         ttl: user.ttl,
         max_ttl: user.max_ttl,
       });
-      setPoliciesInput(user.policies.join(', '));
+      setPoliciesInput(user.policies.join(", "));
       setIsEditing(true);
     }
   };
@@ -125,9 +138,7 @@ export function UsersPage() {
   const user = userDetails?.data;
 
   // Context indicator
-  const contextLabel = currentRealm && !isGlobalMode
-    ? `Realm: ${currentRealm.name}`
-    : 'Global';
+  const contextLabel = currentRealm && !isGlobalMode ? `Realm: ${currentRealm.name}` : "Global";
 
   return (
     <div className="p-6 space-y-6">
@@ -135,21 +146,21 @@ export function UsersPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">User Management</h1>
-            <Badge variant={isGlobalMode ? 'default' : 'secondary'}>
+            <Badge variant={isGlobalMode ? "default" : "secondary"}>
               <Globe className="h-3 w-3 mr-1" />
               {contextLabel}
             </Badge>
           </div>
-          <p className="text-muted-foreground">
-            Manage UserPass authentication users
-          </p>
+          <p className="text-muted-foreground">Manage UserPass authentication users</p>
         </div>
-        <Button onClick={() => {
-          setIsCreating(true);
-          setSelectedUser(null);
-          setIsEditing(false);
-          resetForm();
-        }}>
+        <Button
+          onClick={() => {
+            setIsCreating(true);
+            setSelectedUser(null);
+            setIsEditing(false);
+            resetForm();
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           New User
         </Button>
@@ -160,7 +171,7 @@ export function UsersPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load users'}
+            {error instanceof Error ? error.message : "Failed to load users"}
           </AlertDescription>
         </Alert>
       )}
@@ -174,7 +185,7 @@ export function UsersPage() {
               Users
             </CardTitle>
             <CardDescription>
-              {users.length} {users.length === 1 ? 'user' : 'users'}
+              {users.length} {users.length === 1 ? "user" : "users"}
               {currentRealm && !isGlobalMode && (
                 <span className="block text-xs mt-1">Realm: {currentRealm.name}</span>
               )}
@@ -197,9 +208,7 @@ export function UsersPage() {
                   <div
                     key={username}
                     className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
-                      selectedUser === username
-                        ? 'bg-primary/10 border-primary'
-                        : 'hover:bg-accent'
+                      selectedUser === username ? "bg-primary/10 border-primary" : "hover:bg-accent"
                     }`}
                     onClick={() => {
                       setSelectedUser(username);
@@ -223,21 +232,21 @@ export function UsersPage() {
           <CardHeader>
             <CardTitle className="text-lg">
               {isCreating
-                ? 'Create New User'
+                ? "Create New User"
                 : isEditing
-                ? `Edit User: ${selectedUser}`
-                : selectedUser
-                ? `User: ${selectedUser}`
-                : 'Select a User'}
+                  ? `Edit User: ${selectedUser}`
+                  : selectedUser
+                    ? `User: ${selectedUser}`
+                    : "Select a User"}
             </CardTitle>
             <CardDescription>
               {isCreating
-                ? 'Create a new UserPass user'
+                ? "Create a new UserPass user"
                 : isEditing
-                ? 'Update user settings'
-                : selectedUser
-                ? 'View and manage user details'
-                : 'Select a user from the list to view details'}
+                  ? "Update user settings"
+                  : selectedUser
+                    ? "View and manage user details"
+                    : "Select a user from the list to view details"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -249,25 +258,21 @@ export function UsersPage() {
                     <Input
                       id="username"
                       value={formData.username}
-                      onChange={(e) =>
-                        setFormData({ ...formData, username: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       placeholder="johndoe"
                     />
                   </div>
                 )}
                 <div>
                   <Label htmlFor="password">
-                    Password {isEditing && '(leave blank to keep current)'}
+                    Password {isEditing && "(leave blank to keep current)"}
                   </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    placeholder={isEditing ? '••••••••' : 'Enter password'}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder={isEditing ? "••••••••" : "Enter password"}
                   />
                 </div>
                 <div>
@@ -314,9 +319,9 @@ export function UsersPage() {
                         Saving...
                       </>
                     ) : isCreating ? (
-                      'Create User'
+                      "Create User"
                     ) : (
-                      'Save Changes'
+                      "Save Changes"
                     )}
                   </Button>
                   <Button
@@ -372,7 +377,7 @@ export function UsersPage() {
                     disabled={deleteUserMutation.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    {deleteUserMutation.isPending ? 'Deleting...' : 'Delete User'}
+                    {deleteUserMutation.isPending ? "Deleting..." : "Delete User"}
                   </Button>
                 </div>
               </div>

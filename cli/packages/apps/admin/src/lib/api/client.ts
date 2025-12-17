@@ -3,7 +3,7 @@
  * Session-based authentication using the shared base client
  */
 
-import { BaseApiClient, API_ROUTES, getApiUrl } from "@lazarus-life/shared/api";
+import { API_ROUTES, BaseApiClient, getApiUrl } from "@lazarus-life/shared/api";
 import { env } from "../env";
 
 // Create admin client with session-based auth and custom headers

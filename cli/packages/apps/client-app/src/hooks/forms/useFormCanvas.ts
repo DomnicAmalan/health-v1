@@ -1,10 +1,10 @@
+import { useRef, useState } from "react";
 import type {
   CanvasField,
   CanvasFormConfig,
   CanvasGroup,
   CanvasSection,
 } from "@/components/forms/canvas/types";
-import { useRef, useState } from "react";
 
 export function useFormCanvas() {
   const [fields, setFields] = useState<CanvasField[]>([]);

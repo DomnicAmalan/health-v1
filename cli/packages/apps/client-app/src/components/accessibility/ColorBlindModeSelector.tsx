@@ -3,9 +3,9 @@
  * Select color blind mode filter
  */
 
+import { useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
-import { useEffect } from "react";
 
 export function ColorBlindModeSelector() {
   const colorBlindMode = useAccessibilityStore((state) => state.preferences.colorBlindMode);

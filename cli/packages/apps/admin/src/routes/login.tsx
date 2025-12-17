@@ -1,3 +1,4 @@
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
   Button,
   Card,
@@ -11,7 +12,6 @@ import {
   Stack,
 } from "@lazarus-life/ui-components";
 import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "@lazarus-life/shared/i18n";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";

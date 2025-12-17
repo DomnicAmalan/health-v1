@@ -1,5 +1,5 @@
- import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface UIState {
   sidebarCollapsed: boolean;
@@ -30,7 +30,7 @@ export const useUIStore = create<UIStore>()(
       },
     }),
     {
-      name: 'rustyvault-ui-state',
-    }
-  )
+      name: "rustyvault-ui-state",
+    },
+  ),
 );

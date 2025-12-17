@@ -2,7 +2,6 @@
  * Groups Management Page
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -18,10 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@lazarus-life/ui-components";
-import { Plus, Search, Users, Edit, Trash2 } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../lib/permissions";
-import { listGroups, deleteGroup, type Group } from "../lib/api/groups";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Edit, Plus, Search, Trash2, Users } from "lucide-react";
 import { useState } from "react";
+import { deleteGroup, type Group, listGroups } from "../lib/api/groups";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 export function GroupsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,8 +36,8 @@ export function GroupsPage() {
   const groups: Group[] = Array.isArray(groupsResponse?.data?.groups)
     ? groupsResponse.data.groups
     : Array.isArray(groupsResponse?.data)
-    ? groupsResponse.data
-    : [];
+      ? groupsResponse.data
+      : [];
 
   const deleteMutation = useMutation({
     mutationFn: deleteGroup,
@@ -51,7 +51,10 @@ export function GroupsPage() {
   );
 
   return (
-    <ProtectedPage pageName="groups" fallback={<div className="p-6">You don't have access to this page.</div>}>
+    <ProtectedPage
+      pageName="groups"
+      fallback={<div className="p-6">You don't have access to this page.</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
@@ -134,7 +137,9 @@ export function GroupsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                if (confirm(`Are you sure you want to delete group "${group.name}"?`)) {
+                                if (
+                                  confirm(`Are you sure you want to delete group "${group.name}"?`)
+                                ) {
                                   deleteMutation.mutate(group.id);
                                 }
                               }}
@@ -155,4 +160,3 @@ export function GroupsPage() {
     </ProtectedPage>
   );
 }
-

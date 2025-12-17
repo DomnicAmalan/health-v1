@@ -1,34 +1,35 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
+    "useIgnoreFile": false,
     "defaultBranch": "main"
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
-      "target/**",
-      "**/target/**",
-      "**/src-tauri/target/**",
-      "**/src-tauri/gen/**",
-      "**/*.tsbuildinfo",
-      "**/.tanstack/**",
-      "**/.vite/**",
-      "**/coverage/**",
-      "**/playwright-report/**",
-      "**/test-results/**",
-      "**/.cache/**",
-      "**/bun.lockb",
-      "**/Cargo.lock",
-      "**/package-lock.json",
-      "**/yarn.lock",
-      "**/pnpm-lock.yaml",
-      "**/routeTree.gen.ts"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/target",
+      "!**/target",
+      "!**/src-tauri/target",
+      "!**/src-tauri/gen",
+      "!**/*.tsbuildinfo",
+      "!**/.tanstack",
+      "!**/.vite",
+      "!**/coverage",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!**/.cache",
+      "!**/bun.lockb",
+      "!**/Cargo.lock",
+      "!**/package-lock.json",
+      "!**/yarn.lock",
+      "!**/pnpm-lock.yaml",
+      "!**/routeTree.gen.ts"
     ]
   },
   "formatter": {
@@ -39,9 +40,7 @@
     "lineWidth": 100,
     "formatWithErrors": false
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -96,7 +95,7 @@
   },
   "overrides": [
     {
-      "include": ["*.ts", "*.tsx"],
+      "includes": ["**/*.ts", "**/*.tsx"],
       "linter": {
         "rules": {
           "style": {
@@ -106,7 +105,7 @@
       }
     },
     {
-      "include": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
       "linter": {
         "rules": {
           "suspicious": {

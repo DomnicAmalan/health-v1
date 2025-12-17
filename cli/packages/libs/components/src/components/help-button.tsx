@@ -3,7 +3,8 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
-export interface HelpButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "content"> {
+export interface HelpButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "content"> {
   content: string | React.ReactNode;
   title?: string;
   variant?: "default" | "subtle" | "icon-only";

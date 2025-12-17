@@ -9,17 +9,17 @@ import type { User } from "../types/user";
 export type {
   ApiError,
   ApiResponse,
+  AuthConfig,
+  AuthErrorHandler,
+  AuthProvider,
+  AuthType,
+  BaseClientConfig,
+  ErrorInterceptor,
   HttpMethod,
   RequestConfig,
   RequestInterceptor,
   ResponseInterceptor,
-  ErrorInterceptor,
-  AuthProvider,
   ResponseTransformer,
-  AuthErrorHandler,
-  AuthType,
-  AuthConfig,
-  BaseClientConfig,
 } from "./baseClient";
 
 // Authentication types

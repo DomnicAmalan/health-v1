@@ -3,6 +3,7 @@
  * Different layout configurations for different route types
  */
 
+import { Outlet } from "@tanstack/react-router";
 import { ActionRibbon } from "@/components/ActionRibbon";
 import { Sidebar } from "@/components/layout/Sidebar";
 import type { SidebarItem } from "@/components/layout/Sidebar/SidebarItem";
@@ -11,7 +12,6 @@ import { Box } from "@/components/ui/box";
 import { Container } from "@/components/ui/container";
 import { Flex } from "@/components/ui/flex";
 import { SkipToMainContent } from "@/lib/accessibility";
-import { Outlet } from "@tanstack/react-router";
 
 interface FullLayoutProps {
   sidebarItems: SidebarItem[];

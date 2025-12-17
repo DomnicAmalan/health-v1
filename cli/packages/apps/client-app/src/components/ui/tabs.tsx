@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const Tabs = BaseTabs.Root;
 

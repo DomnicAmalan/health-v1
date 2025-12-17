@@ -2,11 +2,18 @@
  * Register Field Form Component
  */
 
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectItem,
+  SelectValue,
+  Stack,
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Input, Label, Select, SelectItem, SelectValue, Stack } from "@lazarus-life/ui-components";
-import { registerField, type RegisterFieldRequest, listPages } from "../../lib/api/ui-entities";
-import { useQuery } from "@tanstack/react-query";
+import { listPages, type RegisterFieldRequest, registerField } from "../../lib/api/ui-entities";
 
 interface RegisterFieldFormProps {
   defaultPageId?: string;
@@ -14,11 +21,7 @@ interface RegisterFieldFormProps {
   onCancel?: () => void;
 }
 
-export function RegisterFieldForm({
-  defaultPageId,
-  onSuccess,
-  onCancel,
-}: RegisterFieldFormProps) {
+export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: RegisterFieldFormProps) {
   const [pageId, setPageId] = useState(defaultPageId || "");
   const [fieldId, setFieldId] = useState("");
   const [label, setLabel] = useState("");
@@ -129,4 +132,3 @@ export function RegisterFieldForm({
     </form>
   );
 }
-

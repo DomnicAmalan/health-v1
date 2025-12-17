@@ -3,13 +3,13 @@
  * Token-based authentication with interceptors using the shared base client
  */
 
-import { BaseApiClient, type ApiResponse, type RequestConfig } from "@lazarus-life/shared/api";
+import { type ApiResponse, BaseApiClient, type RequestConfig } from "@lazarus-life/shared/api";
 import {
   errorInterceptor,
+  getAccessToken,
   requestInterceptor,
   responseInterceptor,
   setTokens,
-  getAccessToken,
 } from "./interceptors";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4117";

@@ -1,6 +1,6 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebarExpandedItems, useToggleSidebarExpand } from "@/stores/uiStore";
-import { memo } from "react";
 import { SidebarCollapseButton } from "./SidebarCollapseButton";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";

@@ -2,10 +2,10 @@
  * Register Page Form Component
  */
 
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Input, Label, Stack } from "@lazarus-life/ui-components";
-import { registerPage, type RegisterPageRequest } from "../../lib/api/ui-entities";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { type RegisterPageRequest, registerPage } from "../../lib/api/ui-entities";
 
 interface RegisterPageFormProps {
   onSuccess?: () => void;
@@ -87,4 +87,3 @@ export function RegisterPageForm({ onSuccess, onCancel }: RegisterPageFormProps)
     </form>
   );
 }
-

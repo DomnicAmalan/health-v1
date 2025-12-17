@@ -1,12 +1,12 @@
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
+import { useNavigate } from "@tanstack/react-router";
+import { Menu } from "lucide-react";
+import { memo, useEffect, useMemo, useRef } from "react";
+import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTabBarDrag } from "@/hooks/ui/useTabBarDrag";
 import { useActiveTabId, useCloseTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
-import { useNavigate } from "@tanstack/react-router";
-import { Menu } from "lucide-react";
-import { memo, useEffect, useMemo, useRef } from "react";
 import { TabDragPreview } from "./TabDragPreview";
 import { TabItem } from "./TabItem";
 import { TabUserMenu } from "./TabUserMenu";

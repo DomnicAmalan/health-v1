@@ -1,3 +1,5 @@
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { memo } from "react";
 import { Box } from "@/components/ui/box";
 import {
   ContextMenu,
@@ -9,8 +11,6 @@ import {
 import { Stack } from "@/components/ui/stack";
 import { getNavActions, getNavContextActions } from "@/lib/nav-actions";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { memo } from "react";
 
 export interface SidebarItem {
   path: string;

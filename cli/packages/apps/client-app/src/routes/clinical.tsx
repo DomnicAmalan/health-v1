@@ -1,10 +1,10 @@
-import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Button } from "@lazarus-life/ui-components";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import { Button } from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
+import { ProtectedRoute } from "@/components/security/ProtectedRoute";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/clinical")({
   component: ClinicalComponent,
@@ -26,9 +26,7 @@ function ClinicalComponentInner() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t("clinical.title")}</h1>
-          <p className="text-muted-foreground mt-2">
-            {t("clinical.documentationTemplates")}
-          </p>
+          <p className="text-muted-foreground mt-2">{t("clinical.documentationTemplates")}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -51,19 +49,25 @@ function ClinicalComponentInner() {
             </Card>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="text-base">{t("clinical.templates.historyPhysical")}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("clinical.templates.historyPhysical")}
+                </CardTitle>
                 <CardDescription>{t("clinical.templates.historyPhysicalDesc")}</CardDescription>
               </CardHeader>
             </Card>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="text-base">{t("clinical.templates.dischargeSummary")}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("clinical.templates.dischargeSummary")}
+                </CardTitle>
                 <CardDescription>{t("clinical.templates.dischargeSummaryDesc")}</CardDescription>
               </CardHeader>
             </Card>
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="text-base">{t("clinical.templates.operativeReport")}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("clinical.templates.operativeReport")}
+                </CardTitle>
                 <CardDescription>{t("clinical.templates.operativeReportDesc")}</CardDescription>
               </CardHeader>
             </Card>

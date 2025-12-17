@@ -3,7 +3,7 @@
  * Vault token-based authentication using the shared base client
  */
 
-import { BaseApiClient, ApiClientError, type ApiResponse } from "@lazarus-life/shared/api";
+import { ApiClientError, type ApiResponse, BaseApiClient } from "@lazarus-life/shared/api";
 import { useAuthStore } from "@/stores/authStore";
 
 // Vault API base URL - should NOT include /api prefix
@@ -17,7 +17,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status?: number,
-    public errors?: string[]
+    public errors?: string[],
   ) {
     super(message);
     this.name = "ApiError";
@@ -59,19 +59,21 @@ class VaultApiClient extends BaseApiClient {
     if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
       return endpoint;
     }
-    
+
     // For Vault API, always use direct concatenation (no /api prefix)
     // Vault routes are: /v1/sys/*, /v1/realm/*, /v1/secret/*, etc.
     // Never use getApiUrl() which would add /api prefix
     const base = this.baseUrl.replace(/\/$/, "");
     const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${base}${path}`;
-    
+
     // Debug logging
     if (this.debug) {
-      console.log(`[VaultApiClient] buildUrl: endpoint="${endpoint}", baseUrl="${this.baseUrl}" -> "${url}"`);
+      console.log(
+        `[VaultApiClient] buildUrl: endpoint="${endpoint}", baseUrl="${this.baseUrl}" -> "${url}"`,
+      );
     }
-    
+
     return url;
   }
 

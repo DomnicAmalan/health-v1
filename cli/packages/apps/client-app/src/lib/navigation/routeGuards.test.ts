@@ -2,9 +2,9 @@
  * Route Guards Tests
  */
 
-import { useAuthStore } from "@/stores/authStore";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useAuthStore } from "@/stores/authStore";
 import { checkRoutePermission, createRouteGuard } from "./routeGuards";
 
 // Mock audit API

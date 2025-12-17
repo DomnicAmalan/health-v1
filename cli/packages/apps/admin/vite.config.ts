@@ -42,7 +42,7 @@ export default defineConfig({
           "query-vendor": ["@tanstack/react-query"],
           "ui-vendor": ["@lazarus-life/ui-components"],
           // Shared libraries
-          "shared": ["@lazarus-life/shared"],
+          shared: ["@lazarus-life/shared"],
         },
       },
     },

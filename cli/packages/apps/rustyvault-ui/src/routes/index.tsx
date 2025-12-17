@@ -1,31 +1,38 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, Stack, Badge } from '@lazarus-life/ui-components';
-import { Activity, CheckCircle2, XCircle, Globe, Lock, Settings } from 'lucide-react';
-import { systemApi, realmsApi, secretsApi } from '@/lib/api';
+import {
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Stack,
+} from "@lazarus-life/ui-components";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, CheckCircle2, Globe, Lock, Settings, XCircle } from "lucide-react";
+import { realmsApi, secretsApi, systemApi } from "@/lib/api";
 
 export function DashboardPage() {
   const { data: sealStatus, isLoading: isLoadingSeal } = useQuery({
-    queryKey: ['sealStatus'],
+    queryKey: ["sealStatus"],
     queryFn: () => systemApi.getSealStatus(),
     refetchInterval: 30000,
   });
 
   const { data: realms, isLoading: isLoadingRealms } = useQuery({
-    queryKey: ['realms'],
+    queryKey: ["realms"],
     queryFn: () => realmsApi.list(),
     refetchInterval: 60000,
   });
 
   const { data: mounts, isLoading: isLoadingMounts } = useQuery({
-    queryKey: ['mounts'],
+    queryKey: ["mounts"],
     queryFn: () => systemApi.listMounts(),
     refetchInterval: 60000,
   });
 
   const { data: secrets, isLoading: isLoadingSecrets } = useQuery({
-    queryKey: ['secrets', 'kv2', ''],
-    queryFn: () => secretsApi.list('kv2', ''),
-    enabled: !!mounts && 'kv2' in mounts,
+    queryKey: ["secrets", "kv2", ""],
+    queryFn: () => secretsApi.list("kv2", ""),
+    enabled: !!mounts && "kv2" in mounts,
     refetchInterval: 60000,
   });
 
@@ -52,8 +59,10 @@ export function DashboardPage() {
               )}
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${sealStatus?.sealed ? 'text-destructive' : 'text-green-600'}`}>
-                {isLoadingSeal ? '-' : sealStatus?.sealed ? 'Sealed' : 'Unsealed'}
+              <div
+                className={`text-2xl font-bold ${sealStatus?.sealed ? "text-destructive" : "text-green-600"}`}
+              >
+                {isLoadingSeal ? "-" : sealStatus?.sealed ? "Sealed" : "Unsealed"}
               </div>
               {sealStatus && (
                 <p className="text-xs text-muted-foreground">
@@ -115,8 +124,8 @@ export function DashboardPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Status</span>
-                    <Badge variant={sealStatus.sealed ? 'destructive' : 'default'}>
-                      {sealStatus.sealed ? 'Sealed' : 'Unsealed'}
+                    <Badge variant={sealStatus.sealed ? "destructive" : "default"}>
+                      {sealStatus.sealed ? "Sealed" : "Unsealed"}
                     </Badge>
                   </div>
                   {sealStatus.version && (
@@ -149,4 +158,3 @@ export function DashboardPage() {
     </div>
   );
 }
-

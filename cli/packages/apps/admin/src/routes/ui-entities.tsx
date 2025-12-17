@@ -3,14 +3,17 @@
  * Register and manage pages, buttons, fields, and API endpoints
  */
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   Input,
   Stack,
   Table,
@@ -24,26 +27,21 @@ import {
   TabsList,
   TabsTrigger,
 } from "@lazarus-life/ui-components";
-import { Plus, Search, FileText, Globe } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../lib/permissions";
-import {
-  listPages,
-  listButtonsForPage,
-  listFieldsForPage,
-  listApis,
-  type UiPage,
-} from "../lib/api/ui-entities";
-import { RegisterPageForm } from "../components/ui-entities/RegisterPageForm";
+import { useQuery } from "@tanstack/react-query";
+import { FileText, Globe, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { RegisterApiForm } from "../components/ui-entities/RegisterApiForm";
 import { RegisterButtonForm } from "../components/ui-entities/RegisterButtonForm";
 import { RegisterFieldForm } from "../components/ui-entities/RegisterFieldForm";
-import { RegisterApiForm } from "../components/ui-entities/RegisterApiForm";
+import { RegisterPageForm } from "../components/ui-entities/RegisterPageForm";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@lazarus-life/ui-components";
+  listApis,
+  listButtonsForPage,
+  listFieldsForPage,
+  listPages,
+  type UiPage,
+} from "../lib/api/ui-entities";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 export function UiEntitiesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,24 +66,31 @@ export function UiEntitiesPage() {
 
   const apis = apisResponse?.data?.apis || [];
 
-  const filteredPages = pages.filter((page) =>
-    page.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    page.path.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPages = pages.filter(
+    (page) =>
+      page.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      page.path.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredApis = apis.filter((api) =>
-    api.endpoint.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    api.method.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredApis = apis.filter(
+    (api) =>
+      api.endpoint.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      api.method.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <ProtectedPage pageName="ui-entities" fallback={<div className="p-6">You don't have access to this page.</div>}>
+    <ProtectedPage
+      pageName="ui-entities"
+      fallback={<div className="p-6">You don't have access to this page.</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">UI Entities</h1>
-              <p className="text-muted-foreground">Register and manage UI components for access control</p>
+              <p className="text-muted-foreground">
+                Register and manage UI components for access control
+              </p>
             </div>
           </div>
 
@@ -115,7 +120,10 @@ export function UiEntitiesPage() {
                           onChange={(e) => setSearchQuery(e.target.value)}
                         />
                       </div>
-                      <ProtectedButton buttonId="register-page" onClick={() => setShowPageForm(true)}>
+                      <ProtectedButton
+                        buttonId="register-page"
+                        onClick={() => setShowPageForm(true)}
+                      >
                         <Plus className="mr-2 h-4 w-4" />
                         Register Page
                       </ProtectedButton>
@@ -150,7 +158,9 @@ export function UiEntitiesPage() {
                             <TableCell className="font-medium">{page.name}</TableCell>
                             <TableCell className="font-mono text-sm">{page.path}</TableCell>
                             <TableCell>{page.description || "-"}</TableCell>
-                            <TableCell className="font-mono text-xs">{page.zanzibar_resource}</TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {page.zanzibar_resource}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -168,7 +178,10 @@ export function UiEntitiesPage() {
                       <CardTitle>Registered Buttons</CardTitle>
                       <CardDescription>Buttons registered for access control</CardDescription>
                     </div>
-                    <ProtectedButton buttonId="register-button" onClick={() => setShowButtonForm(true)}>
+                    <ProtectedButton
+                      buttonId="register-button"
+                      onClick={() => setShowButtonForm(true)}
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Register Button
                     </ProtectedButton>
@@ -192,7 +205,10 @@ export function UiEntitiesPage() {
                       <CardTitle>Registered Fields</CardTitle>
                       <CardDescription>Form fields registered for access control</CardDescription>
                     </div>
-                    <ProtectedButton buttonId="register-field" onClick={() => setShowFieldForm(true)}>
+                    <ProtectedButton
+                      buttonId="register-field"
+                      onClick={() => setShowFieldForm(true)}
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Register Field
                     </ProtectedButton>
@@ -263,7 +279,9 @@ export function UiEntitiesPage() {
                             </TableCell>
                             <TableCell className="font-mono text-sm">{api.endpoint}</TableCell>
                             <TableCell>{api.description || "-"}</TableCell>
-                            <TableCell className="font-mono text-xs">{api.zanzibar_resource}</TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {api.zanzibar_resource}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -427,4 +445,3 @@ function PageFieldsSection({ page }: { page: UiPage }) {
     </div>
   );
 }
-

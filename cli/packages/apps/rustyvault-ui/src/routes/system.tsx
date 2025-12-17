@@ -1,31 +1,52 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, Stack, Button, Input, Label, Badge, Alert, AlertDescription } from '@lazarus-life/ui-components';
-import { systemApi, type HealthStatus } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-import { Lock, Unlock, RefreshCw, AlertCircle, CheckCircle2, Loader2, Copy, Download } from 'lucide-react';
-import { UnsealLock } from '@/components/UnsealLock';
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Stack,
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Copy,
+  Download,
+  Loader2,
+  Lock,
+  RefreshCw,
+  Unlock,
+} from "lucide-react";
+import { useState } from "react";
+import { UnsealLock } from "@/components/UnsealLock";
+import { type HealthStatus, systemApi } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 
 export function SystemPage() {
-  const [unsealKey, setUnsealKey] = useState('');
+  const [unsealKey, setUnsealKey] = useState("");
   const [initShares, setInitShares] = useState(1);
   const [initThreshold, setInitThreshold] = useState(1);
   const [initKeys, setInitKeys] = useState<string[]>([]);
-  const [initRootToken, setInitRootToken] = useState('');
-  const [initDownloadToken, setInitDownloadToken] = useState('');
-  const [downloadTokenInput, setDownloadTokenInput] = useState('');
+  const [initRootToken, setInitRootToken] = useState("");
+  const [initDownloadToken, setInitDownloadToken] = useState("");
+  const [downloadTokenInput, setDownloadTokenInput] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const queryClient = useQueryClient();
   const { hasPolicy } = useAuthStore();
 
   const { data: sealStatus, isLoading: isLoadingSeal } = useQuery({
-    queryKey: ['sealStatus'],
+    queryKey: ["sealStatus"],
     queryFn: () => systemApi.getSealStatus(),
     refetchInterval: 5000,
   });
 
   const { data: health, isLoading: isLoadingHealth } = useQuery<HealthStatus>({
-    queryKey: ['health'],
+    queryKey: ["health"],
     queryFn: () => systemApi.getHealth(),
     refetchInterval: 10000,
   });
@@ -33,20 +54,20 @@ export function SystemPage() {
   const unsealMutation = useMutation({
     mutationFn: (key: string) => systemApi.unseal(key),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sealStatus'] });
-      setUnsealKey('');
+      queryClient.invalidateQueries({ queryKey: ["sealStatus"] });
+      setUnsealKey("");
     },
   });
 
   const sealMutation = useMutation({
     mutationFn: () => systemApi.seal(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sealStatus'] });
+      queryClient.invalidateQueries({ queryKey: ["sealStatus"] });
     },
   });
 
   const initMutation = useMutation({
-    mutationFn: (request: { secret_shares: number; secret_threshold: number }) => 
+    mutationFn: (request: { secret_shares: number; secret_threshold: number }) =>
       systemApi.init(request),
     onSuccess: (data) => {
       setInitKeys(data.keys_base64);
@@ -54,8 +75,8 @@ export function SystemPage() {
       if (data.download_token) {
         setInitDownloadToken(data.download_token);
       }
-      queryClient.invalidateQueries({ queryKey: ['sealStatus'] });
-      queryClient.invalidateQueries({ queryKey: ['health'] });
+      queryClient.invalidateQueries({ queryKey: ["sealStatus"] });
+      queryClient.invalidateQueries({ queryKey: ["health"] });
     },
   });
 
@@ -66,8 +87,8 @@ export function SystemPage() {
       try {
         await systemApi.downloadKeysFile(tokenToUse);
       } catch (error) {
-        console.error('Failed to download keys file:', error);
-        alert('Failed to download keys file. Please try again.');
+        console.error("Failed to download keys file:", error);
+        alert("Failed to download keys file. Please try again.");
       } finally {
         setIsDownloading(false);
       }
@@ -78,11 +99,11 @@ export function SystemPage() {
     try {
       await navigator.clipboard.writeText(text);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      console.error("Failed to copy:", error);
     }
   };
 
-  const canManageSystem = hasPolicy('root');
+  const canManageSystem = hasPolicy("root");
 
   const handleUnseal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,14 +162,14 @@ export function SystemPage() {
                   <div>
                     <Label className="text-xs text-muted-foreground">Status</Label>
                     <div className="mt-1">
-                      <Badge variant={isSealed ? 'destructive' : 'default'}>
-                        {isSealed ? 'Sealed' : 'Unsealed'}
+                      <Badge variant={isSealed ? "destructive" : "default"}>
+                        {isSealed ? "Sealed" : "Unsealed"}
                       </Badge>
                     </div>
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Version</Label>
-                    <div className="mt-1 text-sm">{sealStatus.version || '0.1.0'}</div>
+                    <div className="mt-1 text-sm">{sealStatus.version || "0.1.0"}</div>
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Unseal Progress</Label>
@@ -158,7 +179,7 @@ export function SystemPage() {
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Storage Type</Label>
-                    <div className="mt-1 text-sm">{sealStatus.storage_type || 'file'}</div>
+                    <div className="mt-1 text-sm">{sealStatus.storage_type || "file"}</div>
                   </div>
                 </div>
 
@@ -205,22 +226,26 @@ export function SystemPage() {
                       total={sealStatus.n || 1}
                     />
                   )}
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="unseal-key">
-                      Unseal Key (Base64) - Enter key {sealStatus ? (sealStatus.progress || 0) + 1 : 1} of {sealStatus?.t || 1}
+                      Unseal Key (Base64) - Enter key{" "}
+                      {sealStatus ? (sealStatus.progress || 0) + 1 : 1} of {sealStatus?.t || 1}
                     </Label>
                     <Input
                       id="unseal-key"
                       type="text"
                       placeholder="Enter unseal key"
                       value={unsealKey}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUnsealKey(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setUnsealKey(e.target.value)
+                      }
                       disabled={unsealMutation.isPending}
                       required
                     />
                     <p className="text-xs text-muted-foreground">
-                      Enter one of the unseal keys from your initialization. Each key can only be used once.
+                      Enter one of the unseal keys from your initialization. Each key can only be
+                      used once.
                     </p>
                   </div>
                   {unsealMutation.isError && (
@@ -229,7 +254,7 @@ export function SystemPage() {
                       <AlertDescription>
                         {unsealMutation.error instanceof Error
                           ? unsealMutation.error.message
-                          : 'Failed to unseal vault'}
+                          : "Failed to unseal vault"}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -278,19 +303,26 @@ export function SystemPage() {
                           </Button>
                         )}
                       </div>
-                      
+
                       <Alert variant="default" className="bg-blue-50 dark:bg-blue-950">
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription className="text-xs">
-                          <p className="font-semibold mb-1">Important: Download the credentials file!</p>
-                          <p>The file contains your root token (needed to login) and all unseal keys. Save it securely.</p>
+                          <p className="font-semibold mb-1">
+                            Important: Download the credentials file!
+                          </p>
+                          <p>
+                            The file contains your root token (needed to login) and all unseal keys.
+                            Save it securely.
+                          </p>
                         </AlertDescription>
                       </Alert>
-                      
+
                       {/* Root Token */}
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <Label className="text-sm font-semibold">Root Token (Use this to login):</Label>
+                          <Label className="text-sm font-semibold">
+                            Root Token (Use this to login):
+                          </Label>
                           <Button
                             variant="outline"
                             size="sm"
@@ -308,12 +340,19 @@ export function SystemPage() {
 
                       {/* All Unseal Keys */}
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold">Unseal Keys ({initKeys.length} total, {initThreshold} needed to unseal):</Label>
+                        <Label className="text-sm font-semibold">
+                          Unseal Keys ({initKeys.length} total, {initThreshold} needed to unseal):
+                        </Label>
                         <div className="space-y-2 max-h-96 overflow-y-auto">
                           {initKeys.map((key, index) => (
-                            <div key={`unseal-key-${index}-${key.substring(0, 8)}`} className="space-y-1">
+                            <div
+                              key={`unseal-key-${index}-${key.substring(0, 8)}`}
+                              className="space-y-1"
+                            >
                               <div className="flex items-center justify-between">
-                                <Label className="text-xs text-muted-foreground">Unseal Key {index + 1}:</Label>
+                                <Label className="text-xs text-muted-foreground">
+                                  Unseal Key {index + 1}:
+                                </Label>
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -337,7 +376,10 @@ export function SystemPage() {
                         <AlertDescription className="text-xs">
                           <p className="font-semibold mb-1">⚠️ Save these credentials securely!</p>
                           <ul className="list-disc list-inside space-y-1 ml-2">
-                            <li>You will need {initThreshold} of {initKeys.length} unseal keys to unseal the vault</li>
+                            <li>
+                              You will need {initThreshold} of {initKeys.length} unseal keys to
+                              unseal the vault
+                            </li>
                             <li>Store keys in separate secure locations</li>
                             <li>The root token provides full access - keep it extremely secure</li>
                             <li>You cannot recover these keys if lost</li>
@@ -359,7 +401,9 @@ export function SystemPage() {
                           min="1"
                           max="255"
                           value={initShares}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInitShares(Number.parseInt(e.target.value) || 1)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setInitShares(Number.parseInt(e.target.value) || 1)
+                          }
                           disabled={initMutation.isPending}
                           required
                         />
@@ -372,7 +416,9 @@ export function SystemPage() {
                           min="1"
                           max={initShares}
                           value={initThreshold}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInitThreshold(Number.parseInt(e.target.value) || 1)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setInitThreshold(Number.parseInt(e.target.value) || 1)
+                          }
                           disabled={initMutation.isPending}
                           required
                         />
@@ -387,7 +433,7 @@ export function SystemPage() {
                         <AlertDescription>
                           {initMutation.error instanceof Error
                             ? initMutation.error.message
-                            : 'Failed to initialize vault'}
+                            : "Failed to initialize vault"}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -427,7 +473,9 @@ export function SystemPage() {
                       type="text"
                       placeholder="Enter download token from initialization"
                       value={downloadTokenInput}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDownloadTokenInput(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setDownloadTokenInput(e.target.value)
+                      }
                       disabled={isDownloading}
                     />
                     <Button
@@ -448,8 +496,8 @@ export function SystemPage() {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    If you have a download token from initialization, enter it here to download the credentials file.
-                    Tokens expire after 1 hour.
+                    If you have a download token from initialization, enter it here to download the
+                    credentials file. Tokens expire after 1 hour.
                   </p>
                 </div>
               </Stack>
@@ -472,14 +520,14 @@ export function SystemPage() {
               <Stack spacing="sm">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Initialized</span>
-                  <Badge variant={health.initialized ? 'default' : 'secondary'}>
-                    {health.initialized ? 'Yes' : 'No'}
+                  <Badge variant={health.initialized ? "default" : "secondary"}>
+                    {health.initialized ? "Yes" : "No"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Sealed</span>
-                  <Badge variant={health.sealed ? 'destructive' : 'default'}>
-                    {health.sealed ? 'Yes' : 'No'}
+                  <Badge variant={health.sealed ? "destructive" : "default"}>
+                    {health.sealed ? "Yes" : "No"}
                   </Badge>
                 </div>
                 {health.version && (

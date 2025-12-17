@@ -3,9 +3,9 @@
  * Caption overlay for audio/video content
  */
 
+import { useEffect, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
-import { useEffect, useState } from "react";
 
 export interface CaptionProviderProps {
   children: React.ReactNode;

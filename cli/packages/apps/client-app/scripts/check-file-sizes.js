@@ -6,8 +6,8 @@
  */
 
 import { readFileSync, statSync } from "fs";
-import { extname, join, relative } from "path";
 import pkg from "glob";
+import { extname, join, relative } from "path";
 
 const { glob } = pkg;
 

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 /**
  * Encryption Index Page
@@ -14,4 +14,3 @@ export function EncryptionIndexPage() {
 
   return null;
 }
-

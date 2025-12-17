@@ -2,8 +2,7 @@
  * Service Status API
  */
 
-import { apiRequest } from "./client";
-import { API_ROUTES } from "./client";
+import { API_ROUTES, apiRequest } from "./client";
 import type { ServiceStatusResponse } from "./types";
 
 /**

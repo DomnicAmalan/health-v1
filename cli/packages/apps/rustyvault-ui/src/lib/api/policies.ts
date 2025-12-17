@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface Policy {
   name: string;
@@ -57,7 +57,10 @@ export const policiesApi = {
    * Check capabilities for a path (global)
    */
   checkCapabilities: async (path: string, policies?: string[]): Promise<CapabilitiesResponse> => {
-    return apiClient.post<CapabilitiesResponse>(VAULT_ROUTES.POLICIES.CAPABILITIES, { path, policies });
+    return apiClient.post<CapabilitiesResponse>(VAULT_ROUTES.POLICIES.CAPABILITIES, {
+      path,
+      policies,
+    });
   },
 
   // ============ Realm-Scoped Policies ============
@@ -96,12 +99,11 @@ export const policiesApi = {
   checkCapabilitiesForRealm: async (
     realmId: string,
     path: string,
-    policies?: string[]
+    policies?: string[],
   ): Promise<CapabilitiesResponse> => {
-    return apiClient.post<CapabilitiesResponse>(
-      VAULT_ROUTES.REALM_POLICIES.CAPABILITIES(realmId),
-      { path, policies }
-    );
+    return apiClient.post<CapabilitiesResponse>(VAULT_ROUTES.REALM_POLICIES.CAPABILITIES(realmId), {
+      path,
+      policies,
+    });
   },
 };
-

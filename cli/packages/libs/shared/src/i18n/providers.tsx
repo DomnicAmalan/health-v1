@@ -5,7 +5,7 @@
 
 import type { ReactNode } from "react";
 import { TranslationProvider } from "./TranslationProvider";
-import { adminTranslations, vaultTranslations, clientTranslations } from "./translations";
+import { adminTranslations, clientTranslations, vaultTranslations } from "./translations";
 
 export interface AppTranslationProviderProps {
   children: ReactNode;
@@ -15,9 +15,9 @@ export interface AppTranslationProviderProps {
 /**
  * Translation Provider for Admin App
  */
-export function AdminTranslationProvider({ 
-  children, 
-  defaultLocale = "en" 
+export function AdminTranslationProvider({
+  children,
+  defaultLocale = "en",
 }: AppTranslationProviderProps) {
   return (
     <TranslationProvider translations={adminTranslations} defaultLocale={defaultLocale}>
@@ -29,9 +29,9 @@ export function AdminTranslationProvider({
 /**
  * Translation Provider for Lazarus Life Vault
  */
-export function VaultTranslationProvider({ 
-  children, 
-  defaultLocale = "en" 
+export function VaultTranslationProvider({
+  children,
+  defaultLocale = "en",
 }: AppTranslationProviderProps) {
   return (
     <TranslationProvider translations={vaultTranslations} defaultLocale={defaultLocale}>
@@ -43,9 +43,9 @@ export function VaultTranslationProvider({
 /**
  * Translation Provider for Client App
  */
-export function ClientTranslationProvider({ 
-  children, 
-  defaultLocale = "en" 
+export function ClientTranslationProvider({
+  children,
+  defaultLocale = "en",
 }: AppTranslationProviderProps) {
   return (
     <TranslationProvider translations={clientTranslations} defaultLocale={defaultLocale}>

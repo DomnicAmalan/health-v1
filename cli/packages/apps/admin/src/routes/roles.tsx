@@ -2,7 +2,6 @@
  * Roles Management Page
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -18,10 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@lazarus-life/ui-components";
-import { Plus, Search, Shield, Edit, Trash2 } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../lib/permissions";
-import { listRoles, deleteRole } from "../lib/api/roles";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Edit, Plus, Search, Shield, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { deleteRole, listRoles } from "../lib/api/roles";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 export function RolesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,10 +33,9 @@ export function RolesPage() {
   });
 
   // Handle both { roles: [] } and [] response formats
-  const roles = Array.isArray(rolesResponse?.data) 
-    ? rolesResponse.data 
+  const roles = Array.isArray(rolesResponse?.data)
+    ? rolesResponse.data
     : rolesResponse?.data?.roles || [];
-
 
   const deleteMutation = useMutation({
     mutationFn: deleteRole,
@@ -50,7 +49,10 @@ export function RolesPage() {
   );
 
   return (
-    <ProtectedPage pageName="roles" fallback={<div className="p-6">You don't have access to this page.</div>}>
+    <ProtectedPage
+      pageName="roles"
+      fallback={<div className="p-6">You don't have access to this page.</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
@@ -118,9 +120,7 @@ export function RolesPage() {
                       <TableRow key={role.id}>
                         <TableCell className="font-medium">{role.name}</TableCell>
                         <TableCell>{role.description || "-"}</TableCell>
-                        <TableCell>
-                          {role.permissions?.length || 0} permission(s)
-                        </TableCell>
+                        <TableCell>{role.permissions?.length || 0} permission(s)</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <ProtectedButton
@@ -135,7 +135,9 @@ export function RolesPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                if (confirm(`Are you sure you want to delete role "${role.name}"?`)) {
+                                if (
+                                  confirm(`Are you sure you want to delete role "${role.name}"?`)
+                                ) {
                                   deleteMutation.mutate(role.id);
                                 }
                               }}
@@ -156,4 +158,3 @@ export function RolesPage() {
     </ProtectedPage>
   );
 }
-

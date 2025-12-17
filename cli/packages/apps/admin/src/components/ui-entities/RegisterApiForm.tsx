@@ -2,10 +2,18 @@
  * Register API Form Component
  */
 
-import { useState } from "react";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectItem,
+  SelectValue,
+  Stack,
+} from "@lazarus-life/ui-components";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Input, Label, Select, SelectItem, SelectValue, Stack } from "@lazarus-life/ui-components";
-import { registerApi, type RegisterApiRequest } from "../../lib/api/ui-entities";
+import { useState } from "react";
+import { type RegisterApiRequest, registerApi } from "../../lib/api/ui-entities";
 
 interface RegisterApiFormProps {
   onSuccess?: () => void;
@@ -95,4 +103,3 @@ export function RegisterApiForm({ onSuccess, onCancel }: RegisterApiFormProps) {
     </form>
   );
 }
-

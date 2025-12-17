@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { FormCanvasPreview } from "@/components/ui/form-canvas-preview";
@@ -5,7 +6,6 @@ import { useCanvasOperations } from "@/hooks/forms/useCanvasOperations";
 import { useFormCanvas } from "@/hooks/forms/useFormCanvas";
 import { useCanvasDrag } from "@/hooks/ui/useCanvasDrag";
 import { useCanvasResize } from "@/hooks/ui/useCanvasResize";
-import { useState } from "react";
 import { Canvas } from "./Canvas";
 import { CanvasFieldLibrary } from "./CanvasFieldLibrary";
 import { CanvasPropertyPanel } from "./CanvasPropertyPanel";

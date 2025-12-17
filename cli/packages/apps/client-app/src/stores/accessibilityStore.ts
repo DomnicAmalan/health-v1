@@ -4,15 +4,14 @@
  * WCAG 2.1 AA/AAA compliant
  */
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
 import type {
   AccessibilityActions,
   AccessibilityPreferences,
   AccessibilityState,
   AccessibilityStore,
 } from "@lazarus-life/shared/types/stores/accessibility";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 // Re-export types
 export type {

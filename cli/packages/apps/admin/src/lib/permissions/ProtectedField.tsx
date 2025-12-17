@@ -3,8 +3,8 @@
  * Wraps form fields to check permission for viewing/editing
  */
 
-import { useCanAccess } from "./context";
 import { Input, type InputProps } from "@lazarus-life/ui-components";
+import { useCanAccess } from "./context";
 
 interface ProtectedFieldProps extends InputProps {
   fieldId: string; // e.g., "user-email", "user-password"
@@ -31,26 +31,11 @@ export function ProtectedField({
     if (hideIfDenied) {
       return null;
     }
-    return (
-      <Input
-        {...inputProps}
-        value=""
-        placeholder="No access"
-        readOnly
-        disabled
-      />
-    );
+    return <Input {...inputProps} value="" placeholder="No access" readOnly disabled />;
   }
 
   // If can view but can't edit, make read-only
   const isReadOnly = readOnly || !canEdit;
 
-  return (
-    <Input
-      {...inputProps}
-      readOnly={isReadOnly}
-      disabled={isReadOnly}
-    />
-  );
+  return <Input {...inputProps} readOnly={isReadOnly} disabled={isReadOnly} />;
 }
-

@@ -3,13 +3,13 @@
  * Hook for checking user permissions and roles
  */
 
-import { useAuthStore } from "@/stores/authStore";
 import {
   PERMISSIONS,
   type Permission,
   ROLE_PERMISSIONS,
 } from "@lazarus-life/shared/constants/permissions";
 import { useCallback, useMemo } from "react";
+import { useAuthStore } from "@/stores/authStore";
 
 export function usePermissions() {
   // Use individual selectors to avoid object recreation

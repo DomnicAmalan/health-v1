@@ -18,4 +18,3 @@ export async function getDashboardStats(): Promise<DashboardStatsResponse> {
     method: "GET",
   });
 }
-

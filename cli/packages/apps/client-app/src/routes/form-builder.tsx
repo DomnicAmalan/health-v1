@@ -1,12 +1,12 @@
-import { FormCanvasBuilder } from "@/components/forms/canvas";
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
-import { Flex } from "@/components/ui/flex";
-import { FormPlaygroundWithResizer } from "@/components/ui/form-playground-with-resizer";
-import { Stack } from "@/components/ui/stack";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Layout } from "lucide-react";
 import { useState } from "react";
+import { FormCanvasBuilder } from "@/components/forms/canvas";
+import { Box } from "@/components/ui/box";
+import { Flex } from "@/components/ui/flex";
+import { FormPlaygroundWithResizer } from "@/components/ui/form-playground-with-resizer";
+import { Stack } from "@/components/ui/stack";
 
 export const Route = createFileRoute("/form-builder")({
   component: FormBuilderPage,

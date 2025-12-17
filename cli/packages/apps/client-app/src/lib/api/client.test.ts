@@ -5,7 +5,9 @@
 
 import { API_CONFIG } from "@lazarus-life/shared/api/config";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 const API_BASE_URL = API_CONFIG.BASE_URL;
+
 import { apiClient } from "./client";
 import { getAccessToken, setTokens } from "./interceptors";
 

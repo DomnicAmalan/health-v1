@@ -1,9 +1,9 @@
+import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Router from "./router";
 import { PermissionProvider } from "./lib/permissions";
-import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
+import Router from "./router";
 import "./index.css";
 
 // Create a client

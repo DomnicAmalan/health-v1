@@ -3,9 +3,9 @@
  * Toggle high contrast mode
  */
 
+import { useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
-import { useEffect } from "react";
 
 export function HighContrastToggle() {
   const highContrast = useAccessibilityStore((state) => state.preferences.highContrast);

@@ -47,18 +47,16 @@ export interface RequestConfig {
 export type RequestInterceptor = (
   url: string,
   config: RequestConfig & { headers: Record<string, string> }
-) => Promise<RequestConfig & { headers: Record<string, string> }> | (RequestConfig & { headers: Record<string, string> });
+) =>
+  | Promise<RequestConfig & { headers: Record<string, string> }>
+  | (RequestConfig & { headers: Record<string, string> });
 
 export type ResponseInterceptor<T = unknown> = (
   response: Response,
   url: string
 ) => Promise<ApiResponse<T>> | ApiResponse<T>;
 
-export type ErrorInterceptor = (
-  error: unknown,
-  url: string,
-  response?: Response
-) => ApiError;
+export type ErrorInterceptor = (error: unknown, url: string, response?: Response) => ApiError;
 
 export type AuthProvider = () => Record<string, string> | Promise<Record<string, string>>;
 
@@ -74,29 +72,29 @@ export type AuthType = "none" | "bearer" | "basic" | "apiKey" | "cookie" | "cust
 
 export interface AuthConfig {
   type: AuthType;
-  
+
   // Bearer token auth
   getToken?: () => string | null | Promise<string | null>;
   tokenPrefix?: string; // Default: "Bearer"
-  
+
   // Basic auth
   username?: string;
   password?: string;
   getCredentials?: () => { username: string; password: string } | null;
-  
+
   // API Key auth
   apiKey?: string;
   apiKeyHeader?: string; // Default: "X-API-Key"
   getApiKey?: () => string | null;
-  
+
   // Cookie auth (just sets credentials: "include")
-  
+
   // Custom auth - full control
   getHeaders?: AuthProvider;
-  
+
   // Handle auth errors (401)
   onAuthError?: AuthErrorHandler;
-  
+
   // Auto-refresh token
   refreshToken?: () => Promise<boolean>;
   shouldRefresh?: (response: Response) => boolean;
@@ -111,32 +109,32 @@ export interface BaseClientConfig {
   baseUrl?: string;
   timeout?: number;
   credentials?: RequestCredentials;
-  
+
   // Default headers
   headers?: Record<string, string>;
-  
+
   // Retry configuration
   retryAttempts?: number;
   retryDelay?: number;
   retryStatusCodes?: number[]; // Status codes to retry on (default: [408, 429, 500, 502, 503, 504])
   retryMethods?: HttpMethod[]; // Methods to retry (default: ["GET", "HEAD", "OPTIONS"])
-  
+
   // Authentication
   auth?: AuthConfig;
-  
+
   // Interceptors
   requestInterceptors?: RequestInterceptor[];
   responseInterceptors?: ResponseInterceptor[];
   errorInterceptor?: ErrorInterceptor;
-  
+
   // Response transformation
   transformResponse?: ResponseTransformer;
   unwrapData?: boolean; // Unwrap { data: T } responses (default: false)
   dataKey?: string; // Key to unwrap (default: "data")
-  
+
   // Error handling
   throwOnError?: boolean; // Throw instead of returning { error } (default: false)
-  
+
   // Logging
   debug?: boolean;
   logger?: (message: string, data?: unknown) => void;
@@ -172,27 +170,27 @@ export class BaseApiClient {
   protected readonly timeout: number;
   protected readonly credentials: RequestCredentials;
   protected readonly defaultHeaders: Record<string, string>;
-  
+
   // Retry settings
   protected readonly retryAttempts: number;
   protected readonly retryDelay: number;
   protected readonly retryStatusCodes: number[];
   protected readonly retryMethods: HttpMethod[];
-  
+
   // Authentication
   protected readonly auth?: AuthConfig;
-  
+
   // Interceptors
   protected readonly requestInterceptors: RequestInterceptor[];
   protected readonly responseInterceptors: ResponseInterceptor[];
   protected readonly errorInterceptor: ErrorInterceptor;
-  
+
   // Response handling
   protected readonly transformResponse?: ResponseTransformer;
   protected readonly unwrapData: boolean;
   protected readonly dataKey: string;
   protected readonly throwOnError: boolean;
-  
+
   // Logging
   protected readonly debug: boolean;
   protected readonly logger: (message: string, data?: unknown) => void;
@@ -202,37 +200,37 @@ export class BaseApiClient {
     this.baseUrl = config.baseUrl || API_CONFIG.BASE_URL;
     this.timeout = config.timeout || API_CONFIG.TIMEOUT;
     this.credentials = config.credentials || "same-origin";
-    
+
     // Default headers
     this.defaultHeaders = {
       "Content-Type": "application/json",
       Accept: "application/json",
       ...config.headers,
     };
-    
+
     // Retry settings
     this.retryAttempts = config.retryAttempts ?? API_CONFIG.RETRY_ATTEMPTS;
     this.retryDelay = config.retryDelay ?? API_CONFIG.RETRY_DELAY;
     this.retryStatusCodes = config.retryStatusCodes || [408, 429, 500, 502, 503, 504];
     this.retryMethods = config.retryMethods || ["GET", "HEAD", "OPTIONS"];
-    
+
     // Authentication
     this.auth = config.auth;
     if (this.auth?.type === "cookie") {
       this.credentials = "include";
     }
-    
+
     // Interceptors
     this.requestInterceptors = config.requestInterceptors || [];
     this.responseInterceptors = config.responseInterceptors || [];
     this.errorInterceptor = config.errorInterceptor || this.defaultErrorInterceptor.bind(this);
-    
+
     // Response handling
     this.transformResponse = config.transformResponse;
     this.unwrapData = config.unwrapData ?? false;
     this.dataKey = config.dataKey || "data";
     this.throwOnError = config.throwOnError ?? false;
-    
+
     // Logging
     this.debug = config.debug ?? false;
     this.logger = config.logger || console.log;
@@ -294,7 +292,10 @@ export class BaseApiClient {
     if (!this.auth) return false;
 
     // Try token refresh first
-    if (this.auth.refreshToken && (this.auth.shouldRefresh?.(response) ?? response.status === 401)) {
+    if (
+      this.auth.refreshToken &&
+      (this.auth.shouldRefresh?.(response) ?? response.status === 401)
+    ) {
       const refreshed = await this.auth.refreshToken();
       if (refreshed) return true;
     }
@@ -358,12 +359,12 @@ export class BaseApiClient {
     if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
       return endpoint;
     }
-    
+
     // Use shared getApiUrl for consistent path handling
     if (this.baseUrl === API_CONFIG.BASE_URL) {
       return getApiUrl(endpoint);
     }
-    
+
     // Custom base URL
     const base = this.baseUrl.replace(/\/$/, "");
     const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
@@ -384,7 +385,10 @@ export class BaseApiClient {
   // Core Request Method
   // ==========================================================================
 
-  async request<T = unknown>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  async request<T = unknown>(
+    endpoint: string,
+    config: RequestConfig = {}
+  ): Promise<ApiResponse<T>> {
     const url = this.buildUrl(endpoint);
     const method = config.method || "GET";
     const timeout = config.timeout || this.timeout;
@@ -398,13 +402,13 @@ export class BaseApiClient {
     try {
       // Build headers
       let headers: Record<string, string> = { ...this.defaultHeaders };
-      
+
       // Add auth headers unless skipped
       if (!config.skipAuth) {
         const authHeaders = await this.getAuthHeaders();
         headers = { ...headers, ...authHeaders };
       }
-      
+
       // Add custom headers
       headers = { ...headers, ...config.headers };
 
@@ -495,7 +499,12 @@ export class BaseApiClient {
       }
 
       // Unwrap data if configured
-      if (this.unwrapData && data && typeof data === "object" && this.dataKey in (data as Record<string, unknown>)) {
+      if (
+        this.unwrapData &&
+        data &&
+        typeof data === "object" &&
+        this.dataKey in (data as Record<string, unknown>)
+      ) {
         data = (data as Record<string, unknown>)[this.dataKey];
       }
 
@@ -505,12 +514,11 @@ export class BaseApiClient {
       }
 
       return { data: data as T, status: response.status, headers: response.headers };
-
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       const apiError = this.errorInterceptor(error, url);
-      
+
       if (this.throwOnError) {
         throw new ApiClientError(apiError);
       }
@@ -540,7 +548,13 @@ export class BaseApiClient {
       const result = await this.request<T>(endpoint, config);
 
       // Success or client error (4xx) - don't retry
-      if (result.data !== undefined || (result.error?.status && result.error.status < 500 && result.error.status !== 408 && result.error.status !== 429)) {
+      if (
+        result.data !== undefined ||
+        (result.error?.status &&
+          result.error.status < 500 &&
+          result.error.status !== 408 &&
+          result.error.status !== 429)
+      ) {
         return result;
       }
 
@@ -623,16 +637,16 @@ export class BaseApiClient {
 
   protected extractErrorMessage(data: unknown): string | undefined {
     if (!data || typeof data !== "object") return undefined;
-    
+
     const obj = data as Record<string, unknown>;
-    
+
     // Common error message patterns
     if (typeof obj.message === "string") return obj.message;
     if (typeof obj.error === "string") return obj.error;
     if (Array.isArray(obj.errors) && typeof obj.errors[0] === "string") return obj.errors[0];
     if (typeof obj.detail === "string") return obj.detail;
     if (typeof obj.msg === "string") return obj.msg;
-    
+
     return undefined;
   }
 
@@ -695,7 +709,9 @@ export function createPublicClient(config?: Omit<BaseClientConfig, "auth">): Bas
 /**
  * Create a session-based client (cookie authentication)
  */
-export function createSessionClient(config?: Omit<BaseClientConfig, "auth" | "credentials">): BaseApiClient {
+export function createSessionClient(
+  config?: Omit<BaseClientConfig, "auth" | "credentials">
+): BaseApiClient {
   return new BaseApiClient({
     ...config,
     auth: { type: "cookie" },
@@ -769,7 +785,12 @@ export class TokenApiClient extends BaseApiClient {
       auth: {
         type: "bearer",
         getToken: config.getToken,
-        onAuthError: config.onAuthError ? async () => { config.onAuthError?.(); return false; } : undefined,
+        onAuthError: config.onAuthError
+          ? async () => {
+              config.onAuthError?.();
+              return false;
+            }
+          : undefined,
       },
     });
   }

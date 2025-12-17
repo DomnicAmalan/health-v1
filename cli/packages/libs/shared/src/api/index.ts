@@ -4,19 +4,18 @@
 
 // Export base client first (defines core types)
 export * from "./baseClient";
-
+export * from "./config";
 // Export routes and config
 export * from "./routes";
-export * from "./config";
 
 // Export additional types (auth-related, service types, etc.)
-export {
-  type LoginRequest,
-  type LoginResponse,
-  type RefreshTokenRequest,
-  type RefreshTokenResponse,
-  type SetupRequest,
-  type SetupStatusResponse,
-  type ServiceInfo,
-  type ServiceStatusResponse,
+export type {
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  ServiceInfo,
+  ServiceStatusResponse,
+  SetupRequest,
+  SetupStatusResponse,
 } from "./types";

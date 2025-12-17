@@ -44,9 +44,7 @@ export async function getRole(roleId: string): Promise<ApiResponse<Role>> {
 /**
  * Create a new role
  */
-export async function createRole(
-  request: CreateRoleRequest
-): Promise<ApiResponse<Role>> {
+export async function createRole(request: CreateRoleRequest): Promise<ApiResponse<Role>> {
   return apiRequest(API_ROUTES.ADMIN.ROLES.CREATE, {
     method: "POST",
     body: JSON.stringify(request),
@@ -86,4 +84,3 @@ export async function assignRoleToUser(
     body: JSON.stringify(request),
   });
 }
-

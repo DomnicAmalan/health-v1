@@ -1,49 +1,49 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-  Stack,
-  Button,
-  Badge,
-  Alert,
-  AlertDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@lazarus-life/ui-components';
-import { useTranslation } from '@lazarus-life/shared/i18n';
-import { 
-  Plus, 
-  Search, 
-  Users, 
-  Trash2, 
-  MoreVertical, 
-  Mail, 
-  Building2,
-  Shield,
+  Input,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
   AppWindow,
+  Building2,
   Key,
   Loader2,
-  AlertCircle,
+  Mail,
+  MoreVertical,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
   UserPlus,
-} from 'lucide-react';
-import { ProtectedPage, ProtectedButton } from '../lib/permissions';
-import { ProvisionUserDialog } from '@/components/users/ProvisionUserDialog';
-import { apiClient } from '@/lib/api/client';
+  Users,
+} from "lucide-react";
+import { useState } from "react";
+import { ProvisionUserDialog } from "@/components/users/ProvisionUserDialog";
+import { apiClient } from "@/lib/api/client";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 interface User {
   id: string;
@@ -73,7 +73,7 @@ interface OrganizationsListResponse {
 // API functions
 const usersApiAdmin = {
   list: async (search?: string): Promise<UsersListResponse> => {
-    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    const query = search ? `?search=${encodeURIComponent(search)}` : "";
     return apiClient.get<UsersListResponse>(`/users${query}`);
   },
   delete: async (userId: string): Promise<void> => {
@@ -83,7 +83,7 @@ const usersApiAdmin = {
 
 const organizationsApi = {
   list: async (): Promise<Organization[]> => {
-    const response = await apiClient.get<OrganizationsListResponse>('/organizations');
+    const response = await apiClient.get<OrganizationsListResponse>("/organizations");
     return response.organizations || [];
   },
 };
@@ -91,20 +91,24 @@ const organizationsApi = {
 export function UsersPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [isProvisionOpen, setIsProvisionOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
   // Fetch users
-  const { data: usersData, isLoading, error } = useQuery({
-    queryKey: ['users', searchTerm],
+  const {
+    data: usersData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users", searchTerm],
     queryFn: () => usersApiAdmin.list(searchTerm || undefined),
   });
 
   // Fetch organizations for the provision dialog
   const { data: organizations = [] } = useQuery({
-    queryKey: ['organizations'],
+    queryKey: ["organizations"],
     queryFn: organizationsApi.list,
   });
 
@@ -112,7 +116,7 @@ export function UsersPage() {
   const deleteMutation = useMutation({
     mutationFn: usersApiAdmin.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       setDeleteUserId(null);
     },
   });
@@ -125,12 +129,12 @@ export function UsersPage() {
   };
 
   return (
-    <ProtectedPage pageName="users" fallback={<div className="p-6">{t('errors.forbidden')}</div>}>
+    <ProtectedPage pageName="users" fallback={<div className="p-6">{t("errors.forbidden")}</div>}>
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">{t('navigation.users')}</h1>
+              <h1 className="text-3xl font-bold tracking-tight">{t("navigation.users")}</h1>
               <p className="text-muted-foreground">
                 Manage users, roles, and access across the system
               </p>
@@ -146,7 +150,7 @@ export function UsersPage() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {error instanceof Error ? error.message : 'Failed to load users'}
+                {error instanceof Error ? error.message : "Failed to load users"}
               </AlertDescription>
             </Alert>
           )}
@@ -157,7 +161,7 @@ export function UsersPage() {
                 <div>
                   <CardTitle>All Users</CardTitle>
                   <CardDescription>
-                    {total} {total === 1 ? 'user' : 'users'} total
+                    {total} {total === 1 ? "user" : "users"} total
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
@@ -186,8 +190,8 @@ export function UsersPage() {
                       <p className="text-lg font-medium">No users found</p>
                       <p className="text-sm text-muted-foreground">
                         {searchTerm
-                          ? 'Try a different search term'
-                          : 'Get started by provisioning your first user'}
+                          ? "Try a different search term"
+                          : "Get started by provisioning your first user"}
                       </p>
                     </div>
                     {!searchTerm && (
@@ -249,9 +253,7 @@ export function UsersPage() {
                             <Badge variant="outline">Inactive</Badge>
                           )}
                         </TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
@@ -277,7 +279,7 @@ export function UsersPage() {
         open={isProvisionOpen}
         onOpenChange={setIsProvisionOpen}
         organizations={organizations}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["users"] })}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -292,7 +294,8 @@ export function UsersPage() {
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              This will remove the user's access to all applications and revoke their vault credentials.
+              This will remove the user's access to all applications and revoke their vault
+              credentials.
             </AlertDescription>
           </Alert>
           <DialogFooter className="mt-4">
@@ -310,7 +313,7 @@ export function UsersPage() {
                   Deleting...
                 </>
               ) : (
-                'Delete User'
+                "Delete User"
               )}
             </Button>
           </DialogFooter>

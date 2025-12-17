@@ -1,18 +1,18 @@
 /**
  * Zanzibar-Vault Sync Service
- * 
+ *
  * Provides real-time synchronization between Zanzibar permission changes
  * and Lazarus Life Vault ACL policies.
  */
 
-import type { VaultCapability } from './types';
 import {
   generateRealmPolicy,
   generateServiceRealmPolicy,
   type RealmMembership,
   type VaultPolicyClient,
   type ZanzibarClient,
-} from './permissions';
+} from "./permissions";
+import type { VaultCapability } from "./types";
 
 /**
  * Configuration for the sync service
@@ -35,7 +35,7 @@ export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   syncIntervalSeconds: 60,
   autoSync: true,
   cleanupOldPolicies: true,
-  policyPrefix: 'zanzibar-',
+  policyPrefix: "zanzibar-",
 };
 
 /**
@@ -43,14 +43,14 @@ export const DEFAULT_SYNC_CONFIG: SyncConfig = {
  */
 export interface SyncState {
   lastSyncTime: Date | null;
-  lastSyncStatus: 'success' | 'failed' | 'pending' | null;
+  lastSyncStatus: "success" | "failed" | "pending" | null;
   syncedPolicies: string[];
   errors: string[];
 }
 
 /**
  * Zanzibar-Vault Sync Service
- * 
+ *
  * Manages synchronization of Zanzibar permissions to Vault policies.
  * Supports:
  * - User realm memberships → User-scoped vault policies
@@ -86,7 +86,7 @@ export class ZanzibarVaultSync {
    */
   startPeriodicSync(): void {
     if (this.config.syncIntervalSeconds <= 0) {
-      console.warn('Sync interval is 0 or negative, periodic sync disabled');
+      console.warn("Sync interval is 0 or negative, periodic sync disabled");
       return;
     }
 
@@ -123,18 +123,18 @@ export class ZanzibarVaultSync {
    * Sync all users and services (full sync)
    */
   async syncAll(): Promise<void> {
-    this.state.lastSyncStatus = 'pending';
+    this.state.lastSyncStatus = "pending";
     this.state.errors = [];
-    
+
     try {
       // In a real implementation, you would iterate over all users/services
       // For now, this is a placeholder that shows the pattern
-      console.log('Full sync started...');
-      
+      console.log("Full sync started...");
+
       this.state.lastSyncTime = new Date();
-      this.state.lastSyncStatus = 'success';
+      this.state.lastSyncStatus = "success";
     } catch (error) {
-      this.state.lastSyncStatus = 'failed';
+      this.state.lastSyncStatus = "failed";
       this.state.errors.push(error instanceof Error ? error.message : String(error));
       throw error;
     }
@@ -159,13 +159,13 @@ export class ZanzibarVaultSync {
       for (const { realmId, role } of memberships) {
         const policyName = `${this.config.policyPrefix}user-${userId}-realm-${realmId}-${role}`;
         const policy = generateRealmPolicy(realmId, role);
-        
+
         await this.vaultClient.writePolicy(policyName, policy);
         policyNames.push(policyName);
       }
 
       this.state.syncedPolicies = [
-        ...this.state.syncedPolicies.filter(p => !p.includes(`user-${userId}-`)),
+        ...this.state.syncedPolicies.filter((p) => !p.includes(`user-${userId}-`)),
         ...policyNames,
       ];
 
@@ -182,7 +182,7 @@ export class ZanzibarVaultSync {
    */
   async syncService(
     serviceId: string,
-    defaultCapabilities: VaultCapability[] = ['read', 'list']
+    defaultCapabilities: VaultCapability[] = ["read", "list"]
   ): Promise<string[]> {
     const policyNames: string[] = [];
 
@@ -199,13 +199,13 @@ export class ZanzibarVaultSync {
       for (const { realmId } of memberships) {
         const policyName = `${this.config.policyPrefix}service-${serviceId}-realm-${realmId}`;
         const policy = generateServiceRealmPolicy(serviceId, realmId, defaultCapabilities);
-        
+
         await this.vaultClient.writePolicy(policyName, policy);
         policyNames.push(policyName);
       }
 
       this.state.syncedPolicies = [
-        ...this.state.syncedPolicies.filter(p => !p.includes(`service-${serviceId}-`)),
+        ...this.state.syncedPolicies.filter((p) => !p.includes(`service-${serviceId}-`)),
         ...policyNames,
       ];
 
@@ -255,10 +255,10 @@ export class ZanzibarVaultSync {
     }
 
     switch (event.subjectType) {
-      case 'user':
+      case "user":
         await this.syncUser(event.subjectId);
         break;
-      case 'service':
+      case "service":
         await this.syncService(event.subjectId);
         break;
     }
@@ -270,13 +270,13 @@ export class ZanzibarVaultSync {
  */
 export interface PermissionChangeEvent {
   /** Type of subject (user or service) */
-  subjectType: 'user' | 'service';
+  subjectType: "user" | "service";
   /** ID of the subject */
   subjectId: string;
   /** Realm affected */
   realmId: string;
   /** Type of change */
-  changeType: 'added' | 'removed' | 'updated';
+  changeType: "added" | "removed" | "updated";
   /** Role in the realm */
   role?: string;
 }
@@ -303,7 +303,7 @@ export function createMockZanzibarClient(
  */
 export function createMockVaultClient(): VaultPolicyClient & { policies: Record<string, string> } {
   const policies: Record<string, string> = {};
-  
+
   return {
     policies,
     async writePolicy(name: string, policy: string): Promise<void> {
@@ -317,4 +317,3 @@ export function createMockVaultClient(): VaultPolicyClient & { policies: Record<
     },
   };
 }
-

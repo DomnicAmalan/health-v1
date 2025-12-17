@@ -3,9 +3,8 @@
  * View all Zanzibar-style authorization relationships
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import {
+  Badge,
   Card,
   CardContent,
   CardDescription,
@@ -19,11 +18,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Badge,
 } from "@lazarus-life/ui-components";
-import { Search, Shield, Database } from "lucide-react";
-import { ProtectedPage } from "../lib/permissions";
+import { useQuery } from "@tanstack/react-query";
+import { Database, Search, Shield } from "lucide-react";
+import { useState } from "react";
 import { listAllRelationships } from "../lib/api/permissions";
+import { ProtectedPage } from "../lib/permissions";
 
 interface Relationship {
   id: string;
@@ -39,7 +39,11 @@ interface Relationship {
 export function ZanzibarRelationshipsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: relationshipsResponse, isLoading, error } = useQuery({
+  const {
+    data: relationshipsResponse,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["zanzibarRelationships"],
     queryFn: async () => {
       const response = await listAllRelationships();
@@ -73,7 +77,10 @@ export function ZanzibarRelationshipsPage() {
   };
 
   return (
-    <ProtectedPage pageName="permissions" fallback={<div className="p-6">You don't have access to this page.</div>}>
+    <ProtectedPage
+      pageName="permissions"
+      fallback={<div className="p-6">You don't have access to this page.</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div>
@@ -150,10 +157,10 @@ export function ZanzibarRelationshipsPage() {
                         const status = !rel.is_active
                           ? "Revoked"
                           : expired
-                          ? "Expired"
-                          : notYetValid
-                          ? "Not Yet Valid"
-                          : "Active";
+                            ? "Expired"
+                            : notYetValid
+                              ? "Not Yet Valid"
+                              : "Active";
 
                         return (
                           <TableRow key={rel.id}>
@@ -171,8 +178,8 @@ export function ZanzibarRelationshipsPage() {
                                   status === "Active"
                                     ? "default"
                                     : status === "Expired"
-                                    ? "secondary"
-                                    : "destructive"
+                                      ? "secondary"
+                                      : "destructive"
                                 }
                               >
                                 {status}
@@ -202,4 +209,3 @@ export function ZanzibarRelationshipsPage() {
     </ProtectedPage>
   );
 }
-

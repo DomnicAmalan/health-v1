@@ -3,10 +3,10 @@
  * Wrapper that checks permissions before rendering children
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { AccessDenied } from "./AccessDenied";
 
 interface RequirePermissionProps {

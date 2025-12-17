@@ -1,27 +1,15 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRealmStore } from '@/stores/realmStore';
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
-  appsApi,
-  type RealmApplication,
-  type CreateAppRequest,
-  type AppType,
-  type AuthMethod,
-  getAppTypeIcon,
-  getAppTypeLabel,
-  defaultAuthMethods,
-} from '@/lib/api/apps';
-import { useTranslation } from '@lazarus-life/shared/i18n';
-import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
-  Input,
-  Label,
-  Badge,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -29,29 +17,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Alert,
-  AlertDescription,
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Checkbox,
-} from '@lazarus-life/ui-components';
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
-  AppWindow, 
-  Loader2, 
-  AlertCircle, 
-  Wand2,
-  Globe 
-} from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, AppWindow, Edit, Globe, Loader2, Plus, Trash2, Wand2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import {
+  type AppType,
+  type AuthMethod,
+  appsApi,
+  type CreateAppRequest,
+  defaultAuthMethods,
+  getAppTypeIcon,
+  getAppTypeLabel,
+  type RealmApplication,
+} from "@/lib/api/apps";
+import { useRealmStore } from "@/stores/realmStore";
 
-const APP_TYPES: AppType[] = ['admin-ui', 'client-app', 'mobile', 'api'];
-const AUTH_METHODS: AuthMethod[] = ['token', 'userpass', 'approle', 'jwt'];
+const APP_TYPES: AppType[] = ["admin-ui", "client-app", "mobile", "api"];
+const AUTH_METHODS: AuthMethod[] = ["token", "userpass", "approle", "jwt"];
 
 export function ApplicationsPage() {
   const { t } = useTranslation();
@@ -63,16 +55,20 @@ export function ApplicationsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState<RealmApplication | null>(null);
   const [formData, setFormData] = useState<CreateAppRequest>({
-    app_name: '',
-    app_type: 'client-app',
-    display_name: '',
-    description: '',
-    allowed_auth_methods: ['token', 'userpass'],
+    app_name: "",
+    app_type: "client-app",
+    display_name: "",
+    description: "",
+    allowed_auth_methods: ["token", "userpass"],
   });
 
   // Fetch apps for current realm
-  const { data: apps = [], isLoading, error } = useQuery({
-    queryKey: ['realm-apps', currentRealm?.id],
+  const {
+    data: apps = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["realm-apps", currentRealm?.id],
     queryFn: () => appsApi.list(currentRealm!.id),
     enabled: !!currentRealm && !isGlobalMode,
   });
@@ -81,7 +77,7 @@ export function ApplicationsPage() {
   const createMutation = useMutation({
     mutationFn: (data: CreateAppRequest) => appsApi.create(currentRealm!.id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realm-apps', currentRealm?.id] });
+      queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsCreateOpen(false);
       resetForm();
     },
@@ -92,7 +88,7 @@ export function ApplicationsPage() {
     mutationFn: ({ appName, data }: { appName: string; data: Partial<CreateAppRequest> }) =>
       appsApi.update(currentRealm!.id, appName, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realm-apps', currentRealm?.id] });
+      queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsEditOpen(false);
       setSelectedApp(null);
       resetForm();
@@ -103,7 +99,7 @@ export function ApplicationsPage() {
   const deleteMutation = useMutation({
     mutationFn: (appName: string) => appsApi.delete(currentRealm!.id, appName),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realm-apps', currentRealm?.id] });
+      queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsDeleteOpen(false);
       setSelectedApp(null);
     },
@@ -113,17 +109,17 @@ export function ApplicationsPage() {
   const registerDefaultsMutation = useMutation({
     mutationFn: () => appsApi.registerDefaults(currentRealm!.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realm-apps', currentRealm?.id] });
+      queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
     },
   });
 
   const resetForm = () => {
     setFormData({
-      app_name: '',
-      app_type: 'client-app',
-      display_name: '',
-      description: '',
-      allowed_auth_methods: ['token', 'userpass'],
+      app_name: "",
+      app_type: "client-app",
+      display_name: "",
+      description: "",
+      allowed_auth_methods: ["token", "userpass"],
     });
   };
 
@@ -173,8 +169,8 @@ export function ApplicationsPage() {
     setFormData({
       app_name: app.app_name,
       app_type: app.app_type,
-      display_name: app.display_name || '',
-      description: app.description || '',
+      display_name: app.display_name || "",
+      description: app.description || "",
       allowed_auth_methods: app.allowed_auth_methods,
     });
     setIsEditOpen(true);
@@ -192,14 +188,12 @@ export function ApplicationsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Globe className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t('applications.noRealmSelected.title')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t("applications.noRealmSelected.title")}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              {t('applications.noRealmSelected.description')}
+              {t("applications.noRealmSelected.description")}
             </p>
             <Link to="/realms">
-              <Button>
-                {t('applications.noRealmSelected.goToRealms')}
-              </Button>
+              <Button>{t("applications.noRealmSelected.goToRealms")}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -211,9 +205,9 @@ export function ApplicationsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('applications.title')}</h1>
+          <h1 className="text-2xl font-bold">{t("applications.title")}</h1>
           <p className="text-muted-foreground">
-            {t('applications.subtitle', { realmName: currentRealm.name })}
+            {t("applications.subtitle", { realmName: currentRealm.name })}
           </p>
         </div>
         <div className="flex gap-2">
@@ -227,41 +221,50 @@ export function ApplicationsPage() {
             ) : (
               <Wand2 className="h-4 w-4 mr-2" />
             )}
-            {t('applications.create.registerDefaults')}
+            {t("applications.create.registerDefaults")}
           </Button>
 
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
+              <Button
+                onClick={() => {
+                  resetForm();
+                  setIsCreateOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
-                {t('applications.create.registerApp')}
+                {t("applications.create.registerApp")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{t('applications.create.dialogTitle')}</DialogTitle>
+                <DialogTitle>{t("applications.create.dialogTitle")}</DialogTitle>
                 <DialogDescription>
-                  {t('applications.create.dialogDescription', { realmName: currentRealm.name })}
+                  {t("applications.create.dialogDescription", { realmName: currentRealm.name })}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="app_name">{t('applications.create.fields.appName')}</Label>
-                <Input
-                  id="app_name"
-                  placeholder={t('applications.create.fields.appNamePlaceholder')}
-                  value={formData.app_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, app_name: e.target.value })}
-                />
+                  <Label htmlFor="app_name">{t("applications.create.fields.appName")}</Label>
+                  <Input
+                    id="app_name"
+                    placeholder={t("applications.create.fields.appNamePlaceholder")}
+                    value={formData.app_name}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData({ ...formData, app_name: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="app_type">{t('applications.create.fields.appType')}</Label>
+                  <Label htmlFor="app_type">{t("applications.create.fields.appType")}</Label>
                   <Select
                     value={formData.app_type}
                     onValueChange={(value: AppType) => handleAppTypeChange(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={t('applications.create.fields.appTypePlaceholder')} />
+                      <SelectValue
+                        placeholder={t("applications.create.fields.appTypePlaceholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {APP_TYPES.map((type) => (
@@ -273,25 +276,31 @@ export function ApplicationsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="display_name">{t('applications.create.fields.displayName')}</Label>
-                <Input
-                  id="display_name"
-                  placeholder={t('applications.create.fields.displayNamePlaceholder')}
-                  value={formData.display_name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, display_name: e.target.value })}
-                />
+                  <Label htmlFor="display_name">
+                    {t("applications.create.fields.displayName")}
+                  </Label>
+                  <Input
+                    id="display_name"
+                    placeholder={t("applications.create.fields.displayNamePlaceholder")}
+                    value={formData.display_name}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData({ ...formData, display_name: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">{t('applications.create.fields.description')}</Label>
-                <Input
-                  id="description"
-                  placeholder={t('applications.create.fields.descriptionPlaceholder')}
-                  value={formData.description}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
-                />
+                  <Label htmlFor="description">{t("applications.create.fields.description")}</Label>
+                  <Input
+                    id="description"
+                    placeholder={t("applications.create.fields.descriptionPlaceholder")}
+                    value={formData.description}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('applications.create.fields.allowedAuthMethods')}</Label>
+                  <Label>{t("applications.create.fields.allowedAuthMethods")}</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {AUTH_METHODS.map((method) => (
                       <div key={method} className="flex items-center space-x-2">
@@ -310,7 +319,7 @@ export function ApplicationsPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                  {t('applications.create.actions.cancel')}
+                  {t("applications.create.actions.cancel")}
                 </Button>
                 <Button
                   onClick={handleCreate}
@@ -319,10 +328,10 @@ export function ApplicationsPage() {
                   {createMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t('applications.create.registering')}
+                      {t("applications.create.registering")}
                     </>
                   ) : (
-                    t('applications.create.actions.register')
+                    t("applications.create.actions.register")
                   )}
                 </Button>
               </DialogFooter>
@@ -336,7 +345,7 @@ export function ApplicationsPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error instanceof Error ? error.message : t('applications.errors.failedToLoad')}
+            {error instanceof Error ? error.message : t("applications.errors.failedToLoad")}
           </AlertDescription>
         </Alert>
       )}
@@ -353,18 +362,18 @@ export function ApplicationsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AppWindow className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t('applications.empty.title')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t("applications.empty.title")}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              {t('applications.empty.description')}
+              {t("applications.empty.description")}
             </p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => registerDefaultsMutation.mutate()}>
                 <Wand2 className="h-4 w-4 mr-2" />
-                {t('applications.create.registerDefaults')}
+                {t("applications.create.registerDefaults")}
               </Button>
               <Button onClick={() => setIsCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('applications.create.registerApp')}
+                {t("applications.create.registerApp")}
               </Button>
             </div>
           </CardContent>
@@ -386,25 +395,27 @@ export function ApplicationsPage() {
                     </div>
                   </div>
                   {app.is_active ? (
-                    <Badge variant="secondary">{t('applications.list.active')}</Badge>
+                    <Badge variant="secondary">{t("applications.list.active")}</Badge>
                   ) : (
-                    <Badge variant="outline">{t('applications.list.inactive')}</Badge>
+                    <Badge variant="outline">{t("applications.list.inactive")}</Badge>
                   )}
                 </div>
                 {app.description && (
-                  <CardDescription className="mt-2">
-                    {app.description}
-                  </CardDescription>
+                  <CardDescription className="mt-2">{app.description}</CardDescription>
                 )}
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">{t('applications.list.type')}</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {t("applications.list.type")}
+                    </p>
                     <Badge variant="outline">{getAppTypeLabel(app.app_type)}</Badge>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">{t('applications.list.authMethods')}</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {t("applications.list.authMethods")}
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {app.allowed_auth_methods.map((method) => (
                         <Badge key={method} variant="secondary" className="text-xs">
@@ -415,13 +426,9 @@ export function ApplicationsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(app)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => openEditDialog(app)}>
                     <Edit className="h-4 w-4 mr-1" />
-                    {t('applications.list.edit')}
+                    {t("applications.list.edit")}
                   </Button>
                   <Button
                     variant="outline"
@@ -430,7 +437,7 @@ export function ApplicationsPage() {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    {t('applications.list.delete')}
+                    {t("applications.list.delete")}
                   </Button>
                 </div>
               </CardContent>
@@ -443,30 +450,38 @@ export function ApplicationsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('applications.edit.title')}</DialogTitle>
+            <DialogTitle>{t("applications.edit.title")}</DialogTitle>
             <DialogDescription>
-              {t('applications.edit.dialogDescription', { appName: selectedApp?.app_name || '' })}
+              {t("applications.edit.dialogDescription", { appName: selectedApp?.app_name || "" })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-display_name">{t('applications.create.fields.displayName')}</Label>
+              <Label htmlFor="edit-display_name">
+                {t("applications.create.fields.displayName")}
+              </Label>
               <Input
                 id="edit-display_name"
                 value={formData.display_name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, display_name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, display_name: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-description">{t('applications.create.fields.description')}</Label>
+              <Label htmlFor="edit-description">
+                {t("applications.create.fields.description")}
+              </Label>
               <Input
                 id="edit-description"
                 value={formData.description}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('applications.create.fields.allowedAuthMethods')}</Label>
+              <Label>{t("applications.create.fields.allowedAuthMethods")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {AUTH_METHODS.map((method) => (
                   <div key={method} className="flex items-center space-x-2">
@@ -485,16 +500,16 @@ export function ApplicationsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              {t('applications.create.actions.cancel')}
+              {t("applications.create.actions.cancel")}
             </Button>
             <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('applications.edit.saving')}
+                  {t("applications.edit.saving")}
                 </>
               ) : (
-                t('applications.edit.saveChanges')
+                t("applications.edit.saveChanges")
               )}
             </Button>
           </DialogFooter>
@@ -505,20 +520,18 @@ export function ApplicationsPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('applications.delete.title')}</DialogTitle>
+            <DialogTitle>{t("applications.delete.title")}</DialogTitle>
             <DialogDescription>
-              {t('applications.delete.dialogDescription', { appName: selectedApp?.app_name || '' })}
+              {t("applications.delete.dialogDescription", { appName: selectedApp?.app_name || "" })}
             </DialogDescription>
           </DialogHeader>
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {t('applications.delete.warning')}
-            </AlertDescription>
+            <AlertDescription>{t("applications.delete.warning")}</AlertDescription>
           </Alert>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              {t('applications.create.actions.cancel')}
+              {t("applications.create.actions.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -528,10 +541,10 @@ export function ApplicationsPage() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('applications.delete.deleting')}
+                  {t("applications.delete.deleting")}
                 </>
               ) : (
-                t('applications.delete.deleteApp')
+                t("applications.delete.deleteApp")
               )}
             </Button>
           </DialogFooter>
@@ -540,4 +553,3 @@ export function ApplicationsPage() {
     </div>
   );
 }
-

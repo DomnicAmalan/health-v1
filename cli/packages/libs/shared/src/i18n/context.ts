@@ -4,8 +4,8 @@
  */
 
 import { createContext, useContext } from "react";
-import type { Locale, TranslationKey } from "./types";
 import { SUPPORTED_LOCALES } from "./locales";
+import type { Locale, TranslationKey } from "./types";
 
 export interface I18nContextValue {
   locale: string;

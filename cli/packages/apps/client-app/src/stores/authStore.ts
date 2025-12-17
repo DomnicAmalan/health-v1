@@ -3,6 +3,10 @@
  * Authentication state management with Zustand and Immer
  */
 
+import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
+import type { User } from "@lazarus-life/shared/types/user";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 import {
   login as apiLogin,
   logout as apiLogout,
@@ -10,10 +14,6 @@ import {
   refreshAccessToken,
 } from "@/lib/api/auth";
 import { apiClient } from "@/lib/api/client";
-import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
-import type { User } from "@lazarus-life/shared/types/user";
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
 
 const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token";
 const TOKEN_STORAGE_KEY_REFRESH = "auth_refresh_token";

@@ -2,8 +2,8 @@
  * Auth Store Tests
  */
 
-import * as authAPI from "@/lib/api/auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as authAPI from "@/lib/api/auth";
 import { useAuthStore } from "./authStore";
 
 // Mock the auth API

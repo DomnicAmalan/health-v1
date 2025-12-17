@@ -3,9 +3,9 @@
  * Utilities for protecting routes based on permissions
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { logAccessDenied as logAccessDeniedAPI } from "@/lib/api/audit";
 import { useAuthStore } from "@/stores/authStore";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
 
 export interface RouteGuardConfig {
   requiredPermission: Permission;

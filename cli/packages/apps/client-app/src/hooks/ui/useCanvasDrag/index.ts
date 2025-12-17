@@ -1,10 +1,10 @@
+import { useEffect, useState } from "react";
 import type {
   CanvasField,
   CanvasFormConfig,
   CanvasGroup,
   CanvasSection,
 } from "@/components/forms/canvas/types";
-import { useEffect, useState } from "react";
 import { createDragHandlers } from "./handlers";
 import { handleMouseMove } from "./move";
 

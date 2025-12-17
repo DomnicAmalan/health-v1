@@ -1,82 +1,95 @@
-import { useNavigate } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/stores/authStore';
-import { Button, Input, Card, CardContent, CardDescription, CardHeader, CardTitle, Stack, Label } from '@lazarus-life/ui-components';
-import { AlertCircle, Loader2 } from 'lucide-react';
-import { useTranslation } from '@lazarus-life/shared/i18n';
+import { useTranslation } from "@lazarus-life/shared/i18n";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Stack,
+} from "@lazarus-life/ui-components";
+import { useNavigate } from "@tanstack/react-router";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const [loginMethod, setLoginMethod] = useState<'token' | 'userpass' | 'approle'>('token');
-  const [token, setToken] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [roleId, setRoleId] = useState('');
-  const [secretId, setSecretId] = useState('');
-  const [error, setError] = useState('');
+  const [loginMethod, setLoginMethod] = useState<"token" | "userpass" | "approle">("token");
+  const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const [secretId, setSecretId] = useState("");
+  const [error, setError] = useState("");
   const { login, loginWithUserpass, loginWithAppRole, isLoading, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/';
+      const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
       // Use replace to avoid adding to history
-      navigate({ to: redirectTo as '/', replace: true });
+      navigate({ to: redirectTo as "/", replace: true });
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
-      if (loginMethod === 'token') {
+      if (loginMethod === "token") {
         if (!token.trim()) {
-          setError(t('login.errors.tokenRequired'));
+          setError(t("login.errors.tokenRequired"));
           return;
         }
         await login(token.trim());
-      } else if (loginMethod === 'userpass') {
+      } else if (loginMethod === "userpass") {
         if (!username.trim() || !password.trim()) {
-          setError(t('login.errors.usernamePasswordRequired'));
+          setError(t("login.errors.usernamePasswordRequired"));
           return;
         }
         await loginWithUserpass(username.trim(), password);
-      } else if (loginMethod === 'approle') {
+      } else if (loginMethod === "approle") {
         if (!roleId.trim() || !secretId.trim()) {
-          setError(t('login.errors.roleIdSecretIdRequired'));
+          setError(t("login.errors.roleIdSecretIdRequired"));
           return;
         }
         await loginWithAppRole(roleId.trim(), secretId.trim());
       }
-      
+
       // Navigation: Zustand updates are synchronous, but React needs a tick to re-render
       // Check both the hook value and getState() to be safe
-      const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/';
-      
+      const redirectTo = new URLSearchParams(window.location.search).get("redirect") || "/";
+
       // Try immediate navigation (Zustand state is updated synchronously)
       const authState = useAuthStore.getState();
       if (authState.isAuthenticated) {
-        navigate({ to: redirectTo as '/', replace: true });
+        navigate({ to: redirectTo as "/", replace: true });
         return; // Exit early if navigation succeeds
       }
-      
+
       // Fallback: Use requestAnimationFrame to ensure React has processed the state update
       requestAnimationFrame(() => {
         const currentState = useAuthStore.getState();
         if (currentState.isAuthenticated) {
-          navigate({ to: redirectTo as '/', replace: true });
+          navigate({ to: redirectTo as "/", replace: true });
         }
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : t('login.errors.authenticationFailed');
-      
+      const errorMessage =
+        err instanceof Error ? err.message : t("login.errors.authenticationFailed");
+
       // Check if the error is about the vault being sealed
-      if (errorMessage.toLowerCase().includes('barrier is sealed') || 
-          errorMessage.toLowerCase().includes('vault is sealed') ||
-          errorMessage.toLowerCase().includes('vault error: barrier is sealed')) {
-        setError(t('login.errors.vaultSealed'));
+      if (
+        errorMessage.toLowerCase().includes("barrier is sealed") ||
+        errorMessage.toLowerCase().includes("vault is sealed") ||
+        errorMessage.toLowerCase().includes("vault error: barrier is sealed")
+      ) {
+        setError(t("login.errors.vaultSealed"));
       } else {
         setError(errorMessage);
       }
@@ -88,10 +101,10 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src="/logo-main.png" alt={t('login.title')} className="h-16 w-16" />
+            <img src="/logo-main.png" alt={t("login.title")} className="h-16 w-16" />
           </div>
-          <CardTitle className="text-2xl font-bold">{t('login.title')}</CardTitle>
-          <CardDescription>{t('login.subtitle')}</CardDescription>
+          <CardTitle className="text-2xl font-bold">{t("login.title")}</CardTitle>
+          <CardDescription>{t("login.subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -100,45 +113,45 @@ export function LoginPage() {
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    loginMethod === 'token'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                    loginMethod === "token"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
-                  onClick={() => setLoginMethod('token')}
+                  onClick={() => setLoginMethod("token")}
                 >
-                  {t('login.methods.token')}
+                  {t("login.methods.token")}
                 </button>
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    loginMethod === 'userpass'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                    loginMethod === "userpass"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
-                  onClick={() => setLoginMethod('userpass')}
+                  onClick={() => setLoginMethod("userpass")}
                 >
-                  {t('login.methods.userpass')}
+                  {t("login.methods.userpass")}
                 </button>
                 <button
                   type="button"
                   className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    loginMethod === 'approle'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                    loginMethod === "approle"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
-                  onClick={() => setLoginMethod('approle')}
+                  onClick={() => setLoginMethod("approle")}
                 >
-                  {t('login.methods.approle')}
+                  {t("login.methods.approle")}
                 </button>
               </div>
 
-              {loginMethod === 'token' && (
+              {loginMethod === "token" && (
                 <div className="space-y-2">
-                  <Label htmlFor="token">{t('login.fields.token')}</Label>
+                  <Label htmlFor="token">{t("login.fields.token")}</Label>
                   <Input
                     id="token"
                     type="password"
-                    placeholder={t('login.placeholders.token')}
+                    placeholder={t("login.placeholders.token")}
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     disabled={isLoading}
@@ -148,14 +161,14 @@ export function LoginPage() {
                 </div>
               )}
 
-              {loginMethod === 'userpass' && (
+              {loginMethod === "userpass" && (
                 <Stack spacing="md">
                   <div className="space-y-2">
-                    <Label htmlFor="username">{t('login.fields.username')}</Label>
+                    <Label htmlFor="username">{t("login.fields.username")}</Label>
                     <Input
                       id="username"
                       type="text"
-                      placeholder={t('login.placeholders.username')}
+                      placeholder={t("login.placeholders.username")}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       disabled={isLoading}
@@ -164,11 +177,11 @@ export function LoginPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">{t('login.fields.password')}</Label>
+                    <Label htmlFor="password">{t("login.fields.password")}</Label>
                     <Input
                       id="password"
                       type="password"
-                      placeholder={t('login.placeholders.password')}
+                      placeholder={t("login.placeholders.password")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
@@ -178,14 +191,14 @@ export function LoginPage() {
                 </Stack>
               )}
 
-              {loginMethod === 'approle' && (
+              {loginMethod === "approle" && (
                 <Stack spacing="md">
                   <div className="space-y-2">
-                    <Label htmlFor="roleId">{t('login.fields.roleId')}</Label>
+                    <Label htmlFor="roleId">{t("login.fields.roleId")}</Label>
                     <Input
                       id="roleId"
                       type="text"
-                      placeholder={t('login.placeholders.roleId')}
+                      placeholder={t("login.placeholders.roleId")}
                       value={roleId}
                       onChange={(e) => setRoleId(e.target.value)}
                       disabled={isLoading}
@@ -194,11 +207,11 @@ export function LoginPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="secretId">{t('login.fields.secretId')}</Label>
+                    <Label htmlFor="secretId">{t("login.fields.secretId")}</Label>
                     <Input
                       id="secretId"
                       type="password"
-                      placeholder={t('login.placeholders.secretId')}
+                      placeholder={t("login.placeholders.secretId")}
                       value={secretId}
                       onChange={(e) => setSecretId(e.target.value)}
                       disabled={isLoading}
@@ -222,10 +235,10 @@ export function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('login.actions.signingIn')}
+                    {t("login.actions.signingIn")}
                   </>
                 ) : (
-                  t('login.actions.signIn')
+                  t("login.actions.signIn")
                 )}
               </Button>
             </Stack>
@@ -235,4 +248,3 @@ export function LoginPage() {
     </div>
   );
 }
-

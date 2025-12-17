@@ -1,17 +1,14 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { realmsApi, type Realm, type CreateRealmRequest } from '@/lib/api/realms';
-import { useRealmStore } from '@/stores/realmStore';
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
-  Input,
-  Label,
-  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,30 +16,47 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Alert,
-  AlertDescription,
-} from '@lazarus-life/ui-components';
-import { Plus, Trash2, Edit, Globe, Building2, Calendar, Loader2, AlertCircle, Check } from 'lucide-react';
-import { useTranslation } from '@lazarus-life/shared/i18n';
+  Input,
+  Label,
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  Building2,
+  Calendar,
+  Check,
+  Edit,
+  Globe,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { type CreateRealmRequest, type Realm, realmsApi } from "@/lib/api/realms";
+import { useRealmStore } from "@/stores/realmStore";
 
 export function RealmsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { setCurrentRealm, currentRealm, refreshRealms } = useRealmStore();
-  
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRealm, setSelectedRealm] = useState<Realm | null>(null);
   const [formData, setFormData] = useState<CreateRealmRequest>({
-    name: '',
-    description: '',
-    organization_id: '',
+    name: "",
+    description: "",
+    organization_id: "",
   });
 
   // Fetch realms
-  const { data: realmsData, isLoading, error } = useQuery({
-    queryKey: ['realms'],
+  const {
+    data: realmsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["realms"],
     queryFn: () => realmsApi.list(),
   });
 
@@ -52,7 +66,7 @@ export function RealmsPage() {
   const createMutation = useMutation({
     mutationFn: (data: CreateRealmRequest) => realmsApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realms'] });
+      queryClient.invalidateQueries({ queryKey: ["realms"] });
       refreshRealms();
       setIsCreateOpen(false);
       resetForm();
@@ -64,7 +78,7 @@ export function RealmsPage() {
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateRealmRequest> }) =>
       realmsApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realms'] });
+      queryClient.invalidateQueries({ queryKey: ["realms"] });
       refreshRealms();
       setIsEditOpen(false);
       setSelectedRealm(null);
@@ -76,7 +90,7 @@ export function RealmsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => realmsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['realms'] });
+      queryClient.invalidateQueries({ queryKey: ["realms"] });
       refreshRealms();
       setIsDeleteOpen(false);
       setSelectedRealm(null);
@@ -88,7 +102,7 @@ export function RealmsPage() {
   });
 
   const resetForm = () => {
-    setFormData({ name: '', description: '', organization_id: '' });
+    setFormData({ name: "", description: "", organization_id: "" });
   };
 
   const handleCreate = () => {
@@ -116,8 +130,8 @@ export function RealmsPage() {
     setSelectedRealm(realm);
     setFormData({
       name: realm.name,
-      description: realm.description || '',
-      organization_id: realm.organization_id || '',
+      description: realm.description || "",
+      organization_id: realm.organization_id || "",
     });
     setIsEditOpen(true);
   };
@@ -135,51 +149,52 @@ export function RealmsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('realms.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('realms.subtitle')}
-          </p>
+          <h1 className="text-2xl font-bold">{t("realms.title")}</h1>
+          <p className="text-muted-foreground">{t("realms.subtitle")}</p>
         </div>
-        
+
         {/* Create Realm Dialog */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
+            <Button
+              onClick={() => {
+                resetForm();
+                setIsCreateOpen(true);
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
-              {t('realms.create.button')}
+              {t("realms.create.button")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('realms.create.dialogTitle')}</DialogTitle>
-              <DialogDescription>
-                {t('realms.create.dialogDescription')}
-              </DialogDescription>
+              <DialogTitle>{t("realms.create.dialogTitle")}</DialogTitle>
+              <DialogDescription>{t("realms.create.dialogDescription")}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">{t('realms.create.fields.name')}</Label>
+                <Label htmlFor="name">{t("realms.create.fields.name")}</Label>
                 <Input
                   id="name"
-                  placeholder={t('realms.create.fields.namePlaceholder')}
+                  placeholder={t("realms.create.fields.namePlaceholder")}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">{t('realms.create.fields.description')}</Label>
+                <Label htmlFor="description">{t("realms.create.fields.description")}</Label>
                 <Input
                   id="description"
-                  placeholder={t('realms.create.fields.descriptionPlaceholder')}
+                  placeholder={t("realms.create.fields.descriptionPlaceholder")}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="org_id">{t('realms.create.fields.organizationId')}</Label>
+                <Label htmlFor="org_id">{t("realms.create.fields.organizationId")}</Label>
                 <Input
                   id="org_id"
-                  placeholder={t('realms.create.fields.organizationIdPlaceholder')}
+                  placeholder={t("realms.create.fields.organizationIdPlaceholder")}
                   value={formData.organization_id}
                   onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                 />
@@ -187,19 +202,16 @@ export function RealmsPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                {t('realms.create.actions.cancel')}
+                {t("realms.create.actions.cancel")}
               </Button>
-              <Button 
-                onClick={handleCreate} 
-                disabled={!formData.name || createMutation.isPending}
-              >
+              <Button onClick={handleCreate} disabled={!formData.name || createMutation.isPending}>
                 {createMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {t('realms.create.creating')}
+                    {t("realms.create.creating")}
                   </>
                 ) : (
-                  t('realms.create.actions.create')
+                  t("realms.create.actions.create")
                 )}
               </Button>
             </DialogFooter>
@@ -212,7 +224,7 @@ export function RealmsPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error instanceof Error ? error.message : t('realms.errors.failedToLoad')}
+            {error instanceof Error ? error.message : t("realms.errors.failedToLoad")}
           </AlertDescription>
         </Alert>
       )}
@@ -229,13 +241,13 @@ export function RealmsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Globe className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t('realms.empty.title')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t("realms.empty.title")}</h3>
             <p className="text-muted-foreground text-center mb-4">
-              {t('realms.empty.description')}
+              {t("realms.empty.description")}
             </p>
             <Button onClick={() => setIsCreateOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              {t('realms.create.button')}
+              {t("realms.create.button")}
             </Button>
           </CardContent>
         </Card>
@@ -245,10 +257,10 @@ export function RealmsPage() {
       {!isLoading && realms.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {realms.map((realm) => (
-            <Card 
-              key={realm.id} 
+            <Card
+              key={realm.id}
               className={`cursor-pointer transition-all hover:shadow-md ${
-                currentRealm?.id === realm.id ? 'ring-2 ring-primary' : ''
+                currentRealm?.id === realm.id ? "ring-2 ring-primary" : ""
               }`}
               onClick={() => selectRealm(realm)}
             >
@@ -262,20 +274,18 @@ export function RealmsPage() {
                     {currentRealm?.id === realm.id && (
                       <Badge variant="default" className="mr-2">
                         <Check className="h-3 w-3 mr-1" />
-                        {t('realms.list.selected')}
+                        {t("realms.list.selected")}
                       </Badge>
                     )}
                     {realm.is_active !== false ? (
-                      <Badge variant="secondary">{t('realms.list.active')}</Badge>
+                      <Badge variant="secondary">{t("realms.list.active")}</Badge>
                     ) : (
-                      <Badge variant="outline">{t('realms.list.inactive')}</Badge>
+                      <Badge variant="outline">{t("realms.list.inactive")}</Badge>
                     )}
                   </div>
                 </div>
                 {realm.description && (
-                  <CardDescription className="mt-2">
-                    {realm.description}
-                  </CardDescription>
+                  <CardDescription className="mt-2">{realm.description}</CardDescription>
                 )}
               </CardHeader>
               <CardContent className="pt-0">
@@ -289,27 +299,27 @@ export function RealmsPage() {
                   {realm.created_at && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{t('realms.list.created', { date: new Date(realm.created_at).toLocaleDateString() })}</span>
+                      <span>
+                        {t("realms.list.created", {
+                          date: new Date(realm.created_at).toLocaleDateString(),
+                        })}
+                      </span>
                     </div>
                   )}
                 </div>
                 <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => openEditDialog(realm)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => openEditDialog(realm)}>
                     <Edit className="h-4 w-4 mr-1" />
-                    {t('realms.list.edit')}
+                    {t("realms.list.edit")}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => openDeleteDialog(realm)}
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
-                    {t('realms.list.delete')}
+                    {t("realms.list.delete")}
                   </Button>
                 </div>
               </CardContent>
@@ -322,14 +332,14 @@ export function RealmsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('realms.edit.title')}</DialogTitle>
+            <DialogTitle>{t("realms.edit.title")}</DialogTitle>
             <DialogDescription>
-              {t('realms.edit.dialogDescription', { name: selectedRealm?.name || '' })}
+              {t("realms.edit.dialogDescription", { name: selectedRealm?.name || "" })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">{t('realms.create.fields.name')}</Label>
+              <Label htmlFor="edit-name">{t("realms.create.fields.name")}</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
@@ -337,7 +347,7 @@ export function RealmsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-description">{t('realms.create.fields.description')}</Label>
+              <Label htmlFor="edit-description">{t("realms.create.fields.description")}</Label>
               <Input
                 id="edit-description"
                 value={formData.description}
@@ -347,19 +357,16 @@ export function RealmsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              {t('realms.create.actions.cancel')}
+              {t("realms.create.actions.cancel")}
             </Button>
-            <Button 
-              onClick={handleUpdate}
-              disabled={!formData.name || updateMutation.isPending}
-            >
+            <Button onClick={handleUpdate} disabled={!formData.name || updateMutation.isPending}>
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('realms.edit.saving')}
+                  {t("realms.edit.saving")}
                 </>
               ) : (
-                t('realms.edit.saveChanges')
+                t("realms.edit.saveChanges")
               )}
             </Button>
           </DialogFooter>
@@ -370,29 +377,29 @@ export function RealmsPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('realms.delete.title')}</DialogTitle>
+            <DialogTitle>{t("realms.delete.title")}</DialogTitle>
             <DialogDescription>
-              {t('realms.delete.dialogDescription', { name: selectedRealm?.name || '' })}
+              {t("realms.delete.dialogDescription", { name: selectedRealm?.name || "" })}
             </DialogDescription>
           </DialogHeader>
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {t('realms.delete.warning')}
+              {t("realms.delete.warning")}
               <ul className="list-disc list-inside mt-2">
-                <li>{t('realms.delete.associatedItems.applications')}</li>
-                <li>{t('realms.delete.associatedItems.policies')}</li>
-                <li>{t('realms.delete.associatedItems.users')}</li>
-                <li>{t('realms.delete.associatedItems.secrets')}</li>
-                <li>{t('realms.delete.associatedItems.approles')}</li>
+                <li>{t("realms.delete.associatedItems.applications")}</li>
+                <li>{t("realms.delete.associatedItems.policies")}</li>
+                <li>{t("realms.delete.associatedItems.users")}</li>
+                <li>{t("realms.delete.associatedItems.secrets")}</li>
+                <li>{t("realms.delete.associatedItems.approles")}</li>
               </ul>
             </AlertDescription>
           </Alert>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              {t('realms.create.actions.cancel')}
+              {t("realms.create.actions.cancel")}
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
@@ -400,10 +407,10 @@ export function RealmsPage() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t('realms.delete.deleting')}
+                  {t("realms.delete.deleting")}
                 </>
               ) : (
-                t('realms.delete.deleteRealm')
+                t("realms.delete.deleteRealm")
               )}
             </Button>
           </DialogFooter>

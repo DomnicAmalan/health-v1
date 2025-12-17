@@ -9,7 +9,7 @@ import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 import { getActionExecutor } from "./actionExecutor";
 import { getTextToSpeechEngine, getVoiceCommandEngine } from "./voiceCommandEngine";
-import { type BuiltWorkflow, type WorkflowContext, getWorkflowBuilder } from "./workflowBuilder";
+import { type BuiltWorkflow, getWorkflowBuilder, type WorkflowContext } from "./workflowBuilder";
 import { getWorkflowExecutor } from "./workflowExecutor";
 import { getAvailableActionsDescription, getWorkflowPrompt } from "./workflowI18n";
 

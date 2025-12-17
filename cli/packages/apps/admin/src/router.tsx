@@ -1,19 +1,19 @@
-import { RouterProvider, createRoute, createRouter } from "@tanstack/react-router";
+import { createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { Route as rootRoute } from "./routes/__root";
+import { AppAccessPage } from "./routes/app-access";
 import { DashboardPage } from "./routes/dashboard";
+import { DekManagementPage } from "./routes/encryption/deks";
+import { EncryptionIndexPage } from "./routes/encryption/index";
+import { MasterKeyManagementPage } from "./routes/encryption/master-key";
+import { GroupsPage } from "./routes/groups";
 import { LoginPage } from "./routes/login";
 import { OrganizationsPage } from "./routes/organizations";
 import { PermissionsPage } from "./routes/permissions";
-import { ServicesPage } from "./routes/services";
-import { UsersPage } from "./routes/users";
 import { RolesPage } from "./routes/roles";
-import { GroupsPage } from "./routes/groups";
+import { ServicesPage } from "./routes/services";
 import { UiEntitiesPage } from "./routes/ui-entities";
-import { DekManagementPage } from "./routes/encryption/deks";
-import { MasterKeyManagementPage } from "./routes/encryption/master-key";
-import { EncryptionIndexPage } from "./routes/encryption/index";
+import { UsersPage } from "./routes/users";
 import { ZanzibarRelationshipsPage } from "./routes/zanzibar-relationships";
-import { AppAccessPage } from "./routes/app-access";
 
 // Root route (imported from __root.tsx which includes beforeLoad hook)
 

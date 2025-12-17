@@ -95,33 +95,24 @@ export async function checkPermission(
 export async function checkPermissionsBatch(
   checks: Array<[string, string, string]>
 ): Promise<BatchCheckPermissionResponse> {
-  return apiRequest<BatchCheckPermissionResponse>(
-    API_ROUTES.ADMIN.PERMISSIONS.CHECK_BATCH,
-    {
-      method: "POST",
-      body: JSON.stringify({ checks }),
-    }
-  );
+  return apiRequest<BatchCheckPermissionResponse>(API_ROUTES.ADMIN.PERMISSIONS.CHECK_BATCH, {
+    method: "POST",
+    body: JSON.stringify({ checks }),
+  });
 }
 
 /**
  * Get all permissions for a user
  */
-export async function getUserPermissions(
-  userId: string
-): Promise<UserPermissionsResponse> {
-  return apiRequest<UserPermissionsResponse>(
-    API_ROUTES.ADMIN.PERMISSIONS.USER(userId)
-  );
+export async function getUserPermissions(userId: string): Promise<UserPermissionsResponse> {
+  return apiRequest<UserPermissionsResponse>(API_ROUTES.ADMIN.PERMISSIONS.USER(userId));
 }
 
 /**
  * Get user's accessible pages
  */
 export async function getUserPages(userId: string): Promise<UserPagesResponse> {
-  return apiRequest<UserPagesResponse>(
-    API_ROUTES.ADMIN.PERMISSIONS.USER_PAGES(userId)
-  );
+  return apiRequest<UserPagesResponse>(API_ROUTES.ADMIN.PERMISSIONS.USER_PAGES(userId));
 }
 
 /**
@@ -139,13 +130,8 @@ export async function getUserButtons(
 /**
  * Get user's accessible fields for a page
  */
-export async function getUserFields(
-  userId: string,
-  pageName: string
-): Promise<UserFieldsResponse> {
-  return apiRequest<UserFieldsResponse>(
-    API_ROUTES.ADMIN.PERMISSIONS.USER_FIELDS(userId, pageName)
-  );
+export async function getUserFields(userId: string, pageName: string): Promise<UserFieldsResponse> {
+  return apiRequest<UserFieldsResponse>(API_ROUTES.ADMIN.PERMISSIONS.USER_FIELDS(userId, pageName));
 }
 
 /**
@@ -163,9 +149,7 @@ export async function assignPermission(
 /**
  * Batch assign permissions
  */
-export async function assignPermissionsBatch(
-  request: BatchAssignPermissionRequest
-): Promise<
+export async function assignPermissionsBatch(request: BatchAssignPermissionRequest): Promise<
   ApiResponse<{
     success: boolean;
     message: string;
@@ -210,4 +194,3 @@ export async function listAllRelationships(): Promise<
 > {
   return apiRequest(API_ROUTES.ADMIN.RELATIONSHIPS.LIST);
 }
-

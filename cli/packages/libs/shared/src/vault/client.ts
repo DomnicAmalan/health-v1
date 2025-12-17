@@ -11,7 +11,7 @@ import type {
   VaultPolicy,
   VaultSecret,
   VaultTokenInfo,
-} from './types';
+} from "./types";
 
 export interface VaultClientConfig {
   baseUrl: string;
@@ -24,7 +24,7 @@ export class VaultClient {
   private token: string | null = null;
 
   constructor(config: VaultClientConfig) {
-    this.baseUrl = config.baseUrl.replace(/\/$/, '');
+    this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.namespace = config.namespace;
   }
 
@@ -44,27 +44,23 @@ export class VaultClient {
 
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (this.token) {
-      headers['X-Vault-Token'] = this.token;
+      headers["X-Vault-Token"] = this.token;
     }
 
     if (this.namespace) {
-      headers['X-Vault-Namespace'] = this.namespace;
+      headers["X-Vault-Namespace"] = this.namespace;
     }
 
     return headers;
   }
 
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    
+
     const response = await fetch(url, {
       method,
       headers: this.getHeaders(),
@@ -72,7 +68,7 @@ export class VaultClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ errors: ['Unknown error'] }));
+      const error = await response.json().catch(() => ({ errors: ["Unknown error"] }));
       throw new VaultApiError(
         error.errors?.[0] || `HTTP ${response.status}`,
         response.status,
@@ -90,19 +86,19 @@ export class VaultClient {
   // ============================================
 
   async health(): Promise<VaultHealthResponse> {
-    return this.request<VaultHealthResponse>('GET', '/v1/sys/health');
+    return this.request<VaultHealthResponse>("GET", "/v1/sys/health");
   }
 
   async sealStatus(): Promise<{ sealed: boolean; t: number; n: number; progress: number }> {
-    return this.request('GET', '/v1/sys/seal-status');
+    return this.request("GET", "/v1/sys/seal-status");
   }
 
   async unseal(key: string): Promise<{ sealed: boolean; progress: number }> {
-    return this.request('POST', '/v1/sys/unseal', { key });
+    return this.request("POST", "/v1/sys/unseal", { key });
   }
 
   async seal(): Promise<void> {
-    return this.request('POST', '/v1/sys/seal');
+    return this.request("POST", "/v1/sys/seal");
   }
 
   // ============================================
@@ -111,18 +107,18 @@ export class VaultClient {
 
   async loginUserpass(username: string, password: string): Promise<VaultSecret<VaultAuth>> {
     const response = await this.request<{ auth: VaultAuth }>(
-      'POST',
+      "POST",
       `/v1/auth/userpass/login/${username}`,
       { password }
     );
-    
+
     // Auto-set token after login
     if (response.auth?.clientToken) {
       this.token = response.auth.clientToken;
     }
-    
+
     return {
-      requestId: '',
+      requestId: "",
       renewable: response.auth.renewable,
       leaseDuration: response.auth.leaseDuration,
       data: {} as VaultAuth,
@@ -137,23 +133,23 @@ export class VaultClient {
 
   async lookupSelf(): Promise<VaultTokenInfo> {
     const response = await this.request<{ data: VaultTokenInfo }>(
-      'GET',
-      '/v1/auth/token/lookup-self'
+      "GET",
+      "/v1/auth/token/lookup-self"
     );
     return response.data;
   }
 
   async renewSelf(increment?: number): Promise<VaultAuth> {
     const response = await this.request<{ auth: VaultAuth }>(
-      'POST',
-      '/v1/auth/token/renew-self',
+      "POST",
+      "/v1/auth/token/renew-self",
       increment ? { increment } : undefined
     );
     return response.auth;
   }
 
   async revokeSelf(): Promise<void> {
-    await this.request('POST', '/v1/auth/token/revoke-self');
+    await this.request("POST", "/v1/auth/token/revoke-self");
     this.token = null;
   }
 
@@ -165,8 +161,8 @@ export class VaultClient {
     renewable?: boolean;
   }): Promise<VaultAuth> {
     const response = await this.request<{ auth: VaultAuth }>(
-      'POST',
-      '/v1/auth/token/create',
+      "POST",
+      "/v1/auth/token/create",
       options
     );
     return response.auth;
@@ -181,11 +177,8 @@ export class VaultClient {
     path: string,
     version?: number
   ): Promise<VaultSecret<{ data: T; metadata: Record<string, unknown> }>> {
-    const versionParam = version !== undefined ? `?version=${version}` : '';
-    return this.request(
-      'GET',
-      `/v1/${mount}/data/${path}${versionParam}`
-    );
+    const versionParam = version !== undefined ? `?version=${version}` : "";
+    return this.request("GET", `/v1/${mount}/data/${path}${versionParam}`);
   }
 
   async kvWrite<T = Record<string, unknown>>(
@@ -194,35 +187,31 @@ export class VaultClient {
     data: T,
     options?: { cas?: number }
   ): Promise<VaultSecret<{ version: number; created_time: string; deletion_time: string }>> {
-    return this.request(
-      'POST',
-      `/v1/${mount}/data/${path}`,
-      { data, options }
-    );
+    return this.request("POST", `/v1/${mount}/data/${path}`, { data, options });
   }
 
   async kvDelete(mount: string, path: string, versions?: number[]): Promise<void> {
     if (versions) {
       // Soft delete specific versions
-      await this.request('POST', `/v1/${mount}/delete/${path}`, { versions });
+      await this.request("POST", `/v1/${mount}/delete/${path}`, { versions });
     } else {
       // Delete latest version
-      await this.request('DELETE', `/v1/${mount}/data/${path}`);
+      await this.request("DELETE", `/v1/${mount}/data/${path}`);
     }
   }
 
   async kvUndelete(mount: string, path: string, versions: number[]): Promise<void> {
-    await this.request('POST', `/v1/${mount}/undelete/${path}`, { versions });
+    await this.request("POST", `/v1/${mount}/undelete/${path}`, { versions });
   }
 
   async kvDestroy(mount: string, path: string, versions: number[]): Promise<void> {
-    await this.request('POST', `/v1/${mount}/destroy/${path}`, { versions });
+    await this.request("POST", `/v1/${mount}/destroy/${path}`, { versions });
   }
 
-  async kvList(mount: string, path: string = ''): Promise<string[]> {
+  async kvList(mount: string, path: string = ""): Promise<string[]> {
     try {
       const response = await this.request<{ data: { keys: string[] } }>(
-        'GET',
+        "GET",
         `/v1/${mount}/metadata/${path}?list=true`
       );
       return response.data.keys;
@@ -236,7 +225,7 @@ export class VaultClient {
 
   async kvMetadata(mount: string, path: string): Promise<Record<string, unknown>> {
     const response = await this.request<{ data: Record<string, unknown> }>(
-      'GET',
+      "GET",
       `/v1/${mount}/metadata/${path}`
     );
     return response.data;
@@ -248,15 +237,15 @@ export class VaultClient {
 
   async listPolicies(): Promise<string[]> {
     const response = await this.request<{ data: { keys: string[] } }>(
-      'GET',
-      '/v1/sys/policies/acl'
+      "GET",
+      "/v1/sys/policies/acl"
     );
     return response.data.keys;
   }
 
   async readPolicy(name: string): Promise<VaultPolicy> {
     const response = await this.request<{ data: { name: string; policy: string } }>(
-      'GET',
+      "GET",
       `/v1/sys/policies/acl/${name}`
     );
     return {
@@ -266,11 +255,11 @@ export class VaultClient {
   }
 
   async writePolicy(name: string, rules: string): Promise<void> {
-    await this.request('POST', `/v1/sys/policies/acl/${name}`, { policy: rules });
+    await this.request("POST", `/v1/sys/policies/acl/${name}`, { policy: rules });
   }
 
   async deletePolicy(name: string): Promise<void> {
-    await this.request('DELETE', `/v1/sys/policies/acl/${name}`);
+    await this.request("DELETE", `/v1/sys/policies/acl/${name}`);
   }
 
   // ============================================
@@ -279,8 +268,8 @@ export class VaultClient {
 
   async checkCapabilities(paths: string[]): Promise<VaultCapabilitiesResponse> {
     const response = await this.request<VaultCapabilitiesResponse>(
-      'POST',
-      '/v1/sys/capabilities-self',
+      "POST",
+      "/v1/sys/capabilities-self",
       { paths }
     );
     return response;
@@ -289,33 +278,33 @@ export class VaultClient {
   async hasCapability(path: string, capability: VaultCapability): Promise<boolean> {
     const response = await this.checkCapabilities([path]);
     const caps = response[path] || response.capabilities || [];
-    
-    if (caps.includes('deny')) return false;
-    if (caps.includes('root')) return true;
-    
+
+    if (caps.includes("deny")) return false;
+    if (caps.includes("root")) return true;
+
     return caps.includes(capability);
   }
 
   async canRead(path: string): Promise<boolean> {
-    return this.hasCapability(path, 'read');
+    return this.hasCapability(path, "read");
   }
 
   async canWrite(path: string): Promise<boolean> {
     const response = await this.checkCapabilities([path]);
     const caps = response[path] || response.capabilities || [];
-    
-    if (caps.includes('deny')) return false;
-    if (caps.includes('root')) return true;
-    
-    return caps.includes('create') || caps.includes('update');
+
+    if (caps.includes("deny")) return false;
+    if (caps.includes("root")) return true;
+
+    return caps.includes("create") || caps.includes("update");
   }
 
   async canDelete(path: string): Promise<boolean> {
-    return this.hasCapability(path, 'delete');
+    return this.hasCapability(path, "delete");
   }
 
   async canList(path: string): Promise<boolean> {
-    return this.hasCapability(path, 'list');
+    return this.hasCapability(path, "list");
   }
 }
 
@@ -329,7 +318,7 @@ export class VaultApiError extends Error {
     public errors: string[] = []
   ) {
     super(message);
-    this.name = 'VaultApiError';
+    this.name = "VaultApiError";
   }
 }
 
@@ -337,11 +326,11 @@ export class VaultApiError extends Error {
  * Create a configured vault client
  */
 export function createVaultClient(baseUrl?: string): VaultClient {
-  const url = baseUrl || 
-    (typeof window !== 'undefined' 
-      ? window.location.origin.replace(/:\d+$/, ':8200')
-      : 'http://localhost:8200');
-  
+  const url =
+    baseUrl ||
+    (typeof window !== "undefined"
+      ? window.location.origin.replace(/:\d+$/, ":8200")
+      : "http://localhost:8200");
+
   return new VaultClient({ baseUrl: url });
 }
-

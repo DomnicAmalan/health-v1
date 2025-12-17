@@ -4,15 +4,15 @@
  */
 
 // Vault capabilities (similar to HashiCorp Vault)
-export type VaultCapability = 
-  | 'create' 
-  | 'read' 
-  | 'update' 
-  | 'delete' 
-  | 'list' 
-  | 'sudo' 
-  | 'deny'
-  | 'root';
+export type VaultCapability =
+  | "create"
+  | "read"
+  | "update"
+  | "delete"
+  | "list"
+  | "sudo"
+  | "deny"
+  | "root";
 
 export interface VaultTokenInfo {
   id: string;
@@ -58,7 +58,7 @@ export interface VaultAuth {
   leaseDuration: number;
   renewable: boolean;
   entityId?: string;
-  tokenType: 'service' | 'batch';
+  tokenType: "service" | "batch";
   orphan: boolean;
 }
 
@@ -91,13 +91,13 @@ export interface VaultError {
 
 // Permission mapping between health-v1 and vault paths
 export interface VaultPathMapping {
-  healthPermission: string;  // e.g., "patients:view"
-  vaultPath: string;         // e.g., "secret/data/patients/*"
+  healthPermission: string; // e.g., "patients:view"
+  vaultPath: string; // e.g., "secret/data/patients/*"
   capabilities: VaultCapability[];
 }
 
 // Secrets engine types
-export type SecretsEngineType = 'kv' | 'kv-v2' | 'pki' | 'transit' | 'database' | 'aws' | 'gcp';
+export type SecretsEngineType = "kv" | "kv-v2" | "pki" | "transit" | "database" | "aws" | "gcp";
 
 export interface SecretsEngineMount {
   type: SecretsEngineType;
@@ -109,4 +109,3 @@ export interface SecretsEngineMount {
   };
   options?: Record<string, string>;
 }
-

@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface TokenInfo {
   id: string;
@@ -76,7 +76,10 @@ export const tokensApi = {
    * Renew the current token (self)
    */
   renewSelf: async (increment?: number): Promise<RenewTokenResponse> => {
-    return apiClient.post<RenewTokenResponse>(VAULT_ROUTES.AUTH.TOKEN_RENEW_SELF, increment ? { increment } : {});
+    return apiClient.post<RenewTokenResponse>(
+      VAULT_ROUTES.AUTH.TOKEN_RENEW_SELF,
+      increment ? { increment } : {},
+    );
   },
 
   /**
@@ -93,4 +96,3 @@ export const tokensApi = {
     await apiClient.post(VAULT_ROUTES.AUTH.TOKEN_REVOKE_SELF, {});
   },
 };
-

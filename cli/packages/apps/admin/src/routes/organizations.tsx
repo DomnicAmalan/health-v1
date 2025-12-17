@@ -1,3 +1,4 @@
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import {
   Card,
   CardContent,
@@ -7,15 +8,17 @@ import {
   Input,
   Stack,
 } from "@lazarus-life/ui-components";
-import { useTranslation } from "@lazarus-life/shared/i18n";
 import { Building2, Plus, Search } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../lib/permissions";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 export function OrganizationsPage() {
   const { t } = useTranslation();
 
   return (
-    <ProtectedPage pageName="organizations" fallback={<div className="p-6">{t("errors.forbidden")}</div>}>
+    <ProtectedPage
+      pageName="organizations"
+      fallback={<div className="p-6">{t("errors.forbidden")}</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
@@ -29,34 +32,36 @@ export function OrganizationsPage() {
             </ProtectedButton>
           </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{t("common.all")} {t("navigation.organizations")}</CardTitle>
-                <CardDescription>{t("dashboard.totalOrganizations")}</CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder={t("search.organizations")} className="pl-8 w-64" />
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>
+                    {t("common.all")} {t("navigation.organizations")}
+                  </CardTitle>
+                  <CardDescription>{t("dashboard.totalOrganizations")}</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder={t("search.organizations")} className="pl-8 w-64" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-center py-12 text-center">
-                <div className="space-y-2">
-                  <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{t("table.noData")}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-center py-12 text-center">
+                  <div className="space-y-2">
+                    <Building2 className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">{t("table.noData")}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </Stack>
-    </div>
+            </CardContent>
+          </Card>
+        </Stack>
+      </div>
     </ProtectedPage>
   );
 }

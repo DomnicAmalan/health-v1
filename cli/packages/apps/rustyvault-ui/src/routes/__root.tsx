@@ -1,12 +1,12 @@
-import { Outlet, createRootRoute, redirect, useLocation } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { useAuthStore } from '@/stores/authStore';
-import { Sidebar } from '@/components/navigation/Sidebar';
+import { createRootRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Sidebar } from "@/components/navigation/Sidebar";
+import { useAuthStore } from "@/stores/authStore";
 
 export const Route = createRootRoute({
   component: RootComponent,
   beforeLoad: async ({ location }) => {
-    const publicRoutes = ['/login'];
+    const publicRoutes = ["/login"];
     const isPublicRoute = publicRoutes.includes(location.pathname);
 
     if (isPublicRoute) {
@@ -23,9 +23,9 @@ export const Route = createRootRoute({
 
     // If still not authenticated, redirect to login
     if (!authStore.isAuthenticated) {
-      const redirectTo = location.pathname !== '/' ? location.pathname : undefined;
+      const redirectTo = location.pathname !== "/" ? location.pathname : undefined;
       throw redirect({
-        to: '/login',
+        to: "/login",
         search: redirectTo ? { redirect: redirectTo } : undefined,
       });
     }
@@ -34,7 +34,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  const isLoginPage = location.pathname === "/login";
 
   return (
     <>
@@ -47,4 +47,3 @@ function RootComponent() {
     </>
   );
 }
-

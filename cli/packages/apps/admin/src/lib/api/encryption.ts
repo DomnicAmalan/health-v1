@@ -66,9 +66,7 @@ export async function listDekStatuses(): Promise<ApiResponse<{ deks: DekStatus[]
 /**
  * Rotate user DEK
  */
-export async function rotateUserDek(
-  request: RotateDekRequest
-): Promise<RotateDekResponse> {
+export async function rotateUserDek(request: RotateDekRequest): Promise<RotateDekResponse> {
   return apiRequest<RotateDekResponse>(API_ROUTES.ADMIN.ENCRYPTION.DEK_ROTATE, {
     method: "POST",
     body: JSON.stringify(request),
@@ -97,4 +95,3 @@ export async function rotateMasterKey(): Promise<RotateMasterKeyResponse> {
 export async function getEncryptionStats(): Promise<EncryptionStats> {
   return apiRequest<EncryptionStats>(API_ROUTES.ADMIN.ENCRYPTION.STATS);
 }
-

@@ -4,15 +4,15 @@
  * Migrated from TabContext to use Zustand with atomic selectors
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import type { Tab, TabActions, TabState, TabStore } from "@lazarus-life/shared/types/stores/tab";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 import { logAccessDenied } from "@/lib/api/audit";
 import { reorderTabsArray } from "@/lib/dragUtils";
 import { canAccessRoute, getRoutePermission } from "@/lib/navigation/permissionChecks";
 import { useAuditStore } from "@/stores/auditStore";
 import { useAuthStore } from "@/stores/authStore";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
-import type { Tab, TabActions, TabState, TabStore } from "@lazarus-life/shared/types/stores/tab";
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
 
 // Re-export types
 export type { Tab, TabState, TabActions, TabStore };

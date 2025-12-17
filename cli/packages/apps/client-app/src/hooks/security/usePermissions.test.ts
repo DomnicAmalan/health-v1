@@ -2,10 +2,10 @@
  * usePermissions Hook Tests
  */
 
-import { useAuthStore } from "@/stores/authStore";
 import { PERMISSIONS, ROLE_PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
+import { useAuthStore } from "@/stores/authStore";
 import { usePermissions } from "./usePermissions";
 
 describe("usePermissions", () => {

@@ -3,13 +3,13 @@
  * Shows a floating mic button when voice commands are enabled
  */
 
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
+import { Mic, MicOff } from "lucide-react";
+import { Box } from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
-import { Mic, MicOff } from "lucide-react";
 
 export function VoiceCommandFAB() {
   const preferences = useAccessibilityStore((state) => state.preferences);

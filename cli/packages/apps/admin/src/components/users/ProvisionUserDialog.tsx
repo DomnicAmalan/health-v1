@@ -1,18 +1,15 @@
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  provisioningApi,
-  type ProvisionUserRequest,
-  type AppAccessRequest,
-} from '@/lib/api/provisioning';
-import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Button,
   Input,
   Label,
   Select,
@@ -20,41 +17,44 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Checkbox,
-  Alert,
-  AlertDescription,
-  Badge,
   Switch,
-} from '@lazarus-life/ui-components';
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2,
   AlertCircle,
-  User,
-  Building2,
-  Shield,
   AppWindow,
-  Key,
-  ChevronRight,
-  ChevronLeft,
+  Building2,
   Check,
-} from 'lucide-react';
+  ChevronLeft,
+  ChevronRight,
+  Key,
+  Loader2,
+  Shield,
+  User,
+} from "lucide-react";
+import { useState } from "react";
+import {
+  type AppAccessRequest,
+  type ProvisionUserRequest,
+  provisioningApi,
+} from "@/lib/api/provisioning";
 
 // Common apps - these should ideally come from an API
 const AVAILABLE_APPS = [
-  { name: 'admin-ui', label: 'Admin Dashboard', description: 'Administrative access' },
-  { name: 'client-app', label: 'Client Application', description: 'Main user application' },
-  { name: 'mobile', label: 'Mobile App', description: 'Mobile application access' },
+  { name: "admin-ui", label: "Admin Dashboard", description: "Administrative access" },
+  { name: "client-app", label: "Client Application", description: "Main user application" },
+  { name: "mobile", label: "Mobile App", description: "Mobile application access" },
 ];
 
 // Common roles
-const AVAILABLE_ROLES = ['admin', 'user', 'manager', 'viewer'];
+const AVAILABLE_ROLES = ["admin", "user", "manager", "viewer"];
 
 // Common policies
-const AVAILABLE_POLICIES = ['default', 'admin', 'reader', 'writer'];
+const AVAILABLE_POLICIES = ["default", "admin", "reader", "writer"];
 
-type Step = 'basic' | 'role' | 'apps' | 'vault' | 'review';
+type Step = "basic" | "role" | "apps" | "vault" | "review";
 
-const STEPS: Step[] = ['basic', 'role', 'apps', 'vault', 'review'];
+const STEPS: Step[] = ["basic", "role", "apps", "vault", "review"];
 
 interface ProvisionUserDialogProps {
   open: boolean;
@@ -70,14 +70,14 @@ export function ProvisionUserDialog({
   onSuccess,
 }: ProvisionUserDialogProps) {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState<Step>('basic');
+  const [step, setStep] = useState<Step>("basic");
 
   const [formData, setFormData] = useState<ProvisionUserRequest>({
-    email: '',
-    password: '',
-    display_name: '',
-    organization_id: '',
-    role_name: '',
+    email: "",
+    password: "",
+    display_name: "",
+    organization_id: "",
+    role_name: "",
     group_names: [],
     app_access: [],
     vault_access: {
@@ -93,7 +93,7 @@ export function ProvisionUserDialog({
   const provisionMutation = useMutation({
     mutationFn: provisioningApi.provisionUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       onOpenChange(false);
       resetForm();
       onSuccess?.();
@@ -101,13 +101,13 @@ export function ProvisionUserDialog({
   });
 
   const resetForm = () => {
-    setStep('basic');
+    setStep("basic");
     setFormData({
-      email: '',
-      password: '',
-      display_name: '',
-      organization_id: '',
-      role_name: '',
+      email: "",
+      password: "",
+      display_name: "",
+      organization_id: "",
+      role_name: "",
       group_names: [],
       app_access: [],
       vault_access: {
@@ -138,12 +138,13 @@ export function ProvisionUserDialog({
 
   const handleSubmit = () => {
     const appAccess = Object.values(selectedApps);
-    const vaultAccess = formData.vault_access?.create_user || formData.vault_access?.create_token
-      ? {
-          ...formData.vault_access,
-          policies: selectedPolicies,
-        }
-      : undefined;
+    const vaultAccess =
+      formData.vault_access?.create_user || formData.vault_access?.create_token
+        ? {
+            ...formData.vault_access,
+            policies: selectedPolicies,
+          }
+        : undefined;
 
     provisionMutation.mutate({
       ...formData,
@@ -152,7 +153,7 @@ export function ProvisionUserDialog({
     });
   };
 
-  const toggleAppAccess = (appName: string, accessLevel: 'read' | 'write' | 'admin') => {
+  const toggleAppAccess = (appName: string, accessLevel: "read" | "write" | "admin") => {
     setSelectedApps((prev) => {
       if (prev[appName]) {
         const { [appName]: _, ...rest } = prev;
@@ -162,7 +163,7 @@ export function ProvisionUserDialog({
     });
   };
 
-  const updateAppAccessLevel = (appName: string, accessLevel: 'read' | 'write' | 'admin') => {
+  const updateAppAccessLevel = (appName: string, accessLevel: "read" | "write" | "admin") => {
     setSelectedApps((prev) => ({
       ...prev,
       [appName]: { app_name: appName, access_level: accessLevel },
@@ -177,15 +178,17 @@ export function ProvisionUserDialog({
 
   const canProceed = () => {
     switch (step) {
-      case 'basic':
-        return formData.email && formData.password && formData.display_name && formData.organization_id;
-      case 'role':
+      case "basic":
+        return (
+          formData.email && formData.password && formData.display_name && formData.organization_id
+        );
+      case "role":
         return true; // Role is optional
-      case 'apps':
+      case "apps":
         return true; // Apps are optional
-      case 'vault':
+      case "vault":
         return true; // Vault is optional
-      case 'review':
+      case "review":
         return true;
       default:
         return false;
@@ -199,18 +202,14 @@ export function ProvisionUserDialog({
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               i <= currentStepIndex
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground'
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
             }`}
           >
             {i < currentStepIndex ? <Check className="h-4 w-4" /> : i + 1}
           </div>
           {i < STEPS.length - 1 && (
-            <div
-              className={`w-8 h-0.5 ${
-                i < currentStepIndex ? 'bg-primary' : 'bg-muted'
-              }`}
-            />
+            <div className={`w-8 h-0.5 ${i < currentStepIndex ? "bg-primary" : "bg-muted"}`} />
           )}
         </div>
       ))}
@@ -285,7 +284,7 @@ export function ProvisionUserDialog({
       <div className="space-y-2">
         <Label htmlFor="role">System Role</Label>
         <Select
-          value={formData.role_name || ''}
+          value={formData.role_name || ""}
           onValueChange={(value) => setFormData({ ...formData, role_name: value })}
         >
           <SelectTrigger>
@@ -320,14 +319,14 @@ export function ProvisionUserDialog({
             <div
               key={app.name}
               className={`p-4 border rounded-lg transition-colors ${
-                isSelected ? 'border-primary bg-primary/5' : ''
+                isSelected ? "border-primary bg-primary/5" : ""
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={isSelected}
-                    onCheckedChange={() => toggleAppAccess(app.name, 'read')}
+                    onCheckedChange={() => toggleAppAccess(app.name, "read")}
                   />
                   <div>
                     <p className="font-medium">{app.label}</p>
@@ -336,8 +335,8 @@ export function ProvisionUserDialog({
                 </div>
                 {isSelected && (
                   <Select
-                    value={selectedApps[app.name]?.access_level || 'read'}
-                    onValueChange={(value: 'read' | 'write' | 'admin') =>
+                    value={selectedApps[app.name]?.access_level || "read"}
+                    onValueChange={(value: "read" | "write" | "admin") =>
                       updateAppAccessLevel(app.name, value)
                     }
                   >
@@ -440,11 +439,11 @@ export function ProvisionUserDialog({
           </div>
           <div className="flex justify-between py-2 border-b">
             <span className="text-muted-foreground">Organization</span>
-            <span className="font-medium">{selectedOrg?.name || '-'}</span>
+            <span className="font-medium">{selectedOrg?.name || "-"}</span>
           </div>
           <div className="flex justify-between py-2 border-b">
             <span className="text-muted-foreground">Role</span>
-            <span className="font-medium">{formData.role_name || 'None'}</span>
+            <span className="font-medium">{formData.role_name || "None"}</span>
           </div>
           <div className="py-2 border-b">
             <span className="text-muted-foreground">App Access</span>
@@ -482,15 +481,15 @@ export function ProvisionUserDialog({
 
   const renderStep = () => {
     switch (step) {
-      case 'basic':
+      case "basic":
         return renderBasicStep();
-      case 'role':
+      case "role":
         return renderRoleStep();
-      case 'apps':
+      case "apps":
         return renderAppsStep();
-      case 'vault':
+      case "vault":
         return renderVaultStep();
-      case 'review':
+      case "review":
         return renderReviewStep();
       default:
         return null;
@@ -498,13 +497,17 @@ export function ProvisionUserDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) resetForm();
+        onOpenChange(isOpen);
+      }}
+    >
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Provision New User</DialogTitle>
-          <DialogDescription>
-            Create a new user with complete access setup
-          </DialogDescription>
+          <DialogDescription>Create a new user with complete access setup</DialogDescription>
         </DialogHeader>
 
         {provisionMutation.error && (
@@ -513,7 +516,7 @@ export function ProvisionUserDialog({
             <AlertDescription>
               {provisionMutation.error instanceof Error
                 ? provisionMutation.error.message
-                : 'Failed to provision user'}
+                : "Failed to provision user"}
             </AlertDescription>
           </Alert>
         )}
@@ -529,10 +532,7 @@ export function ProvisionUserDialog({
             </Button>
           )}
           {isLastStep ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={provisionMutation.isPending}
-            >
+            <Button onClick={handleSubmit} disabled={provisionMutation.isPending}>
               {provisionMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -556,4 +556,3 @@ export function ProvisionUserDialog({
     </Dialog>
   );
 }
-

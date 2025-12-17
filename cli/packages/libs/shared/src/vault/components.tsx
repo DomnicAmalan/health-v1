@@ -3,10 +3,10 @@
  * Reusable components for vault integration in all UIs
  */
 
-import { type ReactNode, useEffect, useCallback } from 'react';
-import { useVaultStore } from './store';
-import { useVaultCapabilities, useVaultAuth } from './hooks';
-import type { VaultCapability } from './types';
+import { type ReactNode, useCallback, useEffect } from "react";
+import { useVaultAuth, useVaultCapabilities } from "./hooks";
+import { useVaultStore } from "./store";
+import type { VaultCapability } from "./types";
 
 // ============================================
 // Permission Gate Component
@@ -16,7 +16,7 @@ interface VaultPermissionGateProps {
   /** Vault path to check permissions for */
   path: string;
   /** Required capability */
-  capability?: 'read' | 'write' | 'delete' | 'list';
+  capability?: "read" | "write" | "delete" | "list";
   /** Children to render if permitted */
   children: ReactNode;
   /** Fallback if denied */
@@ -32,7 +32,7 @@ interface VaultPermissionGateProps {
  */
 export function VaultPermissionGate({
   path,
-  capability = 'read',
+  capability = "read",
   children,
   fallback,
   showLoading = false,
@@ -47,24 +47,22 @@ export function VaultPermissionGate({
   }
 
   if (loading && showLoading) {
-    return (
-      <div className="animate-pulse bg-gray-200 rounded h-8 w-full" />
-    );
+    return <div className="animate-pulse bg-gray-200 rounded h-8 w-full" />;
   }
 
   const hasPermission = (() => {
     if (isDenied) return false;
-    if (capabilities.includes('root')) return true;
+    if (capabilities.includes("root")) return true;
 
     switch (capability) {
-      case 'read':
-        return capabilities.includes('read');
-      case 'write':
-        return capabilities.includes('create') || capabilities.includes('update');
-      case 'delete':
-        return capabilities.includes('delete');
-      case 'list':
-        return capabilities.includes('list');
+      case "read":
+        return capabilities.includes("read");
+      case "write":
+        return capabilities.includes("create") || capabilities.includes("update");
+      case "delete":
+        return capabilities.includes("delete");
+      case "list":
+        return capabilities.includes("list");
       default:
         return false;
     }
@@ -81,9 +79,7 @@ export function VaultPermissionGate({
   if (showDenied) {
     return (
       <div className="p-4 border border-red-200 bg-red-50 rounded-md">
-        <p className="text-sm text-red-800">
-          Access denied for vault path: {path}
-        </p>
+        <p className="text-sm text-red-800">Access denied for vault path: {path}</p>
       </div>
     );
   }
@@ -107,11 +103,7 @@ interface VaultProviderProps {
 /**
  * Provider component that initializes vault connection
  */
-export function VaultProvider({
-  baseUrl,
-  autoConnect = true,
-  children,
-}: VaultProviderProps) {
+export function VaultProvider({ baseUrl, autoConnect = true, children }: VaultProviderProps) {
   const { connect, isConnected } = useVaultStore();
 
   useEffect(() => {
@@ -131,13 +123,13 @@ interface CombinedPermissionGateProps {
   /** Health-v1 permissions to check (uses external permission check) */
   healthPermissions?: string[];
   /** Health permission mode: 'all' or 'any' */
-  healthMode?: 'all' | 'any';
+  healthMode?: "all" | "any";
   /** Health permission check function from the app */
   checkHealthPermission?: (permission: string) => boolean;
   /** Vault path to check */
   vaultPath?: string;
   /** Vault capability required */
-  vaultCapability?: 'read' | 'write' | 'delete' | 'list';
+  vaultCapability?: "read" | "write" | "delete" | "list";
   /** Children to render if all permissions pass */
   children: ReactNode;
   /** Fallback if denied */
@@ -146,11 +138,11 @@ interface CombinedPermissionGateProps {
 
 /**
  * Combined permission gate that checks both health-v1 and vault permissions
- * 
+ *
  * @example
  * ```tsx
  * const { hasPermission } = usePermissions(); // from health-v1
- * 
+ *
  * <CombinedPermissionGate
  *   healthPermissions={['patients:view']}
  *   checkHealthPermission={hasPermission}
@@ -163,16 +155,14 @@ interface CombinedPermissionGateProps {
  */
 export function CombinedPermissionGate({
   healthPermissions = [],
-  healthMode = 'all',
+  healthMode = "all",
   checkHealthPermission,
   vaultPath,
-  vaultCapability = 'read',
+  vaultCapability = "read",
   children,
   fallback,
 }: CombinedPermissionGateProps) {
-  const { capabilities, loading: vaultLoading, isDenied } = useVaultCapabilities(
-    vaultPath || ''
-  );
+  const { capabilities, loading: vaultLoading, isDenied } = useVaultCapabilities(vaultPath || "");
   const { isRoot } = useVaultAuth();
 
   // Check health-v1 permissions
@@ -181,7 +171,7 @@ export function CombinedPermissionGate({
       return true;
     }
 
-    if (healthMode === 'all') {
+    if (healthMode === "all") {
       return healthPermissions.every(checkHealthPermission);
     }
     return healthPermissions.some(checkHealthPermission);
@@ -192,17 +182,17 @@ export function CombinedPermissionGate({
     if (!vaultPath) return true;
     if (isRoot) return true;
     if (isDenied) return false;
-    if (capabilities.includes('root')) return true;
+    if (capabilities.includes("root")) return true;
 
     switch (vaultCapability) {
-      case 'read':
-        return capabilities.includes('read');
-      case 'write':
-        return capabilities.includes('create') || capabilities.includes('update');
-      case 'delete':
-        return capabilities.includes('delete');
-      case 'list':
-        return capabilities.includes('list');
+      case "read":
+        return capabilities.includes("read");
+      case "write":
+        return capabilities.includes("create") || capabilities.includes("update");
+      case "delete":
+        return capabilities.includes("delete");
+      case "list":
+        return capabilities.includes("list");
       default:
         return false;
     }
@@ -233,23 +223,23 @@ interface VaultStatusProps {
 /**
  * Component showing vault connection and seal status
  */
-export function VaultStatus({ detailed = false, className = '' }: VaultStatusProps) {
+export function VaultStatus({ detailed = false, className = "" }: VaultStatusProps) {
   const { isConnected, isSealed, isInitialized } = useVaultStore();
   const { isAuthenticated } = useVaultAuth();
 
   const getStatusColor = () => {
-    if (!isConnected) return 'bg-gray-400';
-    if (isSealed) return 'bg-yellow-400';
-    if (!isAuthenticated) return 'bg-orange-400';
-    return 'bg-green-400';
+    if (!isConnected) return "bg-gray-400";
+    if (isSealed) return "bg-yellow-400";
+    if (!isAuthenticated) return "bg-orange-400";
+    return "bg-green-400";
   };
 
   const getStatusText = () => {
-    if (!isConnected) return 'Disconnected';
-    if (!isInitialized) return 'Not Initialized';
-    if (isSealed) return 'Sealed';
-    if (!isAuthenticated) return 'Unauthenticated';
-    return 'Connected';
+    if (!isConnected) return "Disconnected";
+    if (!isInitialized) return "Not Initialized";
+    if (isSealed) return "Sealed";
+    if (!isAuthenticated) return "Unauthenticated";
+    return "Connected";
   };
 
   return (
@@ -257,9 +247,7 @@ export function VaultStatus({ detailed = false, className = '' }: VaultStatusPro
       <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
       <span className="text-sm">{getStatusText()}</span>
       {detailed && (
-        <span className="text-xs text-gray-500">
-          {isConnected && isAuthenticated && '(Vault)'}
-        </span>
+        <span className="text-xs text-gray-500">{isConnected && isAuthenticated && "(Vault)"}</span>
       )}
     </div>
   );
@@ -275,7 +263,7 @@ export function VaultStatus({ detailed = false, className = '' }: VaultStatusPro
 export function withVaultPermission<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   path: string,
-  capability: 'read' | 'write' | 'delete' | 'list' = 'read'
+  capability: "read" | "write" | "delete" | "list" = "read"
 ) {
   return function VaultProtectedComponent(props: P) {
     const { capabilities, loading, isDenied, isRoot } = useVaultCapabilities(path);
@@ -291,17 +279,17 @@ export function withVaultPermission<P extends object>(
     const hasPermission = (() => {
       if (isRoot) return true;
       if (isDenied) return false;
-      if (capabilities.includes('root')) return true;
+      if (capabilities.includes("root")) return true;
 
       switch (capability) {
-        case 'read':
-          return capabilities.includes('read');
-        case 'write':
-          return capabilities.includes('create') || capabilities.includes('update');
-        case 'delete':
-          return capabilities.includes('delete');
-        case 'list':
-          return capabilities.includes('list');
+        case "read":
+          return capabilities.includes("read");
+        case "write":
+          return capabilities.includes("create") || capabilities.includes("update");
+        case "delete":
+          return capabilities.includes("delete");
+        case "list":
+          return capabilities.includes("list");
         default:
           return false;
       }
@@ -321,4 +309,3 @@ export function withVaultPermission<P extends object>(
     return <WrappedComponent {...props} />;
   };
 }
-

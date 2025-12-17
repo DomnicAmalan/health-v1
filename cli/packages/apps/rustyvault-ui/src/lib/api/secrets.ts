@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface SecretData {
   [key: string]: unknown;
@@ -56,7 +56,7 @@ export const secretsApi = {
     await apiClient.post(VAULT_ROUTES.SECRETS.WRITE(path), data);
   },
 
-  list: async (path: string = ''): Promise<string[]> => {
+  list: async (path: string = ""): Promise<string[]> => {
     try {
       const response = await apiClient.get<SecretListResponse>(VAULT_ROUTES.SECRETS.LIST(path));
       return response.keys || [];
@@ -77,7 +77,7 @@ export const secretsApi = {
    */
   readForRealm: async (realmId: string, path: string): Promise<SecretResponse> => {
     const response = await apiClient.get<{ data: SecretData }>(
-      VAULT_ROUTES.REALM_SECRETS.READ(realmId, path)
+      VAULT_ROUTES.REALM_SECRETS.READ(realmId, path),
     );
     return {
       data: response.data || {},
@@ -95,10 +95,10 @@ export const secretsApi = {
   /**
    * List secrets in a realm
    */
-  listForRealm: async (realmId: string, path: string = ''): Promise<string[]> => {
+  listForRealm: async (realmId: string, path: string = ""): Promise<string[]> => {
     try {
       const response = await apiClient.get<SecretListResponse>(
-        VAULT_ROUTES.REALM_SECRETS.LIST(realmId, path)
+        VAULT_ROUTES.REALM_SECRETS.LIST(realmId, path),
       );
       return response.keys || [];
     } catch {
@@ -114,4 +114,3 @@ export const secretsApi = {
     await apiClient.delete(VAULT_ROUTES.REALM_SECRETS.DELETE(realmId, path));
   },
 };
-

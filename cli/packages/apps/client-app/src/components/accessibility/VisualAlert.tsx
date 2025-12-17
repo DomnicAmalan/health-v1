@@ -3,10 +3,10 @@
  * Visual indicators for audio alerts
  */
 
-import { Box } from "@/components/ui/box";
-import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Box } from "@/components/ui/box";
+import { useAccessibilityStore } from "@/stores/accessibilityStore";
 
 export interface VisualAlertProps {
   message: string;

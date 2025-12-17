@@ -3,23 +3,23 @@
  * Permission-aware navigation that filters items based on user permissions
  */
 
-import { Link, useLocation } from "@tanstack/react-router";
-import { useCanAccess } from "../../lib/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import { cn } from "@lazarus-life/ui-components";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  Users,
+  AppWindow,
   Building2,
-  Shield,
-  UserCog,
-  UsersRound,
   FileText,
   Key,
-  Settings,
+  LayoutDashboard,
   Network,
-  AppWindow,
+  Settings,
+  Shield,
+  UserCog,
+  Users,
+  UsersRound,
 } from "lucide-react";
-import { cn } from "@lazarus-life/ui-components";
+import { useCanAccess } from "../../lib/permissions";
 
 interface NavItem {
   nameKey: string;
@@ -101,7 +101,7 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
-  
+
   // Check permissions for all nav items upfront
   const canViewDashboard = useCanAccess("can_view", "page:dashboard");
   const canViewUsers = useCanAccess("can_view", "page:users");
@@ -113,7 +113,7 @@ export function Sidebar() {
   const canViewUiEntities = useCanAccess("can_view", "page:ui-entities");
   const canViewEncryption = useCanAccess("can_view", "page:encryption");
   const canViewServices = useCanAccess("can_view", "page:services");
-  
+
   // Check permissions for encryption sub-items
   const canViewDeks = useCanAccess("can_view", "page:encryption-deks");
   const canViewMasterKey = useCanAccess("can_view", "page:encryption-master-key");
@@ -147,9 +147,10 @@ export function Sidebar() {
       <nav className="px-2 space-y-1">
         {visibleItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path || 
-                          (item.path !== "/" && location.pathname.startsWith(item.path));
-          
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/" && location.pathname.startsWith(item.path));
+
           // Special handling for encryption sub-items
           if (item.path === "/encryption") {
             return (
@@ -223,4 +224,3 @@ export function Sidebar() {
     </div>
   );
 }
-

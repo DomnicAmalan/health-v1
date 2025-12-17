@@ -1,15 +1,14 @@
-import { Box } from "@/components/ui/box";
-import { Button } from "@lazarus-life/ui-components";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flex } from "@/components/ui/flex";
-import { Input } from "@lazarus-life/ui-components";
-import { Label } from "@/components/ui/label";
-import { Stack } from "@/components/ui/stack";
-import { checkSetupStatus, initializeSetup } from "@/lib/api/setup";
-import type { SetupRequest } from "@/lib/api/setup";
+import { Button, Input } from "@lazarus-life/ui-components";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Box } from "@/components/ui/box";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Flex } from "@/components/ui/flex";
+import { Label } from "@/components/ui/label";
+import { Stack } from "@/components/ui/stack";
+import type { SetupRequest } from "@/lib/api/setup";
+import { checkSetupStatus, initializeSetup } from "@/lib/api/setup";
 
 export const Route = createFileRoute("/setup")({
   component: SetupPage,

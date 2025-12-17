@@ -61,11 +61,14 @@ export async function checkPermission(
   relation: string,
   resourceId: string
 ): Promise<boolean> {
-  const response = await apiClient.post<CheckPermissionResponse>(API_ROUTES.ADMIN.RELATIONSHIPS.CHECK, {
-    userId,
-    relation,
-    resourceId,
-  } as CheckPermissionRequest);
+  const response = await apiClient.post<CheckPermissionResponse>(
+    API_ROUTES.ADMIN.RELATIONSHIPS.CHECK,
+    {
+      userId,
+      relation,
+      resourceId,
+    } as CheckPermissionRequest
+  );
 
   if (response.error) {
     throw new Error(response.error.message);
@@ -80,9 +83,12 @@ export async function checkPermission(
 export async function batchCheckPermissions(
   checks: Array<{ userId: string; relation: string; resourceId: string }>
 ): Promise<boolean[]> {
-  const response = await apiClient.post<BatchCheckResponse>(API_ROUTES.ADMIN.RELATIONSHIPS.BATCH_CHECK, {
-    checks,
-  } as BatchCheckRequest);
+  const response = await apiClient.post<BatchCheckResponse>(
+    API_ROUTES.ADMIN.RELATIONSHIPS.BATCH_CHECK,
+    {
+      checks,
+    } as BatchCheckRequest
+  );
 
   if (response.error) {
     throw new Error(response.error.message);
@@ -95,7 +101,9 @@ export async function batchCheckPermissions(
  * Get all relationships for a user
  */
 export async function getUserRelationships(userId: string): Promise<Relationship[]> {
-  const response = await apiClient.get<ListRelationshipsResponse>(API_ROUTES.ADMIN.RELATIONSHIPS.USER(userId));
+  const response = await apiClient.get<ListRelationshipsResponse>(
+    API_ROUTES.ADMIN.RELATIONSHIPS.USER(userId)
+  );
 
   if (response.error) {
     throw new Error(response.error.message);

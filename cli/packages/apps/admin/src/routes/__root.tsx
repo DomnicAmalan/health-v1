@@ -1,12 +1,7 @@
+import { createRootRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getSetupStatus } from "@/lib/api/setup";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  Outlet,
-  createRootRoute,
-  redirect,
-  useLocation,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Sidebar } from "../components/navigation/Sidebar";
 
 export const Route = createRootRoute({

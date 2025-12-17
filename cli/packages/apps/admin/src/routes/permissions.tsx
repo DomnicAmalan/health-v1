@@ -3,9 +3,8 @@
  * Full permission management with Zanzibar relationships
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import {
+  Badge,
   Card,
   CardContent,
   CardDescription,
@@ -19,12 +18,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Badge,
 } from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Shield, Trash2, User } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../lib/permissions";
-import { getUserPermissions, revokePermission } from "../lib/api/permissions";
+import { useState } from "react";
 import { AssignPermissionDialog } from "../components/permissions/AssignPermissionDialog";
+import { getUserPermissions, revokePermission } from "../lib/api/permissions";
+import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 export function PermissionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,7 +59,10 @@ export function PermissionsPage() {
   });
 
   return (
-    <ProtectedPage pageName="permissions" fallback={<div className="p-6">You don't have access to this page.</div>}>
+    <ProtectedPage
+      pageName="permissions"
+      fallback={<div className="p-6">You don't have access to this page.</div>}
+    >
       <div className="p-6">
         <Stack spacing="lg">
           <div className="flex items-center justify-between">
@@ -67,10 +70,7 @@ export function PermissionsPage() {
               <h1 className="text-3xl font-bold tracking-tight">Permissions</h1>
               <p className="text-muted-foreground">Manage permissions and Zanzibar relationships</p>
             </div>
-            <ProtectedButton
-              buttonId="create-permission"
-              onClick={() => setAssignDialogOpen(true)}
-            >
+            <ProtectedButton buttonId="create-permission" onClick={() => setAssignDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Assign Permission
             </ProtectedButton>

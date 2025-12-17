@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface SealStatus {
   sealed: boolean;
@@ -133,35 +133,35 @@ export const systemApi = {
   },
 
   downloadKeysFile: async (token: string) => {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4117/v1';
+    const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4117/v1";
     const url = `${baseURL}${VAULT_ROUTES.SYS.KEYS_DOWNLOAD}?token=${encodeURIComponent(token)}`;
-    
+
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'text/plain',
+        Accept: "text/plain",
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to download keys file: ${response.statusText}`);
     }
-    
+
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = downloadUrl;
-    
+
     // Get filename from Content-Disposition header or use default
-    const contentDisposition = response.headers.get('Content-Disposition');
-    let filename = 'rustyvault-credentials.txt';
+    const contentDisposition = response.headers.get("Content-Disposition");
+    let filename = "rustyvault-credentials.txt";
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
       if (filenameMatch) {
         filename = filenameMatch[1];
       }
     }
-    
+
     link.download = filename;
     document.body.appendChild(link);
     link.click();
@@ -170,7 +170,8 @@ export const systemApi = {
   },
 
   getKeysAuthenticated: async (token: string): Promise<InitResponse> => {
-    return apiClient.get<InitResponse>(`${VAULT_ROUTES.SYS.KEYS_AUTH}?token=${encodeURIComponent(token)}`);
+    return apiClient.get<InitResponse>(
+      `${VAULT_ROUTES.SYS.KEYS_AUTH}?token=${encodeURIComponent(token)}`,
+    );
   },
 };
-

@@ -1,9 +1,9 @@
 /**
  * Lazarus Life Vault Integration for all Lazarus Life UIs
- * 
+ *
  * This module provides unified secrets access and ACL checking
  * across admin, client, and vault UIs.
- * 
+ *
  * Key features:
  * - Vault client for API communication
  * - Zustand store for vault state
@@ -12,11 +12,10 @@
  * - Zanzibar-Vault sync for realm policies
  */
 
-export * from './client';
-export * from './store';
-export * from './hooks';
-export * from './types';
-export * from './permissions';
-export * from './components';
-export * from './sync';
-
+export * from "./client";
+export * from "./components";
+export * from "./hooks";
+export * from "./permissions";
+export * from "./store";
+export * from "./sync";
+export * from "./types";

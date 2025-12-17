@@ -1,11 +1,11 @@
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { Box } from "@/components/ui/box";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Flex } from "@/components/ui/flex";
 import type { FormFieldGroup } from "@/components/ui/form-builder";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
 
 interface FormFieldGroupProps {
   group: FormFieldGroup;

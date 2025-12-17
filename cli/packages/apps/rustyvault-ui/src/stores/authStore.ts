@@ -1,23 +1,23 @@
-import { create } from 'zustand';
-import { authApi } from '@/lib/api/auth';
-import { policiesApi } from '@/lib/api/policies';
+import { create } from "zustand";
+import { authApi } from "@/lib/api/auth";
+import { policiesApi } from "@/lib/api/policies";
 
-const TOKEN_STORAGE_KEY = 'rustyvault_token';
-const POLICIES_STORAGE_KEY = 'rustyvault_policies';
+const TOKEN_STORAGE_KEY = "rustyvault_token";
+const POLICIES_STORAGE_KEY = "rustyvault_policies";
 
 function loadTokenFromStorage(): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   return sessionStorage.getItem(TOKEN_STORAGE_KEY);
 }
 
 function loadPoliciesFromStorage(): string[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   const policies = sessionStorage.getItem(POLICIES_STORAGE_KEY);
   return policies ? JSON.parse(policies) : [];
 }
 
 function saveTokenToStorage(token: string | null): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   if (token) {
     sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
   } else {
@@ -26,7 +26,7 @@ function saveTokenToStorage(token: string | null): void {
 }
 
 function savePoliciesToStorage(policies: string[]): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   sessionStorage.setItem(POLICIES_STORAGE_KEY, JSON.stringify(policies));
 }
 
@@ -81,24 +81,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Validate token by looking it up
       const response = await authApi.lookupToken(token);
       const policies = response.data?.policies || [];
-      
+
       // Set token and authentication state
       saveTokenToStorage(token);
       savePoliciesToStorage(policies);
-      
-      set({ 
-        accessToken: token, 
+
+      set({
+        accessToken: token,
         policies,
-        isAuthenticated: true, 
+        isAuthenticated: true,
         isLoading: false,
         capabilitiesCache: {},
         error: null,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Invalid token';
-      set({ 
-        error: message, 
-        isLoading: false, 
+      const message = error instanceof Error ? error.message : "Invalid token";
+      set({
+        error: message,
+        isLoading: false,
         isAuthenticated: false,
         accessToken: null,
         policies: [],
@@ -116,19 +116,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const token = response.auth?.client_token;
       const policies = response.auth?.policies || [];
       if (!token) {
-        throw new Error('No token received from server');
+        throw new Error("No token received from server");
       }
-      set({ 
-        accessToken: token, 
+      set({
+        accessToken: token,
         policies,
-        isAuthenticated: true, 
+        isAuthenticated: true,
         isLoading: false,
         capabilitiesCache: {},
       });
       saveTokenToStorage(token);
       savePoliciesToStorage(policies);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Authentication failed';
+      const message = error instanceof Error ? error.message : "Authentication failed";
       set({ error: message, isLoading: false, isAuthenticated: false });
       throw error;
     }
@@ -141,29 +141,29 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const token = response.auth?.client_token;
       const policies = response.auth?.policies || [];
       if (!token) {
-        throw new Error('No token received from server');
+        throw new Error("No token received from server");
       }
-      set({ 
-        accessToken: token, 
+      set({
+        accessToken: token,
         policies,
-        isAuthenticated: true, 
+        isAuthenticated: true,
         isLoading: false,
         capabilitiesCache: {},
       });
       saveTokenToStorage(token);
       savePoliciesToStorage(policies);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Authentication failed';
+      const message = error instanceof Error ? error.message : "Authentication failed";
       set({ error: message, isLoading: false, isAuthenticated: false });
       throw error;
     }
   },
 
   logout: () => {
-    set({ 
-      accessToken: null, 
+    set({
+      accessToken: null,
       policies: [],
-      isAuthenticated: false, 
+      isAuthenticated: false,
       error: null,
       capabilitiesCache: {},
     });
@@ -186,17 +186,17 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const response = await authApi.lookupToken(token);
       const policies = response.data?.policies || [];
-      set({ 
-        isAuthenticated: true, 
+      set({
+        isAuthenticated: true,
         policies,
-        isLoading: false 
+        isLoading: false,
       });
       savePoliciesToStorage(policies);
     } catch {
-      set({ 
-        accessToken: null, 
+      set({
+        accessToken: null,
         policies: [],
-        isAuthenticated: false, 
+        isAuthenticated: false,
         isLoading: false,
         capabilitiesCache: {},
       });
@@ -208,22 +208,22 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   // Check if user has a specific policy
   hasPolicy: (policyName: string) => {
     const { policies } = get();
-    return policies.includes(policyName) || policies.includes('root');
+    return policies.includes(policyName) || policies.includes("root");
   },
 
   // Check if user has root policy
   isRoot: () => {
     const { policies } = get();
-    return policies.includes('root');
+    return policies.includes("root");
   },
 
   // Get capabilities for a path
   getCapabilities: async (path: string) => {
     const { capabilitiesCache, policies, isRoot } = get();
-    
+
     // Root has all capabilities
     if (isRoot()) {
-      return ['root', 'create', 'read', 'update', 'delete', 'list', 'sudo'];
+      return ["root", "create", "read", "update", "delete", "list", "sudo"];
     }
 
     // Check cache first
@@ -233,8 +233,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     try {
       const response = await policiesApi.checkCapabilities(path, policies);
-      const capabilities = response.capabilities || ['deny'];
-      
+      const capabilities = response.capabilities || ["deny"];
+
       // Update cache
       set((state) => ({
         capabilitiesCache: {
@@ -245,35 +245,35 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       return capabilities;
     } catch (error) {
-      console.error('Failed to check capabilities:', error);
-      return ['deny'];
+      console.error("Failed to check capabilities:", error);
+      return ["deny"];
     }
   },
 
   // Check if user has a specific capability for a path
   hasCapability: async (path: string, capability: string) => {
     const capabilities = await get().getCapabilities(path);
-    if (capabilities.includes('deny')) return false;
-    if (capabilities.includes('root')) return true;
+    if (capabilities.includes("deny")) return false;
+    if (capabilities.includes("root")) return true;
     return capabilities.includes(capability);
   },
 
   // Convenience methods
   canRead: async (path: string) => {
-    return get().hasCapability(path, 'read');
+    return get().hasCapability(path, "read");
   },
 
   canWrite: async (path: string) => {
     const caps = await get().getCapabilities(path);
-    return caps.includes('create') || caps.includes('update') || caps.includes('root');
+    return caps.includes("create") || caps.includes("update") || caps.includes("root");
   },
 
   canDelete: async (path: string) => {
-    return get().hasCapability(path, 'delete');
+    return get().hasCapability(path, "delete");
   },
 
   canList: async (path: string) => {
-    return get().hasCapability(path, 'list');
+    return get().hasCapability(path, "list");
   },
 }));
 
@@ -285,7 +285,7 @@ export function useCapabilities(path: string) {
 
   useEffect(() => {
     if (isRoot()) {
-      setCapabilities(['root', 'create', 'read', 'update', 'delete', 'list', 'sudo']);
+      setCapabilities(["root", "create", "read", "update", "delete", "list", "sudo"]);
       setLoading(false);
       return;
     }
@@ -299,13 +299,16 @@ export function useCapabilities(path: string) {
   return {
     capabilities,
     loading,
-    canRead: capabilities.includes('read') || capabilities.includes('root'),
-    canWrite: capabilities.includes('create') || capabilities.includes('update') || capabilities.includes('root'),
-    canDelete: capabilities.includes('delete') || capabilities.includes('root'),
-    canList: capabilities.includes('list') || capabilities.includes('root'),
-    isDenied: capabilities.includes('deny'),
+    canRead: capabilities.includes("read") || capabilities.includes("root"),
+    canWrite:
+      capabilities.includes("create") ||
+      capabilities.includes("update") ||
+      capabilities.includes("root"),
+    canDelete: capabilities.includes("delete") || capabilities.includes("root"),
+    canList: capabilities.includes("list") || capabilities.includes("root"),
+    isDenied: capabilities.includes("deny"),
   };
 }
 
 // Need to import these for the hook
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";

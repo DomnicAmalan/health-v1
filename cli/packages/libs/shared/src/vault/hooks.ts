@@ -3,9 +3,9 @@
  * Custom hooks for vault integration in React components
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useVaultStore } from './store';
-import type { VaultCapability, VaultSecret } from './types';
+import { useCallback, useEffect, useState } from "react";
+import { useVaultStore } from "./store";
+import type { VaultCapability, VaultSecret } from "./types";
 
 /**
  * Hook for checking vault capabilities on a path
@@ -17,13 +17,13 @@ export function useVaultCapabilities(path: string) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setCapabilities(['deny']);
+      setCapabilities(["deny"]);
       setLoading(false);
       return;
     }
 
     if (isRoot()) {
-      setCapabilities(['root', 'create', 'read', 'update', 'delete', 'list', 'sudo']);
+      setCapabilities(["root", "create", "read", "update", "delete", "list", "sudo"]);
       setLoading(false);
       return;
     }
@@ -37,12 +37,15 @@ export function useVaultCapabilities(path: string) {
   return {
     capabilities,
     loading,
-    canRead: capabilities.includes('read') || capabilities.includes('root'),
-    canWrite: capabilities.includes('create') || capabilities.includes('update') || capabilities.includes('root'),
-    canDelete: capabilities.includes('delete') || capabilities.includes('root'),
-    canList: capabilities.includes('list') || capabilities.includes('root'),
-    isDenied: capabilities.includes('deny'),
-    isRoot: capabilities.includes('root'),
+    canRead: capabilities.includes("read") || capabilities.includes("root"),
+    canWrite:
+      capabilities.includes("create") ||
+      capabilities.includes("update") ||
+      capabilities.includes("root"),
+    canDelete: capabilities.includes("delete") || capabilities.includes("root"),
+    canList: capabilities.includes("list") || capabilities.includes("root"),
+    isDenied: capabilities.includes("deny"),
+    isRoot: capabilities.includes("root"),
   };
 }
 
@@ -71,7 +74,7 @@ export function useVaultSecret<T = Record<string, unknown>>(
       const response = await client.kvRead<T>(mount, path, options?.version);
       setData(response.data?.data || null);
     } catch (e) {
-      setError(e instanceof Error ? e : new Error('Failed to fetch secret'));
+      setError(e instanceof Error ? e : new Error("Failed to fetch secret"));
     } finally {
       setLoading(false);
     }
@@ -102,7 +105,7 @@ export function useVaultSecretMutation(mount: string) {
         clearCapabilitiesCache();
         return response;
       } catch (e) {
-        const err = e instanceof Error ? e : new Error('Failed to write secret');
+        const err = e instanceof Error ? e : new Error("Failed to write secret");
         setError(err);
         throw err;
       } finally {
@@ -121,7 +124,7 @@ export function useVaultSecretMutation(mount: string) {
         await client.kvDelete(mount, path, versions);
         clearCapabilitiesCache();
       } catch (e) {
-        const err = e instanceof Error ? e : new Error('Failed to delete secret');
+        const err = e instanceof Error ? e : new Error("Failed to delete secret");
         setError(err);
         throw err;
       } finally {
@@ -137,7 +140,7 @@ export function useVaultSecretMutation(mount: string) {
 /**
  * Hook for listing secrets in a path
  */
-export function useVaultSecretList(mount: string, path: string = '') {
+export function useVaultSecretList(mount: string, path: string = "") {
   const { client, isAuthenticated } = useVaultStore();
   const [keys, setKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +156,7 @@ export function useVaultSecretList(mount: string, path: string = '') {
       const result = await client.kvList(mount, path);
       setKeys(result);
     } catch (e) {
-      setError(e instanceof Error ? e : new Error('Failed to list secrets'));
+      setError(e instanceof Error ? e : new Error("Failed to list secrets"));
     } finally {
       setLoading(false);
     }
@@ -205,14 +208,7 @@ export function useVaultAuth() {
  * Hook for vault connection state
  */
 export function useVaultConnection() {
-  const {
-    isConnected,
-    isSealed,
-    isInitialized,
-    client,
-    connect,
-    checkHealth,
-  } = useVaultStore();
+  const { isConnected, isSealed, isInitialized, client, connect, checkHealth } = useVaultStore();
 
   return {
     isConnected,
@@ -228,24 +224,19 @@ export function useVaultConnection() {
  * Hook that combines health-v1 permissions with vault capabilities
  * Use this in admin/client apps to check both permission systems
  */
-export function useCombinedPermissions(
-  healthPermission: string,
-  vaultPath?: string
-) {
-  const { capabilities: vaultCaps, loading: vaultLoading } = useVaultCapabilities(
-    vaultPath || ''
-  );
+export function useCombinedPermissions(healthPermission: string, vaultPath?: string) {
+  const { capabilities: vaultCaps, loading: vaultLoading } = useVaultCapabilities(vaultPath || "");
 
   // This hook is meant to be used alongside the existing usePermissions hook
   // from @lazarus-life/shared or the app's own permission system
-  
+
   return {
     vaultCapabilities: vaultCaps,
     vaultLoading,
-    canAccessVault: !vaultCaps.includes('deny'),
-    canReadVault: vaultCaps.includes('read') || vaultCaps.includes('root'),
-    canWriteVault: vaultCaps.includes('create') || vaultCaps.includes('update') || vaultCaps.includes('root'),
-    canDeleteVault: vaultCaps.includes('delete') || vaultCaps.includes('root'),
+    canAccessVault: !vaultCaps.includes("deny"),
+    canReadVault: vaultCaps.includes("read") || vaultCaps.includes("root"),
+    canWriteVault:
+      vaultCaps.includes("create") || vaultCaps.includes("update") || vaultCaps.includes("root"),
+    canDeleteVault: vaultCaps.includes("delete") || vaultCaps.includes("root"),
   };
 }
-

@@ -1,15 +1,15 @@
-import { create } from 'zustand';
-import { realmsApi, type Realm } from '@/lib/api/realms';
+import { create } from "zustand";
+import { type Realm, realmsApi } from "@/lib/api/realms";
 
-const REALM_STORAGE_KEY = 'rustyvault_current_realm';
+const REALM_STORAGE_KEY = "rustyvault_current_realm";
 
 function loadRealmFromStorage(): string | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   return localStorage.getItem(REALM_STORAGE_KEY);
 }
 
 function saveRealmToStorage(realmId: string | null): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   if (realmId) {
     localStorage.setItem(REALM_STORAGE_KEY, realmId);
   } else {
@@ -54,7 +54,7 @@ export const useRealmStore = create<RealmStore>((set, get) => ({
     try {
       const response = await realmsApi.list();
       const realms = response.realms || [];
-      
+
       set({ realms, isLoading: false });
 
       // Restore previously selected realm from storage
@@ -66,31 +66,31 @@ export const useRealmStore = create<RealmStore>((set, get) => ({
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch realms';
+      const message = error instanceof Error ? error.message : "Failed to fetch realms";
       set({ error: message, isLoading: false });
     }
   },
 
   setCurrentRealm: (realm: Realm | null) => {
     saveRealmToStorage(realm?.id || null);
-    set({ 
-      currentRealm: realm, 
-      isGlobalMode: !realm 
+    set({
+      currentRealm: realm,
+      isGlobalMode: !realm,
     });
   },
 
   setCurrentRealmById: async (realmId: string) => {
     const { realms, fetchRealms } = get();
-    
+
     // Try to find in existing realms first
     let realm = realms.find((r) => r.id === realmId);
-    
+
     // If not found, fetch fresh list
     if (!realm) {
       await fetchRealms();
       realm = get().realms.find((r) => r.id === realmId);
     }
-    
+
     if (realm) {
       saveRealmToStorage(realmId);
       set({ currentRealm: realm, isGlobalMode: false });
@@ -121,7 +121,7 @@ export const useRealmStore = create<RealmStore>((set, get) => ({
 // Hook to get realm-scoped query key suffix
 export function useRealmQueryKey(): (string | null)[] {
   const currentRealm = useRealmStore((s) => s.currentRealm);
-  return currentRealm ? [currentRealm.id] : ['global'];
+  return currentRealm ? [currentRealm.id] : ["global"];
 }
 
 // Hook to check if we're in a realm context
@@ -135,4 +135,3 @@ export function useCurrentRealmId(): string | null {
   const currentRealm = useRealmStore((s) => s.currentRealm);
   return currentRealm?.id || null;
 }
-

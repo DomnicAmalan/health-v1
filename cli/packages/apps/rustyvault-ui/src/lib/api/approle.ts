@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface AppRole {
   id: string;
@@ -80,7 +80,7 @@ export const approleApi = {
    */
   listRoles: async (realmId: string): Promise<string[]> => {
     const response = await apiClient.get<AppRoleListResponse>(
-      VAULT_ROUTES.REALM_APPROLE.LIST_ROLES(realmId)
+      VAULT_ROUTES.REALM_APPROLE.LIST_ROLES(realmId),
     );
     return response.keys || [];
   },
@@ -90,7 +90,7 @@ export const approleApi = {
    */
   getRole: async (realmId: string, roleName: string): Promise<AppRole> => {
     const response = await apiClient.get<AppRoleResponse>(
-      VAULT_ROUTES.REALM_APPROLE.GET_ROLE(realmId, roleName)
+      VAULT_ROUTES.REALM_APPROLE.GET_ROLE(realmId, roleName),
     );
     return response.role || response.data || (response as unknown as AppRole);
   },
@@ -101,12 +101,9 @@ export const approleApi = {
   createRole: async (
     realmId: string,
     roleName: string,
-    request: CreateAppRoleRequest
+    request: CreateAppRoleRequest,
   ): Promise<void> => {
-    await apiClient.post(
-      VAULT_ROUTES.REALM_APPROLE.CREATE_ROLE(realmId, roleName),
-      request
-    );
+    await apiClient.post(VAULT_ROUTES.REALM_APPROLE.CREATE_ROLE(realmId, roleName), request);
   },
 
   /**
@@ -121,9 +118,9 @@ export const approleApi = {
    */
   getRoleId: async (realmId: string, roleName: string): Promise<string> => {
     const response = await apiClient.get<RoleIdResponse>(
-      VAULT_ROUTES.REALM_APPROLE.GET_ROLE_ID(realmId, roleName)
+      VAULT_ROUTES.REALM_APPROLE.GET_ROLE_ID(realmId, roleName),
     );
-    return response.role_id || response.data?.role_id || '';
+    return response.role_id || response.data?.role_id || "";
   },
 
   /**
@@ -133,11 +130,11 @@ export const approleApi = {
   generateSecretId: async (
     realmId: string,
     roleName: string,
-    metadata?: Record<string, string>
+    metadata?: Record<string, string>,
   ): Promise<SecretIdResponse> => {
     const response = await apiClient.post<SecretIdResponse>(
       VAULT_ROUTES.REALM_APPROLE.GENERATE_SECRET_ID(realmId, roleName),
-      metadata ? { metadata } : {}
+      metadata ? { metadata } : {},
     );
     return response;
   },
@@ -148,12 +145,12 @@ export const approleApi = {
   login: async (
     realmId: string,
     roleId: string,
-    secretId: string
+    secretId: string,
   ): Promise<AppRoleLoginResponse> => {
-    return apiClient.post<AppRoleLoginResponse>(
-      VAULT_ROUTES.REALM_APPROLE.LOGIN(realmId),
-      { role_id: roleId, secret_id: secretId }
-    );
+    return apiClient.post<AppRoleLoginResponse>(VAULT_ROUTES.REALM_APPROLE.LOGIN(realmId), {
+      role_id: roleId,
+      secret_id: secretId,
+    });
   },
 };
 
@@ -161,8 +158,8 @@ export const approleApi = {
  * Format TTL value for display
  */
 export function formatTTL(seconds?: number): string {
-  if (!seconds) return 'Not set';
-  
+  if (!seconds) return "Not set";
+
   if (seconds < 60) return `${seconds}s`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
@@ -174,13 +171,12 @@ export function formatTTL(seconds?: number): string {
  */
 export function parseTTL(value: string): number | undefined {
   if (!value) return undefined;
-  
+
   const num = parseInt(value);
   if (isNaN(num)) return undefined;
-  
-  if (value.endsWith('d')) return num * 86400;
-  if (value.endsWith('h')) return num * 3600;
-  if (value.endsWith('m')) return num * 60;
+
+  if (value.endsWith("d")) return num * 86400;
+  if (value.endsWith("h")) return num * 3600;
+  if (value.endsWith("m")) return num * 60;
   return num;
 }
-

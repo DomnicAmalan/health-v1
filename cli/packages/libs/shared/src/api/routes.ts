@@ -1,7 +1,7 @@
 /**
  * Unified API Routes
  * Centralized constants for all API endpoints across admin and client-app
- * 
+ *
  * All routes use /v1/ prefix for API versioning.
  * The /api prefix is automatically added by getApiUrl() function.
  * Health check and auth routes are excluded from /api prefix.
@@ -78,7 +78,8 @@ export const API_ROUTES = {
       CHECK_BATCH: "/v1/admin/permissions/check-batch",
       USER: (id: string) => `/v1/admin/permissions/user/${id}`,
       USER_PAGES: (id: string) => `/v1/admin/permissions/user/${id}/pages`,
-      USER_BUTTONS: (id: string, page: string) => `/v1/admin/permissions/user/${id}/buttons/${page}`,
+      USER_BUTTONS: (id: string, page: string) =>
+        `/v1/admin/permissions/user/${id}/buttons/${page}`,
       USER_FIELDS: (id: string, page: string) => `/v1/admin/permissions/user/${id}/fields/${page}`,
       ASSIGN: "/v1/admin/permissions/assign",
       ASSIGN_BATCH: "/v1/admin/permissions/assign-batch",
@@ -99,8 +100,10 @@ export const API_ROUTES = {
       UPDATE: (id: string) => `/v1/admin/groups/${id}`,
       DELETE: (id: string) => `/v1/admin/groups/${id}`,
       ADD_USER: (groupId: string, userId: string) => `/v1/admin/groups/${groupId}/users/${userId}`,
-      REMOVE_USER: (groupId: string, userId: string) => `/v1/admin/groups/${groupId}/users/${userId}`,
-      ASSIGN_ROLE: (groupId: string, roleId: string) => `/v1/admin/groups/${groupId}/roles/${roleId}`,
+      REMOVE_USER: (groupId: string, userId: string) =>
+        `/v1/admin/groups/${groupId}/users/${userId}`,
+      ASSIGN_ROLE: (groupId: string, roleId: string) =>
+        `/v1/admin/groups/${groupId}/roles/${roleId}`,
     },
     DASHBOARD: {
       STATS: "/v1/admin/dashboard/stats",

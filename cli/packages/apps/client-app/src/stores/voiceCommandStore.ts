@@ -3,13 +3,12 @@
  * Manages voice command state and recognition
  */
 
-import { create } from "zustand";
-
 import type {
   VoiceCommandActions,
   VoiceCommandState,
   VoiceCommandStore,
 } from "@lazarus-life/shared/types/stores/voice";
+import { create } from "zustand";
 
 // Re-export types
 export type { VoiceCommandState, VoiceCommandActions, VoiceCommandStore };

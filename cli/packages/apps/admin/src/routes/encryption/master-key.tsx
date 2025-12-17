@@ -3,30 +3,27 @@
  * View and manage the master encryption key
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Stack,
-  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Stack,
 } from "@lazarus-life/ui-components";
-import { Key, RotateCw, AlertTriangle, Shield, Calendar } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../../lib/permissions";
-import {
-  getMasterKeyStatus,
-  rotateMasterKey,
-} from "../../lib/api/encryption";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Calendar, Key, RotateCw, Shield } from "lucide-react";
 import { useState } from "react";
+import { getMasterKeyStatus, rotateMasterKey } from "../../lib/api/encryption";
+import { ProtectedButton, ProtectedPage } from "../../lib/permissions";
 
 export function MasterKeyManagementPage() {
   const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
@@ -164,8 +161,8 @@ export function MasterKeyManagementPage() {
                           </p>
                           <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
                             Rotating the master key will re-encrypt all DEKs stored in the vault.
-                            This does NOT re-encrypt user data - only the DEKs themselves. User
-                            data remains encrypted with the same DEKs.
+                            This does NOT re-encrypt user data - only the DEKs themselves. User data
+                            remains encrypted with the same DEKs.
                           </p>
                         </div>
                       </div>
@@ -213,18 +210,10 @@ export function MasterKeyManagementPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setRotateDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setRotateDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                type="button"
-                onClick={handleRotate}
-                disabled={rotateMutation.isPending}
-              >
+              <Button type="button" onClick={handleRotate} disabled={rotateMutation.isPending}>
                 {rotateMutation.isPending ? "Rotating..." : "Rotate Master Key"}
               </Button>
             </DialogFooter>
@@ -234,4 +223,3 @@ export function MasterKeyManagementPage() {
     </ProtectedPage>
   );
 }
-

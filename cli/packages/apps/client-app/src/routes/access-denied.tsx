@@ -3,11 +3,11 @@
  * Page shown when user doesn't have permission to access a resource
  */
 
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { createFileRoute } from "@tanstack/react-router";
 import { AccessDenied } from "@/components/security/AccessDenied";
 import { Container } from "@/components/ui/container";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
-import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/access-denied")({
   component: AccessDeniedPage,

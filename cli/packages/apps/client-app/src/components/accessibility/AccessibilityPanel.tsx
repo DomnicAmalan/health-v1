@@ -3,8 +3,10 @@
  * Main accessibility settings panel
  */
 
-import { Box } from "@/components/ui/box";
+import { useTranslation } from "@lazarus-life/shared/i18n";
 import { Button } from "@lazarus-life/ui-components";
+import { Settings } from "lucide-react";
+import { Box } from "@/components/ui/box";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { Stack } from "@/components/ui/stack";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
-import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Settings } from "lucide-react";
 import { ColorBlindModeSelector } from "./ColorBlindModeSelector";
 import { FontSizeSelector } from "./FontSizeSelector";
 import { HighContrastToggle } from "./HighContrastToggle";

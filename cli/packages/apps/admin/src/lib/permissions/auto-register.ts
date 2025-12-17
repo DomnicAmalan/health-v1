@@ -3,7 +3,7 @@
  * Automatically registers UI entities for access control
  */
 
-import { registerPage, registerButton, registerField, registerApi } from "../api/ui-entities";
+import { registerApi, registerButton, registerField, registerPage } from "../api/ui-entities";
 
 /**
  * Auto-register a page when route loads
@@ -25,12 +25,9 @@ export async function autoRegisterPage(
 /**
  * Auto-register buttons with data-permission attribute
  */
-export async function autoRegisterButtons(
-  pageId: string,
-  pageName: string
-): Promise<void> {
+export async function autoRegisterButtons(pageId: string, pageName: string): Promise<void> {
   const buttons = document.querySelectorAll('[data-permission^="button:"]');
-  
+
   for (const button of buttons) {
     const permissionAttr = button.getAttribute("data-permission");
     if (!permissionAttr) continue;
@@ -56,22 +53,21 @@ export async function autoRegisterButtons(
 /**
  * Auto-register fields with data-permission attribute
  */
-export async function autoRegisterFields(
-  pageId: string,
-  pageName: string
-): Promise<void> {
+export async function autoRegisterFields(pageId: string, pageName: string): Promise<void> {
   const fields = document.querySelectorAll('[data-permission^="field:"]');
-  
+
   for (const field of fields) {
     const permissionAttr = field.getAttribute("data-permission");
     if (!permissionAttr) continue;
 
     const fieldId = permissionAttr.replace("field:", "");
-    const label = field.getAttribute("data-label") || 
-                  (field as HTMLElement).getAttribute("aria-label") ||
-                  fieldId;
-    const fieldType = field.getAttribute("data-field-type") ||
-                     (field.tagName === "INPUT" ? (field as HTMLInputElement).type : "text");
+    const label =
+      field.getAttribute("data-label") ||
+      (field as HTMLElement).getAttribute("aria-label") ||
+      fieldId;
+    const fieldType =
+      field.getAttribute("data-field-type") ||
+      (field.tagName === "INPUT" ? (field as HTMLInputElement).type : "text");
 
     try {
       await registerField({
@@ -115,14 +111,12 @@ export async function initializePageAutoRegistration(
   try {
     // First, register the page
     await autoRegisterPage(pageName, pagePath);
-    
+
     // Get the page ID (we'd need to fetch it or return it from registerPage)
     // For now, we'll need to query for it
     const { listPages } = await import("../api/ui-entities");
     const pagesResponse = await listPages();
-    const registeredPage = pagesResponse.data?.pages?.find(
-      (p) => p.name === pageName
-    );
+    const registeredPage = pagesResponse.data?.pages?.find((p) => p.name === pageName);
 
     if (registeredPage) {
       // Auto-register buttons and fields
@@ -137,4 +131,3 @@ export async function initializePageAutoRegistration(
     return null;
   }
 }
-

@@ -3,9 +3,9 @@
  * WCAG 2.1 AA/AAA compliant
  */
 
+import type * as React from "react";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
-import type * as React from "react";
 import { COMMON_SHORTCUTS, keyboardShortcutManager } from "./keyboard/shortcuts";
 import { getVoiceCommandEngine } from "./voice/voiceCommandEngine";
 

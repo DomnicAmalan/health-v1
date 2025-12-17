@@ -1,9 +1,9 @@
-import { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { VaultTranslationProvider } from '@lazarus-life/shared/i18n';
-import Router from './router';
-import './index.css';
+import { VaultTranslationProvider } from "@lazarus-life/shared/i18n";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+import Router from "./router";
+import "./index.css";
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -15,13 +15,12 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <VaultTranslationProvider>
       <QueryClientProvider client={queryClient}>
         <Router />
       </QueryClientProvider>
     </VaultTranslationProvider>
-  </StrictMode>
+  </StrictMode>,
 );
-

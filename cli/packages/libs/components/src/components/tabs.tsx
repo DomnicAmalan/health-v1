@@ -34,19 +34,18 @@ const Tabs = ({
   );
 };
 
-const TabsList = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-));
+const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 TabsList.displayName = "TabsList";
 
 const TabsTrigger = React.forwardRef<
@@ -79,7 +78,7 @@ const TabsContent = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { value: string }
 >(({ className, value: contentValue, ...props }, ref) => {
   const { value } = React.useContext(TabsContext);
-  
+
   if (value !== contentValue) {
     return null;
   }
@@ -98,4 +97,3 @@ const TabsContent = React.forwardRef<
 TabsContent.displayName = "TabsContent";
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };
-

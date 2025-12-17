@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface AppAccessEntry {
   id: string;
@@ -6,7 +6,7 @@ export interface AppAccessEntry {
   user_email: string;
   user_name: string;
   app_name: string;
-  access_level: 'read' | 'write' | 'admin';
+  access_level: "read" | "write" | "admin";
   organization_id?: string;
   organization_name?: string;
   granted_at: string;
@@ -22,7 +22,7 @@ export interface AppAccessMatrix {
     organization_name?: string;
   }>;
   apps: string[];
-  access: Record<string, Record<string, 'read' | 'write' | 'admin'>>;
+  access: Record<string, Record<string, "read" | "write" | "admin">>;
 }
 
 export interface AppAccessListResponse {
@@ -37,7 +37,7 @@ export interface AppAccessMatrixResponse {
 export interface BulkGrantRequest {
   user_ids: string[];
   app_name: string;
-  access_level: 'read' | 'write' | 'admin';
+  access_level: "read" | "write" | "admin";
 }
 
 export interface BulkRevokeRequest {
@@ -55,11 +55,11 @@ export const appAccessApi = {
     access_level?: string;
   }): Promise<AppAccessListResponse> => {
     const params = new URLSearchParams();
-    if (filters?.app_name) params.append('app_name', filters.app_name);
-    if (filters?.organization_id) params.append('organization_id', filters.organization_id);
-    if (filters?.access_level) params.append('access_level', filters.access_level);
-    
-    const query = params.toString() ? `?${params.toString()}` : '';
+    if (filters?.app_name) params.append("app_name", filters.app_name);
+    if (filters?.organization_id) params.append("organization_id", filters.organization_id);
+    if (filters?.access_level) params.append("access_level", filters.access_level);
+
+    const query = params.toString() ? `?${params.toString()}` : "";
     return apiClient.get<AppAccessListResponse>(`/app-access${query}`);
   },
 
@@ -67,7 +67,7 @@ export const appAccessApi = {
    * Get app access matrix view
    */
   getMatrix: async (organizationId?: string): Promise<AppAccessMatrix> => {
-    const query = organizationId ? `?organization_id=${organizationId}` : '';
+    const query = organizationId ? `?organization_id=${organizationId}` : "";
     const response = await apiClient.get<AppAccessMatrixResponse>(`/app-access/matrix${query}`);
     return response.matrix;
   },
@@ -78,7 +78,7 @@ export const appAccessApi = {
   grant: async (
     userId: string,
     appName: string,
-    accessLevel: 'read' | 'write' | 'admin'
+    accessLevel: "read" | "write" | "admin"
   ): Promise<void> => {
     await apiClient.post(`/app-access/grant`, {
       user_id: userId,
@@ -115,7 +115,9 @@ export const appAccessApi = {
    * Get access for a specific user
    */
   getForUser: async (userId: string): Promise<AppAccessEntry[]> => {
-    const response = await apiClient.get<{ entries: AppAccessEntry[] }>(`/users/${userId}/app-access`);
+    const response = await apiClient.get<{ entries: AppAccessEntry[] }>(
+      `/users/${userId}/app-access`
+    );
     return response.entries || [];
   },
 
@@ -127,4 +129,3 @@ export const appAccessApi = {
     return response.entries || [];
   },
 };
-

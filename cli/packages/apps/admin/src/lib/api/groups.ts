@@ -42,9 +42,7 @@ export async function getGroup(groupId: string): Promise<Group> {
 /**
  * Create a new group
  */
-export async function createGroup(
-  request: CreateGroupRequest
-): Promise<Group> {
+export async function createGroup(request: CreateGroupRequest): Promise<Group> {
   return apiRequest<Group>(API_ROUTES.ADMIN.GROUPS.CREATE, {
     method: "POST",
     body: JSON.stringify(request),
@@ -54,10 +52,7 @@ export async function createGroup(
 /**
  * Update a group
  */
-export async function updateGroup(
-  groupId: string,
-  request: UpdateGroupRequest
-): Promise<Group> {
+export async function updateGroup(groupId: string, request: UpdateGroupRequest): Promise<Group> {
   return apiRequest<Group>(API_ROUTES.ADMIN.GROUPS.UPDATE(groupId), {
     method: "PUT",
     body: JSON.stringify(request),
@@ -108,4 +103,3 @@ export async function assignRoleToGroup(
     method: "POST",
   });
 }
-

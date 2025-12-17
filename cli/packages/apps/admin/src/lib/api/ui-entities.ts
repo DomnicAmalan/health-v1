@@ -69,9 +69,7 @@ export interface RegisterApiRequest {
 /**
  * Register a new UI page
  */
-export async function registerPage(
-  request: RegisterPageRequest
-): Promise<UiPage> {
+export async function registerPage(request: RegisterPageRequest): Promise<UiPage> {
   return apiRequest<UiPage>(API_ROUTES.ADMIN.UI.PAGES, {
     method: "POST",
     body: JSON.stringify(request),
@@ -88,9 +86,7 @@ export async function listPages(): Promise<ApiResponse<{ pages: UiPage[] }>> {
 /**
  * Register a new UI button
  */
-export async function registerButton(
-  request: RegisterButtonRequest
-): Promise<UiButton> {
+export async function registerButton(request: RegisterButtonRequest): Promise<UiButton> {
   return apiRequest<UiButton>(API_ROUTES.ADMIN.UI.BUTTONS, {
     method: "POST",
     body: JSON.stringify(request),
@@ -109,9 +105,7 @@ export async function listButtonsForPage(
 /**
  * Register a new UI field
  */
-export async function registerField(
-  request: RegisterFieldRequest
-): Promise<UiField> {
+export async function registerField(request: RegisterFieldRequest): Promise<UiField> {
   return apiRequest<UiField>(API_ROUTES.ADMIN.UI.FIELDS, {
     method: "POST",
     body: JSON.stringify(request),
@@ -130,9 +124,7 @@ export async function listFieldsForPage(
 /**
  * Register a new API endpoint
  */
-export async function registerApi(
-  request: RegisterApiRequest
-): Promise<UiApiEndpoint> {
+export async function registerApi(request: RegisterApiRequest): Promise<UiApiEndpoint> {
   return apiRequest<UiApiEndpoint>(API_ROUTES.ADMIN.UI.APIS, {
     method: "POST",
     body: JSON.stringify(request),
@@ -145,4 +137,3 @@ export async function registerApi(
 export async function listApis(): Promise<ApiResponse<{ apis: UiApiEndpoint[] }>> {
   return apiRequest(API_ROUTES.ADMIN.UI.APIS);
 }
-

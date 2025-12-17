@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface Realm {
   id: string;
@@ -53,7 +53,7 @@ export const realmsApi = {
   get: async (realmId: string): Promise<Realm> => {
     const response = await apiClient.get<RealmResponse>(VAULT_ROUTES.REALMS.GET(realmId));
     // Handle both formats: { realm: {...} } or direct realm object
-    return response.realm || response as unknown as Realm;
+    return response.realm || (response as unknown as Realm);
   },
 
   /**
@@ -61,15 +61,18 @@ export const realmsApi = {
    */
   create: async (request: CreateRealmRequest): Promise<Realm> => {
     const response = await apiClient.post<RealmResponse>(VAULT_ROUTES.REALMS.CREATE, request);
-    return response.realm || response as unknown as Realm;
+    return response.realm || (response as unknown as Realm);
   },
 
   /**
    * Update an existing realm
    */
   update: async (realmId: string, request: UpdateRealmRequest): Promise<Realm> => {
-    const response = await apiClient.post<RealmResponse>(VAULT_ROUTES.REALMS.UPDATE(realmId), request);
-    return response.realm || response as unknown as Realm;
+    const response = await apiClient.post<RealmResponse>(
+      VAULT_ROUTES.REALMS.UPDATE(realmId),
+      request,
+    );
+    return response.realm || (response as unknown as Realm);
   },
 
   /**
@@ -87,4 +90,3 @@ export const realmsApi = {
     return response.realms || [];
   },
 };
-

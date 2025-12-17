@@ -9,7 +9,7 @@ import type { ApiResponse, RequestConfig } from "./types";
 
 const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token";
 const TOKEN_STORAGE_KEY_REFRESH = "auth_refresh_token";
-let refreshPromise: Promise<string> | null = null;
+const refreshPromise: Promise<string> | null = null;
 
 /**
  * Store tokens in sessionStorage (more secure than localStorage - cleared on tab close)
@@ -51,13 +51,18 @@ export function getRefreshToken(): string | null {
  */
 function detectDeviceType(): string {
   if (typeof window === "undefined") return "web";
-  
+
   const ua = navigator.userAgent.toLowerCase();
   if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
     return "mobile";
   } else if (ua.includes("tablet") || ua.includes("ipad")) {
     return "tablet";
-  } else if (ua.includes("desktop") || ua.includes("windows") || ua.includes("mac") || ua.includes("linux")) {
+  } else if (
+    ua.includes("desktop") ||
+    ua.includes("windows") ||
+    ua.includes("mac") ||
+    ua.includes("linux")
+  ) {
     return "desktop";
   }
   return "web";

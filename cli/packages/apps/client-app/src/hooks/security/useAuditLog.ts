@@ -3,11 +3,11 @@
  * Hook for audit logging and immutable audit trail access
  */
 
-import { logAccessDenied, logPHIAccess, logPermissionCheck, logStateChange } from "@/lib/api/audit";
+import { useCallback } from "react";
+import { logAccessDenied, logPermissionCheck, logPHIAccess, logStateChange } from "@/lib/api/audit";
 import type { AuditEntry } from "@/lib/api/types";
 import { useAuditStore } from "@/stores/auditStore";
 import { useAuth } from "@/stores/authStore";
-import { useCallback } from "react";
 
 export function useAuditLog() {
   const { user } = useAuth();

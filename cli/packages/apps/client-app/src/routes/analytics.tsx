@@ -1,9 +1,9 @@
-import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Users } from "lucide-react";
+import { ProtectedRoute } from "@/components/security/ProtectedRoute";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/analytics")({
   component: AnalyticsComponent,
@@ -24,9 +24,7 @@ function AnalyticsComponentInner() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">{t("analytics.patientVolume")}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t("analytics.patientVolume")}
-        </p>
+        <p className="text-muted-foreground mt-2">{t("analytics.patientVolume")}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

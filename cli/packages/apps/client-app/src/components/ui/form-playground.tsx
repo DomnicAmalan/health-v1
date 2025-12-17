@@ -1,24 +1,24 @@
-import { cn } from "@/lib/utils"
-import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react"
-import * as React from "react"
-import { Button, Input, Label } from "@lazarus-life/ui-components"
-import { Card, CardContent } from "./card"
-import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder"
+import { Button, Input, Label } from "@lazarus-life/ui-components";
+import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "./card";
+import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
 
 /**
  * Visual Form Builder Playground
  * Drag-and-drop interface for building forms with live preview
  */
 export function FormPlayground() {
-  const [fields, setFields] = React.useState<FormField[]>([])
-  const [selectedField, setSelectedField] = React.useState<string | null>(null)
-  const [previewMode, setPreviewMode] = React.useState(false)
+  const [fields, setFields] = React.useState<FormField[]>([]);
+  const [selectedField, setSelectedField] = React.useState<string | null>(null);
+  const [previewMode, setPreviewMode] = React.useState(false);
   const [formConfig, setFormConfig] = React.useState<Partial<FormConfig>>({
     title: "New Form",
     description: "Build your form by adding fields",
     layout: "two-column",
     gap: "md",
-  })
+  });
 
   // Add new field
   const addField = (type: FieldType) => {
@@ -32,31 +32,31 @@ export function FormPlayground() {
         colSpan: 12,
         size: "md",
       },
-    }
-    setFields([...fields, newField])
-    setSelectedField(newField.id)
-  }
+    };
+    setFields([...fields, newField]);
+    setSelectedField(newField.id);
+  };
 
   // Remove field
   const removeField = (fieldId: string) => {
-    setFields(fields.filter((f) => f.id !== fieldId))
+    setFields(fields.filter((f) => f.id !== fieldId));
     if (selectedField === fieldId) {
-      setSelectedField(null)
+      setSelectedField(null);
     }
-  }
+  };
 
   // Update field
   const updateField = (fieldId: string, updates: Partial<FormField>) => {
-    setFields(fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f)))
-  }
+    setFields(fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f)));
+  };
 
   // Move field
   const _moveField = (fromIndex: number, toIndex: number) => {
-    const newFields = [...fields]
-    const [moved] = newFields.splice(fromIndex, 1)
-    newFields.splice(toIndex, 0, moved!)
-    setFields(newFields)
-  }
+    const newFields = [...fields];
+    const [moved] = newFields.splice(fromIndex, 1);
+    newFields.splice(toIndex, 0, moved!);
+    setFields(newFields);
+  };
 
   // Export form config
   const exportConfig = () => {
@@ -64,35 +64,35 @@ export function FormPlayground() {
       id: formConfig.id || "form-1",
       ...formConfig,
       fields,
-    }
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${config.id}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${config.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Import form config
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const config = JSON.parse(e.target?.result as string) as FormConfig
-        setFormConfig(config)
-        setFields(config.fields)
+        const config = JSON.parse(e.target?.result as string) as FormConfig;
+        setFormConfig(config);
+        setFields(config.fields);
       } catch (error) {
-        console.error("Error importing config:", error)
+        console.error("Error importing config:", error);
       }
-    }
-    reader.readAsText(file)
-  }
+    };
+    reader.readAsText(file);
+  };
 
-  const selectedFieldData = fields.find((f) => f.id === selectedField)
+  const selectedFieldData = fields.find((f) => f.id === selectedField);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -215,8 +215,8 @@ export function FormPlayground() {
                     } as FormConfig
                   }
                   onSubmit={(data) => {
-                    console.log("Form submitted:", data)
-                    alert("Form submitted! Check console.")
+                    console.log("Form submitted:", data);
+                    alert("Form submitted! Check console.");
                   }}
                   onCancel={() => setPreviewMode(false)}
                 />
@@ -256,8 +256,8 @@ export function FormPlayground() {
                             size="icon"
                             className="h-6 w-6 opacity-0 group-hover:opacity-100"
                             onClick={(e) => {
-                              e.stopPropagation()
-                              removeField(field.id)
+                              e.stopPropagation();
+                              removeField(field.id);
                             }}
                           >
                             <Trash2 className="h-3 w-3 text-destructive" />
@@ -459,5 +459,5 @@ export function FormPlayground() {
         </div>
       )}
     </div>
-  )
+  );
 }

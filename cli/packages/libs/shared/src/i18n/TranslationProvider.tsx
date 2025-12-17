@@ -1,19 +1,19 @@
 /**
  * Translation Provider
  * i18n provider component
- * 
+ *
  * Apps pass their translations via the `translations` prop.
  * The provider handles flattening, storage, and context management.
  */
 
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
-  I18nContext,
   formatCurrencyInLocale,
   formatDateInLocale,
   formatNumberInLocale,
   getLocaleInfo,
   getTranslation,
+  I18nContext,
   isRTL,
   setTranslations,
 } from "./context";
@@ -21,10 +21,13 @@ import { SUPPORTED_LOCALES } from "./locales";
 import type { TranslationKey } from "./types";
 
 // Flatten nested translation objects to dot-notation keys
-export function flattenTranslations(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
+export function flattenTranslations(
+  obj: Record<string, unknown>,
+  prefix = ""
+): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (Object.hasOwn(obj, key)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
       const value = obj[key];
       if (typeof value === "object" && value !== null && !Array.isArray(value)) {
@@ -40,14 +43,14 @@ export function flattenTranslations(obj: Record<string, unknown>, prefix = ""): 
 /**
  * Helper to create translations map from locale imports
  * Use this in your app to prepare translations for the provider
- * 
+ *
  * @example
  * const translations = createTranslations({
  *   en: enJson,
  *   es: esJson,
  *   fr: frJson,
  * });
- * 
+ *
  * <TranslationProvider translations={translations}>
  *   {children}
  * </TranslationProvider>
@@ -62,15 +65,15 @@ export interface TranslationProviderProps {
   children: ReactNode;
   /** Default locale code (e.g., "en") */
   defaultLocale?: string;
-  /** 
+  /**
    * App translations - keys are locale codes, values are translation objects.
    * Use createTranslations() helper to prepare this.
    */
   translations: Record<string, Record<string, unknown>>;
 }
 
-export function TranslationProvider({ 
-  children, 
+export function TranslationProvider({
+  children,
   defaultLocale = "en",
   translations: providedTranslations,
 }: TranslationProviderProps) {

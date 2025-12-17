@@ -1,14 +1,13 @@
-import { Box } from "@/components/ui/box";
-import { Button } from "@lazarus-life/ui-components";
-import { Flex } from "@/components/ui/flex";
-import { Input } from "@lazarus-life/ui-components";
-import { Label } from "@/components/ui/label";
-import { Stack } from "@/components/ui/stack";
-import { useAuthStore } from "@/stores/authStore";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import { Button, Input } from "@lazarus-life/ui-components";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Box } from "@/components/ui/box";
+import { Flex } from "@/components/ui/flex";
+import { Label } from "@/components/ui/label";
+import { Stack } from "@/components/ui/stack";
+import { useAuthStore } from "@/stores/authStore";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -70,9 +69,7 @@ function LoginPage() {
               <img src="/logo-main.png" alt={t("branding.appName")} className="h-16 w-16" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{t("auth.signIn")}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("login.title")}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("login.title")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

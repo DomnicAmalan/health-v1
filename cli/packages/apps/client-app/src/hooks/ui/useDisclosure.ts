@@ -4,8 +4,8 @@
  * Uses Zustand UI store internally to avoid useState boilerplate
  */
 
-import { useUIStore } from "@/stores/uiStore";
 import { useCallback } from "react";
+import { useUIStore } from "@/stores/uiStore";
 
 export interface UseDisclosureReturn {
   isOpen: boolean;

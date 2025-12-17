@@ -1,9 +1,9 @@
 /**
  * Base Tailwind Configuration
  * Shared across all apps for consistent styling
- * 
+ *
  * Framework-agnostic Tailwind config that works with any build tool
- * 
+ *
  * Apps should extend this config:
  * @example
  * import baseConfig from "@lazarus-life/shared/styles/tailwind.config";

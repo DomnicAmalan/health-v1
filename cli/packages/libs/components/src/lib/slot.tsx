@@ -28,4 +28,3 @@ Slot.displayName = "Slot";
 
 export { Slot };
 export type { SlotProps };
-

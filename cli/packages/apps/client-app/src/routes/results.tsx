@@ -1,10 +1,10 @@
-import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
+import { ProtectedRoute } from "@/components/security/ProtectedRoute";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/results")({
   component: ResultsComponent,
@@ -25,9 +25,7 @@ function ResultsComponentInner() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">{t("results.title")}</h1>
-        <p className="text-muted-foreground mt-2">
-          {t("results.resultsRequiringReview")}
-        </p>
+        <p className="text-muted-foreground mt-2">{t("results.resultsRequiringReview")}</p>
       </div>
 
       <Card>

@@ -3,11 +3,11 @@
  * Maps health-v1 permissions to vault paths for unified access control
  */
 
-import type { VaultCapability, VaultPathMapping } from './types';
+import type { VaultCapability, VaultPathMapping } from "./types";
 
 /**
  * Default path mappings between health-v1 permissions and vault paths
- * 
+ *
  * This allows apps to check both:
  * 1. Health-v1 permission (e.g., "patients:view")
  * 2. Vault ACL (e.g., "secret/data/patients/*")
@@ -15,70 +15,70 @@ import type { VaultCapability, VaultPathMapping } from './types';
 export const DEFAULT_VAULT_PATH_MAPPINGS: VaultPathMapping[] = [
   // Patient secrets
   {
-    healthPermission: 'patients:view',
-    vaultPath: 'secret/data/patients/*',
-    capabilities: ['read', 'list'],
+    healthPermission: "patients:view",
+    vaultPath: "secret/data/patients/*",
+    capabilities: ["read", "list"],
   },
   {
-    healthPermission: 'patients:view:ssn',
-    vaultPath: 'secret/data/patients/*/ssn',
-    capabilities: ['read'],
+    healthPermission: "patients:view:ssn",
+    vaultPath: "secret/data/patients/*/ssn",
+    capabilities: ["read"],
   },
   {
-    healthPermission: 'patients:create',
-    vaultPath: 'secret/data/patients/*',
-    capabilities: ['create'],
+    healthPermission: "patients:create",
+    vaultPath: "secret/data/patients/*",
+    capabilities: ["create"],
   },
   {
-    healthPermission: 'patients:update',
-    vaultPath: 'secret/data/patients/*',
-    capabilities: ['update'],
+    healthPermission: "patients:update",
+    vaultPath: "secret/data/patients/*",
+    capabilities: ["update"],
   },
   {
-    healthPermission: 'patients:delete',
-    vaultPath: 'secret/data/patients/*',
-    capabilities: ['delete'],
+    healthPermission: "patients:delete",
+    vaultPath: "secret/data/patients/*",
+    capabilities: ["delete"],
   },
 
   // Clinical secrets (sensitive medical data)
   {
-    healthPermission: 'clinical:view',
-    vaultPath: 'secret/data/clinical/*',
-    capabilities: ['read', 'list'],
+    healthPermission: "clinical:view",
+    vaultPath: "secret/data/clinical/*",
+    capabilities: ["read", "list"],
   },
   {
-    healthPermission: 'clinical:create',
-    vaultPath: 'secret/data/clinical/*',
-    capabilities: ['create'],
+    healthPermission: "clinical:create",
+    vaultPath: "secret/data/clinical/*",
+    capabilities: ["create"],
   },
   {
-    healthPermission: 'clinical:update',
-    vaultPath: 'secret/data/clinical/*',
-    capabilities: ['update'],
+    healthPermission: "clinical:update",
+    vaultPath: "secret/data/clinical/*",
+    capabilities: ["update"],
   },
 
   // API keys and credentials
   {
-    healthPermission: 'settings:view',
-    vaultPath: 'secret/data/config/*',
-    capabilities: ['read', 'list'],
+    healthPermission: "settings:view",
+    vaultPath: "secret/data/config/*",
+    capabilities: ["read", "list"],
   },
   {
-    healthPermission: 'settings:update',
-    vaultPath: 'secret/data/config/*',
-    capabilities: ['create', 'update'],
+    healthPermission: "settings:update",
+    vaultPath: "secret/data/config/*",
+    capabilities: ["create", "update"],
   },
 
   // Encryption keys (for transit engine)
   {
-    healthPermission: 'users:view',
-    vaultPath: 'transit/keys/*',
-    capabilities: ['read', 'list'],
+    healthPermission: "users:view",
+    vaultPath: "transit/keys/*",
+    capabilities: ["read", "list"],
   },
   {
-    healthPermission: 'users:create',
-    vaultPath: 'transit/keys/*',
-    capabilities: ['create'],
+    healthPermission: "users:create",
+    vaultPath: "transit/keys/*",
+    capabilities: ["create"],
   },
 ];
 
@@ -136,21 +136,23 @@ export function generateVaultPolicyRules(
 
   // Generate HCL-like policy
   const policyPaths = Object.entries(rules).map(([path, caps]) => {
-    const capabilities = Array.from(caps).map((c) => `"${c}"`).join(', ');
+    const capabilities = Array.from(caps)
+      .map((c) => `"${c}"`)
+      .join(", ");
     return `path "${path}" {\n  capabilities = [${capabilities}]\n}`;
   });
 
-  return policyPaths.join('\n\n');
+  return policyPaths.join("\n\n");
 }
 
 /**
  * Role to vault policy name mapping
  */
 export const ROLE_TO_VAULT_POLICY: Record<string, string> = {
-  admin: 'admin-policy',
-  doctor: 'doctor-policy',
-  nurse: 'nurse-policy',
-  receptionist: 'receptionist-policy',
+  admin: "admin-policy",
+  doctor: "doctor-policy",
+  nurse: "nurse-policy",
+  receptionist: "receptionist-policy",
 };
 
 /**
@@ -158,12 +160,12 @@ export const ROLE_TO_VAULT_POLICY: Record<string, string> = {
  * Maps roles to their default vault capabilities
  */
 export const ROLE_CAPABILITIES: Record<string, VaultCapability[]> = {
-  admin: ['create', 'read', 'update', 'delete', 'list', 'sudo'],
-  doctor: ['create', 'read', 'update', 'list'],
-  nurse: ['read', 'update', 'list'],
-  receptionist: ['read', 'list'],
-  viewer: ['read', 'list'],
-  service: ['create', 'read', 'update', 'delete', 'list'],
+  admin: ["create", "read", "update", "delete", "list", "sudo"],
+  doctor: ["create", "read", "update", "list"],
+  nurse: ["read", "update", "list"],
+  receptionist: ["read", "list"],
+  viewer: ["read", "list"],
+  service: ["create", "read", "update", "delete", "list"],
 };
 
 /**
@@ -198,8 +200,8 @@ export function generateVaultPoliciesForRoles(
  * Creates realm-scoped paths with role-appropriate capabilities
  */
 export function generateRealmPolicy(realmId: string, role: string): string {
-  const capabilities = ROLE_CAPABILITIES[role] || ['read'];
-  const capabilitiesStr = capabilities.map((c) => `"${c}"`).join(', ');
+  const capabilities = ROLE_CAPABILITIES[role] || ["read"];
+  const capabilitiesStr = capabilities.map((c) => `"${c}"`).join(", ");
 
   return `# Auto-generated from Zanzibar realm membership
 # Role: ${role} in realm: ${realmId}
@@ -223,9 +225,9 @@ path "secret/realms/${realmId}/+/metadata/*" {
 export function generateServiceRealmPolicy(
   serviceId: string,
   realmId: string,
-  capabilities: VaultCapability[] = ['read', 'list']
+  capabilities: VaultCapability[] = ["read", "list"]
 ): string {
-  const capabilitiesStr = capabilities.map((c) => `"${c}"`).join(', ');
+  const capabilitiesStr = capabilities.map((c) => `"${c}"`).join(", ");
 
   return `# Service-to-realm access policy
 # Service: ${serviceId} accessing realm: ${realmId}
@@ -268,13 +270,8 @@ export function generateUserRealmPolicies(
 /**
  * Get policy names for a user's realm memberships
  */
-export function getUserRealmPolicyNames(
-  userId: string,
-  memberships: RealmMembership[]
-): string[] {
-  return memberships.map(
-    ({ realmId, role }) => `user-${userId}-realm-${realmId}-${role}`
-  );
+export function getUserRealmPolicyNames(userId: string, memberships: RealmMembership[]): string[] {
+  return memberships.map(({ realmId, role }) => `user-${userId}-realm-${realmId}-${role}`);
 }
 
 // ==========================================
@@ -337,7 +334,7 @@ export async function syncServiceRealmPolicies(
 
   for (const { realmId } of memberships) {
     const policyName = `service-${serviceId}-realm-${realmId}`;
-    const policy = generateServiceRealmPolicy(serviceId, realmId, ['read', 'list']);
+    const policy = generateServiceRealmPolicy(serviceId, realmId, ["read", "list"]);
     await vaultClient.writePolicy(policyName, policy);
     policyNames.push(policyName);
   }
@@ -361,4 +358,3 @@ export async function cleanupUserPolicies(
     }
   }
 }
-

@@ -1,10 +1,10 @@
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
+import { memo, useMemo } from "react";
+import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Separator } from "@/components/ui/separator";
 import { getTabActions } from "@/lib/tab-actions";
 import { useActiveTabId, useTabs } from "@/stores/tabStore";
-import { memo, useMemo } from "react";
 
 interface ActionRibbonProps {
   onAction?: (actionId: string, tabPath: string) => void;

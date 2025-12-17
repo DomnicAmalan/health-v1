@@ -3,8 +3,9 @@
  * Provides permission checking functionality throughout the admin UI
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type React from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
   checkPermission,
   checkPermissionsBatch,
@@ -16,15 +17,15 @@ interface PermissionContextValue {
   // Current user ID (should be set from auth context)
   currentUserId: string | null;
   setCurrentUserId: (userId: string | null) => void;
-  
+
   // Permission checking functions
   canAccess: (relation: string, object: string) => Promise<boolean>;
   canAccessBatch: (checks: Array<[string, string]>) => Promise<boolean[]>;
-  
+
   // Cached permission data
   userPermissions: UserPermissionsResponse | undefined;
   isLoadingPermissions: boolean;
-  
+
   // Refresh permissions
   refreshPermissions: () => void;
 }
@@ -39,13 +40,8 @@ interface PermissionProviderProps {
 /**
  * Permission Provider - wraps the app and provides permission context
  */
-export function PermissionProvider({
-  children,
-  userId: initialUserId,
-}: PermissionProviderProps) {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(
-    initialUserId || null
-  );
+export function PermissionProvider({ children, userId: initialUserId }: PermissionProviderProps) {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(initialUserId || null);
   const queryClient = useQueryClient();
 
   // Fetch user permissions
@@ -91,9 +87,11 @@ export function PermissionProvider({
       }
 
       try {
-        const batchChecks: Array<[string, string, string]> = checks.map(
-          ([relation, object]) => [currentUserId, relation, object]
-        );
+        const batchChecks: Array<[string, string, string]> = checks.map(([relation, object]) => [
+          currentUserId,
+          relation,
+          object,
+        ]);
         const response = await checkPermissionsBatch(batchChecks);
         return response.results;
       } catch (error) {
@@ -122,11 +120,7 @@ export function PermissionProvider({
     refreshPermissions,
   };
 
-  return (
-    <PermissionContext.Provider value={value}>
-      {children}
-    </PermissionContext.Provider>
-  );
+  return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
 }
 
 /**
@@ -146,11 +140,7 @@ export function usePermissions(): PermissionContextValue {
  * @param object - The object (e.g., "page:users", "button:create-user")
  * @param fallback - Default value if permission check fails (default: false)
  */
-export function useCanAccess(
-  relation: string,
-  object: string,
-  fallback: boolean = false
-): boolean {
+export function useCanAccess(relation: string, object: string, fallback: boolean = false): boolean {
   const { canAccess, currentUserId } = usePermissions();
   const [allowed, setAllowed] = useState<boolean>(fallback);
 
@@ -186,13 +176,9 @@ export function useCanAccess(
  * Hook for batch permission checks
  * @param checks - Array of [relation, object] tuples
  */
-export function usePermissionCheck(
-  checks: Array<[string, string]>
-): boolean[] {
+export function usePermissionCheck(checks: Array<[string, string]>): boolean[] {
   const { canAccessBatch, currentUserId } = usePermissions();
-  const [results, setResults] = useState<boolean[]>(
-    checks.map(() => false)
-  );
+  const [results, setResults] = useState<boolean[]>(checks.map(() => false));
 
   useEffect(() => {
     if (!currentUserId || checks.length === 0) {
@@ -221,4 +207,3 @@ export function usePermissionCheck(
 
   return results;
 }
-

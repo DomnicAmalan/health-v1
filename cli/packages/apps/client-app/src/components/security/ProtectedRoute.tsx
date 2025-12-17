@@ -3,11 +3,11 @@
  * Route-level permission checking and redirects
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import { Navigate } from "@tanstack/react-router";
 import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
-import { Navigate } from "@tanstack/react-router";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

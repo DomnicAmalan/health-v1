@@ -2,26 +2,24 @@
  * i18n index
  */
 
-export * from "./types";
-export * from "./locales";
-export * from "./labels";
 export * from "./context";
-export * from "./useTranslation";
-export { TranslationProvider, flattenTranslations, setTranslations } from "./TranslationProvider";
-
-// Pre-built translations for each app
-export { 
-  adminTranslations,
-  vaultTranslations,
-  clientTranslations,
-  commonTranslations,
-  mergeTranslations,
-} from "./translations";
-
+export * from "./labels";
+export * from "./locales";
 // Pre-configured providers for each app
 export {
   AdminTranslationProvider,
-  VaultTranslationProvider,
-  ClientTranslationProvider,
   type AppTranslationProviderProps,
+  ClientTranslationProvider,
+  VaultTranslationProvider,
 } from "./providers";
+export { flattenTranslations, setTranslations, TranslationProvider } from "./TranslationProvider";
+// Pre-built translations for each app
+export {
+  adminTranslations,
+  clientTranslations,
+  commonTranslations,
+  mergeTranslations,
+  vaultTranslations,
+} from "./translations";
+export * from "./types";
+export * from "./useTranslation";

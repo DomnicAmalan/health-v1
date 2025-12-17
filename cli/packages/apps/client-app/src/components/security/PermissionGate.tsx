@@ -4,14 +4,17 @@
  * Now supports optional vault ACL checking for secrets access
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import {
+  getVaultPathForPermission,
+  permissionRequiresVault,
+  useVaultCapabilities,
+} from "@lazarus-life/shared/vault";
+import { useMemo } from "react";
 import { Box } from "@/components/ui/box";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import { AccessDenied } from "./AccessDenied";
-import { useVaultCapabilities } from "@lazarus-life/shared/vault";
-import { getVaultPathForPermission, permissionRequiresVault } from "@lazarus-life/shared/vault";
-import { useMemo } from "react";
 
 interface PermissionGateProps {
   children: React.ReactNode;
@@ -44,7 +47,7 @@ export function PermissionGate({
   const effectiveVaultPath = useMemo(() => {
     if (vaultPath) return vaultPath;
     if (!checkVault) return null;
-    
+
     // Find the first permission that requires vault access
     for (const perm of permissions) {
       if (permissionRequiresVault(perm)) {
@@ -55,31 +58,35 @@ export function PermissionGate({
   }, [vaultPath, checkVault, permissions]);
 
   // Check vault capabilities if needed
-  const { 
-    canRead, 
-    canWrite, 
-    canDelete, 
-    canList, 
+  const {
+    canRead,
+    canWrite,
+    canDelete,
+    canList,
     isDenied: vaultDenied,
-    loading: vaultLoading 
-  } = useVaultCapabilities(effectiveVaultPath || '');
+    loading: vaultLoading,
+  } = useVaultCapabilities(effectiveVaultPath || "");
 
   // Check health-v1 permissions
-  const healthGranted = mode === "all" 
-    ? hasAllPermissions(permissions) 
-    : hasAnyPermission(permissions);
+  const healthGranted =
+    mode === "all" ? hasAllPermissions(permissions) : hasAnyPermission(permissions);
 
   // Check vault permissions if applicable
   const vaultGranted = useMemo(() => {
     if (!effectiveVaultPath) return true;
     if (vaultDenied) return false;
-    
+
     switch (vaultCapability) {
-      case "read": return canRead;
-      case "write": return canWrite;
-      case "delete": return canDelete;
-      case "list": return canList;
-      default: return canRead;
+      case "read":
+        return canRead;
+      case "write":
+        return canWrite;
+      case "delete":
+        return canDelete;
+      case "list":
+        return canList;
+      default:
+        return canRead;
     }
   }, [effectiveVaultPath, vaultDenied, vaultCapability, canRead, canWrite, canDelete, canList]);
 
@@ -93,7 +100,7 @@ export function PermissionGate({
   if (!granted) {
     // Log access denied
     if (resource) {
-      const reason = !healthGranted 
+      const reason = !healthGranted
         ? permissions.join(mode === "all" ? " AND " : " OR ")
         : `vault:${effectiveVaultPath}:${vaultCapability}`;
       logDenied(resource, reason);

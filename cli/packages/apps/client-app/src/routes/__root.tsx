@@ -1,30 +1,7 @@
-import { ActionRibbon } from "@/components/ActionRibbon";
-import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
-import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
-import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChatbox";
-import { VoiceCommandFAB } from "@/components/accessibility/VoiceCommandFAB";
-import { VoiceCommandFeedback } from "@/components/accessibility/VoiceCommandFeedback";
-import { VoiceCommandIndicator } from "@/components/accessibility/VoiceCommandIndicator";
-import {
-  CenteredLayout,
-  CleanLayout,
-  FullLayout,
-  MinimalLayout,
-} from "@/components/layout/Layouts";
-import { Box } from "@/components/ui/box";
-import { Container } from "@/components/ui/container";
-import { Flex } from "@/components/ui/flex";
-import { useDisclosure } from "@/hooks/ui/useDisclosure";
-import { SkipToMainContent, initializeAccessibility } from "@/lib/accessibility";
-import { checkSetupStatus } from "@/lib/api/setup";
-import { getLayoutForRoute } from "@/lib/layouts/routeLayouts";
-import { useAuthStore } from "@/stores/authStore";
-import { useActiveTabId, useOpenTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
-import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore";
 import { PERMISSIONS, type Permission } from "@lazarus-life/shared/constants/permissions";
 import {
-  Outlet,
   createRootRoute,
+  Outlet,
   redirect,
   useLocation,
   useNavigate,
@@ -44,6 +21,29 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
+import { ActionRibbon } from "@/components/ActionRibbon";
+import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
+import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
+import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChatbox";
+import { VoiceCommandFAB } from "@/components/accessibility/VoiceCommandFAB";
+import { VoiceCommandFeedback } from "@/components/accessibility/VoiceCommandFeedback";
+import { VoiceCommandIndicator } from "@/components/accessibility/VoiceCommandIndicator";
+import {
+  CenteredLayout,
+  CleanLayout,
+  FullLayout,
+  MinimalLayout,
+} from "@/components/layout/Layouts";
+import { Box } from "@/components/ui/box";
+import { Container } from "@/components/ui/container";
+import { Flex } from "@/components/ui/flex";
+import { useDisclosure } from "@/hooks/ui/useDisclosure";
+import { initializeAccessibility, SkipToMainContent } from "@/lib/accessibility";
+import { checkSetupStatus } from "@/lib/api/setup";
+import { getLayoutForRoute } from "@/lib/layouts/routeLayouts";
+import { useAuthStore } from "@/stores/authStore";
+import { useActiveTabId, useOpenTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
+import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore";
 
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {

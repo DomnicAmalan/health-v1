@@ -3,10 +3,10 @@
  * Show when listening for voice commands
  */
 
+import { Mic } from "lucide-react";
 import { Box } from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
-import { Mic } from "lucide-react";
 
 export function VoiceCommandIndicator() {
   const isListening = useVoiceCommandStore((state) => state.isListening);

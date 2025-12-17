@@ -3,16 +3,22 @@
  * View and manage user Data Encryption Keys
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import {
+  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
+  Label,
   Stack,
   Table,
   TableBody,
@@ -20,22 +26,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Badge,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Label,
 } from "@lazarus-life/ui-components";
-import { Search, Key, RotateCw, AlertCircle } from "lucide-react";
-import { ProtectedPage, ProtectedButton } from "../../lib/permissions";
-import {
-  listDekStatuses,
-  rotateUserDek,
-  type RotateDekRequest,
-} from "../../lib/api/encryption";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, Key, RotateCw, Search } from "lucide-react";
+import { useState } from "react";
+import { listDekStatuses, type RotateDekRequest, rotateUserDek } from "../../lib/api/encryption";
+import { ProtectedButton, ProtectedPage } from "../../lib/permissions";
 
 export function DekManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,9 +89,7 @@ export function DekManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">DEK Management</h1>
-              <p className="text-muted-foreground">
-                View and manage user Data Encryption Keys
-              </p>
+              <p className="text-muted-foreground">View and manage user Data Encryption Keys</p>
             </div>
           </div>
 
@@ -196,8 +190,8 @@ export function DekManagementPage() {
             <DialogHeader>
               <DialogTitle>Rotate User DEK</DialogTitle>
               <DialogDescription>
-                Rotating a DEK will decrypt all user data with the old key and re-encrypt it with
-                a new key. This process may take some time.
+                Rotating a DEK will decrypt all user data with the old key and re-encrypt it with a
+                new key. This process may take some time.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -217,8 +211,8 @@ export function DekManagementPage() {
               <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
                 <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Warning: This operation will re-encrypt all user data. Ensure you have backups
-                  and that this is necessary.
+                  Warning: This operation will re-encrypt all user data. Ensure you have backups and
+                  that this is necessary.
                 </p>
               </div>
             </div>
@@ -247,4 +241,3 @@ export function DekManagementPage() {
     </ProtectedPage>
   );
 }
-

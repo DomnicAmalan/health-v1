@@ -3,13 +3,12 @@
  * Pre-built translations for all apps
  */
 
-// Import common translations
-import commonEn from "./common/en.json";
-
 // Import app-specific translations
 import adminEn from "./admin/en.json";
-import vaultEn from "./vault/en.json";
 import clientEn from "./client/en.json";
+// Import common translations
+import commonEn from "./common/en.json";
+import vaultEn from "./vault/en.json";
 
 /**
  * Deep merge two translation objects
@@ -19,11 +18,11 @@ function mergeTranslations(
   override: Record<string, unknown>
 ): Record<string, unknown> {
   const result = { ...base };
-  
+
   for (const key of Object.keys(override)) {
     const baseValue = base[key];
     const overrideValue = override[key];
-    
+
     if (
       typeof baseValue === "object" &&
       baseValue !== null &&
@@ -40,7 +39,7 @@ function mergeTranslations(
       result[key] = overrideValue;
     }
   }
-  
+
   return result;
 }
 
@@ -48,18 +47,15 @@ function mergeTranslations(
 function buildAppTranslations(appLocales: Record<string, Record<string, unknown>>) {
   const result: Record<string, Record<string, unknown>> = {};
   const commonLocales = { en: commonEn };
-  
-  const locales = new Set([
-    ...Object.keys(commonLocales),
-    ...Object.keys(appLocales),
-  ]);
-  
+
+  const locales = new Set([...Object.keys(commonLocales), ...Object.keys(appLocales)]);
+
   for (const locale of locales) {
     const common = commonLocales[locale as keyof typeof commonLocales] || commonEn;
     const app = appLocales[locale] || {};
     result[locale] = mergeTranslations(common, app);
   }
-  
+
   return result;
 }
 

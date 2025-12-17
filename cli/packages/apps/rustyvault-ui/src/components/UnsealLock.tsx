@@ -1,9 +1,9 @@
-import { Lock, Key, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Key, Lock } from "lucide-react";
 
 interface UnsealLockProps {
-  progress: number;  // Keys entered so far
+  progress: number; // Keys entered so far
   threshold: number; // Keys needed to unseal
-  total: number;     // Total keys available (for display)
+  total: number; // Total keys available (for display)
 }
 
 export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
@@ -25,7 +25,10 @@ export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
         {/* Central Lock Icon */}
         <div className="relative z-10">
           {isUnlocked ? (
-            <Lock className="h-16 w-16 text-green-600 transition-all duration-300" style={{ transform: 'rotate(0deg)' }} />
+            <Lock
+              className="h-16 w-16 text-green-600 transition-all duration-300"
+              style={{ transform: "rotate(0deg)" }}
+            />
           ) : (
             <Lock className="h-16 w-16 text-destructive transition-all duration-300" />
           )}
@@ -35,7 +38,7 @@ export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
         {Array.from({ length: threshold }).map((_, index) => {
           const isFilled = index < progress;
           const position = getKeySlotPosition(index, threshold, 70);
-          
+
           return (
             <div
               key={`key-slot-${index}`}
@@ -43,7 +46,7 @@ export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
               style={{
                 left: `calc(50% + ${position.x}px)`,
                 top: `calc(50% + ${position.y}px)`,
-                transform: 'translate(-50%, -50%)',
+                transform: "translate(-50%, -50%)",
               }}
             >
               {isFilled ? (
@@ -76,12 +79,10 @@ export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
         </p>
         {!isUnlocked && remaining > 0 && (
           <p className="text-sm text-muted-foreground mt-1">
-            {remaining} more {remaining === 1 ? 'key' : 'keys'} needed
+            {remaining} more {remaining === 1 ? "key" : "keys"} needed
           </p>
         )}
-        <p className="text-xs text-muted-foreground mt-2">
-          Total keys available: {total}
-        </p>
+        <p className="text-xs text-muted-foreground mt-2">Total keys available: {total}</p>
       </div>
     </div>
   );

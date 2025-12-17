@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { Copy, Check, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import {
+  Alert,
+  AlertDescription,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Button,
-  Alert,
-  AlertDescription,
   Input,
   Label,
-} from '@lazarus-life/ui-components';
-import { type SecretIdResponse, formatTTL } from '@/lib/api/approle';
+} from "@lazarus-life/ui-components";
+import { AlertTriangle, Check, Copy, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { formatTTL, type SecretIdResponse } from "@/lib/api/approle";
 
 interface SecretIdDialogProps {
   open: boolean;
@@ -39,7 +39,7 @@ export function SecretIdDialog({
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (err) {
-        console.error('Failed to copy:', err);
+        console.error("Failed to copy:", err);
       }
     }
   };
@@ -48,7 +48,7 @@ export function SecretIdDialog({
     if (!acknowledged) {
       // Ask for confirmation if not acknowledged
       const confirm = window.confirm(
-        'Are you sure? This secret_id cannot be retrieved again. Make sure you have copied it.'
+        "Are you sure? This secret_id cannot be retrieved again. Make sure you have copied it.",
       );
       if (!confirm) return;
     }
@@ -77,8 +77,8 @@ export function SecretIdDialog({
         <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800 dark:text-amber-200">
-            <strong>Important:</strong> This is a one-time display. Copy and store this secret_id 
-            in a secure location. You will not be able to retrieve it again.
+            <strong>Important:</strong> This is a one-time display. Copy and store this secret_id in
+            a secure location. You will not be able to retrieve it again.
           </AlertDescription>
         </Alert>
 
@@ -91,30 +91,17 @@ export function SecretIdDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Secret ID</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSecret(!showSecret)}
-              >
-                {showSecret ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+              <Button variant="ghost" size="sm" onClick={() => setShowSecret(!showSecret)}>
+                {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
             <div className="flex gap-2">
               <Input
-                value={showSecret ? secretIdData.secret_id : '•'.repeat(36)}
+                value={showSecret ? secretIdData.secret_id : "•".repeat(36)}
                 readOnly
                 className="font-mono text-sm"
               />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleCopy}
-                className="shrink-0"
-              >
+              <Button variant="outline" size="icon" onClick={handleCopy} className="shrink-0">
                 {copied ? (
                   <Check className="h-4 w-4 text-green-600" />
                 ) : (
@@ -144,8 +131,8 @@ export function SecretIdDialog({
               <div>
                 <Label className="text-muted-foreground">Max Uses</Label>
                 <p className="font-medium">
-                  {secretIdData.secret_id_num_uses === 0 
-                    ? 'Unlimited' 
+                  {secretIdData.secret_id_num_uses === 0
+                    ? "Unlimited"
                     : secretIdData.secret_id_num_uses}
                 </p>
               </div>
@@ -170,13 +157,12 @@ export function SecretIdDialog({
           <Button
             onClick={handleClose}
             disabled={!acknowledged && !copied}
-            className={acknowledged || copied ? '' : 'opacity-50'}
+            className={acknowledged || copied ? "" : "opacity-50"}
           >
-            {acknowledged || copied ? 'Done' : 'Copy Secret ID First'}
+            {acknowledged || copied ? "Done" : "Copy Secret ID First"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-

@@ -3,23 +3,23 @@
  * Dialog for assigning permissions to users, roles, or groups
  */
 
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Button,
   Input,
   Label,
   Select,
   SelectItem,
   SelectValue,
 } from "@lazarus-life/ui-components";
-import { assignPermission, type AssignPermissionRequest } from "../../lib/api/permissions";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { type AssignPermissionRequest, assignPermission } from "../../lib/api/permissions";
 
 interface AssignPermissionDialogProps {
   open: boolean;
@@ -68,11 +68,12 @@ export function AssignPermissionDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const subjectStr = subjectType === "user" 
-      ? `user:${subject}`
-      : subjectType === "role"
-      ? `role:${subject}`
-      : `group:${subject}`;
+    const subjectStr =
+      subjectType === "user"
+        ? `user:${subject}`
+        : subjectType === "role"
+          ? `role:${subject}`
+          : `group:${subject}`;
 
     mutation.mutate({
       subject: subjectStr,
@@ -111,24 +112,26 @@ export function AssignPermissionDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="subject">
-                {subjectType === "user" ? "User ID" : subjectType === "role" ? "Role Name" : "Group ID"}
+                {subjectType === "user"
+                  ? "User ID"
+                  : subjectType === "role"
+                    ? "Role Name"
+                    : "Group ID"}
               </Label>
               <Input
                 id="subject"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder={subjectType === "user" ? "user-id" : subjectType === "role" ? "admin" : "group-id"}
+                placeholder={
+                  subjectType === "user" ? "user-id" : subjectType === "role" ? "admin" : "group-id"
+                }
                 required
               />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="relation">Relation</Label>
-              <Select
-                id="relation"
-                value={relation}
-                onChange={(e) => setRelation(e.target.value)}
-              >
+              <Select id="relation" value={relation} onChange={(e) => setRelation(e.target.value)}>
                 <SelectValue placeholder="Select relation" />
                 <SelectItem value="can_view">Can View</SelectItem>
                 <SelectItem value="can_edit">Can Edit</SelectItem>
@@ -186,4 +189,3 @@ export function AssignPermissionDialog({
     </Dialog>
   );
 }
-

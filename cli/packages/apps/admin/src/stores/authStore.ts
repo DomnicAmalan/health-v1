@@ -3,10 +3,10 @@
  * Authentication state management with Zustand and Immer
  */
 
-import { login as apiLogin, logout as apiLogout, getUserInfo } from "@/lib/api/auth";
-import type { UserInfo } from "@/lib/api/types";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { login as apiLogin, logout as apiLogout, getUserInfo } from "@/lib/api/auth";
+import type { UserInfo } from "@/lib/api/types";
 
 const USER_STORAGE_KEY = "admin_auth_user";
 
@@ -166,4 +166,3 @@ export const useAuthStore = create<AuthStore>()(
     },
   }))
 );
-

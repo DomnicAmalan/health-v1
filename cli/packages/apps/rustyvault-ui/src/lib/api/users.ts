@@ -1,5 +1,5 @@
-import { apiClient } from './client';
-import { VAULT_ROUTES } from './routes';
+import { apiClient } from "./client";
+import { VAULT_ROUTES } from "./routes";
 
 export interface User {
   username: string;
@@ -91,7 +91,11 @@ export const usersApi = {
   /**
    * Create or update a user in a realm
    */
-  writeForRealm: async (realmId: string, username: string, request: CreateUserRequest): Promise<void> => {
+  writeForRealm: async (
+    realmId: string,
+    username: string,
+    request: CreateUserRequest,
+  ): Promise<void> => {
     await apiClient.post(VAULT_ROUTES.REALM_USERS.CREATE(realmId, username), request);
   },
 
@@ -105,8 +109,13 @@ export const usersApi = {
   /**
    * Login with username and password in a realm
    */
-  loginForRealm: async (realmId: string, username: string, password: string): Promise<LoginResponse> => {
-    return apiClient.post<LoginResponse>(VAULT_ROUTES.REALM_USERS.LOGIN(realmId, username), { password });
+  loginForRealm: async (
+    realmId: string,
+    username: string,
+    password: string,
+  ): Promise<LoginResponse> => {
+    return apiClient.post<LoginResponse>(VAULT_ROUTES.REALM_USERS.LOGIN(realmId, username), {
+      password,
+    });
   },
 };
-

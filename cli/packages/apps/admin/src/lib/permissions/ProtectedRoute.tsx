@@ -43,14 +43,9 @@ export function withProtectedRoute<T extends object>(
 ) {
   return function ProtectedComponent(props: T) {
     return (
-      <ProtectedRoute
-        pageName={pageName}
-        relation={relation}
-        fallbackPath={fallbackPath}
-      >
+      <ProtectedRoute pageName={pageName} relation={relation} fallbackPath={fallbackPath}>
         <Component {...props} />
       </ProtectedRoute>
     );
   };
 }
-

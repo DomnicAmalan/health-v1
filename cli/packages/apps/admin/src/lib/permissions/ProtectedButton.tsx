@@ -3,8 +3,8 @@
  * Wraps buttons to check permission before rendering or enabling
  */
 
-import { useCanAccess } from "./context";
 import { Button, type ButtonProps } from "@lazarus-life/ui-components";
+import { useCanAccess } from "./context";
 
 interface ProtectedButtonProps extends ButtonProps {
   buttonId: string; // e.g., "create-user", "delete-user"
@@ -39,4 +39,3 @@ export function ProtectedButton({
     />
   );
 }
-

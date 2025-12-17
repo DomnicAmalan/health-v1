@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { secretsApi } from '@/lib/api';
-import { useRealmStore } from '@/stores/realmStore';
 import {
+  Alert,
+  AlertDescription,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -11,35 +10,50 @@ import {
   CardTitle,
   Input,
   Label,
-  Badge,
-  Alert,
-  AlertDescription,
-} from '@lazarus-life/ui-components';
-import { Plus, Trash2, Edit, Folder, File, Loader2, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Edit,
+  File,
+  Folder,
+  Globe,
+  Loader2,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { secretsApi } from "@/lib/api";
+import { useRealmStore } from "@/stores/realmStore";
 
 export function SecretsPage() {
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
 
-  const [currentPath, setCurrentPath] = useState('');
+  const [currentPath, setCurrentPath] = useState("");
   const [selectedSecret, setSelectedSecret] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [newSecretPath, setNewSecretPath] = useState('');
+  const [newSecretPath, setNewSecretPath] = useState("");
   const [secretData, setSecretData] = useState<Record<string, string>>({});
-  const [newKey, setNewKey] = useState('');
-  const [newValue, setNewValue] = useState('');
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
 
   // Reset state when realm changes
   useEffect(() => {
-    setCurrentPath('');
+    setCurrentPath("");
     setSelectedSecret(null);
     setIsCreating(false);
     setSecretData({});
   }, [currentRealm?.id, isGlobalMode]);
 
   // Fetch secrets list (realm-scoped or global)
-  const { data: secrets, isLoading, error } = useQuery({
-    queryKey: ['secrets', currentPath, currentRealm?.id, isGlobalMode],
+  const {
+    data: secrets,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["secrets", currentPath, currentRealm?.id, isGlobalMode],
     queryFn: () =>
       currentRealm && !isGlobalMode
         ? secretsApi.listForRealm(currentRealm.id, currentPath)
@@ -49,11 +63,12 @@ export function SecretsPage() {
 
   // Fetch selected secret
   const { data: secretDetails, isLoading: isLoadingSecret } = useQuery({
-    queryKey: ['secret', selectedSecret, currentRealm?.id, isGlobalMode],
+    queryKey: ["secret", selectedSecret, currentRealm?.id, isGlobalMode],
     queryFn: async () => {
-      const data = currentRealm && !isGlobalMode
-        ? await secretsApi.readForRealm(currentRealm.id, selectedSecret!)
-        : await secretsApi.read(selectedSecret!);
+      const data =
+        currentRealm && !isGlobalMode
+          ? await secretsApi.readForRealm(currentRealm.id, selectedSecret!)
+          : await secretsApi.read(selectedSecret!);
       setSecretData((data.data || {}) as Record<string, string>);
       return data;
     },
@@ -67,10 +82,10 @@ export function SecretsPage() {
         ? secretsApi.writeForRealm(currentRealm.id, path, data)
         : secretsApi.write(path, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['secrets'] });
-      queryClient.invalidateQueries({ queryKey: ['secret', selectedSecret] });
+      queryClient.invalidateQueries({ queryKey: ["secrets"] });
+      queryClient.invalidateQueries({ queryKey: ["secret", selectedSecret] });
       setIsCreating(false);
-      setNewSecretPath('');
+      setNewSecretPath("");
       setSecretData({});
     },
   });
@@ -82,7 +97,7 @@ export function SecretsPage() {
         ? secretsApi.deleteForRealm(currentRealm.id, path)
         : secretsApi.delete(path),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['secrets'] });
+      queryClient.invalidateQueries({ queryKey: ["secrets"] });
       if (selectedSecret === currentPath) {
         setSelectedSecret(null);
       }
@@ -104,8 +119,8 @@ export function SecretsPage() {
   const handleAddKeyValue = () => {
     if (newKey && newValue) {
       setSecretData({ ...secretData, [newKey]: newValue });
-      setNewKey('');
-      setNewValue('');
+      setNewKey("");
+      setNewValue("");
     }
   };
 
@@ -115,16 +130,14 @@ export function SecretsPage() {
     setSecretData(newData);
   };
 
-  const pathParts = currentPath.split('/').filter(Boolean);
+  const pathParts = currentPath.split("/").filter(Boolean);
   const breadcrumbs = pathParts.map((part, index) => ({
     name: part,
-    path: pathParts.slice(0, index + 1).join('/'),
+    path: pathParts.slice(0, index + 1).join("/"),
   }));
 
   // Context indicator
-  const contextLabel = currentRealm && !isGlobalMode
-    ? `Realm: ${currentRealm.name}`
-    : 'Global';
+  const contextLabel = currentRealm && !isGlobalMode ? `Realm: ${currentRealm.name}` : "Global";
 
   return (
     <div className="p-6 space-y-6">
@@ -132,7 +145,7 @@ export function SecretsPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">Secrets</h1>
-            <Badge variant={isGlobalMode ? 'default' : 'secondary'}>
+            <Badge variant={isGlobalMode ? "default" : "secondary"}>
               <Globe className="h-3 w-3 mr-1" />
               {contextLabel}
             </Badge>
@@ -143,7 +156,7 @@ export function SecretsPage() {
           onClick={() => {
             setIsCreating(true);
             setSelectedSecret(null);
-            setNewSecretPath('');
+            setNewSecretPath("");
             setSecretData({});
           }}
         >
@@ -163,7 +176,7 @@ export function SecretsPage() {
           </>
         )}
         <button
-          onClick={() => setCurrentPath('')}
+          onClick={() => setCurrentPath("")}
           className="text-muted-foreground hover:text-foreground"
         >
           secret
@@ -187,7 +200,9 @@ export function SecretsPage() {
           <CardHeader>
             <CardTitle className="text-lg">Secrets</CardTitle>
             <CardDescription>
-              {isLoading ? 'Loading...' : `${secrets?.length || 0} ${secrets?.length === 1 ? 'item' : 'items'}`}
+              {isLoading
+                ? "Loading..."
+                : `${secrets?.length || 0} ${secrets?.length === 1 ? "item" : "items"}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -199,13 +214,13 @@ export function SecretsPage() {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {error instanceof Error ? error.message : 'Failed to load secrets'}
+                  {error instanceof Error ? error.message : "Failed to load secrets"}
                 </AlertDescription>
               </Alert>
             ) : secrets && secrets.length > 0 ? (
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {secrets.map((secret) => {
-                  const isDirectory = secret.endsWith('/');
+                  const isDirectory = secret.endsWith("/");
                   const secretName = isDirectory ? secret.slice(0, -1) : secret;
                   const fullPath = currentPath ? `${currentPath}/${secretName}` : secretName;
 
@@ -214,8 +229,8 @@ export function SecretsPage() {
                       key={secret}
                       className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
                         selectedSecret === fullPath
-                          ? 'bg-primary/10 border-primary'
-                          : 'hover:bg-accent'
+                          ? "bg-primary/10 border-primary"
+                          : "hover:bg-accent"
                       }`}
                       onClick={() => {
                         if (isDirectory) {
@@ -235,9 +250,7 @@ export function SecretsPage() {
                         )}
                         <span className="font-medium">{secretName}</span>
                       </div>
-                      {isDirectory && (
-                        <Badge variant="secondary">Directory</Badge>
-                      )}
+                      {isDirectory && <Badge variant="secondary">Directory</Badge>}
                     </div>
                   );
                 })}
@@ -255,14 +268,18 @@ export function SecretsPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg">
-              {isCreating ? 'Create New Secret' : selectedSecret ? `Secret: ${selectedSecret}` : 'Select a Secret'}
+              {isCreating
+                ? "Create New Secret"
+                : selectedSecret
+                  ? `Secret: ${selectedSecret}`
+                  : "Select a Secret"}
             </CardTitle>
             <CardDescription>
               {isCreating
-                ? 'Create a new secret with key-value pairs'
+                ? "Create a new secret with key-value pairs"
                 : selectedSecret
-                ? 'View and edit secret data'
-                : 'Select a secret from the list to view details'}
+                  ? "View and edit secret data"
+                  : "Select a secret from the list to view details"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -292,11 +309,7 @@ export function SecretsPage() {
                             <Input value={key} readOnly className="font-mono text-sm" />
                             <Input value={value} readOnly className="font-mono text-sm" />
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveKey(key)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveKey(key)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -329,7 +342,11 @@ export function SecretsPage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleCreateSecret}
-                    disabled={saveSecretMutation.isPending || !newSecretPath || Object.keys(secretData).length === 0}
+                    disabled={
+                      saveSecretMutation.isPending ||
+                      !newSecretPath ||
+                      Object.keys(secretData).length === 0
+                    }
                   >
                     {saveSecretMutation.isPending ? (
                       <>
@@ -375,7 +392,9 @@ export function SecretsPage() {
                                 />
                                 <Input
                                   value={value}
-                                  onChange={(e) => setSecretData({ ...secretData, [key]: e.target.value })}
+                                  onChange={(e) =>
+                                    setSecretData({ ...secretData, [key]: e.target.value })
+                                  }
                                   className="font-mono text-sm"
                                   type="password"
                                 />
@@ -417,7 +436,9 @@ export function SecretsPage() {
                     <div className="flex gap-2">
                       <Button
                         onClick={handleUpdateSecret}
-                        disabled={saveSecretMutation.isPending || Object.keys(secretData).length === 0}
+                        disabled={
+                          saveSecretMutation.isPending || Object.keys(secretData).length === 0
+                        }
                       >
                         {saveSecretMutation.isPending ? (
                           <>
@@ -437,7 +458,7 @@ export function SecretsPage() {
                         disabled={deleteSecretMutation.isPending}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        {deleteSecretMutation.isPending ? 'Deleting...' : 'Delete'}
+                        {deleteSecretMutation.isPending ? "Deleting..." : "Delete"}
                       </Button>
                     </div>
                   </>

@@ -4,13 +4,13 @@
  * Supports both health-v1 permissions and vault ACL denials
  */
 
+import type { Permission } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
+import { AlertCircle, Lock, Shield } from "lucide-react";
 import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/card";
 import { Stack } from "@/components/ui/stack";
 import { usePermissions } from "@/hooks/security/usePermissions";
-import type { Permission } from "@lazarus-life/shared/constants/permissions";
-import { useTranslation } from "@lazarus-life/shared/i18n";
-import { AlertCircle, Lock, Shield } from "lucide-react";
 
 interface AccessDeniedProps {
   type: "route" | "tab" | "component" | "api";
@@ -44,7 +44,9 @@ export function AccessDenied({
         <Stack spacing="sm" align="center">
           <h3 className="text-lg font-semibold">{t("security.accessDenied")}</h3>
           <p className="text-sm text-muted-foreground text-center">
-            {t("security.noPermission", { type: type === "route" ? "page" : type === "tab" ? "tab" : "resource" })}
+            {t("security.noPermission", {
+              type: type === "route" ? "page" : type === "tab" ? "tab" : "resource",
+            })}
           </p>
         </Stack>
 
@@ -80,9 +82,7 @@ export function AccessDenied({
             <Box className="text-sm text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
               {vaultPath}
             </Box>
-            <Box className="text-xs text-muted-foreground">
-              {t("security.contactAdminVault")}
-            </Box>
+            <Box className="text-xs text-muted-foreground">{t("security.contactAdminVault")}</Box>
           </Stack>
         )}
 

@@ -3,8 +3,9 @@
  * Display available keyboard shortcuts
  */
 
-import { Box } from "@/components/ui/box";
 import { Button } from "@lazarus-life/ui-components";
+import { Keyboard } from "lucide-react";
+import { Box } from "@/components/ui/box";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,6 @@ import {
 import { Stack } from "@/components/ui/stack";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { keyboardShortcutManager } from "@/lib/keyboard/shortcuts";
-import { Keyboard } from "lucide-react";
 
 interface KeyboardShortcutsHelpProps {
   showTrigger?: boolean;

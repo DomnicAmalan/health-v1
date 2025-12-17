@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface ProvisionUserRequest {
   email: string;
@@ -13,7 +13,7 @@ export interface ProvisionUserRequest {
 
 export interface AppAccessRequest {
   app_name: string;
-  access_level: 'read' | 'write' | 'admin';
+  access_level: "read" | "write" | "admin";
 }
 
 export interface VaultAccessRequest {
@@ -70,7 +70,7 @@ export const provisioningApi = {
    * Creates user, assigns role, grants app access, creates vault access
    */
   provisionUser: async (request: ProvisionUserRequest): Promise<ProvisionUserResponse> => {
-    return apiClient.post<ProvisionUserResponse>('/users/provision', request);
+    return apiClient.post<ProvisionUserResponse>("/users/provision", request);
   },
 
   /**
@@ -118,9 +118,12 @@ export const provisioningApi = {
   /**
    * Get user's vault access across realms
    */
-  getUserVaultAccess: async (userId: string): Promise<Array<{ realm_id: string; has_user: boolean; has_token: boolean }>> => {
-    const response = await apiClient.get<{ access: Array<{ realm_id: string; has_user: boolean; has_token: boolean }> }>(`/users/${userId}/vault-access`);
+  getUserVaultAccess: async (
+    userId: string
+  ): Promise<Array<{ realm_id: string; has_user: boolean; has_token: boolean }>> => {
+    const response = await apiClient.get<{
+      access: Array<{ realm_id: string; has_user: boolean; has_token: boolean }>;
+    }>(`/users/${userId}/vault-access`);
     return response.access || [];
   },
 };
-

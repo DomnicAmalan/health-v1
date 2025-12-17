@@ -1,13 +1,12 @@
-import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { Button } from "@lazarus-life/ui-components";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@lazarus-life/ui-components";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import { Button, Input } from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { Bell, Shield, User } from "lucide-react";
+import { ProtectedRoute } from "@/components/security/ProtectedRoute";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsComponent,
@@ -80,7 +79,9 @@ function SettingsComponentInner() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">{t("settings.pushNotifications")}</p>
-                <p className="text-xs text-muted-foreground">{t("settings.receivePushNotifications")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.receivePushNotifications")}
+                </p>
               </div>
               <Button variant="outline" size="sm">
                 {t("common.enabled")}

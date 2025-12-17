@@ -1,9 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-import { Box } from "@/components/ui/box";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flex } from "@/components/ui/flex";
-import { Stack } from "@/components/ui/stack";
-import { useOpenTab } from "@/stores/tabStore";
 import { useTranslation } from "@lazarus-life/shared/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -15,6 +9,12 @@ import {
   FileText,
   Users,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Box } from "@/components/ui/box";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Flex } from "@/components/ui/flex";
+import { Stack } from "@/components/ui/stack";
+import { useOpenTab } from "@/stores/tabStore";
 
 export const Route = createFileRoute("/")({
   component: DashboardComponent,
@@ -106,7 +106,9 @@ function DashboardComponent() {
     <Stack spacing="lg">
       <Stack spacing="xs">
         <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
-        <p className="text-muted-foreground">{t("dashboard.welcomeBack", { name: "Dr. John Doe" })}</p>
+        <p className="text-muted-foreground">
+          {t("dashboard.welcomeBack", { name: "Dr. John Doe" })}
+        </p>
       </Stack>
 
       {/* Stats Grid */}
@@ -188,7 +190,9 @@ function DashboardComponent() {
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
                   <p className="font-medium">{t("alerts.medicationInteractions")}</p>
-                  <p className="text-sm text-muted-foreground">{t("alerts.potentialInteractions", { count: 2 })}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("alerts.potentialInteractions", { count: 2 })}
+                  </p>
                 </Box>
                 <Badge variant="destructive">2</Badge>
               </Flex>
@@ -209,14 +213,18 @@ function DashboardComponent() {
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
                   <p className="font-medium">{t("alerts.dischargeSummaries")}</p>
-                  <p className="text-sm text-muted-foreground">{t("alerts.pendingCompletion", { count: 5 })}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("alerts.pendingCompletion", { count: 5 })}
+                  </p>
                 </Box>
                 <Badge variant="secondary">5</Badge>
               </Flex>
               <Flex className="items-center justify-between p-3 border rounded-lg">
                 <Box>
                   <p className="font-medium">{t("alerts.clinicalNotes")}</p>
-                  <p className="text-sm text-muted-foreground">{t("alerts.notesAwaitingSignature", { count: 12 })}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("alerts.notesAwaitingSignature", { count: 12 })}
+                  </p>
                 </Box>
                 <Badge variant="secondary">12</Badge>
               </Flex>

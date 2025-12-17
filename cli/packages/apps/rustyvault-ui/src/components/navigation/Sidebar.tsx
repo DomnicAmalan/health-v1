@@ -1,11 +1,11 @@
+import { useTranslation } from '@lazarus-life/shared/i18n';
+import { Button, cn, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lazarus-life/ui-components';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
-import { LayoutDashboard, Lock, Globe, Settings, LogOut, Shield, Key, Users, AppWindow, KeyRound, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn, Button, Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@lazarus-life/ui-components';
+import { AppWindow, ChevronLeft, ChevronRight, Globe, Key, KeyRound, LayoutDashboard, Lock, LogOut, Settings, Shield, Users } from 'lucide-react';
+import { RealmSelector } from '@/components/RealmSelector';
 import { useAuthStore } from '@/stores/authStore';
 import { useRealmStore } from '@/stores/realmStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useTranslation } from '@lazarus-life/shared/i18n';
-import { RealmSelector } from '@/components/RealmSelector';
 
 interface NavItem {
   nameKey: string;

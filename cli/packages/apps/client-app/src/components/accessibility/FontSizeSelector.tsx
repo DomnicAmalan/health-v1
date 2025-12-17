@@ -3,9 +3,9 @@
  * Adjust font size for better readability
  */
 
+import { useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
-import { useEffect } from "react";
 
 export function FontSizeSelector() {
   const fontSize = useAccessibilityStore((state) => state.preferences.fontSize);

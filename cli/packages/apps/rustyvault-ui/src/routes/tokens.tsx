@@ -1,7 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { tokensApi, CreateTokenRequest } from '@/lib/api';
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -10,9 +8,11 @@ import {
   CardTitle,
   Input,
   Label,
-  Badge,
-} from '@lazarus-life/ui-components';
-import { Key, RefreshCw, Trash2, Plus, Copy, Check } from 'lucide-react';
+} from "@lazarus-life/ui-components";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Copy, Key, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { type CreateTokenRequest, tokensApi } from "@/lib/api";
 
 export function TokensPage() {
   const queryClient = useQueryClient();
@@ -20,17 +20,17 @@ export function TokensPage() {
   const [newToken, setNewToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [createForm, setCreateForm] = useState<CreateTokenRequest>({
-    display_name: '',
+    display_name: "",
     policies: [],
     ttl: 3600,
     renewable: true,
     num_uses: 0,
   });
-  const [policiesInput, setPoliciesInput] = useState('');
+  const [policiesInput, setPoliciesInput] = useState("");
 
   // Fetch current token info
   const { data: tokenInfo, isLoading } = useQuery({
-    queryKey: ['token-self'],
+    queryKey: ["token-self"],
     queryFn: () => tokensApi.lookupSelf(),
   });
 
@@ -41,13 +41,13 @@ export function TokensPage() {
       setNewToken(data.auth.client_token);
       setIsCreating(false);
       setCreateForm({
-        display_name: '',
+        display_name: "",
         policies: [],
         ttl: 3600,
         renewable: true,
         num_uses: 0,
       });
-      setPoliciesInput('');
+      setPoliciesInput("");
     },
   });
 
@@ -55,7 +55,7 @@ export function TokensPage() {
   const renewTokenMutation = useMutation({
     mutationFn: () => tokensApi.renewSelf(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['token-self'] });
+      queryClient.invalidateQueries({ queryKey: ["token-self"] });
     },
   });
 
@@ -64,13 +64,13 @@ export function TokensPage() {
     mutationFn: () => tokensApi.revokeSelf(),
     onSuccess: () => {
       // Logout after revoking self
-      window.location.href = '/login';
+      window.location.href = "/login";
     },
   });
 
   const handleCreateToken = () => {
     const policies = policiesInput
-      .split(',')
+      .split(",")
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
     createTokenMutation.mutate({ ...createForm, policies });
@@ -91,9 +91,7 @@ export function TokensPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Tokens</h1>
-          <p className="text-muted-foreground">
-            Manage authentication tokens
-          </p>
+          <p className="text-muted-foreground">Manage authentication tokens</p>
         </div>
         <Button onClick={() => setIsCreating(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -121,11 +119,7 @@ export function TokensPage() {
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => setNewToken(null)}
-            >
+            <Button variant="outline" className="mt-4" onClick={() => setNewToken(null)}>
               Dismiss
             </Button>
           </CardContent>
@@ -140,9 +134,7 @@ export function TokensPage() {
               <Key className="h-5 w-5" />
               Current Token
             </CardTitle>
-            <CardDescription>
-              Information about your current authentication token
-            </CardDescription>
+            <CardDescription>Information about your current authentication token</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -151,7 +143,7 @@ export function TokensPage() {
               <div className="space-y-4">
                 <div>
                   <Label className="text-muted-foreground">Display Name</Label>
-                  <p className="font-medium">{token.display_name || 'N/A'}</p>
+                  <p className="font-medium">{token.display_name || "N/A"}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Policies</Label>
@@ -166,19 +158,17 @@ export function TokensPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-muted-foreground">TTL</Label>
-                    <p className="font-medium">{token.ttl ? `${token.ttl}s` : 'Never'}</p>
+                    <p className="font-medium">{token.ttl ? `${token.ttl}s` : "Never"}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Renewable</Label>
-                    <p className="font-medium">{token.renewable ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{token.renewable ? "Yes" : "No"}</p>
                   </div>
                 </div>
                 {token.expires_at && (
                   <div>
                     <Label className="text-muted-foreground">Expires At</Label>
-                    <p className="font-medium">
-                      {new Date(token.expires_at).toLocaleString()}
-                    </p>
+                    <p className="font-medium">{new Date(token.expires_at).toLocaleString()}</p>
                   </div>
                 )}
                 <div className="flex gap-2 pt-4">
@@ -189,7 +179,7 @@ export function TokensPage() {
                       disabled={renewTokenMutation.isPending}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
-                      {renewTokenMutation.isPending ? 'Renewing...' : 'Renew Token'}
+                      {renewTokenMutation.isPending ? "Renewing..." : "Renew Token"}
                     </Button>
                   )}
                   <Button
@@ -198,7 +188,7 @@ export function TokensPage() {
                     disabled={revokeSelfMutation.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    {revokeSelfMutation.isPending ? 'Revoking...' : 'Revoke & Logout'}
+                    {revokeSelfMutation.isPending ? "Revoking..." : "Revoke & Logout"}
                   </Button>
                 </div>
               </div>
@@ -214,12 +204,12 @@ export function TokensPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              {isCreating ? 'Create New Token' : 'Token Generation'}
+              {isCreating ? "Create New Token" : "Token Generation"}
             </CardTitle>
             <CardDescription>
               {isCreating
-                ? 'Configure and create a new token'
-                : 'Create child tokens for applications'}
+                ? "Configure and create a new token"
+                : "Create child tokens for applications"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -230,9 +220,7 @@ export function TokensPage() {
                   <Input
                     id="display_name"
                     value={createForm.display_name}
-                    onChange={(e) =>
-                      setCreateForm({ ...createForm, display_name: e.target.value })
-                    }
+                    onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
                     placeholder="my-app-token"
                   />
                 </div>
@@ -274,19 +262,14 @@ export function TokensPage() {
                     type="checkbox"
                     id="renewable"
                     checked={createForm.renewable}
-                    onChange={(e) =>
-                      setCreateForm({ ...createForm, renewable: e.target.checked })
-                    }
+                    onChange={(e) => setCreateForm({ ...createForm, renewable: e.target.checked })}
                     className="rounded border-gray-300"
                   />
                   <Label htmlFor="renewable">Renewable</Label>
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={handleCreateToken}
-                    disabled={createTokenMutation.isPending}
-                  >
-                    {createTokenMutation.isPending ? 'Creating...' : 'Create Token'}
+                  <Button onClick={handleCreateToken} disabled={createTokenMutation.isPending}>
+                    {createTokenMutation.isPending ? "Creating..." : "Create Token"}
                   </Button>
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
@@ -309,4 +292,3 @@ export function TokensPage() {
     </div>
   );
 }
-

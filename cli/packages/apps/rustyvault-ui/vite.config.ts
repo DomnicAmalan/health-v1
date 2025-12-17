@@ -23,7 +23,7 @@ export default defineConfig({
           "react-vendor": ["react", "react-dom"],
           "query-vendor": ["@tanstack/react-query"],
           "ui-vendor": ["@lazarus-life/ui-components"],
-          "shared": ["@lazarus-life/shared"],
+          shared: ["@lazarus-life/shared"],
         },
       },
     },
@@ -35,4 +35,3 @@ export default defineConfig({
   },
   envPrefix: ["VITE_"],
 });
-

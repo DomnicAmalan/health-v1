@@ -1,14 +1,14 @@
-import { ReactNode } from 'react';
-import { useCapabilities, useAuthStore } from '@/stores/authStore';
-import { useTranslation } from '@lazarus-life/shared/i18n';
-import { AlertCircle, Lock } from 'lucide-react';
-import { Card, CardContent } from '@lazarus-life/ui-components';
+import { useTranslation } from "@lazarus-life/shared/i18n";
+import { Card, CardContent } from "@lazarus-life/ui-components";
+import { AlertCircle, Lock } from "lucide-react";
+import type { ReactNode } from "react";
+import { useAuthStore, useCapabilities } from "@/stores/authStore";
 
 interface PermissionGateProps {
   /** The vault path to check permissions for */
   path: string;
   /** Required capability (read, write, delete, list) */
-  capability?: 'read' | 'write' | 'delete' | 'list';
+  capability?: "read" | "write" | "delete" | "list";
   /** Children to render if permission is granted */
   children: ReactNode;
   /** What to render if permission is denied (optional) */
@@ -21,7 +21,7 @@ interface PermissionGateProps {
 
 /**
  * Component to conditionally render children based on ACL permissions
- * 
+ *
  * @example
  * ```tsx
  * <PermissionGate path="secret/data/myapp" capability="write">
@@ -31,7 +31,7 @@ interface PermissionGateProps {
  */
 export function PermissionGate({
   path,
-  capability = 'read',
+  capability = "read",
   children,
   fallback,
   showLoading = false,
@@ -48,25 +48,23 @@ export function PermissionGate({
 
   // Show loading state
   if (loading && showLoading) {
-    return (
-      <div className="animate-pulse bg-muted rounded h-8 w-full" />
-    );
+    return <div className="animate-pulse bg-muted rounded h-8 w-full" />;
   }
 
   // Check specific capability
   const hasPermission = (() => {
     if (isDenied) return false;
-    if (capabilities.includes('root')) return true;
-    
+    if (capabilities.includes("root")) return true;
+
     switch (capability) {
-      case 'read':
-        return capabilities.includes('read');
-      case 'write':
-        return capabilities.includes('create') || capabilities.includes('update');
-      case 'delete':
-        return capabilities.includes('delete');
-      case 'list':
-        return capabilities.includes('list');
+      case "read":
+        return capabilities.includes("read");
+      case "write":
+        return capabilities.includes("create") || capabilities.includes("update");
+      case "delete":
+        return capabilities.includes("delete");
+      case "list":
+        return capabilities.includes("list");
       default:
         return false;
     }
@@ -88,9 +86,7 @@ export function PermissionGate({
           <Lock className="h-5 w-5 text-destructive" />
           <div>
             <p className="font-medium text-destructive">{t("security.accessDenied")}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("errors.forbidden")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("errors.forbidden")}</p>
           </div>
         </CardContent>
       </Card>
@@ -103,7 +99,7 @@ export function PermissionGate({
 /**
  * Hook-based permission check for more complex scenarios
  */
-export function useHasPermission(path: string, capability: 'read' | 'write' | 'delete' | 'list') {
+export function useHasPermission(path: string, capability: "read" | "write" | "delete" | "list") {
   const { capabilities, loading, isDenied } = useCapabilities(path);
   const { isRoot } = useAuthStore();
 
@@ -120,17 +116,17 @@ export function useHasPermission(path: string, capability: 'read' | 'write' | 'd
   }
 
   const hasPermission = (() => {
-    if (capabilities.includes('root')) return true;
-    
+    if (capabilities.includes("root")) return true;
+
     switch (capability) {
-      case 'read':
-        return capabilities.includes('read');
-      case 'write':
-        return capabilities.includes('create') || capabilities.includes('update');
-      case 'delete':
-        return capabilities.includes('delete');
-      case 'list':
-        return capabilities.includes('list');
+      case "read":
+        return capabilities.includes("read");
+      case "write":
+        return capabilities.includes("create") || capabilities.includes("update");
+      case "delete":
+        return capabilities.includes("delete");
+      case "list":
+        return capabilities.includes("list");
       default:
         return false;
     }
@@ -145,7 +141,7 @@ export function useHasPermission(path: string, capability: 'read' | 'write' | 'd
 export function withPermission<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   path: string,
-  capability: 'read' | 'write' | 'delete' | 'list' = 'read'
+  capability: "read" | "write" | "delete" | "list" = "read",
 ) {
   return function PermissionProtectedComponent(props: P) {
     const { hasPermission, loading } = useHasPermission(path, capability);
@@ -182,4 +178,3 @@ export function withPermission<P extends object>(
     return <WrappedComponent {...props} />;
   };
 }
-

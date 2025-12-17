@@ -1,5 +1,5 @@
-import { useCloseTab, useReorderTabs } from "@/stores/tabStore";
 import { useEffect, useRef, useState } from "react";
+import { useCloseTab, useReorderTabs } from "@/stores/tabStore";
 import { createMouseHandlers } from "./mouseHandlers";
 
 const DASHBOARD_ID = "dashboard";

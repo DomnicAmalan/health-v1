@@ -3,12 +3,12 @@
  * Component that prevents editing of immutable fields
  */
 
-import { Flex } from "@/components/ui/flex";
 import { Input } from "@lazarus-life/ui-components";
+import { Lock } from "lucide-react";
+import { Flex } from "@/components/ui/flex";
 import { Label } from "@/components/ui/label";
 import { Stack } from "@/components/ui/stack";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Lock } from "lucide-react";
 
 interface ImmutableFieldProps {
   label: string;
