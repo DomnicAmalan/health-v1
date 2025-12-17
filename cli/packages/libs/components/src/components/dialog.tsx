@@ -24,7 +24,9 @@ const DialogTrigger = React.forwardRef<
     </BaseDialog.Trigger>
   );
 }) as React.ForwardRefExoticComponent<
-  React.ComponentPropsWithoutRef<typeof BaseDialog.Trigger> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+  React.ComponentPropsWithoutRef<typeof BaseDialog.Trigger> & {
+    asChild?: boolean;
+  } & React.RefAttributes<HTMLElement>
 >;
 DialogTrigger.displayName = "DialogTrigger";
 

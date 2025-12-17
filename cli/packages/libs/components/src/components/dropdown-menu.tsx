@@ -1,9 +1,8 @@
 import { Menu } from "@base-ui/react/menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
-
-import { cn } from "../lib/utils";
 import { Slot } from "../lib/slot";
+import { cn } from "../lib/utils";
 
 const DropdownMenu = Menu.Root;
 
@@ -25,7 +24,9 @@ const DropdownMenuTrigger = React.forwardRef<
     </Menu.Trigger>
   );
 }) as React.ForwardRefExoticComponent<
-  React.ComponentPropsWithoutRef<typeof Menu.Trigger> & { asChild?: boolean } & React.RefAttributes<HTMLElement>
+  React.ComponentPropsWithoutRef<typeof Menu.Trigger> & {
+    asChild?: boolean;
+  } & React.RefAttributes<HTMLElement>
 >;
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 
@@ -84,11 +85,7 @@ const DropdownMenuContent = React.forwardRef<
   }
 >(({ className, sideOffset = 4, side, align, ...props }, ref) => (
   <Menu.Portal>
-    <Menu.Positioner
-      sideOffset={sideOffset}
-      {...(side && { side })}
-      {...(align && { align })}
-    >
+    <Menu.Positioner sideOffset={sideOffset} {...(side && { side })} {...(align && { align })}>
       <Menu.Popup
         ref={ref}
         className={cn(

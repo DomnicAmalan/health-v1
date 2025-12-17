@@ -54,8 +54,10 @@ export function FormPlayground() {
   const _moveField = (fromIndex: number, toIndex: number) => {
     const newFields = [...fields];
     const [moved] = newFields.splice(fromIndex, 1);
-    newFields.splice(toIndex, 0, moved!);
-    setFields(newFields);
+    if (moved) {
+      newFields.splice(toIndex, 0, moved);
+      setFields(newFields);
+    }
   };
 
   // Export form config
@@ -444,7 +446,10 @@ export function FormPlayground() {
             <div className="pt-4 border-t">
               <h4 className="text-xs font-semibold mb-3">Validation</h4>
               <div className="space-y-2">
-                <Label htmlFor="field-required" className="flex items-center space-x-2 cursor-pointer">
+                <Label
+                  htmlFor="field-required"
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
                   <Checkbox
                     id="field-required"
                     checked={selectedFieldData.validation?.required || false}
