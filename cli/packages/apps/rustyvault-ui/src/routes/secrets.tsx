@@ -45,7 +45,7 @@ export function SecretsPage() {
     setSelectedSecret(null);
     setIsCreating(false);
     setSecretData({});
-  }, [currentRealm?.id, isGlobalMode]);
+  }, []);
 
   // Fetch secrets list (realm-scoped or global)
   const {

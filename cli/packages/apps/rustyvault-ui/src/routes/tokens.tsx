@@ -241,7 +241,7 @@ export function TokensPage() {
                       type="number"
                       value={createForm.ttl}
                       onChange={(e) =>
-                        setCreateForm({ ...createForm, ttl: parseInt(e.target.value) || 0 })
+                        setCreateForm({ ...createForm, ttl: parseInt(e.target.value, 10) || 0 })
                       }
                     />
                   </div>
@@ -252,7 +252,10 @@ export function TokensPage() {
                       type="number"
                       value={createForm.num_uses}
                       onChange={(e) =>
-                        setCreateForm({ ...createForm, num_uses: parseInt(e.target.value) || 0 })
+                        setCreateForm({
+                          ...createForm,
+                          num_uses: parseInt(e.target.value, 10) || 0,
+                        })
                       }
                     />
                   </div>

@@ -1,5 +1,4 @@
 import { createRootRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Sidebar } from "@/components/navigation/Sidebar";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -37,13 +36,11 @@ function RootComponent() {
   const isLoginPage = location.pathname === "/login";
 
   return (
-    <>
-      <div className="min-h-screen bg-background flex">
-        {!isLoginPage && <Sidebar />}
-        <div className="flex-1">
-          <Outlet />
-        </div>
+    <div className="min-h-screen bg-background flex">
+      {!isLoginPage && <Sidebar />}
+      <div className="flex-1">
+        <Outlet />
       </div>
-    </>
+    </div>
   );
 }

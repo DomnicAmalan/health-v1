@@ -76,7 +76,7 @@ export function AppRolesPage() {
     error,
   } = useQuery({
     queryKey: ["approles", currentRealm?.id],
-    queryFn: () => approleApi.listRoles(currentRealm!.id),
+    queryFn: () => approleApi.listRoles(currentRealm?.id),
     enabled: !!currentRealm && !isGlobalMode,
   });
 
@@ -113,7 +113,7 @@ export function AppRolesPage() {
   const createMutation = useMutation({
     mutationFn: async (data: { roleName: string } & CreateAppRoleRequest) => {
       const { roleName, ...request } = data;
-      await approleApi.createRole(currentRealm!.id, roleName, request);
+      await approleApi.createRole(currentRealm?.id, roleName, request);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approles", currentRealm?.id] });
@@ -125,7 +125,7 @@ export function AppRolesPage() {
 
   // Delete role mutation
   const deleteMutation = useMutation({
-    mutationFn: (roleName: string) => approleApi.deleteRole(currentRealm!.id, roleName),
+    mutationFn: (roleName: string) => approleApi.deleteRole(currentRealm?.id, roleName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approles", currentRealm?.id] });
       queryClient.invalidateQueries({ queryKey: ["approles-details", currentRealm?.id] });
@@ -136,7 +136,7 @@ export function AppRolesPage() {
 
   // Generate secret ID mutation
   const generateSecretMutation = useMutation({
-    mutationFn: (roleName: string) => approleApi.generateSecretId(currentRealm!.id, roleName),
+    mutationFn: (roleName: string) => approleApi.generateSecretId(currentRealm?.id, roleName),
     onSuccess: (data, roleName) => {
       setSecretIdData(data);
       setSelectedRole(roleName);
@@ -278,7 +278,7 @@ export function AppRolesPage() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setFormData({
                         ...formData,
-                        secret_id_ttl: parseInt(e.target.value) || undefined,
+                        secret_id_ttl: parseInt(e.target.value, 10) || undefined,
                       })
                     }
                   />
@@ -292,7 +292,7 @@ export function AppRolesPage() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setFormData({
                         ...formData,
-                        secret_id_num_uses: parseInt(e.target.value) || undefined,
+                        secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
                       })
                     }
                     placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
@@ -308,7 +308,10 @@ export function AppRolesPage() {
                     type="number"
                     value={formData.token_ttl || ""}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({ ...formData, token_ttl: parseInt(e.target.value) || undefined })
+                      setFormData({
+                        ...formData,
+                        token_ttl: parseInt(e.target.value, 10) || undefined,
+                      })
                     }
                   />
                 </div>
@@ -321,7 +324,7 @@ export function AppRolesPage() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setFormData({
                         ...formData,
-                        token_max_ttl: parseInt(e.target.value) || undefined,
+                        token_max_ttl: parseInt(e.target.value, 10) || undefined,
                       })
                     }
                   />

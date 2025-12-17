@@ -145,7 +145,7 @@ export function contextualMask(value: string, field: string, userRole: string): 
  * Get masking level based on user role
  * Admin: no masking, Doctor: partial, Nurse: more aggressive, Receptionist: complete
  */
-function getMaskingLevel(field: string, userRole: string): MaskingLevel {
+function getMaskingLevel(_field: string, userRole: string): MaskingLevel {
   switch (userRole.toLowerCase()) {
     case "admin":
       return "partial"; // Admin can see partial

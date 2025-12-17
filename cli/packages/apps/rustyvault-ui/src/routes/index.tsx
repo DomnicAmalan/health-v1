@@ -7,7 +7,7 @@ import {
   Stack,
 } from "@lazarus-life/ui-components";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, CheckCircle2, Globe, Lock, Settings, XCircle } from "lucide-react";
+import { CheckCircle2, Globe, Lock, Settings, XCircle } from "lucide-react";
 import { realmsApi, secretsApi, systemApi } from "@/lib/api";
 
 export function DashboardPage() {

@@ -48,7 +48,7 @@ export function getLayoutForRoute(pathname: string): LayoutType {
   for (const [pattern, layout] of Object.entries(ROUTE_LAYOUTS)) {
     if (pattern.includes(":")) {
       // Convert pattern to regex
-      const regex = new RegExp("^" + pattern.replace(/:[^/]+/g, "[^/]+") + "$");
+      const regex = new RegExp(`^${pattern.replace(/:[^/]+/g, "[^/]+")}$`);
       if (regex.test(pathname)) {
         return layout;
       }

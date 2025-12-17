@@ -46,7 +46,7 @@ Utilisez les actions disponibles pour créer des flux de travail qui atteignent 
 /**
  * Translate workflow step for user display
  */
-export function translateWorkflowStep(step: WorkflowStep, locale: string): string {
+export function translateWorkflowStep(step: WorkflowStep, _locale: string): string {
   if (step.type === "speak" && step.message) {
     // Could translate message here if needed
     return step.message;
@@ -83,7 +83,7 @@ export function getAvailableActionsDescription(
 /**
  * Get component structure description for LLM in user's language
  */
-export function getComponentStructureDescription(structure: unknown, locale: string): string {
+export function getComponentStructureDescription(structure: unknown, _locale: string): string {
   if (!structure || typeof structure !== "object") {
     return "No structure available";
   }

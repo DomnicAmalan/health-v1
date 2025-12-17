@@ -31,7 +31,7 @@ export function getRoutePermission(route: string): Permission | null {
 
   // Try pattern matching (e.g., /patients/:id)
   for (const [pattern, permission] of Object.entries(routePermissionMap)) {
-    const patternRegex = new RegExp("^" + pattern.replace(/:\w+/g, "[^/]+") + "$");
+    const patternRegex = new RegExp(`^${pattern.replace(/:\w+/g, "[^/]+")}$`);
     if (patternRegex.test(route)) {
       return permission;
     }

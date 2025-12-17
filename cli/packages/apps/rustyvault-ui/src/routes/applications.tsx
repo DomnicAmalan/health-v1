@@ -69,13 +69,13 @@ export function ApplicationsPage() {
     error,
   } = useQuery({
     queryKey: ["realm-apps", currentRealm?.id],
-    queryFn: () => appsApi.list(currentRealm!.id),
+    queryFn: () => appsApi.list(currentRealm?.id),
     enabled: !!currentRealm && !isGlobalMode,
   });
 
   // Create app mutation
   const createMutation = useMutation({
-    mutationFn: (data: CreateAppRequest) => appsApi.create(currentRealm!.id, data),
+    mutationFn: (data: CreateAppRequest) => appsApi.create(currentRealm?.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsCreateOpen(false);
@@ -86,7 +86,7 @@ export function ApplicationsPage() {
   // Update app mutation
   const updateMutation = useMutation({
     mutationFn: ({ appName, data }: { appName: string; data: Partial<CreateAppRequest> }) =>
-      appsApi.update(currentRealm!.id, appName, data),
+      appsApi.update(currentRealm?.id, appName, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsEditOpen(false);
@@ -97,7 +97,7 @@ export function ApplicationsPage() {
 
   // Delete app mutation
   const deleteMutation = useMutation({
-    mutationFn: (appName: string) => appsApi.delete(currentRealm!.id, appName),
+    mutationFn: (appName: string) => appsApi.delete(currentRealm?.id, appName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsDeleteOpen(false);
@@ -107,7 +107,7 @@ export function ApplicationsPage() {
 
   // Register defaults mutation
   const registerDefaultsMutation = useMutation({
-    mutationFn: () => appsApi.registerDefaults(currentRealm!.id),
+    mutationFn: () => appsApi.registerDefaults(currentRealm?.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
     },

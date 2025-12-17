@@ -85,7 +85,11 @@ export class VoiceCommandParser {
     };
   }
 
-  private buildIntent(type: string, originalCommand: string, match: RegExpMatchArray): VoiceIntent {
+  private buildIntent(
+    type: string,
+    _originalCommand: string,
+    match: RegExpMatchArray
+  ): VoiceIntent {
     const intent: VoiceIntent = {
       type,
       action: type,

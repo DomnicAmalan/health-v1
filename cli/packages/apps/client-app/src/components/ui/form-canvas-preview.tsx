@@ -371,107 +371,103 @@ export function FormCanvasPreview({
   }, [canvasWidth, canvasHeight, sheetSize]);
 
   return (
-    <>
-      <div className="flex-1 overflow-auto bg-gray-100 p-8">
-        <div className="mx-auto" style={{ maxWidth: `${canvasWidth + 100}px` }}>
-          {/* Print Preview Header */}
-          <div className="print-header mb-4 p-4 bg-white rounded-md shadow-sm border border-[#E1E4E8]">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold">Print Preview</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Sheet Size: {sheetSize.toUpperCase()} ({canvasWidth} × {canvasHeight} px)
-                </p>
-              </div>
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-sm text-sm font-medium hover:bg-primary/90"
-              >
-                Print
-              </button>
+    <div className="flex-1 overflow-auto bg-gray-100 p-8">
+      <div className="mx-auto" style={{ maxWidth: `${canvasWidth + 100}px` }}>
+        {/* Print Preview Header */}
+        <div className="print-header mb-4 p-4 bg-white rounded-md shadow-sm border border-[#E1E4E8]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold">Print Preview</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sheet Size: {sheetSize.toUpperCase()} ({canvasWidth} × {canvasHeight} px)
+              </p>
             </div>
-          </div>
-
-          {/* Print Preview Canvas - Wrapper for print */}
-          <div className="print-canvas-only">
-            <div
-              className="print-canvas-content relative bg-white"
-              style={{
-                width: `${canvasWidth}px`,
-                height: `${canvasHeight}px`,
-                minHeight: `${canvasHeight}px`,
-              }}
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-sm text-sm font-medium hover:bg-primary/90"
             >
-              {/* Sections */}
-              {sections.map((section) => (
-                <div
-                  key={section.id}
-                  className="absolute border-b-2 border-[#1C1C1E] bg-gray-50"
-                  style={{
-                    left: `${section.x}px`,
-                    top: `${section.y}px`,
-                    width: `${section.width}px`,
-                    height: `${section.height}px`,
-                  }}
-                >
-                  <div className="p-4">
-                    <h2 className="text-lg font-bold text-[#1C1C1E]">
-                      {section.title || "Section"}
-                    </h2>
-                  </div>
-                </div>
-              ))}
-
-              {/* Groups */}
-              {groups.map((group) => (
-                <div
-                  key={group.id}
-                  className="absolute border border-[#1C1C1E] bg-white"
-                  style={{
-                    left: `${group.x}px`,
-                    top: `${group.y}px`,
-                    width: `${group.width}px`,
-                    height: `${group.height}px`,
-                  }}
-                >
-                  {group.title && (
-                    <div className="border-b border-[#1C1C1E] p-2 bg-gray-50">
-                      <h4 className="text-sm font-semibold text-[#1C1C1E]">{group.title}</h4>
-                      {group.description && (
-                        <p className="text-xs text-[#4A4A4E] mt-1">{group.description}</p>
-                      )}
-                    </div>
-                  )}
-                  <div className="p-2">
-                    {group.fields.map((fieldId) => {
-                      const field = fields.find((f) => f.id === fieldId);
-                      if (!field) return null;
-                      // Adjust field position relative to group
-                      const relativeField = {
-                        ...field,
-                        x: field.x - group.x,
-                        y: field.y - group.y - (group.title ? 40 : 0),
-                      };
-                      return renderField(relativeField);
-                    })}
-                  </div>
-                </div>
-              ))}
-
-              {/* Fields (not in groups) */}
-              {fields.filter((field) => !field.groupId).map(renderField)}
-            </div>
-          </div>
-
-          {/* Print Instructions */}
-          <div className="print-instructions mt-4 p-4 bg-white rounded-md shadow-sm border border-[#E1E4E8]">
-            <p className="text-xs text-muted-foreground">
-              💡 Tip: Use your browser's print dialog (Ctrl/Cmd + P) to print or save as PDF. The
-              preview shows exactly how the form will appear on paper.
-            </p>
+              Print
+            </button>
           </div>
         </div>
+
+        {/* Print Preview Canvas - Wrapper for print */}
+        <div className="print-canvas-only">
+          <div
+            className="print-canvas-content relative bg-white"
+            style={{
+              width: `${canvasWidth}px`,
+              height: `${canvasHeight}px`,
+              minHeight: `${canvasHeight}px`,
+            }}
+          >
+            {/* Sections */}
+            {sections.map((section) => (
+              <div
+                key={section.id}
+                className="absolute border-b-2 border-[#1C1C1E] bg-gray-50"
+                style={{
+                  left: `${section.x}px`,
+                  top: `${section.y}px`,
+                  width: `${section.width}px`,
+                  height: `${section.height}px`,
+                }}
+              >
+                <div className="p-4">
+                  <h2 className="text-lg font-bold text-[#1C1C1E]">{section.title || "Section"}</h2>
+                </div>
+              </div>
+            ))}
+
+            {/* Groups */}
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="absolute border border-[#1C1C1E] bg-white"
+                style={{
+                  left: `${group.x}px`,
+                  top: `${group.y}px`,
+                  width: `${group.width}px`,
+                  height: `${group.height}px`,
+                }}
+              >
+                {group.title && (
+                  <div className="border-b border-[#1C1C1E] p-2 bg-gray-50">
+                    <h4 className="text-sm font-semibold text-[#1C1C1E]">{group.title}</h4>
+                    {group.description && (
+                      <p className="text-xs text-[#4A4A4E] mt-1">{group.description}</p>
+                    )}
+                  </div>
+                )}
+                <div className="p-2">
+                  {group.fields.map((fieldId) => {
+                    const field = fields.find((f) => f.id === fieldId);
+                    if (!field) return null;
+                    // Adjust field position relative to group
+                    const relativeField = {
+                      ...field,
+                      x: field.x - group.x,
+                      y: field.y - group.y - (group.title ? 40 : 0),
+                    };
+                    return renderField(relativeField);
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Fields (not in groups) */}
+            {fields.filter((field) => !field.groupId).map(renderField)}
+          </div>
+        </div>
+
+        {/* Print Instructions */}
+        <div className="print-instructions mt-4 p-4 bg-white rounded-md shadow-sm border border-[#E1E4E8]">
+          <p className="text-xs text-muted-foreground">
+            💡 Tip: Use your browser's print dialog (Ctrl/Cmd + P) to print or save as PDF. The
+            preview shows exactly how the form will appear on paper.
+          </p>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

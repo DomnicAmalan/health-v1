@@ -16,7 +16,6 @@ import { getWorkflowBuilder } from "./workflowBuilder";
 export class VoiceCommandExecutor {
   private tts: ReturnType<typeof getTextToSpeechEngine>;
   private actionExecutor = getActionExecutor();
-  private workflowBuilder = getWorkflowBuilder();
   private llmEngine = getLLMWorkflowEngine();
 
   constructor() {

@@ -48,7 +48,7 @@ export function UsersPage() {
     setIsCreating(false);
     setIsEditing(false);
     resetForm();
-  }, [currentRealm?.id, isGlobalMode]);
+  }, [resetForm]);
 
   // Fetch users list (realm-scoped or global)
   const {
@@ -292,7 +292,7 @@ export function UsersPage() {
                       type="number"
                       value={formData.ttl}
                       onChange={(e) =>
-                        setFormData({ ...formData, ttl: parseInt(e.target.value) || 0 })
+                        setFormData({ ...formData, ttl: parseInt(e.target.value, 10) || 0 })
                       }
                     />
                   </div>
@@ -303,7 +303,7 @@ export function UsersPage() {
                       type="number"
                       value={formData.max_ttl}
                       onChange={(e) =>
-                        setFormData({ ...formData, max_ttl: parseInt(e.target.value) || 0 })
+                        setFormData({ ...formData, max_ttl: parseInt(e.target.value, 10) || 0 })
                       }
                     />
                   </div>

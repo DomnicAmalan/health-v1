@@ -45,7 +45,7 @@ export function getGridLayoutClasses(config: FormConfig): string {
     "four-column": "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
   };
 
-  return layoutMap[config.layout || "single"] ?? layoutMap["single"];
+  return layoutMap[config.layout || "single"] ?? layoutMap.single;
 }
 
 export function getGapClasses(config: FormConfig): string {
@@ -56,5 +56,5 @@ export function getGapClasses(config: FormConfig): string {
     lg: "gap-6",
     xl: "gap-8",
   };
-  return gapMap[config.gap || "md"] ?? gapMap["md"];
+  return gapMap[config.gap || "md"] ?? gapMap.md;
 }

@@ -68,7 +68,7 @@ export const TabItem = memo(function TabItem({
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
           e.preventDefault();
           const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
-          const currentIndex = tabs.findIndex((t) => t === e.currentTarget);
+          const currentIndex = tabs.indexOf(e.currentTarget);
           const direction = e.key === "ArrowLeft" ? -1 : 1;
           const nextIndex = (currentIndex + direction + tabs.length) % tabs.length;
           tabs[nextIndex]?.focus();

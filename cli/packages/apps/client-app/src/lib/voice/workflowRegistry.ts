@@ -68,7 +68,7 @@ workflowRegistry.register({
     "complete form",
     "fill out form",
   ],
-  execute: async (params) => {
+  execute: async (_params) => {
     // This will be implemented by formFillingWorkflow
     return { success: true, message: "Form filling workflow started" };
   },
@@ -79,7 +79,7 @@ workflowRegistry.register({
   name: "Create Patient",
   description: "Create a new patient record",
   triggerPhrases: ["create patient", "new patient", "add patient", "register patient"],
-  execute: async (params) => {
+  execute: async (_params) => {
     return { success: true, message: "Patient creation workflow started" };
   },
 });
@@ -89,7 +89,7 @@ workflowRegistry.register({
   name: "Schedule Appointment",
   description: "Schedule a patient appointment",
   triggerPhrases: ["schedule appointment", "book appointment", "create appointment"],
-  execute: async (params) => {
+  execute: async (_params) => {
     return { success: true, message: "Appointment scheduling workflow started" };
   },
 });

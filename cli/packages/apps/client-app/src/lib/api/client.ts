@@ -101,11 +101,6 @@ class ClientApiClient extends BaseApiClient {
 
 // Legacy ApiClient class for backward compatibility
 export class ApiClient extends ClientApiClient {
-  private _baseUrl: string;
-  private _timeout: number;
-  private _retryAttempts: number;
-  private _retryDelay: number;
-
   constructor(
     baseUrl: string = API_BASE_URL,
     timeout: number = API_TIMEOUT,

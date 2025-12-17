@@ -31,7 +31,7 @@ export function PoliciesPage() {
     setSelectedPolicy(null);
     setIsCreating(false);
     setPolicyContent("");
-  }, [currentRealm?.id, isGlobalMode]);
+  }, []);
 
   // Fetch policies list (realm-scoped or global)
   const {

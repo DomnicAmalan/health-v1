@@ -3,7 +3,7 @@
  * Vault token-based authentication using the shared base client
  */
 
-import { ApiClientError, type ApiResponse, BaseApiClient } from "@lazarus-life/shared/api";
+import { BaseApiClient } from "@lazarus-life/shared/api";
 import { useAuthStore } from "@/stores/authStore";
 
 // Vault API base URL - should NOT include /api prefix

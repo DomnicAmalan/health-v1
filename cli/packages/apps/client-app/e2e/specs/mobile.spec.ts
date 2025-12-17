@@ -47,7 +47,7 @@ test.describe("Mobile UI @mobile", () => {
     // Check viewport size
     const viewportSize = authenticatedPage.viewportSize();
     expect(viewportSize).toBeTruthy();
-    expect(viewportSize!.width).toBeLessThanOrEqual(428); // iPhone 12/13 width
+    expect(viewportSize?.width).toBeLessThanOrEqual(428); // iPhone 12/13 width
   });
 
   test("should scroll properly on mobile", async ({ authenticatedPage }) => {
@@ -91,7 +91,7 @@ test.describe("Mobile UI @mobile", () => {
     expect(viewportSize).toBeTruthy();
 
     // iPad Pro has width of 1024
-    if (viewportSize!.width >= 1024) {
+    if (viewportSize?.width >= 1024) {
       // Tablet layout should be visible
       expect(true).toBeTruthy();
     }

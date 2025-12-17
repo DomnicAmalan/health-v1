@@ -31,7 +31,7 @@ if (typeof window !== "undefined") {
 if (typeof global !== "undefined") {
   global.crypto = {
     ...global.crypto,
-    randomUUID: () => "test-uuid-" + Math.random().toString(36).substring(7),
+    randomUUID: () => `test-uuid-${Math.random().toString(36).substring(7)}`,
   } as Crypto;
 }
 

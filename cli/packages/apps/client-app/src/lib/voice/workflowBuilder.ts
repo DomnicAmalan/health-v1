@@ -298,7 +298,7 @@ Return JSON in format: { "steps": [ { "id": "step1", "type": "action", "actionId
   private async executeWorkflowSteps(
     steps: WorkflowStep[],
     params: Record<string, unknown>,
-    context?: WorkflowContext
+    _context?: WorkflowContext
   ): Promise<WorkflowResult> {
     try {
       for (const step of steps) {

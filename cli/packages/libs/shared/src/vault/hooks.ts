@@ -224,7 +224,7 @@ export function useVaultConnection() {
  * Hook that combines health-v1 permissions with vault capabilities
  * Use this in admin/client apps to check both permission systems
  */
-export function useCombinedPermissions(healthPermission: string, vaultPath?: string) {
+export function useCombinedPermissions(_healthPermission: string, vaultPath?: string) {
   const { capabilities: vaultCaps, loading: vaultLoading } = useVaultCapabilities(vaultPath || "");
 
   // This hook is meant to be used alongside the existing usePermissions hook

@@ -5,9 +5,9 @@
  * Enforces maximum line counts for different file types
  */
 
-import { readFileSync, statSync } from "fs";
+import { readFileSync, statSync } from "node:fs";
+import { extname, join, relative } from "node:path";
 import pkg from "glob";
-import { extname, join, relative } from "path";
 
 const { glob } = pkg;
 

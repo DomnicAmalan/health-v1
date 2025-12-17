@@ -172,8 +172,8 @@ export function formatTTL(seconds?: number): string {
 export function parseTTL(value: string): number | undefined {
   if (!value) return undefined;
 
-  const num = parseInt(value);
-  if (isNaN(num)) return undefined;
+  const num = parseInt(value, 10);
+  if (Number.isNaN(num)) return undefined;
 
   if (value.endsWith("d")) return num * 86400;
   if (value.endsWith("h")) return num * 3600;

@@ -131,7 +131,7 @@ export function TranslationProvider({
       isRTL: () => isRTL(locale),
       getLocale: () => getLocaleInfo(locale),
     }),
-    [locale]
+    [locale, setLocale]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

@@ -402,7 +402,7 @@ export function SystemPage() {
                           max="255"
                           value={initShares}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setInitShares(Number.parseInt(e.target.value) || 1)
+                            setInitShares(Number.parseInt(e.target.value, 10) || 1)
                           }
                           disabled={initMutation.isPending}
                           required
@@ -417,7 +417,7 @@ export function SystemPage() {
                           max={initShares}
                           value={initThreshold}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setInitThreshold(Number.parseInt(e.target.value) || 1)
+                            setInitThreshold(Number.parseInt(e.target.value, 10) || 1)
                           }
                           disabled={initMutation.isPending}
                           required

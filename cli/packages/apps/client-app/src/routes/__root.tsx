@@ -471,8 +471,6 @@ function RootComponentInner() {
           <TanStackRouterDevtools />
         </>
       );
-
-    case "full":
     default:
       return (
         <>

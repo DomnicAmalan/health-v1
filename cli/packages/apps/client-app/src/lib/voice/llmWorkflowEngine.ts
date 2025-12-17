@@ -33,9 +33,6 @@ export class LLMWorkflowEngine {
   private actionExecutor = getActionExecutor();
   private workflowBuilder = getWorkflowBuilder();
   private workflowExecutor = getWorkflowExecutor();
-  private apiKey: string | null = null;
-  private apiEndpoint = "https://api.openai.com/v1/chat/completions";
-  private model = "gpt-4";
 
   constructor() {
     this.tts = getTextToSpeechEngine();
@@ -131,7 +128,7 @@ export class LLMWorkflowEngine {
    */
   public async updateWorkflowFromFeedback(
     workflow: BuiltWorkflow,
-    feedback: string
+    _feedback: string
   ): Promise<BuiltWorkflow> {
     // This would use LLM to refine the workflow based on feedback
     // For now, return the original workflow
@@ -206,7 +203,7 @@ export class LLMWorkflowEngine {
 
   private buildFieldPrompt(
     field: { id: string; label: string; placeholder?: string; validation?: unknown },
-    allFields: Array<{ id: string; label: string }>
+    _allFields: Array<{ id: string; label: string }>
   ): string {
     return `You are helping a user fill a form field.
 Field: ${field.label}
@@ -217,8 +214,8 @@ Ask the user for this field's value in a conversational way.`;
   }
 
   private async waitForFieldValue(
-    field: { id: string; ref?: { current: HTMLInputElement | null } },
-    conversation: Array<{ role: "user" | "assistant"; content: string }>
+    _field: { id: string; ref?: { current: HTMLInputElement | null } },
+    _conversation: Array<{ role: "user" | "assistant"; content: string }>
   ): Promise<string> {
     // This would wait for voice recognition result
     // For now, return empty string
@@ -246,93 +243,6 @@ Ask the user for this field's value in a conversational way.`;
     }
 
     return { errors };
-  }
-
-  private async callLLM(prompt: string, context: LLMWorkflowContext): Promise<LLMResponse> {
-    if (!this.apiKey) {
-      // Fallback to rule-based execution if no API key
-      return this.fallbackExecution(prompt, context);
-    }
-
-    // Get available actions for LLM context
-    const workflowContext = this.getWorkflowContext();
-    const availableActions = this.actionExecutor.getActionMetadata(workflowContext.locale || "en");
-    const actionsDescription = getAvailableActionsDescription(
-      availableActions,
-      workflowContext.locale || "en"
-    );
-    const systemPrompt = getWorkflowPrompt(workflowContext.locale || "en");
-
-    try {
-      const response = await fetch(this.apiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            {
-              role: "system",
-              content: `${systemPrompt}
-
-${actionsDescription}
-
-Component structure: ${JSON.stringify(context.componentStructure)}`,
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 500,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`LLM API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const content = data.choices[0]?.message?.content || "";
-
-      // Parse LLM response (simplified - actual implementation would be more robust)
-      return this.parseLLMResponse(content);
-    } catch (error) {
-      console.error("LLM API error:", error);
-      return this.fallbackExecution(prompt, context);
-    }
-  }
-
-  private parseLLMResponse(content: string): LLMResponse {
-    // Simplified parsing - actual implementation would be more sophisticated
-    try {
-      const parsed = JSON.parse(content);
-      return parsed as LLMResponse;
-    } catch {
-      // Fallback to speak action
-      return {
-        action: "speak",
-        content: content,
-      };
-    }
-  }
-
-  private fallbackExecution(prompt: string, context: LLMWorkflowContext): LLMResponse {
-    // Rule-based fallback when LLM is not available
-    if (prompt.includes("fill form") || prompt.includes("fill the form")) {
-      return {
-        action: "ask_question",
-        content: "I will help you fill the form. Let's start with the first field.",
-      };
-    }
-
-    return {
-      action: "speak",
-      content: "I understand. Let me help you with that.",
-    };
   }
 
   private speak(text: string): void {

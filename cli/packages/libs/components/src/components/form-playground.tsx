@@ -252,7 +252,7 @@ export function FormPlayground() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {fields.map((field, index) => (
+                    {fields.map((field, _index) => (
                       <div
                         key={field.id}
                         className={cn(
