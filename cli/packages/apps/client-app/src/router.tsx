@@ -7,8 +7,14 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({ routeTree });
 
 // Expose router globally for programmatic navigation (e.g., voice commands)
+declare global {
+  interface Window {
+    __tanstackRouter?: typeof router;
+  }
+}
+
 if (typeof window !== "undefined") {
-  (window as any).__tanstackRouter = router;
+  window.__tanstackRouter = router;
 }
 
 // Register the router instance for type safety

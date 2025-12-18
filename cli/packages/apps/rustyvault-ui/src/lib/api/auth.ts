@@ -47,7 +47,7 @@ export const authApi = {
         return response as TokenLookupResponse;
       }
       // If response is unwrapped, wrap it
-      return { data: response as any };
+      return { data: response as unknown as TokenLookupResponse["data"] };
     }
     return apiClient.get<TokenLookupResponse>(VAULT_ROUTES.AUTH.TOKEN_LOOKUP_SELF);
   },

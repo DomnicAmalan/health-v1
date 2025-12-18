@@ -283,8 +283,14 @@ export function findActionsByVoiceCommand(
 }
 
 // Expose registry globally for LLM context
+declare global {
+  interface Window {
+    __componentRegistry?: Map<string, ComponentConfig>;
+  }
+}
+
 if (typeof window !== "undefined") {
-  (window as any).__componentRegistry = componentRegistry;
+  window.__componentRegistry = componentRegistry;
 }
 
 /**

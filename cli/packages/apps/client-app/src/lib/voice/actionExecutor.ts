@@ -211,7 +211,7 @@ export class ActionExecutor {
       // Try to translate if i18n key exists
       if (action.i18nKey) {
         try {
-          const translated = getTranslation(locale, action.i18nKey as any);
+          const translated = getTranslation(locale, action.i18nKey);
           if (translated !== action.i18nKey) {
             label = translated;
           }

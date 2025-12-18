@@ -156,7 +156,7 @@ export function Sidebar() {
             return (
               <div key={item.path} className="space-y-1">
                 <Link
-                  to={item.path as any}
+                  to={item.path}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                     isActive

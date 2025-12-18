@@ -19,7 +19,7 @@ export interface CreateTokenRequest {
   ttl?: number;
   renewable?: boolean;
   num_uses?: number;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export interface CreateTokenResponse {

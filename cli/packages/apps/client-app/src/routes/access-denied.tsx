@@ -3,7 +3,7 @@
  * Page shown when user doesn't have permission to access a resource
  */
 
-import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { PERMISSIONS, type Permission } from "@lazarus-life/shared/constants/permissions";
 import { Container } from "@lazarus-life/ui-components";
 import { createFileRoute } from "@tanstack/react-router";
 import { AccessDenied } from "@/components/security/AccessDenied";
@@ -19,14 +19,15 @@ function AccessDeniedPage() {
   // Get required permission from URL params or default
   const searchParams = new URL(window.location.href).searchParams;
   const resource = searchParams.get("resource") || "resource";
-  const requiredPermission = searchParams.get("permission") || PERMISSIONS.PATIENTS.VIEW;
+  const requiredPermission = (searchParams.get("permission") ||
+    PERMISSIONS.PATIENTS.VIEW) as Permission;
 
   return (
     <Container size="lg" className="py-8">
       <AccessDenied
         type="route"
         resource={resource}
-        requiredPermissions={[requiredPermission as any]}
+        requiredPermissions={[requiredPermission]}
         currentPermissions={permissions}
       />
     </Container>

@@ -1,4 +1,4 @@
-import type { FormFieldGroup } from "@lazarus-life/ui-components";
+import type { FormField, FormFieldGroup } from "@lazarus-life/ui-components";
 import {
   Box,
   Button,
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface FormFieldGroupProps {
   group: FormFieldGroup;
-  fields: Array<{ field: any; render: () => React.ReactNode }>;
+  fields: Array<{ field: FormField; render: () => React.ReactNode }>;
   getGridLayoutClasses: () => string;
   getGapClasses: () => string;
 }

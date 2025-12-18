@@ -158,8 +158,8 @@ export class VoiceCommandExecutor {
       });
 
       // Navigate to the patient page
-      if (typeof window !== "undefined" && (window as any).__tanstackRouter) {
-        (window as any).__tanstackRouter.navigate({
+      if (typeof window !== "undefined" && window.__tanstackRouter) {
+        window.__tanstackRouter.navigate({
           to: "/patients/$patientId",
           params: { patientId: "john-doe-123" },
         });
@@ -180,8 +180,8 @@ export class VoiceCommandExecutor {
       icon: "Users",
     });
 
-    if (typeof window !== "undefined" && (window as any).__tanstackRouter) {
-      (window as any).__tanstackRouter.navigate({ to: "/patients" });
+    if (typeof window !== "undefined" && window.__tanstackRouter) {
+      window.__tanstackRouter.navigate({ to: "/patients" });
     }
 
     return true;
@@ -233,7 +233,7 @@ export class VoiceCommandExecutor {
 
     // Check component registry for registered routes
     if (!route) {
-      const allComponents = (window as any).__componentRegistry || new Map();
+      const allComponents = window.__componentRegistry || new Map();
       for (const [id, config] of allComponents.entries()) {
         if (
           config.voiceDescription &&
@@ -257,7 +257,7 @@ export class VoiceCommandExecutor {
       // Navigate using router
       if (typeof window !== "undefined") {
         // Use TanStack Router if available
-        const router = (window as any).__tanstackRouter;
+        const router = window.__tanstackRouter;
 
         // Check if tab already exists
         const existingTab = tabs.find((t) => t.path === route.path);
@@ -266,7 +266,7 @@ export class VoiceCommandExecutor {
           // Switch to existing tab
           setActiveTab(existingTab.id, (path) => {
             if (router) {
-              router.navigate({ to: path as any }).catch(() => {
+              router.navigate({ to: path }).catch(() => {
                 // Fallback to window.location if router fails
                 window.location.href = path;
               });
@@ -284,7 +284,7 @@ export class VoiceCommandExecutor {
             },
             (path) => {
               if (router) {
-                router.navigate({ to: path as any }).catch(() => {
+                router.navigate({ to: path }).catch(() => {
                   // Fallback to window.location if router fails
                   window.location.href = path;
                 });

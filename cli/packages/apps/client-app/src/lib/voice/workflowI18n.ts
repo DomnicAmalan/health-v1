@@ -13,7 +13,7 @@ import type { WorkflowStep } from "./workflowBuilder";
 export function translateActionLabel(action: ActionItem, locale: string): string {
   if (action.i18nKey) {
     try {
-      const translated = getTranslation(locale, action.i18nKey as any);
+      const translated = getTranslation(locale, action.i18nKey);
       if (translated !== action.i18nKey) {
         return translated;
       }
@@ -70,7 +70,7 @@ export function getAvailableActionsDescription(
   const actionDescriptions = actions
     .map((action) => {
       const label = action.i18nKey
-        ? getTranslation(locale, action.i18nKey as any) || action.label
+        ? getTranslation(locale, action.i18nKey) || action.label
         : action.label;
 
       return `- ${label} (ID: ${action.id}, Commands: ${action.voiceCommands.join(", ")})`;

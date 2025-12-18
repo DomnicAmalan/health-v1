@@ -35,13 +35,14 @@ export function UnsealLock({ progress, threshold, total }: UnsealLockProps) {
         </div>
 
         {/* Key Slots arranged in a circle */}
-        {Array.from({ length: threshold }).map((_, index) => {
+        {Array.from({ length: threshold }, (_unused, index) => {
           const isFilled = index < progress;
           const position = getKeySlotPosition(index, threshold, 70);
+          const slotId = `key-slot-${index}`;
 
           return (
             <div
-              key={`key-slot-${index}`}
+              key={slotId}
               className="absolute z-20 transition-all duration-300"
               style={{
                 left: `calc(50% + ${position.x}px)`,

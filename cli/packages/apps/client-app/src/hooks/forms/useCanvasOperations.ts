@@ -94,8 +94,10 @@ export function useCanvasOperations({
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const config = JSON.parse(e.target?.result as string);
-        const canvasFields = config.fields.map((field: any, index: number) => ({
+        const config = JSON.parse(e.target?.result as string) as {
+          fields?: Array<Partial<CanvasField>>;
+        };
+        const canvasFields = (config.fields || []).map((field, index: number) => ({
           ...field,
           x: 50 + (index % 5) * 200,
           y: 50 + Math.floor(index / 5) * 100,
