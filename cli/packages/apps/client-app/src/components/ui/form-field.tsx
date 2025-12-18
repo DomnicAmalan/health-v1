@@ -47,7 +47,7 @@ export function FormField({
       <Label htmlFor={id} help={help}>
         {label}
         {required && (
-          <span className="text-destructive ml-1" aria-label="required">
+          <span className="text-destructive ml-1" aria-hidden="true">
             *
           </span>
         )}

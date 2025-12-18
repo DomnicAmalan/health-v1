@@ -407,8 +407,10 @@ export function AppAccessPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Application</label>
-              <Select value={bulkApp} onValueChange={setBulkApp}>
+              <label htmlFor="bulk-app-select" className="text-sm font-medium">
+                Application
+              </label>
+              <Select id="bulk-app-select" value={bulkApp} onValueChange={setBulkApp}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select application" />
                 </SelectTrigger>
@@ -423,8 +425,11 @@ export function AppAccessPage() {
             </div>
             {bulkAction === "grant" && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Access Level</label>
+                <label htmlFor="bulk-level-select" className="text-sm font-medium">
+                  Access Level
+                </label>
                 <Select
+                  id="bulk-level-select"
                   value={bulkLevel}
                   onValueChange={(v: "read" | "write" | "admin") => setBulkLevel(v)}
                 >

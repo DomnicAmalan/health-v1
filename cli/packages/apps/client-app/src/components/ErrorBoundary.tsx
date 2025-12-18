@@ -38,15 +38,18 @@ export class ErrorBoundary extends Component<Props, State> {
 
   sanitizeError(message: string): string {
     // Remove email patterns
-    message = message.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, "[EMAIL]");
+    let sanitized = message.replace(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      "[EMAIL]"
+    );
 
     // Remove SSN patterns
-    message = message.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "[SSN]");
+    sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "[SSN]");
 
     // Remove phone patterns
-    message = message.replace(/\b\d{3}-\d{3}-\d{4}\b/g, "[PHONE]");
+    sanitized = sanitized.replace(/\b\d{3}-\d{3}-\d{4}\b/g, "[PHONE]");
 
-    return message;
+    return sanitized;
   }
 
   handleReset = () => {

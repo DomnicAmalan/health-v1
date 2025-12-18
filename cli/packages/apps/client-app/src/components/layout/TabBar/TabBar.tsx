@@ -45,8 +45,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
     // Reverse other tabs in-place for efficiency (newest first)
     for (let i = 0, j = otherTabs.length - 1; i < j; i++, j--) {
       const temp = otherTabs[i];
-      if (temp && otherTabs[j]) {
-        otherTabs[i] = otherTabs[j]!;
+      const swapTarget = otherTabs[j];
+      if (temp && swapTarget) {
+        otherTabs[i] = swapTarget;
         otherTabs[j] = temp;
       }
     }

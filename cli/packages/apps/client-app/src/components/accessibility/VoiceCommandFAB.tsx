@@ -61,7 +61,6 @@ export function VoiceCommandFAB() {
   return (
     <Box
       className={cn("fixed bottom-24 right-6 z-50", "transition-all duration-300 ease-in-out")}
-      role="button"
       aria-label={isListening ? "Stop voice commands" : "Start voice commands"}
     >
       <Button

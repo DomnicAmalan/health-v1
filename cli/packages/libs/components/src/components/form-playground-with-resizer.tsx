@@ -467,7 +467,7 @@ export function MyForm() {
                       const colWidth = (colSpan / 12) * 100;
 
                       return (
-                        <div
+                        <fieldset
                           key={field.id}
                           draggable
                           onDragStart={(e) => handleDragStart(e, field.id)}
@@ -485,20 +485,31 @@ export function MyForm() {
                           style={{
                             width: `${colWidth}%`,
                             minWidth: "200px",
+                            border: "none",
+                            padding: 0,
+                            margin: 0,
                           }}
                         >
                           {/* Drag Handle */}
                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary cursor-grab active:cursor-grabbing" />
 
                           {/* Resize Handle */}
-                          <div
-                            className="absolute right-0 top-0 bottom-0 w-2 bg-transparent group-hover:bg-primary/20 cursor-ew-resize flex items-center justify-center"
+                          <button
+                            type="button"
+                            className="absolute right-0 top-0 bottom-0 w-2 bg-transparent group-hover:bg-primary/20 cursor-ew-resize flex items-center justify-center border-0 p-0 m-0"
                             onMouseDown={(e) => handleResizeStart(e, field.id)}
                             onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }
+                            }}
                             title={`Resize column span (current: ${field.layout?.colSpan || 12}/12)`}
+                            aria-label={`Resize column span for ${field.label || "field"}`}
                           >
                             <div className="w-0.5 h-full bg-primary opacity-0 group-hover:opacity-100" />
-                          </div>
+                          </button>
 
                           <div className="p-4 pr-6">
                             <div className="flex items-start justify-between mb-2">
@@ -549,7 +560,7 @@ export function MyForm() {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </fieldset>
                       );
                     })}
                   </div>

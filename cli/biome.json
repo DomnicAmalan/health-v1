@@ -30,7 +30,8 @@
       "!**/yarn.lock",
       "!**/pnpm-lock.yaml",
       "!**/routeTree.gen.ts",
-      "!**/*.css"
+      "!**/*.css",
+      "!**/.venv"
     ]
   },
   "formatter": {

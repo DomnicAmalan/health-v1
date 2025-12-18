@@ -55,7 +55,7 @@ test.describe("API Integration @api", () => {
     expect([400, 401, 403]).toContain(response.status());
   });
 
-  test("should refresh access token", async ({ apiContext, apiURL }) => {
+  test("should refresh access token", async ({ apiContext }) => {
     // First login to get tokens
     const testEmail = process.env.TEST_USER_EMAIL || "test@example.com";
     const testPassword = process.env.TEST_USER_PASSWORD || "testpassword";

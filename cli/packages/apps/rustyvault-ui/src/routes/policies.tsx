@@ -27,11 +27,12 @@ export function PoliciesPage() {
   const [policyContent, setPolicyContent] = useState("");
 
   // Reset selection when realm changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally want to reset when realm changes
   useEffect(() => {
     setSelectedPolicy(null);
     setIsCreating(false);
     setPolicyContent("");
-  }, []);
+  }, [currentRealm?.id, isGlobalMode]);
 
   // Fetch policies list (realm-scoped or global)
   const {
@@ -49,10 +50,14 @@ export function PoliciesPage() {
   // Fetch selected policy details
   const { data: policyDetails } = useQuery({
     queryKey: ["policy", selectedPolicy, currentRealm?.id, isGlobalMode],
-    queryFn: () =>
-      currentRealm && !isGlobalMode
-        ? policiesApi.readForRealm(currentRealm.id, selectedPolicy!)
-        : policiesApi.read(selectedPolicy!),
+    queryFn: () => {
+      if (!selectedPolicy) {
+        throw new Error("Policy not selected");
+      }
+      return currentRealm && !isGlobalMode
+        ? policiesApi.readForRealm(currentRealm.id, selectedPolicy)
+        : policiesApi.read(selectedPolicy);
+    },
     enabled: !!selectedPolicy,
   });
 
@@ -178,14 +183,22 @@ export function PoliciesPage() {
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {policies.map((policy) => (
-                  <div
+                  <button
                     key={policy}
-                    className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
+                    type="button"
+                    className={`w-full flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors text-left ${
                       selectedPolicy === policy ? "bg-primary/10 border-primary" : "hover:bg-accent"
                     }`}
                     onClick={() => {
                       setSelectedPolicy(policy);
                       setIsCreating(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedPolicy(policy);
+                        setIsCreating(false);
+                      }
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -195,7 +208,7 @@ export function PoliciesPage() {
                     {(policy === "root" || policy === "default") && (
                       <Badge variant="secondary">System</Badge>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

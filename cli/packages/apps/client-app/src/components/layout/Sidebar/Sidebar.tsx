@@ -31,12 +31,11 @@ export const Sidebar = memo(function Sidebar({
   };
 
   return (
-    <aside
+    <nav
       className={cn(
         "h-screen bg-card border-r flex flex-col transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-64"
       )}
-      role="navigation"
       aria-label="Main navigation"
     >
       <SidebarHeader isCollapsed={isCollapsed} onToggle={onToggle} />
@@ -52,6 +51,6 @@ export const Sidebar = memo(function Sidebar({
       />
 
       <SidebarFooter isCollapsed={isCollapsed} />
-    </aside>
+    </nav>
   );
 });

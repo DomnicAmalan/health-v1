@@ -13,7 +13,7 @@ type ApiFixtures = {
 };
 
 export const test = base.extend<ApiFixtures>({
-  apiURL: async ({}, use) => {
+  apiURL: async (_fixtures, use) => {
     const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
     await use(apiURL);
   },

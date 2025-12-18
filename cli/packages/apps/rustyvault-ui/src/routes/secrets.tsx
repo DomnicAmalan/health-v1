@@ -62,13 +62,16 @@ export function SecretsPage() {
   });
 
   // Fetch selected secret
-  const { data: secretDetails, isLoading: isLoadingSecret } = useQuery({
+  const { isLoading: isLoadingSecret } = useQuery({
     queryKey: ["secret", selectedSecret, currentRealm?.id, isGlobalMode],
     queryFn: async () => {
+      if (!selectedSecret) {
+        throw new Error("Secret not selected");
+      }
       const data =
         currentRealm && !isGlobalMode
-          ? await secretsApi.readForRealm(currentRealm.id, selectedSecret!)
-          : await secretsApi.read(selectedSecret!);
+          ? await secretsApi.readForRealm(currentRealm.id, selectedSecret)
+          : await secretsApi.read(selectedSecret);
       setSecretData((data.data || {}) as Record<string, string>);
       return data;
     },
@@ -176,6 +179,7 @@ export function SecretsPage() {
           </>
         )}
         <button
+          type="button"
           onClick={() => setCurrentPath("")}
           className="text-muted-foreground hover:text-foreground"
         >
@@ -185,6 +189,7 @@ export function SecretsPage() {
           <div key={crumb.path} className="flex items-center gap-2">
             <span className="text-muted-foreground">/</span>
             <button
+              type="button"
               onClick={() => setCurrentPath(crumb.path)}
               className="text-muted-foreground hover:text-foreground"
             >
@@ -225,9 +230,10 @@ export function SecretsPage() {
                   const fullPath = currentPath ? `${currentPath}/${secretName}` : secretName;
 
                   return (
-                    <div
+                    <button
                       key={secret}
-                      className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
+                      type="button"
+                      className={`w-full flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors text-left ${
                         selectedSecret === fullPath
                           ? "bg-primary/10 border-primary"
                           : "hover:bg-accent"
@@ -241,6 +247,18 @@ export function SecretsPage() {
                           setIsCreating(false);
                         }
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          if (isDirectory) {
+                            setCurrentPath(fullPath);
+                            setSelectedSecret(null);
+                          } else {
+                            setSelectedSecret(fullPath);
+                            setIsCreating(false);
+                          }
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         {isDirectory ? (
@@ -251,7 +269,7 @@ export function SecretsPage() {
                         <span className="font-medium">{secretName}</span>
                       </div>
                       {isDirectory && <Badge variant="secondary">Directory</Badge>}
-                    </div>
+                    </button>
                   );
                 })}
               </div>

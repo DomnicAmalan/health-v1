@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
 import { Input } from "./input";
 import { Label } from "./label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 
 /**
  * Enhanced Visual Form Builder Playground
@@ -150,9 +151,17 @@ export function FormPlaygroundEnhanced() {
 
     const newFields = [...fields];
     if (direction === "up" && index > 0) {
-      [newFields[index - 1], newFields[index]] = [newFields[index]!, newFields[index - 1]!];
+      const current = newFields[index];
+      const previous = newFields[index - 1];
+      if (current && previous) {
+        [newFields[index - 1], newFields[index]] = [current, previous];
+      }
     } else if (direction === "down" && index < fields.length - 1) {
-      [newFields[index], newFields[index + 1]] = [newFields[index + 1]!, newFields[index]!];
+      const current = newFields[index];
+      const next = newFields[index + 1];
+      if (current && next) {
+        [newFields[index], newFields[index + 1]] = [next, current];
+      }
     }
     setFields(newFields);
   };
@@ -368,15 +377,22 @@ export function MyForm() {
                 ) : (
                   <div className="space-y-3">
                     {fields.map((field, index) => (
-                      <div
+                      <button
                         key={field.id}
+                        type="button"
                         className={cn(
-                          "group relative p-4 rounded-md border-2 transition-all cursor-pointer",
+                          "w-full group relative p-4 rounded-md border-2 transition-all cursor-pointer text-left",
                           selectedField === field.id
                             ? "border-primary bg-primary/5 shadow-fluent-1"
                             : "border-transparent hover:border-[#E1E4E8] bg-white"
                         )}
                         onClick={() => setSelectedField(field.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedField(field.id);
+                          }
+                        }}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2 flex-1">
@@ -448,7 +464,7 @@ export function MyForm() {
                             </Button>
                           </div>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}

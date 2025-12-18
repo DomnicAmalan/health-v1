@@ -22,7 +22,7 @@ import {
   User as UserIcon,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type CreateUserRequest, usersApi } from "@/lib/api";
 import { useRealmStore } from "@/stores/realmStore";
 
@@ -43,12 +43,31 @@ export function UsersPage() {
   const [policiesInput, setPoliciesInput] = useState("");
 
   // Reset selection when realm changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally want to reset when realm changes
   useEffect(() => {
     setSelectedUser(null);
     setIsCreating(false);
     setIsEditing(false);
-    resetForm();
-  }, [resetForm]);
+    setFormData({
+      username: "",
+      password: "",
+      policies: [],
+      ttl: 3600,
+      max_ttl: 86400,
+    });
+    setPoliciesInput("");
+  }, [currentRealm?.id, isGlobalMode]);
+
+  const resetForm = useCallback(() => {
+    setFormData({
+      username: "",
+      password: "",
+      policies: [],
+      ttl: 3600,
+      max_ttl: 86400,
+    });
+    setPoliciesInput("");
+  }, []);
 
   // Fetch users list (realm-scoped or global)
   const {
@@ -64,10 +83,14 @@ export function UsersPage() {
   // Fetch selected user details
   const { data: userDetails } = useQuery({
     queryKey: ["user", selectedUser, currentRealm?.id, isGlobalMode],
-    queryFn: () =>
-      currentRealm && !isGlobalMode
-        ? usersApi.readForRealm(currentRealm.id, selectedUser!)
-        : usersApi.read(selectedUser!),
+    queryFn: () => {
+      if (!selectedUser) {
+        throw new Error("User not selected");
+      }
+      return currentRealm && !isGlobalMode
+        ? usersApi.readForRealm(currentRealm.id, selectedUser)
+        : usersApi.read(selectedUser);
+    },
     enabled: !!selectedUser && !isCreating,
   });
 
@@ -99,17 +122,6 @@ export function UsersPage() {
       setSelectedUser(null);
     },
   });
-
-  const resetForm = () => {
-    setFormData({
-      username: "",
-      password: "",
-      policies: [],
-      ttl: 3600,
-      max_ttl: 86400,
-    });
-    setPoliciesInput("");
-  };
 
   const handleSaveUser = () => {
     const policies = policiesInput
@@ -205,9 +217,10 @@ export function UsersPage() {
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {users.map((username) => (
-                  <div
+                  <button
                     key={username}
-                    className={`flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors ${
+                    type="button"
+                    className={`w-full flex items-center justify-between p-3 rounded-md border cursor-pointer transition-colors text-left ${
                       selectedUser === username ? "bg-primary/10 border-primary" : "hover:bg-accent"
                     }`}
                     onClick={() => {
@@ -215,12 +228,20 @@ export function UsersPage() {
                       setIsCreating(false);
                       setIsEditing(false);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedUser(username);
+                        setIsCreating(false);
+                        setIsEditing(false);
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-2">
                       <UserIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{username}</span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

@@ -307,15 +307,25 @@ export function RealmsPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
-                  <Button variant="outline" size="sm" onClick={() => openEditDialog(realm)}>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditDialog(realm);
+                    }}
+                  >
                     <Edit className="h-4 w-4 mr-1" />
                     {t("realms.list.edit")}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => openDeleteDialog(realm)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDeleteDialog(realm);
+                    }}
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />

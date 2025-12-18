@@ -39,6 +39,7 @@ export function TimezoneSelector() {
       )}
       {!isAutoDetected && (
         <button
+          type="button"
           onClick={resetToSystemTimezone}
           className="text-xs text-primary mt-1 hover:underline"
         >

@@ -45,10 +45,9 @@ export function FullLayout({
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <>
-          <Box
-            role="button"
-            tabIndex={0}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          <button
+            type="button"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden border-0 p-0 m-0"
             onClick={onCloseMobileSidebar}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
@@ -56,6 +55,7 @@ export function FullLayout({
                 onCloseMobileSidebar();
               }
             }}
+            aria-label="Close sidebar"
           />
           <aside className="fixed left-0 top-0 h-screen z-50 lg:hidden">
             <Sidebar isCollapsed={false} onToggle={onCloseMobileSidebar} items={sidebarItems} />

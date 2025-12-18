@@ -1,9 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@lazarus-life/ui-components";
-import { useNavigate } from "@tanstack/react-router";
-import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react";
-import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
-import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -11,6 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@lazarus-life/ui-components";
+import { useNavigate } from "@tanstack/react-router";
+import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react";
+import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
+import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
