@@ -430,3 +430,225 @@ pub async fn userpass_login(
     }
 }
 
+// ============================================================================
+// Realm-Scoped UserPass Handlers
+// ============================================================================
+
+/// List userpass users in a realm
+pub async fn list_realm_userpass_users(
+    state: Arc<AppState>,
+    realm_id: String,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let userpass = state.userpass.as_ref().ok_or_else(|| {
+        (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({ "error": "userpass auth not enabled" })),
+        )
+    })?;
+
+    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "invalid realm ID" })),
+        )
+    })?;
+
+    match userpass.list_users_in_realm(Some(realm_uuid)).await {
+        Ok(users) => Ok(Json(json!({
+            "keys": users
+        }))),
+        Err(e) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )),
+    }
+}
+
+/// Create or update a userpass user in a realm
+pub async fn create_realm_userpass_user(
+    state: Arc<AppState>,
+    realm_id: String,
+    username: String,
+    payload: Json<Value>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let userpass = state.userpass.as_ref().ok_or_else(|| {
+        (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({ "error": "userpass auth not enabled" })),
+        )
+    })?;
+
+    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "invalid realm ID" })),
+        )
+    })?;
+
+    let password = payload
+        .get("password")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({ "error": "password is required" })),
+            )
+        })?;
+
+    let policies: Vec<String> = payload
+        .get("policies")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(String::from))
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let ttl = payload.get("ttl").and_then(|v| v.as_i64()).unwrap_or(3600);
+    let max_ttl = payload
+        .get("max_ttl")
+        .and_then(|v| v.as_i64())
+        .unwrap_or(86400);
+    let email = payload.get("email").and_then(|v| v.as_str()).map(String::from);
+    let display_name = payload.get("display_name").and_then(|v| v.as_str()).map(String::from);
+
+    let request = CreateUserRequest {
+        username,
+        password: password.to_string(),
+        policies,
+        ttl,
+        max_ttl,
+        realm_id: Some(realm_uuid),
+        email,
+        display_name,
+    };
+
+    match userpass.create_user(&request).await {
+        Ok(_) => Ok(Json(json!({}))),
+        Err(e) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )),
+    }
+}
+
+/// Read a userpass user in a realm
+pub async fn read_realm_userpass_user(
+    state: Arc<AppState>,
+    realm_id: String,
+    username: String,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let userpass = state.userpass.as_ref().ok_or_else(|| {
+        (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({ "error": "userpass auth not enabled" })),
+        )
+    })?;
+
+    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "invalid realm ID" })),
+        )
+    })?;
+
+    match userpass.get_user_in_realm(&username, Some(realm_uuid)).await {
+        Ok(Some(user)) => Ok(Json(json!({
+            "data": {
+                "username": user.username,
+                "policies": user.policies,
+                "ttl": user.ttl,
+                "max_ttl": user.max_ttl,
+                "realm_id": realm_id
+            }
+        }))),
+        Ok(None) => Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({ "error": "user not found" })),
+        )),
+        Err(e) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )),
+    }
+}
+
+/// Delete a userpass user in a realm
+pub async fn delete_realm_userpass_user(
+    state: Arc<AppState>,
+    realm_id: String,
+    username: String,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let userpass = state.userpass.as_ref().ok_or_else(|| {
+        (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({ "error": "userpass auth not enabled" })),
+        )
+    })?;
+
+    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "invalid realm ID" })),
+        )
+    })?;
+
+    match userpass.delete_user_in_realm(&username, Some(realm_uuid)).await {
+        Ok(_) => Ok(Json(json!({}))),
+        Err(e) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )),
+    }
+}
+
+/// Login with userpass in a realm
+pub async fn realm_userpass_login(
+    state: Arc<AppState>,
+    realm_id: String,
+    username: String,
+    payload: Json<Value>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let userpass = state.userpass.as_ref().ok_or_else(|| {
+        (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({ "error": "userpass auth not enabled" })),
+        )
+    })?;
+
+    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
+        (
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "error": "invalid realm ID" })),
+        )
+    })?;
+
+    let password = payload
+        .get("password")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({ "error": "password is required" })),
+            )
+        })?;
+
+    match userpass.login_in_realm(&username, password, Some(realm_uuid)).await {
+        Ok(response) => Ok(Json(json!({
+            "auth": {
+                "client_token": response.client_token,
+                "accessor": response.accessor,
+                "policies": response.policies,
+                "token_ttl": response.token_ttl,
+                "renewable": response.renewable,
+                "realm_id": realm_id
+            }
+        }))),
+        Err(e) => Err((
+            StatusCode::UNAUTHORIZED,
+            Json(json!({ "error": e.to_string() })),
+        )),
+    }
+}
+

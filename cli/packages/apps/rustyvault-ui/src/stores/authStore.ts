@@ -182,7 +182,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return;
     }
 
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
       const response = await authApi.lookupToken(token);
       const policies = response.data?.policies || [];
@@ -190,15 +190,30 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isAuthenticated: true,
         policies,
         isLoading: false,
+        error: null,
       });
       savePoliciesToStorage(policies);
-    } catch {
+    } catch (error) {
+      // Determine if this is a network error (backend down) or auth error (invalid token)
+      const isNetworkError =
+        error instanceof Error &&
+        (error.message.includes("fetch") ||
+          error.message.includes("network") ||
+          error.message.includes("Failed to fetch") ||
+          error.message.includes("NetworkError"));
+
+      const errorMessage = isNetworkError
+        ? "Unable to connect to vault server. Please check if the server is running."
+        : "Session expired or invalid. Please login again.";
+
+      // Always clear auth state - don't trust stale tokens
       set({
         accessToken: null,
         policies: [],
         isAuthenticated: false,
         isLoading: false,
         capabilitiesCache: {},
+        error: errorMessage,
       });
       saveTokenToStorage(null);
       savePoliciesToStorage([]);

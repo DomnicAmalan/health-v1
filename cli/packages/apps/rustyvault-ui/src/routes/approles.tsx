@@ -8,7 +8,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -35,6 +34,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { PolicySelector } from "@/components/PolicySelector";
 import { SecretIdDialog } from "@/components/SecretIdDialog";
 import {
   approleApi,
@@ -43,9 +43,6 @@ import {
   type SecretIdResponse,
 } from "@/lib/api/approle";
 import { useRealmStore } from "@/stores/realmStore";
-
-// Common policies
-const COMMON_POLICIES = ["default", "admin", "reader", "writer"];
 
 export function AppRolesPage() {
   const { t } = useTranslation();
@@ -154,14 +151,6 @@ export function AppRolesPage() {
       token_max_ttl: 86400,
       policies: ["default"],
     });
-  };
-
-  const handlePolicyToggle = (policy: string) => {
-    const current = formData.policies || [];
-    const updated = current.includes(policy)
-      ? current.filter((p) => p !== policy)
-      : [...current, policy];
-    setFormData({ ...formData, policies: updated });
   };
 
   const handleCreate = () => {
@@ -331,23 +320,12 @@ export function AppRolesPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>{t("approles.create.fields.policies")}</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {COMMON_POLICIES.map((policy) => (
-                    <div key={policy} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`policy-${policy}`}
-                        checked={formData.policies?.includes(policy)}
-                        onCheckedChange={() => handlePolicyToggle(policy)}
-                      />
-                      <label htmlFor={`policy-${policy}`} className="text-sm">
-                        {policy}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <PolicySelector
+                label={t("approles.create.fields.policies")}
+                selectedPolicies={formData.policies || []}
+                onPoliciesChange={(policies) => setFormData({ ...formData, policies })}
+                realmId={currentRealm?.id}
+              />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>

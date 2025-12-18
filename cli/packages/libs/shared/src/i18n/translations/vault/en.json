@@ -42,6 +42,7 @@
   "navigation": {
     "title": "Lazarus Life Vault",
     "dashboard": "Dashboard",
+    "guide": "Getting Started",
     "secrets": "Secrets",
     "policies": "Policies",
     "tokens": "Tokens",

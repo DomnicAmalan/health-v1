@@ -12,6 +12,7 @@ import {
   Label,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   Edit,
@@ -23,6 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { PolicySelector } from "@/components/PolicySelector";
 import { type CreateUserRequest, usersApi } from "@/lib/api";
 import { useRealmStore } from "@/stores/realmStore";
 
@@ -40,7 +42,6 @@ export function UsersPage() {
     ttl: 3600,
     max_ttl: 86400,
   });
-  const [policiesInput, setPoliciesInput] = useState("");
 
   // Reset selection when realm changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally want to reset when realm changes
@@ -55,7 +56,6 @@ export function UsersPage() {
       ttl: 3600,
       max_ttl: 86400,
     });
-    setPoliciesInput("");
   }, [currentRealm?.id, isGlobalMode]);
 
   const resetForm = useCallback(() => {
@@ -66,7 +66,6 @@ export function UsersPage() {
       ttl: 3600,
       max_ttl: 86400,
     });
-    setPoliciesInput("");
   }, []);
 
   // Fetch users list (realm-scoped or global)
@@ -124,11 +123,7 @@ export function UsersPage() {
   });
 
   const handleSaveUser = () => {
-    const policies = policiesInput
-      .split(",")
-      .map((p) => p.trim())
-      .filter((p) => p.length > 0);
-    saveUserMutation.mutate({ ...formData, policies });
+    saveUserMutation.mutate(formData);
   };
 
   const handleEditUser = () => {
@@ -141,7 +136,6 @@ export function UsersPage() {
         ttl: user.ttl,
         max_ttl: user.max_ttl,
       });
-      setPoliciesInput(user.policies.join(", "));
       setIsEditing(true);
     }
   };
@@ -177,6 +171,20 @@ export function UsersPage() {
           New User
         </Button>
       </div>
+
+      {/* No Realm Selected Info */}
+      {isGlobalMode && (
+        <Alert>
+          <Globe className="h-4 w-4" />
+          <AlertDescription>
+            You are viewing global users. For realm-scoped users,{" "}
+            <Link to="/realms" className="underline font-medium">
+              select a realm
+            </Link>{" "}
+            from the sidebar.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Error State */}
       {error && (
@@ -296,15 +304,13 @@ export function UsersPage() {
                     placeholder={isEditing ? "••••••••" : "Enter password"}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="policies">Policies (comma-separated)</Label>
-                  <Input
-                    id="policies"
-                    value={policiesInput}
-                    onChange={(e) => setPoliciesInput(e.target.value)}
-                    placeholder="default, my-policy"
-                  />
-                </div>
+                <PolicySelector
+                  label="Policies"
+                  selectedPolicies={formData.policies || []}
+                  onPoliciesChange={(policies) => setFormData({ ...formData, policies })}
+                  realmId={currentRealm?.id}
+                  useGlobalMode={isGlobalMode}
+                />
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="ttl">Token TTL (seconds)</Label>
@@ -364,18 +370,37 @@ export function UsersPage() {
                   <p className="font-medium">{user.username}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Policies</Label>
+                  <Label className="text-muted-foreground">Assigned Policies</Label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {user.policies?.length > 0 ? (
-                      user.policies.map((policy) => (
-                        <Badge key={policy} variant="secondary">
-                          {policy}
-                        </Badge>
-                      ))
+                      user.policies.map((policy) => {
+                        // Highlight special policies
+                        const isAdmin = policy === "admin" || policy === "root";
+                        const isDefault = policy === "default";
+                        return (
+                          <Badge
+                            key={policy}
+                            variant={isAdmin ? "destructive" : isDefault ? "outline" : "secondary"}
+                          >
+                            {policy}
+                          </Badge>
+                        );
+                      })
                     ) : (
-                      <span className="text-muted-foreground">No policies</span>
+                      <span className="text-muted-foreground">No policies assigned</span>
                     )}
                   </div>
+                  {user.policies?.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {user.policies.includes("admin") || user.policies.includes("root")
+                        ? "⚠️ This user has administrative access"
+                        : user.policies.includes("writer")
+                          ? "This user can read and write secrets"
+                          : user.policies.includes("reader")
+                            ? "This user has read-only access"
+                            : "Standard user access"}
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

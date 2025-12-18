@@ -10,6 +10,7 @@ import {
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   AppWindow,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   Globe,
@@ -40,6 +41,11 @@ const navItems: NavItem[] = [
     nameKey: "navigation.dashboard",
     path: "/",
     icon: LayoutDashboard,
+  },
+  {
+    nameKey: "navigation.guide",
+    path: "/guide",
+    icon: BookOpen,
   },
   {
     nameKey: "navigation.realms",
@@ -162,15 +168,17 @@ export function Sidebar() {
                     <Link
                       to={item.path}
                       className={cn(
-                        "flex items-center rounded-md text-sm font-medium transition-colors w-full block",
-                        sidebarCollapsed ? "justify-center px-2 py-2" : "gap-3 px-3 py-2",
+                        "flex items-center rounded-md text-sm font-medium transition-colors w-full",
+                        sidebarCollapsed ? "justify-center px-2 py-2" : "px-3 py-2",
                         isActive
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {!sidebarCollapsed && <span className="truncate">{t(item.nameKey)}</span>}
+                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      {!sidebarCollapsed && <span className="ml-3 truncate">{t(item.nameKey)}</span>}
                     </Link>
                   </TooltipTrigger>
                   {sidebarCollapsed && (
@@ -184,19 +192,21 @@ export function Sidebar() {
           </nav>
         </TooltipProvider>
         <TooltipProvider>
-          <div className={cn("border-t", sidebarCollapsed ? "p-2" : "p-4")}>
+          <div className={cn("border-t py-4", sidebarCollapsed ? "px-2" : "px-2")}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   className={cn(
                     "w-full transition-colors",
-                    sidebarCollapsed ? "justify-center px-2" : "justify-start",
+                    sidebarCollapsed ? "justify-center px-2" : "justify-start px-3",
                   )}
                   onClick={handleLogout}
                 >
-                  <LogOut className={cn("h-4 w-4 shrink-0", !sidebarCollapsed && "mr-2")} />
-                  {!sidebarCollapsed && t("common.logout")}
+                  <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <LogOut className="h-4 w-4" />
+                  </span>
+                  {!sidebarCollapsed && <span className="ml-3">{t("common.logout")}</span>}
                 </Button>
               </TooltipTrigger>
               {sidebarCollapsed && (

@@ -108,6 +108,13 @@ async fn async_main() -> Result<(), String> {
     ));
     info!("UserPass backend initialized");
 
+    // Initialize AppRole backend
+    let approle_backend = Arc::new(modules::auth::AppRoleBackend::new(
+        pool.clone(),
+        "auth/approle",
+    ));
+    info!("AppRole backend initialized");
+
     // Initialize Realm store
     let realm_store = Arc::new(modules::realm::RealmStore::new(pool.clone()));
     info!("Realm store initialized");
@@ -126,6 +133,7 @@ async fn async_main() -> Result<(), String> {
         policy_store: Some(policy_store),
         token_store: Some(token_store),
         userpass: Some(userpass_backend),
+        approle_backend: Some(approle_backend),
         realm_store: Some(realm_store),
         app_store: Some(app_store),
         key_storage,

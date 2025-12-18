@@ -3,6 +3,7 @@ import { Route as rootRoute } from "./routes/__root";
 import { ApplicationsPage } from "./routes/applications";
 import { AppRolesPage } from "./routes/approles";
 import { DashboardPage } from "./routes/index";
+import { GuidePage } from "./routes/guide";
 import { LoginPage } from "./routes/login";
 import { PoliciesPage } from "./routes/policies";
 import { RealmsPage } from "./routes/realms";
@@ -81,6 +82,13 @@ const systemRoute = createRoute({
   component: SystemPage,
 });
 
+// Guide route
+const guideRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/guide",
+  component: GuidePage,
+});
+
 // Route tree
 const routeTree = rootRoute.addChildren([
   loginRoute,
@@ -93,6 +101,7 @@ const routeTree = rootRoute.addChildren([
   applicationsRoute,
   approlesRoute,
   systemRoute,
+  guideRoute,
 ]);
 
 // Create router

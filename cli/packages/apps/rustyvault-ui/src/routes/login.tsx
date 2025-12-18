@@ -24,8 +24,24 @@ export function LoginPage() {
   const [roleId, setRoleId] = useState("");
   const [secretId, setSecretId] = useState("");
   const [error, setError] = useState("");
-  const { login, loginWithUserpass, loginWithAppRole, isLoading, isAuthenticated } = useAuthStore();
+  const {
+    login,
+    loginWithUserpass,
+    loginWithAppRole,
+    isLoading,
+    isAuthenticated,
+    error: authError,
+    clearError,
+  } = useAuthStore();
   const navigate = useNavigate();
+
+  // Show auth store error (e.g., from failed token validation on page load)
+  useEffect(() => {
+    if (authError && !error) {
+      setError(authError);
+      clearError();
+    }
+  }, [authError, error, clearError]);
 
   // Redirect if already authenticated
   useEffect(() => {

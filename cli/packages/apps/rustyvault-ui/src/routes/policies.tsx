@@ -8,14 +8,43 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
   Input,
   Label,
+  Select,
+  SelectItem,
+  SelectValue,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Edit, FileText, Globe, Loader2, Plus, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, Edit, FileText, Globe, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { policiesApi } from "@/lib/api";
 import { useRealmStore } from "@/stores/realmStore";
+
+// Available capabilities for policies
+const CAPABILITIES = ["create", "read", "update", "delete", "list"] as const;
+type Capability = (typeof CAPABILITIES)[number];
+
+// Common path templates
+const PATH_TEMPLATES = [
+  { label: "All Secrets", value: "secret/*" },
+  { label: "Secret Data", value: "secret/data/*" },
+  { label: "Secret Metadata", value: "secret/metadata/*" },
+  { label: "Specific Secret Path", value: "secret/data/" },
+  { label: "System Policies", value: "sys/policies/*" },
+  { label: "Auth Methods", value: "auth/*" },
+  { label: "Custom Path", value: "" },
+] as const;
+
+interface PathRule {
+  id: string;
+  path: string;
+  capabilities: Capability[];
+}
+
+// Helper to generate unique IDs
+const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export function PoliciesPage() {
   const queryClient = useQueryClient();
@@ -25,6 +54,10 @@ export function PoliciesPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [newPolicyName, setNewPolicyName] = useState("");
   const [policyContent, setPolicyContent] = useState("");
+  const [pathRules, setPathRules] = useState<PathRule[]>([
+    { id: generateId(), path: "secret/data/*", capabilities: ["read", "list"] },
+  ]);
+  const [useAdvancedMode, setUseAdvancedMode] = useState(false);
 
   // Reset selection when realm changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally want to reset when realm changes
@@ -90,9 +123,63 @@ export function PoliciesPage() {
     },
   });
 
+  // Convert path rules to policy JSON
+  const pathRulesToJson = (rules: PathRule[]): string => {
+    const pathObj: Record<string, { capabilities: string[] }> = {};
+    for (const rule of rules) {
+      if (rule.path && rule.capabilities.length > 0) {
+        pathObj[rule.path] = { capabilities: rule.capabilities };
+      }
+    }
+    return JSON.stringify(
+      {
+        name: newPolicyName || "new-policy",
+        path: pathObj,
+      },
+      null,
+      2,
+    );
+  };
+
+  // Add a new path rule
+  const addPathRule = () => {
+    setPathRules([...pathRules, { id: generateId(), path: "", capabilities: ["read"] }]);
+  };
+
+  // Remove a path rule
+  const removePathRule = (id: string) => {
+    if (pathRules.length > 1) {
+      setPathRules(pathRules.filter((rule) => rule.id !== id));
+    }
+  };
+
+  // Update path for a rule
+  const updateRulePath = (id: string, path: string) => {
+    setPathRules(pathRules.map((rule) => (rule.id === id ? { ...rule, path } : rule)));
+  };
+
+  // Toggle capability for a rule
+  const toggleCapability = (id: string, capability: Capability) => {
+    setPathRules(
+      pathRules.map((rule) => {
+        if (rule.id !== id) return rule;
+        const hasCapability = rule.capabilities.includes(capability);
+        return {
+          ...rule,
+          capabilities: hasCapability
+            ? rule.capabilities.filter((c) => c !== capability)
+            : [...rule.capabilities, capability],
+        };
+      }),
+    );
+  };
+
   const handleCreatePolicy = () => {
-    if (newPolicyName && policyContent) {
-      savePolicyMutation.mutate({ name: newPolicyName, policy: policyContent });
+    if (!newPolicyName) return;
+
+    const policyJson = useAdvancedMode ? policyContent : pathRulesToJson(pathRules);
+    if (policyJson) {
+      savePolicyMutation.mutate({ name: newPolicyName, policy: policyJson });
     }
   };
 
@@ -104,7 +191,7 @@ export function PoliciesPage() {
 
   const policies = policiesData?.keys || [];
 
-  // Default policy template
+  // Default policy template for advanced mode
   const defaultPolicyTemplate = `{
   "name": "example-policy",
   "path": {
@@ -116,6 +203,16 @@ export function PoliciesPage() {
     }
   }
 }`;
+
+  // Reset form state when starting to create
+  const startCreating = () => {
+    setIsCreating(true);
+    setSelectedPolicy(null);
+    setNewPolicyName("");
+    setPathRules([{ id: generateId(), path: "secret/data/*", capabilities: ["read", "list"] }]);
+    setPolicyContent(defaultPolicyTemplate);
+    setUseAdvancedMode(false);
+  };
 
   // Context indicator
   const contextLabel = currentRealm && !isGlobalMode ? `Realm: ${currentRealm.name}` : "Global";
@@ -135,17 +232,25 @@ export function PoliciesPage() {
             Manage access control policies for Lazarus Life Vault
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setIsCreating(true);
-            setSelectedPolicy(null);
-            setPolicyContent(defaultPolicyTemplate);
-          }}
-        >
+        <Button onClick={startCreating}>
           <Plus className="h-4 w-4 mr-2" />
           New Policy
         </Button>
       </div>
+
+      {/* No Realm Selected Info */}
+      {isGlobalMode && (
+        <Alert>
+          <Globe className="h-4 w-4" />
+          <AlertDescription>
+            You are viewing global policies. For realm-scoped policies,{" "}
+            <Link to="/realms" className="underline font-medium">
+              select a realm
+            </Link>{" "}
+            from the sidebar.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Error State */}
       {error && (
@@ -236,6 +341,7 @@ export function PoliciesPage() {
           <CardContent>
             {isCreating ? (
               <div className="space-y-4">
+                {/* Policy Name */}
                 <div>
                   <Label htmlFor="policy-name">Policy Name</Label>
                   <Input
@@ -245,20 +351,144 @@ export function PoliciesPage() {
                     placeholder="my-policy"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="policy-content">Policy Content (JSON)</Label>
-                  <textarea
-                    id="policy-content"
-                    value={policyContent}
-                    onChange={(e) => setPolicyContent(e.target.value)}
-                    className="w-full h-64 p-3 font-mono text-sm border rounded-md bg-background resize-y"
-                    placeholder="Enter policy JSON..."
-                  />
+
+                {/* Mode Toggle */}
+                <div className="flex items-center justify-between border-b pb-3">
+                  <Label>Policy Definition</Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={useAdvancedMode ? "outline" : "default"}
+                      size="sm"
+                      onClick={() => setUseAdvancedMode(false)}
+                    >
+                      Visual Builder
+                    </Button>
+                    <Button
+                      variant={useAdvancedMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setUseAdvancedMode(true);
+                        setPolicyContent(pathRulesToJson(pathRules));
+                      }}
+                    >
+                      Advanced (JSON)
+                    </Button>
+                  </div>
                 </div>
+
+                {useAdvancedMode ? (
+                  /* Advanced JSON Mode */
+                  <div>
+                    <Label htmlFor="policy-content">Policy Content (JSON)</Label>
+                    <textarea
+                      id="policy-content"
+                      value={policyContent}
+                      onChange={(e) => setPolicyContent(e.target.value)}
+                      className="w-full h-64 p-3 font-mono text-sm border rounded-md bg-background resize-y"
+                      placeholder="Enter policy JSON..."
+                    />
+                  </div>
+                ) : (
+                  /* Visual Builder Mode */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label>Path Rules</Label>
+                      <Button variant="outline" size="sm" onClick={addPathRule}>
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Path
+                      </Button>
+                    </div>
+
+                    {pathRules.map((rule, index) => (
+                      <div key={rule.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-muted-foreground">
+                            Rule {index + 1}
+                          </span>
+                          {pathRules.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              onClick={() => removePathRule(rule.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Path Selection */}
+                        <div className="space-y-2">
+                          <Label>Path Pattern</Label>
+                          <div className="flex gap-2">
+                            <Select
+                              value={
+                                PATH_TEMPLATES.find((t) => t.value === rule.path)?.value || ""
+                              }
+                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                const value = e.target.value;
+                                if (value) updateRulePath(rule.id, value);
+                              }}
+                              className="w-48"
+                            >
+                              <SelectValue placeholder="Select template" />
+                              {PATH_TEMPLATES.map((template) => (
+                                <SelectItem key={template.value} value={template.value || "custom"}>
+                                  {template.label}
+                                </SelectItem>
+                              ))}
+                            </Select>
+                            <Input
+                              value={rule.path}
+                              onChange={(e) => updateRulePath(rule.id, e.target.value)}
+                              placeholder="secret/data/my-app/*"
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Capabilities */}
+                        <div className="space-y-2">
+                          <Label>Capabilities</Label>
+                          <div className="flex flex-wrap gap-3">
+                            {CAPABILITIES.map((capability) => (
+                              <div key={capability} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`${rule.id}-${capability}`}
+                                  checked={rule.capabilities.includes(capability)}
+                                  onCheckedChange={() => toggleCapability(rule.id, capability)}
+                                />
+                                <label
+                                  htmlFor={`${rule.id}-${capability}`}
+                                  className="text-sm capitalize cursor-pointer"
+                                >
+                                  {capability}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Preview */}
+                    <div className="border-t pt-4">
+                      <Label className="text-muted-foreground">Preview (JSON)</Label>
+                      <pre className="mt-2 p-3 bg-muted rounded-md text-xs font-mono overflow-x-auto max-h-32">
+                        {pathRulesToJson(pathRules)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     onClick={handleCreatePolicy}
-                    disabled={savePolicyMutation.isPending || !newPolicyName}
+                    disabled={
+                      savePolicyMutation.isPending ||
+                      !newPolicyName ||
+                      (!useAdvancedMode && pathRules.every((r) => !r.path || r.capabilities.length === 0))
+                    }
                   >
                     {savePolicyMutation.isPending ? (
                       <>
