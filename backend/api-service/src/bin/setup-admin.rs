@@ -509,7 +509,7 @@ async fn main() {
         Ok(_) => println!("✓ Organization DEK generated"),
         Err(e) => {
             eprintln!("Failed to generate organization DEK: {}", e);
-            eprintln!("⚠ Note: Make sure VAULT_ADDR is set correctly (e.g., http://localhost:8201 or http://rustyvault-service:8200 in Docker)");
+            eprintln!("⚠ Note: Make sure VAULT_ADDR is set correctly (e.g., http://localhost:4117 or http://rustyvault-service:4117 in Docker)");
             rollback_all(&pool, Some(org_id), Some(admin_user.id)).await;
             process::exit(1);
         }

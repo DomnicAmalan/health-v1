@@ -77,7 +77,7 @@ impl RustyVaultClient {
     /// Create from environment variables
     pub fn from_env() -> AppResult<Self> {
         let addr = std::env::var("VAULT_ADDR")
-            .unwrap_or_else(|_| "http://localhost:8201".to_string());
+            .unwrap_or_else(|_| "http://localhost:4117".to_string());
         let token = std::env::var("VAULT_TOKEN")
             .map_err(|_| AppError::Configuration("VAULT_TOKEN not set".to_string()))?;
         let mount_path = std::env::var("VAULT_MOUNT_PATH")

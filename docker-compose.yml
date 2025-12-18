@@ -1,9 +1,9 @@
 # Docker Compose file - version removed as it's obsolete in newer Docker Compose
 
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database with PostGIS support
   postgres:
-    image: postgres:17-alpine
+    image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-auth_user}

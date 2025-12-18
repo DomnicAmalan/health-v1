@@ -81,33 +81,33 @@ export function RegisterButtonForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="button-id">Button ID</Label>
           <Input
+            label="Button ID"
             id="button-id"
             value={buttonId}
-            onChange={(e) => setButtonId(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonId(e.target.value)}
             placeholder="create-user, delete-user, etc."
             required
           />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="button-label">Label</Label>
           <Input
+            label="Label"
             id="button-label"
             value={label}
-            onChange={(e) => setLabel(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
             placeholder="Create User"
             required
           />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="button-action">Action (Optional)</Label>
           <Input
+            label="Action (Optional)"
             id="button-action"
             value={action}
-            onChange={(e) => setAction(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAction(e.target.value)}
             placeholder="create, delete, edit, etc."
           />
         </div>

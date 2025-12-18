@@ -4,6 +4,7 @@
 
 export * from "./auth";
 export * from "./client";
+export * from "./compliance";
 export * from "./dashboard";
 export * from "./encryption";
 export * from "./groups";

@@ -14,7 +14,7 @@ A professional web UI for Lazarus Life Vault, built using the shared component l
 ### Prerequisites
 
 - Bun (latest version)
-- Lazarus Life Vault server running on `http://127.0.0.1:8200`
+- Lazarus Life Vault server running on `http://127.0.0.1:4117`
 
 ### Installation
 

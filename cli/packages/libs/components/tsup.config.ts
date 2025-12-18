@@ -13,6 +13,7 @@ export default defineConfig({
     "src/components/card.tsx",
     "src/components/avatar.tsx",
     "src/components/dropdown-menu.tsx",
+    "src/components/context-menu.tsx",
     "src/components/badge.tsx",
     "src/components/container.tsx",
   ],

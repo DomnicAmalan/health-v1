@@ -14,9 +14,9 @@ x-profiles: &profiles
   # The Makefile or docker-compose command should use --profile flags based on ENABLE_* vars
 
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database with PostGIS support
   postgres:
-    image: postgres:17-alpine
+    image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-auth_user}
@@ -162,14 +162,13 @@ services:
       target: runner-dev
       args:
         BUILD_MODE: dev
-        VITE_API_BASE_URL: ${CLIENT_APP_API_BASE_URL:-http://localhost:4117}
         SKIP_TYPE_CHECK: "true"
     container_name: health-client-app
+    env_file:
+      - ./cli/packages/apps/client-app/.env
     environment:
-      # Vite configuration
-      VITE_API_BASE_URL: ${CLIENT_APP_API_BASE_URL:-http://localhost:4117}
-      VITE_OIDC_ISSUER: ${VITE_OIDC_ISSUER:-http://localhost:4117}
-      VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-default-client}
+      # Override for Docker (host access)
+      VITE_HOST: 0.0.0.0
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/client-app:/app/packages/apps/client-app
@@ -182,7 +181,7 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${CLIENT_APP_PORT:-4115}:5173"
+      - "${CLIENT_APP_PORT:-4115}:4115"
     depends_on:
       - api-service
     healthcheck:
@@ -203,17 +202,13 @@ services:
       target: runner-dev
       args:
         BUILD_MODE: dev
-        VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:4117}
         SKIP_TYPE_CHECK: "true"
     container_name: health-admin-ui
+    env_file:
+      - ./cli/packages/apps/admin/.env
     environment:
-      # Vite configuration
-      VITE_API_BASE_URL: ${ADMIN_UI_API_BASE_URL:-http://localhost:4117}
-      VITE_OIDC_ISSUER: ${VITE_OIDC_ISSUER:-http://localhost:4117}
-      VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-default-client}
-      VITE_ENABLE_POSTGRES: ${VITE_ENABLE_POSTGRES:-true}
-      VITE_ENABLE_NATS: ${VITE_ENABLE_NATS:-false}
-      VITE_ENABLE_KAFKA: ${VITE_ENABLE_KAFKA:-false}
+      # Override for Docker (host access)
+      VITE_HOST: 0.0.0.0
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/admin:/app/packages/apps/admin
@@ -222,7 +217,7 @@ services:
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
     ports:
-      - "${ADMIN_UI_PORT:-4111}:5174"
+      - "${ADMIN_UI_PORT:-4111}:4111"
     depends_on:
       - api-service
     healthcheck:
@@ -331,12 +326,13 @@ services:
       target: runner-dev
       args:
         BUILD_MODE: dev
-        VITE_API_BASE_URL: ${VAULT_UI_API_BASE_URL:-http://localhost:4117/v1}
         SKIP_TYPE_CHECK: "true"
     container_name: health-rustyvault-ui
+    env_file:
+      - ./cli/packages/apps/rustyvault-ui/.env
     environment:
-      # Vite configuration - use localhost for browser access
-      VITE_API_BASE_URL: ${VAULT_UI_API_BASE_URL:-http://localhost:4117/v1}
+      # Override for Docker (host access)
+      VITE_HOST: 0.0.0.0
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/rustyvault-ui:/app/packages/apps/rustyvault-ui
@@ -349,7 +345,7 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${VAULT_UI_PORT:-4115}:3000"
+      - "${VAULT_UI_PORT:-4115}:4115"
     depends_on:
       - rustyvault-service
     healthcheck:

@@ -222,35 +222,29 @@ export function ProvisionUserDialog({
         <User className="h-5 w-5 text-primary" />
         <h3 className="font-medium">Basic Information</h3>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="user@example.com"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="display_name">Display Name</Label>
-        <Input
-          id="display_name"
-          value={formData.display_name}
-          onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-          placeholder="John Doe"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          placeholder="••••••••"
-        />
-      </div>
+      <Input
+        label="Email Address"
+        id="email"
+        type="email"
+        value={formData.email}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
+        placeholder="user@example.com"
+      />
+      <Input
+        label="Display Name"
+        id="display_name"
+        value={formData.display_name}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, display_name: e.target.value })}
+        placeholder="John Doe"
+      />
+      <Input
+        label="Password"
+        id="password"
+        type="password"
+        value={formData.password}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, password: e.target.value })}
+        placeholder="••••••••"
+      />
       <div className="space-y-2">
         <Label htmlFor="organization">Organization</Label>
         <Select

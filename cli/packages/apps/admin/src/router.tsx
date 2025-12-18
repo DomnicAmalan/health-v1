@@ -1,6 +1,8 @@
 import { createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
 import { Route as rootRoute } from "./routes/__root";
 import { AppAccessPage } from "./routes/app-access";
+import { ComplianceIndexPage } from "./routes/compliance/index";
+import { RegulationsPage } from "./routes/compliance/regulations";
 import { DashboardPage } from "./routes/dashboard";
 import { DekManagementPage } from "./routes/encryption/deks";
 import { EncryptionIndexPage } from "./routes/encryption/index";
@@ -113,6 +115,19 @@ const appAccessRoute = createRoute({
   component: AppAccessPage,
 });
 
+// Compliance routes
+const complianceIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compliance",
+  component: ComplianceIndexPage,
+});
+
+const regulationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/compliance/regulations",
+  component: RegulationsPage,
+});
+
 // Route tree
 const routeTree = rootRoute.addChildren([
   loginRoute,
@@ -129,6 +144,8 @@ const routeTree = rootRoute.addChildren([
   servicesRoute,
   zanzibarRelationshipsRoute,
   appAccessRoute,
+  complianceIndexRoute,
+  regulationsRoute,
 ]);
 
 // Create router

@@ -76,27 +76,23 @@ export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: Regist
           </Select>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="field-id">Field ID</Label>
-          <Input
-            id="field-id"
-            value={fieldId}
-            onChange={(e) => setFieldId(e.target.value)}
-            placeholder="user-email, user-password, etc."
-            required
-          />
-        </div>
+        <Input
+          label="Field ID"
+          id="field-id"
+          value={fieldId}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldId(e.target.value)}
+          placeholder="user-email, user-password, etc."
+          required
+        />
 
-        <div className="grid gap-2">
-          <Label htmlFor="field-label">Label</Label>
-          <Input
-            id="field-label"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Email Address"
-            required
-          />
-        </div>
+        <Input
+          label="Label"
+          id="field-label"
+          value={label}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
+          placeholder="Email Address"
+          required
+        />
 
         <div className="grid gap-2">
           <Label htmlFor="field-type">Field Type</Label>

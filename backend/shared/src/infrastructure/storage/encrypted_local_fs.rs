@@ -15,7 +15,6 @@ use tokio::fs;
 use uuid::Uuid;
 
 // Use age's secrecy types
-use age::secrecy::ExposeSecret;
 
 /// Scope for encrypted storage - determines which DEK to use
 #[derive(Debug, Clone)]

@@ -32,7 +32,7 @@ bun install
 2. **Set Environment Variables:**
 Create `cli/packages/apps/rustyvault-ui/.env`:
 ```env
-VITE_API_BASE_URL=http://localhost:8201
+VITE_API_BASE_URL=http://localhost:4117/v1
 VITE_PORT=3000
 VITE_HOST=localhost
 ```
@@ -49,18 +49,18 @@ bun run dev
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_BASE_URL` | RustyVault API base URL | `http://localhost:8201` |
+| `VITE_API_BASE_URL` | RustyVault API base URL | `http://localhost:4117/v1` |
 | `VITE_PORT` | Dev server port | `3000` |
 | `VITE_HOST` | Dev server host | `localhost` |
 
 ### Docker Configuration
 
 In Docker, the UI connects to RustyVault service using the internal Docker network:
-- **Production**: `http://rustyvault-service:8200`
-- **Development**: `http://rustyvault-service:8201`
+- **Production**: `http://rustyvault-service:4117`
+- **Development**: `http://rustyvault-service:4117`
 
 For local development outside Docker, use:
-- `http://localhost:8201` (if RustyVault is running locally)
+- `http://localhost:4117/v1` (if RustyVault is running locally)
 
 ## Features
 
@@ -123,13 +123,13 @@ docker ps | grep rustyvault-service
 ```
 
 2. **Verify the API URL:**
-   - In Docker: Should be `http://rustyvault-service:8200` (or `:8201` in dev)
-   - Locally: Should be `http://localhost:8201`
+   - In Docker: Should be `http://rustyvault-service:4117`
+   - Locally: Should be `http://localhost:4117/v1`
 
 3. **Check network connectivity:**
 ```bash
 # From UI container
-docker exec health-rustyvault-ui curl http://rustyvault-service:8200/v1/sys/health
+docker exec health-rustyvault-ui curl http://rustyvault-service:4117/v1/sys/health
 ```
 
 ### Port conflicts

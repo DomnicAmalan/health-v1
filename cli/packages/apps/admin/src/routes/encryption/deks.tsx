@@ -195,19 +195,19 @@ export function DekManagementPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="user-id">User ID</Label>
-                <Input id="user-id" value={selectedUserId} disabled />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="reason">Reason (Optional)</Label>
-                <Input
-                  id="reason"
-                  value={rotateReason}
-                  onChange={(e) => setRotateReason(e.target.value)}
-                  placeholder="e.g., Password reset, Security event"
-                />
-              </div>
+              <Input
+                label="User ID"
+                id="user-id"
+                value={selectedUserId}
+                disabled
+              />
+              <Input
+                label="Reason (Optional)"
+                id="reason"
+                value={rotateReason}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRotateReason(e.target.value)}
+                placeholder="e.g., Password reset, Security event"
+              />
               <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
                 <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">

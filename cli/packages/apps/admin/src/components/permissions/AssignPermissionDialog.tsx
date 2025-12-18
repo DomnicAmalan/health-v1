@@ -110,24 +110,22 @@ export function AssignPermissionDialog({
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="subject">
-                {subjectType === "user"
+            <Input
+              label={
+                subjectType === "user"
                   ? "User ID"
                   : subjectType === "role"
                     ? "Role Name"
-                    : "Group ID"}
-              </Label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder={
-                  subjectType === "user" ? "user-id" : subjectType === "role" ? "admin" : "group-id"
-                }
-                required
-              />
-            </div>
+                    : "Group ID"
+              }
+              id="subject"
+              value={subject}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)}
+              placeholder={
+                subjectType === "user" ? "user-id" : subjectType === "role" ? "admin" : "group-id"
+              }
+              required
+            />
 
             <div className="grid gap-2">
               <Label htmlFor="relation">Relation</Label>
@@ -144,36 +142,30 @@ export function AssignPermissionDialog({
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="object">Object (Resource)</Label>
-              <Input
-                id="object"
-                value={object}
-                onChange={(e) => setObject(e.target.value)}
-                placeholder="page:users, button:create-user, field:user-email, etc."
-                required
-              />
-            </div>
+            <Input
+              label="Object (Resource)"
+              id="object"
+              value={object}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setObject(e.target.value)}
+              placeholder="page:users, button:create-user, field:user-email, etc."
+              required
+            />
 
-            <div className="grid gap-2">
-              <Label htmlFor="valid-from">Valid From (Optional)</Label>
-              <Input
-                id="valid-from"
-                type="datetime-local"
-                value={validFrom}
-                onChange={(e) => setValidFrom(e.target.value)}
-              />
-            </div>
+            <Input
+              label="Valid From (Optional)"
+              id="valid-from"
+              type="datetime-local"
+              value={validFrom}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValidFrom(e.target.value)}
+            />
 
-            <div className="grid gap-2">
-              <Label htmlFor="expires-at">Expires At (Optional)</Label>
-              <Input
-                id="expires-at"
-                type="datetime-local"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-              />
-            </div>
+            <Input
+              label="Expires At (Optional)"
+              id="expires-at"
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExpiresAt(e.target.value)}
+            />
           </div>
 
           <DialogFooter>

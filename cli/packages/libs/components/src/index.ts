@@ -13,6 +13,7 @@ export * from "./components/card";
 export * from "./components/checkbox";
 export * from "./components/component-registry";
 export * from "./components/container";
+export * from "./components/context-menu";
 export * from "./components/dialog";
 export * from "./components/dropdown-menu";
 export * from "./components/flex";

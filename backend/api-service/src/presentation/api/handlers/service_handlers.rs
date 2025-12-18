@@ -32,7 +32,7 @@ async fn check_postgres_health(db_service: &shared::infrastructure::database::Da
 
 /// Check OpenBao health
 async fn check_openbao_health() -> (bool, Option<String>, Option<String>) {
-    let vault_addr = env::var("VAULT_ADDR").unwrap_or_else(|_| "http://localhost:8200".to_string());
+    let vault_addr = env::var("VAULT_ADDR").unwrap_or_else(|_| "http://localhost:4117".to_string());
     let health_endpoint = format!("{}/v1/sys/health", vault_addr);
     
     let client = reqwest::Client::builder()

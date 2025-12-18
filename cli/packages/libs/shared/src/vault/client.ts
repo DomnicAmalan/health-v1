@@ -329,8 +329,8 @@ export function createVaultClient(baseUrl?: string): VaultClient {
   const url =
     baseUrl ||
     (typeof window !== "undefined"
-      ? window.location.origin.replace(/:\d+$/, ":8200")
-      : "http://localhost:8200");
+      ? window.location.origin.replace(/:\d+$/, ":4117")
+      : "http://localhost:4117");
 
   return new VaultClient({ baseUrl: url });
 }

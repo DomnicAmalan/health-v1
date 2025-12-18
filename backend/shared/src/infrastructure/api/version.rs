@@ -3,11 +3,10 @@
 
 use axum::{
     extract::Request,
-    http::{HeaderMap, HeaderValue, StatusCode},
+    http::{HeaderMap, HeaderValue},
     middleware::Next,
-    response::{Response, IntoResponse},
+    response::Response,
 };
-use std::str::FromStr;
 
 /// API version extracted from request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

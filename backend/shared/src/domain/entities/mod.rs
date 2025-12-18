@@ -14,6 +14,10 @@ pub mod policy_template;
 pub mod policy_assignment;
 pub mod session;
 pub mod request_log;
+pub mod geographic_region;
+pub mod regulation;
+pub mod compliance_rule;
+pub mod training_course;
 
 pub use user::User;
 pub use role::Role;
@@ -31,4 +35,8 @@ pub use policy_template::PolicyTemplate;
 pub use policy_assignment::PolicyAssignment;
 pub use session::Session;
 pub use request_log::RequestLog;
+pub use geographic_region::{GeographicRegion, GeographicLevel};
+pub use regulation::{Regulation, RegulationVersion, RegulationSection, RegulationChange, RegulationCategory, RegulationStatus, ChangeType};
+pub use compliance_rule::{ComplianceRule, ComplianceAssessment, ComplianceGap, EntityType};
+pub use training_course::{TrainingCourse, CourseContent, RegulationTrainingRequirement, UserTrainingProgress, Certificate, ContentType, TrainingStatus, TrainingFrequency};
 

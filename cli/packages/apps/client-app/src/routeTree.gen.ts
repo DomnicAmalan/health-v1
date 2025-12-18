@@ -17,8 +17,10 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
 import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as MyTrainingRouteImport } from './routes/my-training'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FormBuilderRouteImport } from './routes/form-builder'
+import { Route as ComplianceStatusRouteImport } from './routes/compliance-status'
 import { Route as ClinicalRouteImport } from './routes/clinical'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AccessDeniedRouteImport } from './routes/access-denied'
@@ -65,6 +67,11 @@ const OrdersRoute = OrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyTrainingRoute = MyTrainingRouteImport.update({
+  id: '/my-training',
+  path: '/my-training',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -73,6 +80,11 @@ const LoginRoute = LoginRouteImport.update({
 const FormBuilderRoute = FormBuilderRouteImport.update({
   id: '/form-builder',
   path: '/form-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceStatusRoute = ComplianceStatusRouteImport.update({
+  id: '/compliance-status',
+  path: '/compliance-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClinicalRoute = ClinicalRouteImport.update({
@@ -106,8 +118,10 @@ export interface FileRoutesByFullPath {
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
+  '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
   '/login': typeof LoginRoute
+  '/my-training': typeof MyTrainingRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -123,8 +137,10 @@ export interface FileRoutesByTo {
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
+  '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
   '/login': typeof LoginRoute
+  '/my-training': typeof MyTrainingRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -141,8 +157,10 @@ export interface FileRoutesById {
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
   '/clinical': typeof ClinicalRoute
+  '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
   '/login': typeof LoginRoute
+  '/my-training': typeof MyTrainingRoute
   '/orders': typeof OrdersRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
@@ -160,8 +178,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/analytics'
     | '/clinical'
+    | '/compliance-status'
     | '/form-builder'
     | '/login'
+    | '/my-training'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -177,8 +197,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/analytics'
     | '/clinical'
+    | '/compliance-status'
     | '/form-builder'
     | '/login'
+    | '/my-training'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -194,8 +216,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/analytics'
     | '/clinical'
+    | '/compliance-status'
     | '/form-builder'
     | '/login'
+    | '/my-training'
     | '/orders'
     | '/patients'
     | '/pharmacy'
@@ -212,8 +236,10 @@ export interface RootRouteChildren {
   AccessDeniedRoute: typeof AccessDeniedRoute
   AnalyticsRoute: typeof AnalyticsRoute
   ClinicalRoute: typeof ClinicalRoute
+  ComplianceStatusRoute: typeof ComplianceStatusRoute
   FormBuilderRoute: typeof FormBuilderRoute
   LoginRoute: typeof LoginRoute
+  MyTrainingRoute: typeof MyTrainingRoute
   OrdersRoute: typeof OrdersRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PharmacyRoute: typeof PharmacyRoute
@@ -282,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-training': {
+      id: '/my-training'
+      path: '/my-training'
+      fullPath: '/my-training'
+      preLoaderRoute: typeof MyTrainingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -294,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/form-builder'
       fullPath: '/form-builder'
       preLoaderRoute: typeof FormBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance-status': {
+      id: '/compliance-status'
+      path: '/compliance-status'
+      fullPath: '/compliance-status'
+      preLoaderRoute: typeof ComplianceStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clinical': {
@@ -351,8 +391,10 @@ const rootRouteChildren: RootRouteChildren = {
   AccessDeniedRoute: AccessDeniedRoute,
   AnalyticsRoute: AnalyticsRoute,
   ClinicalRoute: ClinicalRoute,
+  ComplianceStatusRoute: ComplianceStatusRoute,
   FormBuilderRoute: FormBuilderRoute,
   LoginRoute: LoginRoute,
+  MyTrainingRoute: MyTrainingRoute,
   OrdersRoute: OrdersRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PharmacyRoute: PharmacyRoute,
