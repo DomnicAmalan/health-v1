@@ -64,7 +64,7 @@ export interface FieldLayout {
   };
 }
 
-export interface FormField {
+export interface FormFieldConfig {
   id: string;
   name: string;
   label: string;
@@ -89,11 +89,14 @@ export interface FormField {
   groupId?: string;
 }
 
+/** @deprecated Use FormFieldConfig instead */
+export type FormField = FormFieldConfig;
+
 export interface FormFieldGroup {
   id: string;
   title?: string;
   description?: string;
-  fields: FormField[];
+  fields: FormFieldConfig[];
   collapsible?: boolean;
   defaultCollapsed?: boolean;
 }
@@ -104,7 +107,7 @@ export interface FormConfig {
   id: string;
   title?: string;
   description?: string;
-  fields: FormField[];
+  fields: FormFieldConfig[];
   groups?: FormFieldGroup[];
   submitLabel?: string;
   cancelLabel?: string;

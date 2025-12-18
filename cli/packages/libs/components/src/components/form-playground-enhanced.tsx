@@ -16,7 +16,7 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
-import { type FieldType, FormBuilder, type FormConfig, type FormField } from "./form-builder";
+import type { FieldType, FormBuilderProps, FormConfig, FormField } from "./form-builder";
 import { Input } from "./input";
 import { Label } from "./label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
@@ -25,7 +25,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
  * Enhanced Visual Form Builder Playground
  * Inspired by formcn.dev and shadcn-builder.com with advanced features
  */
-export function FormPlaygroundEnhanced() {
+interface FormPlaygroundEnhancedProps {
+  FormBuilder?: React.ComponentType<FormBuilderProps>;
+}
+
+export function FormPlaygroundEnhanced({ FormBuilder }: FormPlaygroundEnhancedProps = {}) {
   const [fields, setFields] = React.useState<FormField[]>([]);
   const [selectedField, setSelectedField] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState<"edit" | "code" | "preview">("edit");
@@ -503,20 +507,30 @@ export function MyForm() {
           <TabsContent value="preview" className="flex-1 overflow-y-auto p-6 m-0 bg-[#F4F6F8]">
             <Card className="max-w-5xl mx-auto">
               <CardContent className="p-6">
-                <FormBuilder
-                  config={
-                    {
-                      id: "preview-form",
-                      ...formConfig,
-                      fields,
-                    } as FormConfig
-                  }
-                  onSubmit={(data) => {
-                    console.log("Form submitted:", data);
-                    alert("Form submitted! Check console for data.");
-                  }}
-                  onCancel={() => setActiveTab("edit")}
-                />
+                {FormBuilder ? (
+                  <FormBuilder
+                    config={
+                      {
+                        id: "preview-form",
+                        ...formConfig,
+                        fields,
+                      } as FormConfig
+                    }
+                    onSubmit={(data: Record<string, unknown>) => {
+                      console.log("Form submitted:", data);
+                      alert("Form submitted! Check console for data.");
+                    }}
+                    onCancel={() => setActiveTab("edit")}
+                  />
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-lg mb-2">Preview not available</p>
+                    <p className="text-sm">FormBuilder component is required for preview mode</p>
+                    <p className="text-xs mt-2">
+                      Import FormBuilder from your app and pass it as a prop
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -536,7 +550,9 @@ export function MyForm() {
               <Input
                 id="field-label"
                 value={selectedFieldData.label}
-                onChange={(e) => updateField(selectedField, { label: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  selectedField && updateField(selectedField, { label: e.target.value })
+                }
                 className="h-8 text-sm"
               />
             </div>
@@ -548,7 +564,9 @@ export function MyForm() {
               <Input
                 id="field-name"
                 value={selectedFieldData.name}
-                onChange={(e) => updateField(selectedField, { name: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  selectedField && updateField(selectedField, { name: e.target.value })
+                }
                 className="h-8 text-sm"
               />
             </div>
@@ -563,7 +581,9 @@ export function MyForm() {
                     <Input
                       id="field-placeholder"
                       value={selectedFieldData.placeholder || ""}
-                      onChange={(e) => updateField(selectedField, { placeholder: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        selectedField && updateField(selectedField, { placeholder: e.target.value })
+                      }
                       className="h-8 text-sm"
                     />
                   </div>
@@ -575,7 +595,9 @@ export function MyForm() {
                     <Input
                       id="field-description"
                       value={selectedFieldData.description || ""}
-                      onChange={(e) => updateField(selectedField, { description: e.target.value })}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        selectedField && updateField(selectedField, { description: e.target.value })
+                      }
                       className="h-8 text-sm"
                     />
                   </div>
@@ -593,7 +615,8 @@ export function MyForm() {
                 <select
                   id="field-colspan"
                   value={selectedFieldData.layout?.colSpan || 12}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    selectedField &&
                     updateField(selectedField, {
                       layout: {
                         ...selectedFieldData.layout,
@@ -630,7 +653,8 @@ export function MyForm() {
                 <select
                   id="field-size"
                   value={selectedFieldData.layout?.size || "md"}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    selectedField &&
                     updateField(selectedField, {
                       layout: {
                         ...selectedFieldData.layout,
@@ -657,7 +681,8 @@ export function MyForm() {
                     <input
                       type="checkbox"
                       checked={selectedFieldData.validation?.required || false}
-                      onChange={(e) =>
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        selectedField &&
                         updateField(selectedField, {
                           validation: {
                             ...selectedFieldData.validation,

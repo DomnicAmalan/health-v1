@@ -1,17 +1,15 @@
-import type { FieldType, FormConfig, FormField } from "@lazarus-life/ui-components";
-import { Button, Checkbox, Input, Label } from "@lazarus-life/ui-components";
+import type { FieldType, FormConfig, FormFieldConfig } from "@lazarus-life/ui-components";
+import { Button, Card, CardContent, Checkbox, Input, Label } from "@lazarus-life/ui-components";
 import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
 import { FormBuilder } from "@/components/forms/builder";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "./card";
-
 /**
  * Visual Form Builder Playground
  * Drag-and-drop interface for building forms with live preview
  */
 export function FormPlayground() {
-  const [fields, setFields] = React.useState<FormField[]>([]);
+  const [fields, setFields] = React.useState<FormFieldConfig[]>([]);
   const [selectedField, setSelectedField] = React.useState<string | null>(null);
   const [previewMode, setPreviewMode] = React.useState(false);
   const [formConfig, setFormConfig] = React.useState<Partial<FormConfig>>({
@@ -23,7 +21,7 @@ export function FormPlayground() {
 
   // Add new field
   const addField = (type: FieldType) => {
-    const newField: FormField = {
+    const newField: FormFieldConfig = {
       id: `field-${Date.now()}`,
       name: `field${fields.length + 1}`,
       label: `Field ${fields.length + 1}`,
@@ -47,7 +45,7 @@ export function FormPlayground() {
   };
 
   // Update field
-  const updateField = (fieldId: string, updates: Partial<FormField>) => {
+  const updateField = (fieldId: string, updates: Partial<FormFieldConfig>) => {
     setFields(fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f)));
   };
 
