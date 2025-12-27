@@ -385,9 +385,9 @@ async fn async_main() -> Result<(), String> {
         // Vault proxy routes (backend-mediated vault access)
         .route("/v1/vault/token", axum::routing::post(crate::presentation::api::handlers::request_vault_token))
         .route("/v1/vault/secrets", axum::routing::get(crate::presentation::api::handlers::list_secrets))
-        .route("/v1/vault/secrets/*path", axum::routing::get(crate::presentation::api::handlers::read_secret))
-        .route("/v1/vault/secrets/*path", axum::routing::post(crate::presentation::api::handlers::write_secret))
-        .route("/v1/vault/secrets/*path", axum::routing::delete(crate::presentation::api::handlers::delete_secret))
+        .route("/v1/vault/secrets/{*path}", axum::routing::get(crate::presentation::api::handlers::read_secret))
+        .route("/v1/vault/secrets/{*path}", axum::routing::post(crate::presentation::api::handlers::write_secret))
+        .route("/v1/vault/secrets/{*path}", axum::routing::delete(crate::presentation::api::handlers::delete_secret))
         .route("/v1/vault/capabilities", axum::routing::post(crate::presentation::api::handlers::check_capabilities))
         .with_state(app_state_arc.clone())
         .layer(axum::middleware::from_fn_with_state(

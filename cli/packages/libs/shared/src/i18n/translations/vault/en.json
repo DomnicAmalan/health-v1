@@ -316,7 +316,14 @@
       "secretRequired": "Secret Required",
       "noSecret": "No Secret",
       "generateSecret": "Generate Secret",
+      "edit": "Edit",
       "delete": "Delete"
+    },
+    "edit": {
+      "dialogTitle": "Edit AppRole",
+      "dialogDescription": "Update settings for {{roleName}}",
+      "saving": "Saving...",
+      "save": "Save Changes"
     },
     "errors": {
       "failedToLoad": "Failed to load AppRoles"

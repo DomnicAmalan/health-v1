@@ -6,7 +6,7 @@ import Router from "./router";
 import "./index.css";
 
 // Create a query client
-const queryClient = createQueryClient({
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000, // 1 minute
