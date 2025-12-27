@@ -73,7 +73,10 @@ export function AppRolesPage() {
     error,
   } = useQuery({
     queryKey: ["approles", currentRealm?.id],
-    queryFn: () => approleApi.listRoles(currentRealm?.id),
+    queryFn: () => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return approleApi.listRoles(currentRealm.id);
+    },
     enabled: !!currentRealm && !isGlobalMode,
   });
 
@@ -81,7 +84,7 @@ export function AppRolesPage() {
   const rolesWithDetails = useQuery({
     queryKey: ["approles-details", currentRealm?.id, roleNames],
     queryFn: async () => {
-      if (!currentRealm || roleNames.length === 0) return [];
+      if (!currentRealm?.id || roleNames.length === 0) return [];
       const details = await Promise.all(
         roleNames.map(async (name) => {
           try {
@@ -109,8 +112,9 @@ export function AppRolesPage() {
   // Create role mutation
   const createMutation = useMutation({
     mutationFn: async (data: { roleName: string } & CreateAppRoleRequest) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
       const { roleName, ...request } = data;
-      await approleApi.createRole(currentRealm?.id, roleName, request);
+      await approleApi.createRole(currentRealm.id, roleName, request);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approles", currentRealm?.id] });
@@ -122,7 +126,10 @@ export function AppRolesPage() {
 
   // Delete role mutation
   const deleteMutation = useMutation({
-    mutationFn: (roleName: string) => approleApi.deleteRole(currentRealm?.id, roleName),
+    mutationFn: (roleName: string) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return approleApi.deleteRole(currentRealm.id, roleName);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approles", currentRealm?.id] });
       queryClient.invalidateQueries({ queryKey: ["approles-details", currentRealm?.id] });
@@ -133,7 +140,10 @@ export function AppRolesPage() {
 
   // Generate secret ID mutation
   const generateSecretMutation = useMutation({
-    mutationFn: (roleName: string) => approleApi.generateSecretId(currentRealm?.id, roleName),
+    mutationFn: (roleName: string) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return approleApi.generateSecretId(currentRealm.id, roleName);
+    },
     onSuccess: (data, roleName) => {
       setSecretIdData(data);
       setSelectedRole(roleName);

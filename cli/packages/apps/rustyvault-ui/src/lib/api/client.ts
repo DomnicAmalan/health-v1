@@ -34,7 +34,7 @@ class VaultApiClient extends BaseApiClient {
       baseUrl: API_BASE_URL,
       auth: {
         type: "custom",
-        getHeaders: () => {
+        getHeaders: (): Record<string, string> => {
           const token = useAuthStore.getState().accessToken;
           return token ? { "X-RustyVault-Token": token } : {};
         },

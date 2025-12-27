@@ -1,0 +1,298 @@
+---
+alwaysApply: false
+---
+# Health V1 Project - Cursor Rules
+
+## Project Structure
+
+This is a monorepo with:
+- **Backend**: Rust services (admin-service, api-service, authz-core, rustyvault-service, shared)
+- **Frontend**: TypeScript/React apps (admin, client-app, rustyvault-ui) using TanStack Router, React Query, Zustand
+- **CLI**: TypeScript monorepo using Bun, Biome, Vite
+
+## Rust Backend Rules
+
+### Code Style
+- Use Rust edition 2021
+- Max line width: 100 characters
+- Use 4 spaces for indentation (not tabs)
+- Use Unix line endings (LF)
+- Follow rustfmt configuration in `backend/rustfmt.toml`
+- Run `cargo fmt` before committing
+
+### Error Handling
+- **NEVER use `unwrap()` or `expect()`** - Use proper error handling with `Result<T, E>`
+- Use `thiserror` for error types that implement `std::error::Error`
+- Use `anyhow` for application-level error handling where context is needed
+- All services should define their own error enum (e.g., `VaultError`) that can convert from `shared::AppError`
+- Use `AppError` from `shared::shared::error` for common error types
+- Always log errors with context using `error.log_with_context()` or `error.log_with_operation()`
+- Error types should implement `From` for related error types (e.g., `From<sqlx::Error>`)
+
+### Module Organization
+- Use `pub mod` for module declarations
+- Re-export public items with `pub use` at the module root
+- Organize modules by domain/feature, not by type
+- Keep module files focused and under 1000 lines (per clippy config)
+
+### Clippy Rules
+- Follow all clippy rules defined in `backend/clippy.toml`
+- Key restrictions:
+  - No `unwrap()`, `expect()`, or `panic!()` in production code
+  - Cognitive complexity threshold: 30
+  - Max arguments: 7
+  - Max lines per function: 1000
+  - Type complexity threshold: 300
+- Run `cargo clippy --all-targets -- -D warnings` before committing
+
+### Database
+- Use `sqlx` with PostgreSQL
+- All database operations must use transactions for multi-step operations
+- Use migrations in `migrations/` directory
+- Always use parameterized queries (never string concatenation)
+- Handle database errors gracefully and convert to `AppError::Database`
+
+### Async/Await
+- Use `tokio` runtime with full features
+- Prefer `async fn` over manual futures
+- Use `async-trait` for trait methods that need to be async
+- Avoid blocking operations in async contexts
+
+### Logging
+- Use `tracing` for structured logging
+- Include context: request_id, user_id, operation, resource, resource_id
+- Use appropriate log levels: `error!`, `warn!`, `info!`, `debug!`, `trace!`
+- Log errors with structured fields for better observability
+
+### API Routes (Axum)
+- Use Axum 0.8 for HTTP handlers
+- Handlers should be async functions returning `impl IntoResponse`
+- Use `Json<T>` extractor for request/response bodies
+- Use `Path<T>` for path parameters
+- Use `Query<T>` for query parameters
+- Return appropriate HTTP status codes
+- Use `StatusCode` constants, not magic numbers
+
+### Dependencies
+- All workspace dependencies are defined in root `Cargo.toml` under `[workspace.dependencies]`
+- Services should reference workspace dependencies, not specify versions directly
+- Use `cargo deny` to check for security issues (see `deny.toml`)
+
+## TypeScript/React Frontend Rules
+
+### Code Style
+- Use Biome for formatting and linting (see `cli/biome.json`)
+- Indent with 2 spaces
+- Max line width: 100 characters
+- Use double quotes for strings and JSX
+- Always use semicolons
+- Use LF line endings
+- Run `bun run lint:fix:all` before committing
+
+### TypeScript
+- Use strict mode (all strict flags enabled)
+- No `any` types (use `unknown` or proper types)
+- Use `type` imports for type-only imports: `import type { ... }`
+- Enable `noUncheckedIndexedAccess` and `noPropertyAccessFromIndexSignature`
+- Use proper null/undefined handling with optional chaining and nullish coalescing
+- Define types in shared library (`@lazarus-life/shared`) when used across apps
+
+### React Patterns
+- Use functional components with hooks
+- Use TanStack Router for routing
+- Use TanStack Query (React Query) for data fetching
+- Use Zustand for global state management
+- Prefer composition over inheritance
+- Use custom hooks for reusable logic
+- Keep components small and focused
+
+### API Client Patterns
+- Use `BaseApiClient` from `@lazarus-life/shared/api` as base class
+- Define routes in `API_ROUTES` constant (see `cli/packages/libs/shared/src/api/routes.ts`)
+- **Never include `/api` prefix in route definitions** - it's added automatically
+- Excluded paths (no `/api` prefix): `/health`, `/auth/*`, `/v1/auth/*`
+- Use `getApiUrl()` helper to build full URLs
+- All routes should use `/v1/` prefix for versioning (except health and auth)
+- Use interceptors for request/response transformation
+- Handle errors consistently using `ApiResponse<T>` type
+
+### React Query Patterns
+- Define query keys as constants with hierarchical structure:
+  ```typescript
+  const QUERY_KEYS = {
+    all: ["resource"] as const,
+    lists: () => [...QUERY_KEYS.all, "list"] as const,
+    list: (filters?: unknown) => [...QUERY_KEYS.lists(), { filters }] as const,
+    details: () => [...QUERY_KEYS.all, "detail"] as const,
+    detail: (id: string) => [...QUERY_KEYS.details(), id] as const,
+  };
+  ```
+- Use appropriate `staleTime` for different data types
+- Always handle loading and error states
+- Use mutations for create/update/delete operations
+- Invalidate related queries after mutations
+
+### Security & PHI
+- Always log PHI access using `useAuditLog` hook
+- Use `logPHI()` for any patient data access
+- Never log PHI in console or error messages
+- Use proper authentication tokens in API requests
+- Handle token refresh automatically via interceptors
+
+### File Organization
+- Components in `src/components/` organized by feature
+- Hooks in `src/hooks/` organized by category (api, forms, security, ui)
+- API client code in `src/lib/api/`
+- Routes in `src/routes/` using TanStack Router file-based routing
+- Stores in `src/stores/` using Zustand
+- Shared code in `packages/libs/shared/`
+
+### Styling
+- Use Tailwind CSS for styling
+- Use `clsx` and `tailwind-merge` for conditional classes
+- Use `class-variance-authority` for variant-based components
+- Follow component library patterns from `@lazarus-life/ui-components`
+
+### Testing
+- Write E2E tests with Playwright for critical user flows
+- Use Vitest for unit tests
+- Test files: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`
+- Place E2E tests in `e2e/specs/`
+- Use fixtures in `e2e/fixtures/` for test data
+
+## General Rules
+
+### Versioning
+- Project version: 1.1.0 (see `backend/Cargo.toml` and `cli/package.json`)
+- Use semantic versioning
+- Document breaking changes
+
+### Environment Variables
+- Backend: Use `dotenv` crate, load from `.env` file
+- Frontend: Use `import.meta.env.VITE_*` for environment variables
+- Document all environment variables in `.env.example` or similar
+- Never commit `.env` files
+
+### Git
+- Use conventional commits
+- Run linters and formatters before committing
+- Keep commits focused and atomic
+
+### Docker
+- Services have Dockerfiles in their directories
+- Use `docker-compose.yml` for local development
+- Follow patterns in existing Dockerfiles
+
+### Documentation & Comments
+- **Minimal commenting**: Only comment when necessary - code should be self-documenting
+- Avoid over-commenting obvious code
+- Write doc comments only for public APIs that need explanation
+- Use `///` for Rust doc comments on public items
+- Use `/** */` for TypeScript/JavaScript doc comments on exported functions/types
+- Document only complex algorithms, non-obvious business logic, or important edge cases
+- **Do NOT create markdown files** unless explicitly requested by the user
+- Do not create README files, documentation files, or reports unless specifically asked
+- Keep existing README files up to date only when making relevant changes
+
+### Performance
+- Backend: Optimize for size in release builds (`opt-level = "z"`, `lto = true`)
+- Frontend: Use code splitting, lazy loading for routes
+- Avoid unnecessary re-renders in React
+- Use React.memo, useMemo, useCallback appropriately
+
+### Security
+- Never hardcode secrets or API keys
+- Use proper encryption for sensitive data
+- Validate all user inputs
+- Use parameterized queries (SQL injection prevention)
+- Follow OWASP guidelines
+- Use HTTPS in production
+
+### Accessibility
+- Follow WCAG 2.1 AA standards
+- Use semantic HTML
+- Provide proper ARIA labels
+- Ensure keyboard navigation works
+- Test with screen readers
+
+## Common Patterns
+
+### Rust Handler Pattern
+```rust
+pub async fn handler_name(
+    Path(id): Path<Uuid>,
+    Json(request): Json<RequestDto>,
+) -> impl IntoResponse {
+    // Implementation
+    match result {
+        Ok(data) => (StatusCode::OK, Json(data)),
+        Err(e) => {
+            e.log_with_operation(file!(), "handler_name");
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }
+    }
+}
+```
+
+### TypeScript API Hook Pattern
+```typescript
+export function useResource(id: string) {
+  const { logPHI } = useAuditLog();
+  
+  return useQuery({
+    queryKey: QUERY_KEYS.detail(id),
+    queryFn: async () => {
+      const response = await apiClient.get<Resource>(API_ROUTES.RESOURCE.GET(id));
+      if (response.error) throw new Error(response.error.message);
+      if (!response.data) throw new Error("No data returned");
+      logPHI("resource", id, { action: "read" });
+      return response.data;
+    },
+    staleTime: 30 * 1000,
+  });
+}
+```
+
+### Error Response Pattern
+- Backend: Return JSON with `{"error": "message"}` structure
+- Frontend: Use `ApiResponse<T>` type with `data` and `error` fields
+- Always handle both success and error cases
+
+## Tools & Commands
+
+### Backend
+- `cargo fmt` - Format code
+- `cargo clippy --all-targets` - Lint code
+- `cargo test` - Run tests
+- `cargo deny check` - Check dependencies
+
+### Frontend
+- `bun run lint` - Lint code
+- `bun run lint:fix` - Fix linting issues
+- `bun run format` - Format code
+- `bun run test` - Run tests
+- `bun run dev` - Start dev server
+
+## When Adding New Features
+
+1. **Backend**: 
+   - Create use case in `use_cases/` directory
+   - Add handler in `handlers/` directory
+   - Add route in `routes.rs`
+   - Add DTOs in `dto/` directory
+   - Add database migrations if needed
+
+2. **Frontend**:
+   - Add route in `src/routes/`
+   - Create components in `src/components/`
+   - Add API hooks in `src/hooks/api/`
+   - Update `API_ROUTES` in shared library
+   - Add types in shared library if needed
+
+3. **Both**:
+   - Add tests
+   - Update environment variables if needed
+   - Consider security implications
+   - Log appropriate audit events
+   - **Do NOT create documentation files** unless explicitly requested
+

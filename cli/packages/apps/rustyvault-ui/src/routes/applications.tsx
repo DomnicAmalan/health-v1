@@ -69,13 +69,19 @@ export function ApplicationsPage() {
     error,
   } = useQuery({
     queryKey: ["realm-apps", currentRealm?.id],
-    queryFn: () => appsApi.list(currentRealm?.id),
+    queryFn: () => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return appsApi.list(currentRealm.id);
+    },
     enabled: !!currentRealm && !isGlobalMode,
   });
 
   // Create app mutation
   const createMutation = useMutation({
-    mutationFn: (data: CreateAppRequest) => appsApi.create(currentRealm?.id, data),
+    mutationFn: (data: CreateAppRequest) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return appsApi.create(currentRealm.id, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsCreateOpen(false);
@@ -85,8 +91,10 @@ export function ApplicationsPage() {
 
   // Update app mutation
   const updateMutation = useMutation({
-    mutationFn: ({ appName, data }: { appName: string; data: Partial<CreateAppRequest> }) =>
-      appsApi.update(currentRealm?.id, appName, data),
+    mutationFn: ({ appName, data }: { appName: string; data: Partial<CreateAppRequest> }) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return appsApi.update(currentRealm.id, appName, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsEditOpen(false);
@@ -97,7 +105,10 @@ export function ApplicationsPage() {
 
   // Delete app mutation
   const deleteMutation = useMutation({
-    mutationFn: (appName: string) => appsApi.delete(currentRealm?.id, appName),
+    mutationFn: (appName: string) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return appsApi.delete(currentRealm.id, appName);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
       setIsDeleteOpen(false);
@@ -107,7 +118,10 @@ export function ApplicationsPage() {
 
   // Register defaults mutation
   const registerDefaultsMutation = useMutation({
-    mutationFn: () => appsApi.registerDefaults(currentRealm?.id),
+    mutationFn: () => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      return appsApi.registerDefaults(currentRealm.id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["realm-apps", currentRealm?.id] });
     },
@@ -259,7 +273,7 @@ export function ApplicationsPage() {
                   <Label htmlFor="app_type">{t("applications.create.fields.appType")}</Label>
                   <Select
                     value={formData.app_type}
-                    onValueChange={(value: AppType) => handleAppTypeChange(value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAppTypeChange(e.target.value as AppType)}
                   >
                     <SelectTrigger>
                       <SelectValue

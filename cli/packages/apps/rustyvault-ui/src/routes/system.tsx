@@ -295,7 +295,7 @@ export function SystemPage() {
                           <Button
                             variant="default"
                             size="sm"
-                            onClick={handleDownloadKeys}
+                            onClick={() => handleDownloadKeys()}
                             className="h-8"
                           >
                             <Download className="h-4 w-4 mr-2" />

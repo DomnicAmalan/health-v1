@@ -1,0 +1,164 @@
+# Docker Compose for Vault Testing
+# Usage: docker-compose -f docker-compose.test.yml up -d
+# This file provides isolated test services for vault testing
+
+services:
+  # PostgreSQL Database for Testing
+  postgres-test:
+    image: postgis/postgis:17-3.4-alpine
+    container_name: health-postgres-test
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-test_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test_password}
+      POSTGRES_DB: ${POSTGRES_DB:-vault_test_db}
+    ports:
+      - "${POSTGRES_TEST_PORT:-5433}:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-test_user} -d ${POSTGRES_DB:-vault_test_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vault-test-network
+    restart: "no"
+
+  # Database Migrations for Testing
+  migrations-test:
+    build:
+      context: .
+      dockerfile: backend/rustyvault-service/Dockerfile
+      target: builder
+      args:
+        BUILD_MODE: ${BUILD_MODE:-release}
+        SKIP_CHECKS: ${SKIP_CHECKS:-true}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+    container_name: health-migrations-test
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-test_user}:${POSTGRES_PASSWORD:-test_password}@postgres-test:5432/${POSTGRES_DB:-vault_test_db}
+    volumes:
+      - ./backend/migrations:/app/backend/migrations:ro
+    command: >
+      sh -c "
+        echo 'Installing sqlx-cli...' &&
+        cargo install sqlx-cli --features postgres --locked --force &&
+        echo 'Running database migrations...' &&
+        cd /app/backend &&
+        sqlx migrate run --database-url $${DATABASE_URL} &&
+        echo 'Migrations completed successfully!'
+      "
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - vault-test-network
+    restart: "no"
+
+  # RustyVault Service for Testing
+  rustyvault-service-test:
+    build:
+      context: .
+      dockerfile: backend/rustyvault-service/Dockerfile
+      args:
+        BUILD_MODE: ${BUILD_MODE:-release}
+        SKIP_CHECKS: ${SKIP_CHECKS:-true}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+    container_name: health-rustyvault-service-test
+    environment:
+      # Server
+      VAULT_SERVER_HOST: 0.0.0.0
+      VAULT_SERVER_PORT: 4117
+      
+      # CORS Configuration
+      VAULT_CORS_ORIGINS: "*"
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-test_user}:${POSTGRES_PASSWORD:-test_password}@postgres-test:5432/${POSTGRES_DB:-vault_test_db}
+      DATABASE_MAX_CONNECTIONS: 5
+      DATABASE_MIN_CONNECTIONS: 1
+      
+      # Storage
+      VAULT_STORAGE_BACKEND: file
+      VAULT_STORAGE_PATH: /app/vault-data
+      
+      # Barrier
+      VAULT_BARRIER_ALGORITHM: aes-gcm
+      VAULT_BARRIER_KEY_LENGTH: 32
+      
+      # Seal
+      VAULT_SECRET_SHARES: 5
+      VAULT_SECRET_THRESHOLD: 3
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      RUST_LOG: ${RUST_LOG:-warn}
+      
+      # Deployment
+      ENVIRONMENT: test
+      
+      # Memory optimization
+      TOKIO_WORKER_THREADS: 2
+    ports:
+      - "${VAULT_SERVICE_TEST_PORT:-8217}:4117"
+    volumes:
+      - rustyvault_test_data:/app/vault-data
+      - rustyvault_test_coverage:/app/coverage
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      migrations-test:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4117/v1/sys/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - vault-test-network
+    restart: "no"
+
+  # RustyVault UI for Testing
+  rustyvault-ui-test:
+    build:
+      context: ./cli
+      dockerfile: packages/apps/rustyvault-ui/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://rustyvault-service-test:4117/v1
+        BUILD_MODE: production
+    container_name: health-rustyvault-ui-test
+    environment:
+      VITE_API_BASE_URL: http://rustyvault-service-test:4117/v1
+    ports:
+      - "${VAULT_UI_TEST_PORT:-8215}:80"
+    volumes:
+      - rustyvault_ui_test_coverage:/app/coverage
+    depends_on:
+      rustyvault-service-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vault-test-network
+    restart: "no"
+
+volumes:
+  postgres_test_data:
+    driver: local
+  rustyvault_test_data:
+    driver: local
+  rustyvault_test_coverage:
+    driver: local
+  rustyvault_ui_test_coverage:
+    driver: local
+
+networks:
+  vault-test-network:
+    driver: bridge
+    name: vault-test-network

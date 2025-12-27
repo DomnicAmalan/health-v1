@@ -31,13 +31,13 @@ export function DashboardPage() {
 
   const { data: secrets, isLoading: isLoadingSecrets } = useQuery({
     queryKey: ["secrets", "kv2", ""],
-    queryFn: () => secretsApi.list("kv2", ""),
+    queryFn: () => secretsApi.list("kv2/"),
     enabled: !!mounts && "kv2" in mounts,
     refetchInterval: 60000,
   });
 
   const mountCount = mounts ? Object.keys(mounts).length : 0;
-  const realmCount = realms?.length || 0;
+  const realmCount = realms?.realms?.length || realms?.keys?.length || 0;
   const secretCount = secrets?.length || 0;
 
   return (

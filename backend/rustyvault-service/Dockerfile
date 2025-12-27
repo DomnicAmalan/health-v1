@@ -19,11 +19,18 @@ FROM chef AS planner
 COPY backend/Cargo.toml backend/
 COPY backend/Cargo.lock backend/
 COPY backend/.cargo backend/.cargo
+# Copy Cargo.toml and minimal source files for each workspace member
 COPY backend/shared/Cargo.toml backend/shared/
+COPY backend/shared/src/lib.rs backend/shared/src/
 COPY backend/authz-core/Cargo.toml backend/authz-core/
+COPY backend/authz-core/src/lib.rs backend/authz-core/src/
 COPY backend/admin-service/Cargo.toml backend/admin-service/
+COPY backend/admin-service/src/lib.rs backend/admin-service/src/
 COPY backend/api-service/Cargo.toml backend/api-service/
+COPY backend/api-service/src/lib.rs backend/api-service/src/
+COPY backend/api-service/src/main.rs backend/api-service/src/
 COPY backend/rustyvault-service/Cargo.toml backend/rustyvault-service/
+COPY backend/rustyvault-service/src/main.rs backend/rustyvault-service/src/
 WORKDIR /app/backend
 RUN cargo chef prepare --recipe-path recipe.json
 
