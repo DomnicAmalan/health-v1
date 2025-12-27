@@ -5,7 +5,7 @@ import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initializeAxe } from "./lib/accessibility/axe";
 import { validateEnv } from "./lib/env";
-import { queryClient } from "./lib/queryClient";
+import { createQueryClient } from "@lazarus-life/shared/query";
 import Router from "./router.tsx";
 import "./index.css";
 
@@ -15,6 +15,9 @@ validateEnv();
 // Initialize axe accessibility testing in development
 initializeAxe();
 
+// Create a client
+const queryClient = createQueryClient();
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Root element not found");
@@ -23,7 +26,7 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={createQueryClient}>
         <ClientTranslationProvider>
           <Router />
         </ClientTranslationProvider>

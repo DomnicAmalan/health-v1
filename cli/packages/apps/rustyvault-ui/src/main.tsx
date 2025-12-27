@@ -6,11 +6,11 @@ import Router from "./router";
 import "./index.css";
 
 // Create a query client
-const queryClient = new QueryClient({
+const queryClient = createQueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
+      staleTime: 60 * 1000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });

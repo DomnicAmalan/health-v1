@@ -11,7 +11,7 @@ import {
 } from "@lazarus-life/ui-components";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 
 interface FormFieldGroupProps {
   group: FormFieldGroup;

@@ -1,5 +1,5 @@
 import { Box, Stack } from "@lazarus-life/ui-components";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import type { CanvasField as CanvasFieldType } from "./types";
 
 interface CanvasFieldProps {

@@ -1,5 +1,5 @@
 import { Box, Card } from "@lazarus-life/ui-components";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { CanvasField } from "./CanvasField";
 import { CanvasGrid } from "./CanvasGrid";
 import type { CanvasField as CanvasFieldType, CanvasGroup, CanvasSection } from "./types";

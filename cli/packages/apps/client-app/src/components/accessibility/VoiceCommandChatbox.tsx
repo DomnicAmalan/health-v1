@@ -6,7 +6,7 @@
 import { Box, Button, Card, CardContent, CardHeader, Input } from "@lazarus-life/ui-components";
 import { MessageSquare, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { getVoiceCommandExecutor } from "@/lib/voice/voiceCommandExecutor";

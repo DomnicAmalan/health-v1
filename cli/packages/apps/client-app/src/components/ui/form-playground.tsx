@@ -3,7 +3,7 @@ import { Button, Card, CardContent, Checkbox, Input, Label } from "@lazarus-life
 import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
 import { FormBuilder } from "@/components/forms/builder";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 /**
  * Visual Form Builder Playground
  * Drag-and-drop interface for building forms with live preview

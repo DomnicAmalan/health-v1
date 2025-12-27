@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { useSidebarExpandedItems, useToggleSidebarExpand } from "@/stores/uiStore";
 import { SidebarCollapseButton } from "./SidebarCollapseButton";
 import { SidebarFooter } from "./SidebarFooter";

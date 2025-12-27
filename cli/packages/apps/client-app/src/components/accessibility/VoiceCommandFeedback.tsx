@@ -4,7 +4,7 @@
  */
 
 import { Box } from "@lazarus-life/ui-components";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 
 export function VoiceCommandFeedback() {

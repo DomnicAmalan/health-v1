@@ -15,7 +15,7 @@ import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "l
 import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
 import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { useAuthStore } from "@/stores/authStore";
 
 export function TabUserMenu() {

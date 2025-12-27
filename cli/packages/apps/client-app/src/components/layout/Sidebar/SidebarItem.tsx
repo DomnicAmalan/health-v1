@@ -10,7 +10,7 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { memo } from "react";
 import { getNavActions, getNavContextActions } from "@/lib/nav-actions";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 
 export interface SidebarItem {
   path: string;

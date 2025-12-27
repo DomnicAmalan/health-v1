@@ -1,17 +1,15 @@
 import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@lazarus-life/shared/query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { PermissionProvider } from "./lib/permissions";
 import Router from "./router";
 import "./index.css";
 
-// Create a client
-const queryClient = new QueryClient({
+const queryClient = createQueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
       staleTime: 1 * 60 * 1000, // 1 minute - reduced for memory efficiency
       gcTime: 5 * 60 * 1000, // 5 minutes - garbage collection time
     },

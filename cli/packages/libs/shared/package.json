@@ -91,6 +91,10 @@
     "./vault": {
       "types": "./dist/vault/index.d.ts",
       "default": "./dist/vault/index.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "default": "./dist/query/index.js"
     }
   },
   "scripts": {

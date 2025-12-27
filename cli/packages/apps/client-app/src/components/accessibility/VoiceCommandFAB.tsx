@@ -5,7 +5,7 @@
 
 import { Box, Button } from "@lazarus-life/ui-components";
 import { Mic, MicOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";

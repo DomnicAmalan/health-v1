@@ -53,6 +53,10 @@
     "./container": {
       "types": "./dist/components/container.d.ts",
       "default": "./dist/components/container.js"
+    },
+    "./utils": {
+      "types": "./dist/lib/utils.d.ts",
+      "default": "./dist/lib/utils.js"
     }
   },
   "scripts": {

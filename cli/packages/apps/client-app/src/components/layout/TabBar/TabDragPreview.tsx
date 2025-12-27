@@ -1,5 +1,5 @@
 import { Box, Flex } from "@lazarus-life/ui-components";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 
 interface TabDragPreviewProps {
   draggedTab: { id: string; label: string; icon?: React.ReactNode };

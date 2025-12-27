@@ -1,7 +1,7 @@
 import { Box, Tooltip, TooltipContent, TooltipTrigger } from "@lazarus-life/ui-components";
 import { memo, useRef } from "react";
 import { useTabDrag } from "@/hooks/ui/useTabDrag";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { TabCloseButton } from "./TabCloseButton";
 import { TabDragHandle } from "./TabDragHandle";
 import { getModuleColor } from "./useTabColors";

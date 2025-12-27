@@ -15,7 +15,7 @@ import {
   Stack,
 } from "@lazarus-life/ui-components";
 import { useFormBuilder } from "@/hooks/forms/useFormBuilder";
-import { cn } from "@/lib/utils";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { FormFieldGroupComponent } from "./FormFieldGroup";
 import { FormFieldRenderer } from "./FormFieldRenderer";
 import { FormFieldSection } from "./FormFieldSection";
