@@ -27,13 +27,9 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
-  AppWindow,
   Building2,
-  Key,
   Loader2,
   Mail,
-  MoreVertical,
-  Plus,
   Search,
   Shield,
   Trash2,
@@ -74,7 +70,8 @@ interface OrganizationsListResponse {
 const usersApiAdmin = {
   list: async (search?: string): Promise<UsersListResponse> => {
     const query = search ? `?search=${encodeURIComponent(search)}` : "";
-    return apiClient.get<UsersListResponse>(`/users${query}`);
+    const response = await apiClient.get<UsersListResponse>(`/users${query}`);
+    return response.data || { users: [], total: 0 };
   },
   delete: async (userId: string): Promise<void> => {
     await apiClient.delete(`/users/${userId}`);
@@ -84,7 +81,7 @@ const usersApiAdmin = {
 const organizationsApi = {
   list: async (): Promise<Organization[]> => {
     const response = await apiClient.get<OrganizationsListResponse>("/organizations");
-    return response.organizations || [];
+    return response.data?.organizations || [];
   },
 };
 

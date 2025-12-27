@@ -61,6 +61,21 @@ pub async fn login(
                             // Add session_token to response
                             response.session_token = Some(sess.session_token.clone());
                         }
+                        
+                        // Look up vault realm_id for the user's organization
+                        // This is used for on-demand vault token minting
+                        if let (Some(org_id), Some(vault_client)) = (user.organization_id, &state.vault_client) {
+                            match vault_client.get_or_create_realm_for_org(org_id).await {
+                                Ok(realm_id) => {
+                                    response.realm_id = Some(realm_id.to_string());
+                                    tracing::debug!("Resolved vault realm_id {} for org {}", realm_id, org_id);
+                                }
+                                Err(e) => {
+                                    tracing::warn!("Failed to get vault realm for org {}: {}", org_id, e);
+                                    // Continue without realm_id - vault features will be unavailable
+                                }
+                            }
+                        }
                     }
                 }
             }

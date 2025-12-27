@@ -31,7 +31,7 @@ export function RegulationsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<RegulationStatus | undefined>();
+  const [statusFilter, _setStatusFilter] = useState<RegulationStatus | undefined>();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   // Fetch regulations

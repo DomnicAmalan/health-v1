@@ -17,5 +17,8 @@ export interface UserInfo {
   name?: string;
   role?: string;
   permissions?: string[];
-  organization_id?: string;
+  /** Organization ID for the user */
+  organizationId?: string;
+  /** Vault Realm ID for the user's organization */
+  realmId?: string;
 }

@@ -13,17 +13,13 @@ import {
   Input,
   Label,
   Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
   Switch,
 } from "@lazarus-life/ui-components";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   AppWindow,
-  Building2,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -138,11 +134,15 @@ export function ProvisionUserDialog({
 
   const handleSubmit = () => {
     const appAccess = Object.values(selectedApps);
+    // Include realm_id based on organization - the backend will use org's realm
+    // If no specific realm_id is set, the backend will look up/create the realm for the org
     const vaultAccess =
       formData.vault_access?.create_user || formData.vault_access?.create_token
         ? {
             ...formData.vault_access,
             policies: selectedPolicies,
+            // realm_id is derived from organization_id by the backend
+            // We could optionally allow realm selection here if needed
           }
         : undefined;
 
@@ -248,22 +248,18 @@ export function ProvisionUserDialog({
       <div className="space-y-2">
         <Label htmlFor="organization">Organization</Label>
         <Select
+          id="organization"
           value={formData.organization_id}
           onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Select organization" />
-          </SelectTrigger>
-          <SelectContent>
-            {organizations.map((org) => (
-              <SelectItem key={org.id} value={org.id}>
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  {org.name}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
+          <SelectItem value="" disabled>
+            Select organization
+          </SelectItem>
+          {organizations.map((org) => (
+            <SelectItem key={org.id} value={org.id}>
+              {org.name}
+            </SelectItem>
+          ))}
         </Select>
       </div>
     </div>
@@ -278,20 +274,16 @@ export function ProvisionUserDialog({
       <div className="space-y-2">
         <Label htmlFor="role">System Role</Label>
         <Select
+          id="role"
           value={formData.role_name || ""}
           onValueChange={(value) => setFormData({ ...formData, role_name: value })}
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Select role (optional)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">No role</SelectItem>
-            {AVAILABLE_ROLES.map((role) => (
-              <SelectItem key={role} value={role}>
-                {role.charAt(0).toUpperCase() + role.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
+          <SelectItem value="">No role</SelectItem>
+          {AVAILABLE_ROLES.map((role) => (
+            <SelectItem key={role} value={role}>
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </SelectItem>
+          ))}
         </Select>
         <p className="text-xs text-muted-foreground">
           Roles define system-wide permissions for the user
@@ -329,19 +321,15 @@ export function ProvisionUserDialog({
                 </div>
                 {isSelected && (
                   <Select
+                    className="w-24"
                     value={selectedApps[app.name]?.access_level || "read"}
-                    onValueChange={(value: "read" | "write" | "admin") =>
-                      updateAppAccessLevel(app.name, value)
+                    onValueChange={(value) =>
+                      updateAppAccessLevel(app.name, value as "read" | "write" | "admin")
                     }
                   >
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="read">Read</SelectItem>
-                      <SelectItem value="write">Write</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
+                    <SelectItem value="read">Read</SelectItem>
+                    <SelectItem value="write">Write</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </Select>
                 )}
               </div>

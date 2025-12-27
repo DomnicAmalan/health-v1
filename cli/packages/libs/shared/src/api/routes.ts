@@ -133,4 +133,16 @@ export const API_ROUTES = {
       STATS: "/v1/admin/encryption/stats",
     },
   },
+
+  // Vault proxy routes (backend-mediated vault access)
+  VAULT: {
+    /** Request an on-demand vault token (POST) */
+    TOKEN: "/v1/vault/token",
+    /** List secrets at a path (GET) */
+    SECRETS_LIST: "/v1/vault/secrets",
+    /** Read/Write/Delete a secret (GET/POST/DELETE) */
+    SECRET: (path: string) => `/v1/vault/secrets/${path}`,
+    /** Check capabilities for paths (POST) */
+    CAPABILITIES: "/v1/vault/capabilities",
+  },
 } as const;

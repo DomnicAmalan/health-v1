@@ -16,6 +16,12 @@ pub struct LoginResponse {
     pub user: LoginUserResponse,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub session_token: Option<String>,
+    /// Organization ID - the user's organization context for this session
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_id: Option<String>,
+    /// Vault Realm ID - the vault realm for this organization (used for on-demand vault token minting)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub realm_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,6 +49,12 @@ pub struct UserInfoResponse {
     pub role: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub permissions: Option<Vec<String>>,
+    /// Organization ID for the user
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_id: Option<String>,
+    /// Vault Realm ID for the user's organization
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub realm_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

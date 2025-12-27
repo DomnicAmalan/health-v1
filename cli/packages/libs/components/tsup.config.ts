@@ -16,6 +16,7 @@ export default defineConfig({
     "src/components/context-menu.tsx",
     "src/components/badge.tsx",
     "src/components/container.tsx",
+    "src/components/select.tsx",
   ],
   format: ["esm"],
   dts: true,

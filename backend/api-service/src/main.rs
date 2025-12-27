@@ -290,6 +290,21 @@ async fn async_main() -> Result<(), String> {
     ));
     info!("Session service initialized");
 
+    // Initialize RustyVault client for realm lookups and token minting
+    // This is optional - if vault is not configured, realm features will be disabled
+    info!("Initializing RustyVault client...");
+    use shared::infrastructure::encryption::RustyVaultClient;
+    let vault_client = match RustyVaultClient::from_env() {
+        Ok(client) => {
+            info!("RustyVault client initialized");
+            Some(Arc::new(client))
+        }
+        Err(e) => {
+            tracing::warn!("RustyVault client not available (vault features disabled): {}", e);
+            None
+        }
+    };
+
     // Create application state
     use api_service::AppState;
     let app_state = AppState {
@@ -309,6 +324,7 @@ async fn async_main() -> Result<(), String> {
         role_repository,
         graph_cache: Some(graph_cache),
         session_service,
+        vault_client,
     };
 
     // Build application router with state, middleware, and CORS
@@ -366,6 +382,13 @@ async fn async_main() -> Result<(), String> {
         .route("/v1/admin/groups/{group_id}/roles/{role_id}", axum::routing::post(admin_service::handlers::assign_role_to_group))
         // Dashboard routes
         .route("/v1/admin/dashboard/stats", axum::routing::get(admin_service::handlers::get_dashboard_stats))
+        // Vault proxy routes (backend-mediated vault access)
+        .route("/v1/vault/token", axum::routing::post(crate::presentation::api::handlers::request_vault_token))
+        .route("/v1/vault/secrets", axum::routing::get(crate::presentation::api::handlers::list_secrets))
+        .route("/v1/vault/secrets/*path", axum::routing::get(crate::presentation::api::handlers::read_secret))
+        .route("/v1/vault/secrets/*path", axum::routing::post(crate::presentation::api::handlers::write_secret))
+        .route("/v1/vault/secrets/*path", axum::routing::delete(crate::presentation::api::handlers::delete_secret))
+        .route("/v1/vault/capabilities", axum::routing::post(crate::presentation::api::handlers::check_capabilities))
         .with_state(app_state_arc.clone())
         .layer(axum::middleware::from_fn_with_state(
             app_state_arc.clone(),

@@ -34,6 +34,9 @@ impl UserInfoUseCase {
             name: Some(user.username),
             role: if role.is_empty() { None } else { Some(role) },
             permissions: if permissions.is_empty() { None } else { Some(permissions) },
+            // Organization and realm will be populated by handler if vault is configured
+            organization_id: user.organization_id.map(|id| id.to_string()),
+            realm_id: None, // Populated by handler after vault lookup
         })
     }
 }

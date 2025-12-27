@@ -80,8 +80,8 @@ export const useAuthStore = create<AuthStore>()(
         const response = await apiLogin({ email, password });
 
         // Session is automatically set via cookie, we just store user info
-        const userInfo = {
-          id: response.user.id,
+        const userInfo: UserInfo = {
+          sub: response.user.id,
           email: response.user.email,
           name: response.user.username || response.user.email,
           role: response.user.role,

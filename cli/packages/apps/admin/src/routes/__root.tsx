@@ -35,8 +35,8 @@ export const Route = createRootRoute({
     // Check authentication
     const authStore = useAuthStore.getState();
 
-    // If no token in store, try to restore from sessionStorage
-    if (!authStore.accessToken) {
+    // If not authenticated in store, try to restore from sessionStorage/verify session
+    if (!authStore.isAuthenticated) {
       await authStore.checkAuth();
     }
 

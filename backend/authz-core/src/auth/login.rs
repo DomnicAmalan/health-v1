@@ -116,14 +116,24 @@ impl LoginUseCase {
                 e
             })?;
 
-        // Generate tokens with role and permissions in claims
-        let access_token = self.token_manager.generate_access_token_with_permissions(
+        // Get organization context for token claims
+        let organization_id = user.organization_id.map(|id| id.to_string());
+        
+        // Generate tokens with role, permissions, and organization context
+        // Note: realm_id is populated by the handler after vault lookup
+        let access_token = self.token_manager.generate_access_token_with_context(
             &user,
             primary_role.as_str(),
             &permissions,
+            organization_id.clone(),
+            None, // realm_id will be populated by handler
         )?;
         
-        let refresh_token_string = self.token_manager.generate_refresh_token(&user)?;
+        let refresh_token_string = self.token_manager.generate_refresh_token_with_context(
+            &user,
+            organization_id.clone(),
+            None, // realm_id will be populated by handler
+        )?;
         
         // Hash refresh token for storage
         let mut hasher = Sha256::new();
@@ -164,6 +174,8 @@ impl LoginUseCase {
             expires_in: 3600,
             user: user_response,
             session_token: None, // Will be set by handler if session exists
+            organization_id, // Include org context in response
+            realm_id: None, // Will be populated by handler after vault realm lookup
         })
     }
 }

@@ -20,10 +20,7 @@ import {
   Input,
   Label,
   Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -272,21 +269,18 @@ export function ApplicationsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="app_type">{t("applications.create.fields.appType")}</Label>
                   <Select
+                    id="app_type"
                     value={formData.app_type}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleAppTypeChange(e.target.value as AppType)}
+                    onValueChange={(value) => handleAppTypeChange(value as AppType)}
                   >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("applications.create.fields.appTypePlaceholder")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APP_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {getAppTypeIcon(type)} {getAppTypeLabel(type)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    <SelectItem value="" disabled>
+                      {t("applications.create.fields.appTypePlaceholder")}
+                    </SelectItem>
+                    {APP_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {getAppTypeIcon(type)} {getAppTypeLabel(type)}
+                      </SelectItem>
+                    ))}
                   </Select>
                 </div>
                 <div className="space-y-2">

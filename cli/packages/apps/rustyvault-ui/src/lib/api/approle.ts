@@ -96,12 +96,24 @@ export const approleApi = {
   },
 
   /**
-   * Create or update an AppRole
+   * Create an AppRole
    */
   createRole: async (
     realmId: string,
     roleName: string,
     request: CreateAppRoleRequest,
+  ): Promise<void> => {
+    await apiClient.post(VAULT_ROUTES.REALM_APPROLE.CREATE_ROLE(realmId, roleName), request);
+  },
+
+  /**
+   * Update an existing AppRole
+   * Uses the same endpoint as create (POST) since Vault uses upsert semantics
+   */
+  updateRole: async (
+    realmId: string,
+    roleName: string,
+    request: UpdateAppRoleRequest,
   ): Promise<void> => {
     await apiClient.post(VAULT_ROUTES.REALM_APPROLE.CREATE_ROLE(realmId, roleName), request);
   },

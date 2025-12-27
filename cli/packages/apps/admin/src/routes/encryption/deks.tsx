@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
-  Label,
   Stack,
   Table,
   TableBody,

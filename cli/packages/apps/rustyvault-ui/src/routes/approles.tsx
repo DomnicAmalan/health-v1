@@ -25,6 +25,7 @@ import {
   AlertCircle,
   Check,
   Copy,
+  Edit,
   Globe,
   Key,
   KeyRound,
@@ -41,6 +42,7 @@ import {
   type CreateAppRoleRequest,
   formatTTL,
   type SecretIdResponse,
+  type UpdateAppRoleRequest,
 } from "@/lib/api/approle";
 import { useRealmStore } from "@/stores/realmStore";
 
@@ -50,6 +52,7 @@ export function AppRolesPage() {
   const { currentRealm, isGlobalMode } = useRealmStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [secretIdData, setSecretIdData] = useState<SecretIdResponse | null>(null);
@@ -58,6 +61,15 @@ export function AppRolesPage() {
 
   const [formData, setFormData] = useState<{ roleName: string } & CreateAppRoleRequest>({
     roleName: "",
+    bind_secret_id: true,
+    secret_id_ttl: 3600,
+    secret_id_num_uses: 1,
+    token_ttl: 3600,
+    token_max_ttl: 86400,
+    policies: ["default"],
+  });
+
+  const [editFormData, setEditFormData] = useState<UpdateAppRoleRequest>({
     bind_secret_id: true,
     secret_id_ttl: 3600,
     secret_id_num_uses: 1,
@@ -124,6 +136,21 @@ export function AppRolesPage() {
     },
   });
 
+  // Update role mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: { roleName: string } & UpdateAppRoleRequest) => {
+      if (!currentRealm?.id) throw new Error("No realm selected");
+      const { roleName, ...request } = data;
+      await approleApi.updateRole(currentRealm.id, roleName, request);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["approles", currentRealm?.id] });
+      queryClient.invalidateQueries({ queryKey: ["approles-details", currentRealm?.id] });
+      setIsEditOpen(false);
+      setSelectedRole(null);
+    },
+  });
+
   // Delete role mutation
   const deleteMutation = useMutation({
     mutationFn: (roleName: string) => {
@@ -173,6 +200,33 @@ export function AppRolesPage() {
     if (selectedRole) {
       deleteMutation.mutate(selectedRole);
     }
+  };
+
+  const handleEdit = () => {
+    if (selectedRole) {
+      updateMutation.mutate({ roleName: selectedRole, ...editFormData });
+    }
+  };
+
+  const openEditDialog = (role: {
+    role_name: string;
+    bind_secret_id?: boolean;
+    secret_id_ttl?: number;
+    secret_id_num_uses?: number;
+    token_ttl?: number;
+    token_max_ttl?: number;
+    policies?: string[];
+  }) => {
+    setSelectedRole(role.role_name);
+    setEditFormData({
+      bind_secret_id: role.bind_secret_id ?? true,
+      secret_id_ttl: role.secret_id_ttl,
+      secret_id_num_uses: role.secret_id_num_uses,
+      token_ttl: role.token_ttl,
+      token_max_ttl: role.token_max_ttl,
+      policies: role.policies || ["default"],
+    });
+    setIsEditOpen(true);
   };
 
   const handleCopyRoleId = async (roleId: string, roleName: string) => {
@@ -474,7 +528,15 @@ export function AppRolesPage() {
                   )}
                 </div>
 
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-4 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEditDialog(role)}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    {t("approles.list.edit")}
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -511,6 +573,122 @@ export function AppRolesPage() {
         secretIdData={secretIdData}
         roleName={selectedRole || ""}
       />
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("approles.edit.dialogTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("approles.edit.dialogDescription", { roleName: selectedRole || "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>{t("approles.create.fields.bindSecretId")}</Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("approles.create.fields.bindSecretIdDescription")}
+                </p>
+              </div>
+              <Switch
+                checked={editFormData.bind_secret_id}
+                onCheckedChange={(checked: boolean) =>
+                  setEditFormData({ ...editFormData, bind_secret_id: checked })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_secret_ttl">{t("approles.create.fields.secretIdTtl")}</Label>
+                <Input
+                  id="edit_secret_ttl"
+                  type="number"
+                  value={editFormData.secret_id_ttl || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData({
+                      ...editFormData,
+                      secret_id_ttl: parseInt(e.target.value, 10) || undefined,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_secret_uses">{t("approles.create.fields.secretIdMaxUses")}</Label>
+                <Input
+                  id="edit_secret_uses"
+                  type="number"
+                  value={editFormData.secret_id_num_uses || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData({
+                      ...editFormData,
+                      secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
+                    })
+                  }
+                  placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_token_ttl">{t("approles.create.fields.tokenTtl")}</Label>
+                <Input
+                  id="edit_token_ttl"
+                  type="number"
+                  value={editFormData.token_ttl || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData({
+                      ...editFormData,
+                      token_ttl: parseInt(e.target.value, 10) || undefined,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_token_max_ttl">{t("approles.create.fields.tokenMaxTtl")}</Label>
+                <Input
+                  id="edit_token_max_ttl"
+                  type="number"
+                  value={editFormData.token_max_ttl || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEditFormData({
+                      ...editFormData,
+                      token_max_ttl: parseInt(e.target.value, 10) || undefined,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <PolicySelector
+              label={t("approles.create.fields.policies")}
+              selectedPolicies={editFormData.policies || []}
+              onPoliciesChange={(policies) => setEditFormData({ ...editFormData, policies })}
+              realmId={currentRealm?.id}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+              {t("approles.create.actions.cancel")}
+            </Button>
+            <Button
+              onClick={handleEdit}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t("approles.edit.saving")}
+                </>
+              ) : (
+                t("approles.edit.save")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

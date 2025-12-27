@@ -70,7 +70,9 @@ export const provisioningApi = {
    * Creates user, assigns role, grants app access, creates vault access
    */
   provisionUser: async (request: ProvisionUserRequest): Promise<ProvisionUserResponse> => {
-    return apiClient.post<ProvisionUserResponse>("/users/provision", request);
+    const response = await apiClient.post<ProvisionUserResponse>("/users/provision", request);
+    if (!response.data) throw new Error(response.error?.message || "Failed to provision user");
+    return response.data;
   },
 
   /**
@@ -80,7 +82,8 @@ export const provisioningApi = {
     userId: string,
     request: GrantAppAccessRequest
   ): Promise<GrantAppAccessResponse> => {
-    return apiClient.post<GrantAppAccessResponse>(`/users/${userId}/apps`, request);
+    const response = await apiClient.post<GrantAppAccessResponse>(`/users/${userId}/apps`, request);
+    return response.data || { granted: [] };
   },
 
   /**
@@ -97,7 +100,8 @@ export const provisioningApi = {
     userId: string,
     request: GrantVaultAccessRequest
   ): Promise<GrantVaultAccessResponse> => {
-    return apiClient.post<GrantVaultAccessResponse>(`/users/${userId}/vault-access`, request);
+    const response = await apiClient.post<GrantVaultAccessResponse>(`/users/${userId}/vault-access`, request);
+    return response.data || {};
   },
 
   /**
@@ -112,7 +116,7 @@ export const provisioningApi = {
    */
   getUserAppAccess: async (userId: string): Promise<UserAppAccess[]> => {
     const response = await apiClient.get<{ access: UserAppAccess[] }>(`/users/${userId}/apps`);
-    return response.access || [];
+    return response.data?.access || [];
   },
 
   /**
@@ -124,6 +128,6 @@ export const provisioningApi = {
     const response = await apiClient.get<{
       access: Array<{ realm_id: string; has_user: boolean; has_token: boolean }>;
     }>(`/users/${userId}/vault-access`);
-    return response.access || [];
+    return response.data?.access || [];
   },
 };

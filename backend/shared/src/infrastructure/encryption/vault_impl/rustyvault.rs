@@ -75,15 +75,144 @@ impl RustyVaultClient {
     }
 
     /// Create from environment variables
+    /// Supports both direct token auth (VAULT_TOKEN) and AppRole auth (VAULT_ROLE_ID + VAULT_SECRET_ID)
     pub fn from_env() -> AppResult<Self> {
         let addr = std::env::var("VAULT_ADDR")
             .unwrap_or_else(|_| "http://localhost:4117".to_string());
-        let token = std::env::var("VAULT_TOKEN")
-            .map_err(|_| AppError::Configuration("VAULT_TOKEN not set".to_string()))?;
         let mount_path = std::env::var("VAULT_MOUNT_PATH")
             .unwrap_or_else(|_| "secret".to_string());
         
+        // Try AppRole auth first (preferred for services)
+        if let (Ok(role_id), Ok(secret_id)) = (
+            std::env::var("VAULT_ROLE_ID"),
+            std::env::var("VAULT_SECRET_ID"),
+        ) {
+            let realm_id = std::env::var("VAULT_REALM_ID").ok();
+            return Self::from_approle(&addr, &role_id, &secret_id, realm_id.as_deref(), &mount_path);
+        }
+        
+        // Fall back to direct token auth
+        let token = std::env::var("VAULT_TOKEN")
+            .map_err(|_| AppError::Configuration("VAULT_TOKEN or VAULT_ROLE_ID/VAULT_SECRET_ID not set".to_string()))?;
+        
         Ok(Self::new(&addr, &token, &mount_path))
+    }
+
+    /// Create from AppRole credentials (M2M authentication)
+    /// This is the preferred method for backend services
+    pub fn from_approle(
+        addr: &str,
+        role_id: &str,
+        secret_id: &str,
+        realm_id: Option<&str>,
+        mount_path: &str,
+    ) -> AppResult<Self> {
+        // Create a temporary client to perform the login
+        let client = Client::new();
+        let addr_clean = addr.trim_end_matches('/');
+        
+        // Build the login path (realm-scoped if realm_id provided)
+        let login_path = match realm_id {
+            Some(rid) => format!("{}/v1/realm/{}/auth/approle/login", addr_clean, rid),
+            None => format!("{}/v1/auth/approle/login", addr_clean),
+        };
+        
+        // Perform blocking login (this is called during initialization)
+        // Use a runtime to execute the async request
+        let rt = tokio::runtime::Handle::try_current()
+            .map_err(|_| AppError::Configuration("No tokio runtime available".to_string()))?;
+        
+        let login_response = rt.block_on(async {
+            let response = client
+                .post(&login_path)
+                .json(&serde_json::json!({
+                    "role_id": role_id,
+                    "secret_id": secret_id
+                }))
+                .send()
+                .await
+                .map_err(|e| AppError::Encryption(format!("AppRole login error: {}", e)))?;
+            
+            if !response.status().is_success() {
+                let status = response.status();
+                let error_text = response.text().await.unwrap_or_default();
+                return Err(AppError::Encryption(format!(
+                    "AppRole login failed: {} - {}", status, error_text
+                )));
+            }
+            
+            response.json::<serde_json::Value>().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))
+        })?;
+        
+        // Extract the client token from the response
+        let token = login_response
+            .get("auth")
+            .and_then(|a| a.get("client_token"))
+            .and_then(|t| t.as_str())
+            .ok_or_else(|| AppError::Encryption("No client_token in AppRole response".to_string()))?;
+        
+        tracing::info!(
+            role_id = %role_id,
+            realm_id = ?realm_id,
+            "Successfully authenticated with AppRole"
+        );
+        
+        Ok(Self::new(addr_clean, token, mount_path))
+    }
+
+    /// Create from AppRole credentials asynchronously
+    pub async fn from_approle_async(
+        addr: &str,
+        role_id: &str,
+        secret_id: &str,
+        realm_id: Option<&str>,
+        mount_path: &str,
+    ) -> AppResult<Self> {
+        let client = Client::new();
+        let addr_clean = addr.trim_end_matches('/');
+        
+        // Build the login path (realm-scoped if realm_id provided)
+        let login_path = match realm_id {
+            Some(rid) => format!("{}/v1/realm/{}/auth/approle/login", addr_clean, rid),
+            None => format!("{}/v1/auth/approle/login", addr_clean),
+        };
+        
+        let response = client
+            .post(&login_path)
+            .json(&serde_json::json!({
+                "role_id": role_id,
+                "secret_id": secret_id
+            }))
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("AppRole login error: {}", e)))?;
+        
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "AppRole login failed: {} - {}", status, error_text
+            )));
+        }
+        
+        let login_response: serde_json::Value = response.json().await
+            .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+        
+        // Extract the client token from the response
+        let token = login_response
+            .get("auth")
+            .and_then(|a| a.get("client_token"))
+            .and_then(|t| t.as_str())
+            .ok_or_else(|| AppError::Encryption("No client_token in AppRole response".to_string()))?;
+        
+        tracing::info!(
+            role_id = %role_id,
+            realm_id = ?realm_id,
+            "Successfully authenticated with AppRole (async)"
+        );
+        
+        Ok(Self::new(addr_clean, token, mount_path))
     }
 
     // ==========================================
@@ -99,7 +228,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -122,7 +251,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .delete(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault policy delete error: {}", e)))?;
@@ -144,7 +273,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .get(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault policy list error: {}", e)))?;
@@ -176,7 +305,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(request)
             .send()
             .await
@@ -205,7 +334,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -240,7 +369,7 @@ impl RustyVaultClient {
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -336,7 +465,7 @@ path "sys/policies/*" {{
         
         let response = self.client
             .get(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault realm lookup error: {}", e)))?;
@@ -368,7 +497,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&create_path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -409,7 +538,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -450,7 +579,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&request)
             .send()
             .await
@@ -481,7 +610,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -517,7 +646,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -540,7 +669,7 @@ path "sys/policies/*" {{
 
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault app register error: {}", e)))?;
@@ -554,6 +683,150 @@ path "sys/policies/*" {{
         }
 
         Ok(())
+    }
+
+    // ==========================================
+    // Realm-Scoped Secret Operations
+    // ==========================================
+
+    /// Read a secret from a realm
+    pub async fn read_realm_secret(
+        &self,
+        realm_id: Uuid,
+        path: &str,
+    ) -> AppResult<Option<serde_json::Value>> {
+        let url = format!(
+            "{}/v1/realm/{}/secret/data/{}",
+            self.addr, realm_id, path.trim_start_matches('/')
+        );
+
+        let response = self.client
+            .get(&url)
+            .header("X-Vault-Token", &self.token)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault read error: {}", e)))?;
+
+        if response.status().is_success() {
+            let json: serde_json::Value = response.json().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+            
+            // Extract data from the response (KV v2 format)
+            Ok(json.get("data").and_then(|d| d.get("data")).cloned())
+        } else if response.status() == 404 {
+            Ok(None)
+        } else {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            Err(AppError::Encryption(format!(
+                "Failed to read secret: {} - {}", status, error_text
+            )))
+        }
+    }
+
+    /// Write a secret to a realm
+    pub async fn write_realm_secret(
+        &self,
+        realm_id: Uuid,
+        path: &str,
+        data: serde_json::Value,
+    ) -> AppResult<()> {
+        let url = format!(
+            "{}/v1/realm/{}/secret/data/{}",
+            self.addr, realm_id, path.trim_start_matches('/')
+        );
+
+        let body = serde_json::json!({
+            "data": data
+        });
+
+        let response = self.client
+            .post(&url)
+            .header("X-Vault-Token", &self.token)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault write error: {}", e)))?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to write secret: {} - {}", status, error_text
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// Delete a secret from a realm
+    pub async fn delete_realm_secret(
+        &self,
+        realm_id: Uuid,
+        path: &str,
+    ) -> AppResult<()> {
+        let url = format!(
+            "{}/v1/realm/{}/secret/data/{}",
+            self.addr, realm_id, path.trim_start_matches('/')
+        );
+
+        let response = self.client
+            .delete(&url)
+            .header("X-Vault-Token", &self.token)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault delete error: {}", e)))?;
+
+        if !response.status().is_success() && response.status() != 404 {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(AppError::Encryption(format!(
+                "Failed to delete secret: {} - {}", status, error_text
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// List secrets at a path in a realm
+    pub async fn list_realm_secrets(
+        &self,
+        realm_id: Uuid,
+        path: &str,
+    ) -> AppResult<Vec<String>> {
+        let url = format!(
+            "{}/v1/realm/{}/secret/metadata/{}",
+            self.addr, realm_id, path.trim_start_matches('/').trim_end_matches('/')
+        );
+
+        let response = self.client
+            .request(reqwest::Method::from_bytes(b"LIST").unwrap_or(reqwest::Method::GET), &url)
+            .header("X-Vault-Token", &self.token)
+            .send()
+            .await
+            .map_err(|e| AppError::Encryption(format!("Vault list error: {}", e)))?;
+
+        if response.status().is_success() {
+            let json: serde_json::Value = response.json().await
+                .map_err(|e| AppError::Encryption(format!("Parse error: {}", e)))?;
+            
+            let keys = json
+                .get("data")
+                .and_then(|d| d.get("keys"))
+                .and_then(|k| k.as_array())
+                .map(|arr| arr.iter().filter_map(|v| v.as_str().map(String::from)).collect())
+                .unwrap_or_default();
+            
+            Ok(keys)
+        } else if response.status() == 404 {
+            Ok(vec![])
+        } else {
+            let status = response.status();
+            let error_text = response.text().await.unwrap_or_default();
+            Err(AppError::Encryption(format!(
+                "Failed to list secrets: {} - {}", status, error_text
+            )))
+        }
     }
 }
 
@@ -570,7 +843,7 @@ impl Vault for RustyVaultClient {
         
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -592,7 +865,7 @@ impl Vault for RustyVaultClient {
         
         let response = self.client
             .get(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault request error: {}", e)))?;
@@ -623,7 +896,7 @@ impl Vault for RustyVaultClient {
         
         let response = self.client
             .delete(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault delete error: {}", e)))?;
@@ -655,7 +928,7 @@ impl Vault for RustyVaultClient {
         
         let response = self.client
             .post(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .json(&data)
             .send()
             .await
@@ -677,7 +950,7 @@ impl Vault for RustyVaultClient {
         
         let response = self.client
             .get(&path)
-            .header("X-RustyVault-Token", &self.token)
+            .header("X-Vault-Token", &self.token)
             .send()
             .await
             .map_err(|e| AppError::Encryption(format!("Vault request error: {}", e)))?;

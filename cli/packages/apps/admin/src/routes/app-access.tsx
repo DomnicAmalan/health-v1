@@ -17,10 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
   Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -29,9 +26,9 @@ import {
   TableRow,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, AppWindow, Check, Download, Filter, Loader2, Users, X } from "lucide-react";
+import { AlertCircle, AppWindow, Check, Filter, Loader2, Users, X } from "lucide-react";
 import { useState } from "react";
-import { type AppAccessMatrix, appAccessApi } from "@/lib/api/app-access";
+import { appAccessApi } from "@/lib/api/app-access";
 import { apiClient } from "@/lib/api/client";
 import { ProtectedPage } from "../lib/permissions";
 
@@ -47,7 +44,7 @@ interface OrganizationsListResponse {
 const organizationsApi = {
   list: async (): Promise<Organization[]> => {
     const response = await apiClient.get<OrganizationsListResponse>("/organizations");
-    return response.organizations || [];
+    return response.data?.organizations || [];
   },
 };
 
@@ -236,17 +233,12 @@ export function AppAccessPage() {
             <div className="flex items-center gap-4">
               <div className="flex-1 max-w-xs">
                 <Select value={selectedOrg} onValueChange={setSelectedOrg}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All Organizations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Organizations</SelectItem>
-                    {organizations.map((org) => (
-                      <SelectItem key={org.id} value={org.id}>
-                        {org.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectItem value="">All Organizations</SelectItem>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
                 </Select>
               </div>
             </div>
@@ -357,19 +349,15 @@ export function AppAccessPage() {
                             <TableCell key={app} className="text-center">
                               {level ? (
                                 <Select
+                                  className={`w-20 h-7 ${ACCESS_COLORS[level]}`}
                                   value={level}
-                                  onValueChange={(value: "read" | "write" | "admin") =>
-                                    handleAccessLevelChange(user.id, app, value)
+                                  onValueChange={(value) =>
+                                    handleAccessLevelChange(user.id, app, value as "read" | "write" | "admin")
                                   }
                                 >
-                                  <SelectTrigger className={`w-20 h-7 ${ACCESS_COLORS[level]}`}>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="read">Read</SelectItem>
-                                    <SelectItem value="write">Write</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                  </SelectContent>
+                                  <SelectItem value="read">Read</SelectItem>
+                                  <SelectItem value="write">Write</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
                                 </Select>
                               ) : (
                                 <Button
@@ -411,16 +399,14 @@ export function AppAccessPage() {
                 Application
               </label>
               <Select id="bulk-app-select" value={bulkApp} onValueChange={setBulkApp}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select application" />
-                </SelectTrigger>
-                <SelectContent>
-                  {apps.map((app) => (
-                    <SelectItem key={app} value={app}>
-                      {app}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectItem value="" disabled>
+                  Select application
+                </SelectItem>
+                {apps.map((app) => (
+                  <SelectItem key={app} value={app}>
+                    {app}
+                  </SelectItem>
+                ))}
               </Select>
             </div>
             {bulkAction === "grant" && (
@@ -431,16 +417,11 @@ export function AppAccessPage() {
                 <Select
                   id="bulk-level-select"
                   value={bulkLevel}
-                  onValueChange={(v: "read" | "write" | "admin") => setBulkLevel(v)}
+                  onValueChange={(v) => setBulkLevel(v as "read" | "write" | "admin")}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="read">Read</SelectItem>
-                    <SelectItem value="write">Write</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
+                  <SelectItem value="read">Read</SelectItem>
+                  <SelectItem value="write">Write</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                 </Select>
               </div>
             )}

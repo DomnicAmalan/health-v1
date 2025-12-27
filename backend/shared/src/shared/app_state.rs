@@ -4,7 +4,7 @@ use crate::domain::repositories::{SetupRepository, RoleRepository};
 use crate::infrastructure::database::DatabaseService;
 use crate::infrastructure::oidc::TokenManager;
 use crate::infrastructure::zanzibar::{PermissionChecker, RelationshipStore, GraphCache};
-use crate::infrastructure::encryption::DekManager;
+use crate::infrastructure::encryption::{DekManager, RustyVaultClient};
 use crate::infrastructure::session::SessionService;
 
 /// Application state that holds shared services and use cases.
@@ -27,5 +27,8 @@ pub struct AppState<LoginUseCase, RefreshTokenUseCase, LogoutUseCase, UserInfoUs
     pub role_repository: Arc<dyn RoleRepository>,
     pub graph_cache: Option<Arc<GraphCache>>,
     pub session_service: Arc<SessionService>,
+    /// Vault client for realm lookups and on-demand token minting
+    /// Optional because vault may not be configured in all environments
+    pub vault_client: Option<Arc<RustyVaultClient>>,
 }
 

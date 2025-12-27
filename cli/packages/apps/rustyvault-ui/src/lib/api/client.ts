@@ -26,7 +26,7 @@ export class ApiError extends Error {
 
 /**
  * Vault API Client
- * Uses X-RustyVault-Token header and unwraps { data: T } responses
+ * Uses X-Vault-Token header (industry standard) and unwraps { data: T } responses
  */
 class VaultApiClient extends BaseApiClient {
   constructor() {
@@ -36,7 +36,8 @@ class VaultApiClient extends BaseApiClient {
         type: "custom",
         getHeaders: (): Record<string, string> => {
           const token = useAuthStore.getState().accessToken;
-          return token ? { "X-RustyVault-Token": token } : {};
+          // Use X-Vault-Token for industry compatibility
+          return token ? { "X-Vault-Token": token } : {};
         },
         onAuthError: async () => {
           useAuthStore.getState().logout();

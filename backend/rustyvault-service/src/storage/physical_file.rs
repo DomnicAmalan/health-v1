@@ -37,7 +37,7 @@ impl FileBackend {
 impl StorageBackend for FileBackend {
     async fn get(&self, key: &str) -> VaultResult<Option<Vec<u8>>> {
         if key.starts_with('/') {
-            return Err(VaultError::Storage("Key cannot start with /".to_string()));
+            return Err(VaultError::Shared(shared::AppError::Storage("Key cannot start with /".to_string())));
         }
 
         let (dir_path, file_name) = self.path_key(key);
@@ -62,7 +62,7 @@ impl StorageBackend for FileBackend {
 
     async fn put(&self, key: &str, value: &[u8]) -> VaultResult<()> {
         if key.starts_with('/') {
-            return Err(VaultError::Storage("Key cannot start with /".to_string()));
+            return Err(VaultError::Shared(shared::AppError::Storage("Key cannot start with /".to_string())));
         }
 
         let (dir_path, file_name) = self.path_key(key);
@@ -79,7 +79,7 @@ impl StorageBackend for FileBackend {
 
     async fn delete(&self, key: &str) -> VaultResult<()> {
         if key.starts_with('/') {
-            return Err(VaultError::Storage("Key cannot start with /".to_string()));
+            return Err(VaultError::Shared(shared::AppError::Storage("Key cannot start with /".to_string())));
         }
 
         let (dir_path, file_name) = self.path_key(key);
@@ -94,7 +94,7 @@ impl StorageBackend for FileBackend {
 
     async fn list(&self, prefix: &str) -> VaultResult<Vec<String>> {
         if prefix.starts_with('/') {
-            return Err(VaultError::Storage("Prefix cannot start with /".to_string()));
+            return Err(VaultError::Shared(shared::AppError::Storage("Prefix cannot start with /".to_string())));
         }
 
         let mut path = self.path.clone();
@@ -109,7 +109,7 @@ impl StorageBackend for FileBackend {
         let mut names: Vec<String> = vec![];
         let entries = fs::read_dir(&path)
             .map_err(|e| VaultError::Io(e))?;
-        
+
         for entry in entries {
             let entry = entry.map_err(|e| VaultError::Io(e))?;
             let name = entry.file_name().to_string_lossy().into_owned();

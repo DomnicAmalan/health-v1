@@ -16,6 +16,12 @@ pub struct Claims {
     pub role: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub permissions: Option<Vec<String>>,
+    /// Organization ID - scopes user to a specific organization (realm boundary)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization_id: Option<String>,
+    /// Vault Realm ID - maps to vault realm for this organization
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub realm_id: Option<String>,
 }
 
 #[derive(Clone)]
@@ -39,7 +45,7 @@ impl TokenManager {
     }
 
     pub fn generate_access_token(&self, user: &User) -> AppResult<String> {
-        self.generate_access_token_with_permissions(user, "", &[])
+        self.generate_access_token_with_context(user, "", &[], None, None)
     }
 
     pub fn generate_access_token_with_permissions(
@@ -47,6 +53,23 @@ impl TokenManager {
         user: &User,
         role: &str,
         permissions: &[String],
+    ) -> AppResult<String> {
+        self.generate_access_token_with_context(
+            user,
+            role,
+            permissions,
+            user.organization_id.map(|id| id.to_string()),
+            None,
+        )
+    }
+
+    pub fn generate_access_token_with_context(
+        &self,
+        user: &User,
+        role: &str,
+        permissions: &[String],
+        organization_id: Option<String>,
+        realm_id: Option<String>,
     ) -> AppResult<String> {
         let now = Utc::now();
         let exp = now + Duration::seconds(self.expiration as i64);
@@ -60,6 +83,8 @@ impl TokenManager {
             aud: "api-service".to_string(),
             role: if role.is_empty() { None } else { Some(role.to_string()) },
             permissions: if permissions.is_empty() { None } else { Some(permissions.to_vec()) },
+            organization_id,
+            realm_id,
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)
@@ -67,6 +92,15 @@ impl TokenManager {
     }
 
     pub fn generate_refresh_token(&self, user: &User) -> AppResult<String> {
+        self.generate_refresh_token_with_context(user, None, None)
+    }
+
+    pub fn generate_refresh_token_with_context(
+        &self,
+        user: &User,
+        organization_id: Option<String>,
+        realm_id: Option<String>,
+    ) -> AppResult<String> {
         // Refresh tokens have longer expiration (7 days)
         let now = Utc::now();
         let exp = now + Duration::days(7);
@@ -80,6 +114,9 @@ impl TokenManager {
             aud: "api-service".to_string(),
             role: None,
             permissions: None,
+            // Include org/realm in refresh token to maintain context across refresh
+            organization_id,
+            realm_id,
         };
 
         encode(&Header::default(), &claims, &self.encoding_key)

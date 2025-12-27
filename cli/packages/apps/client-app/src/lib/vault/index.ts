@@ -1,14 +1,30 @@
 /**
  * Vault Integration for Client App
  *
- * Re-exports vault utilities from shared package and provides
- * client-app specific integration with existing permission system.
+ * IMPORTANT: Client apps should NEVER talk directly to Vault.
+ * All vault operations are proxied through the health-v1 backend for:
+ * - Security: Never expose vault tokens/credentials to frontend
+ * - Audit: All access is logged through health-v1
+ * - Policy: Backend enforces role-based policies
+ *
+ * Use the VaultProxyClient for all vault operations.
  */
 
-// Re-export everything from shared vault module
+// Re-export vault proxy (recommended for client apps)
+export {
+  createVaultProxy,
+  VaultProxyClient,
+  VaultProxyError,
+  type VaultProxyCapabilitiesResponse,
+  type VaultProxyConfig,
+  type VaultSecretResponse,
+  type VaultTokenRequest,
+  type VaultTokenResponse,
+} from "@lazarus-life/shared/vault";
+
+// Re-export permission utilities and components from shared vault module
 export {
   CombinedPermissionGate,
-  createVaultClient,
   // Permission mappings
   DEFAULT_VAULT_PATH_MAPPINGS,
   generateVaultPoliciesForRoles,
@@ -21,26 +37,16 @@ export {
   type SecretsEngineMount,
   type SecretsEngineType,
   useCombinedPermissions,
-  useVaultAuth,
-  // Hooks
+  // Hooks (these use the vault store)
   useVaultCapabilities,
-  useVaultConnection,
-  useVaultSecret,
-  useVaultSecretList,
-  useVaultSecretMutation,
   // Store
   useVaultStore,
   type VaultActions,
-  VaultApiError,
   type VaultAuth,
   type VaultCapabilitiesResponse,
   // Types
   type VaultCapability,
-  // Client
-  VaultClient,
-  type VaultClientConfig,
   type VaultError,
-  type VaultHealthResponse,
   type VaultPathMapping,
   // Components
   VaultPermissionGate,
@@ -60,7 +66,7 @@ import {
   permissionRequiresVault,
   useVaultCapabilities,
 } from "@lazarus-life/shared/vault";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { usePermissions } from "@/hooks/security/usePermissions";
 
 /**

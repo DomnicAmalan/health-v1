@@ -1,6 +1,19 @@
-# Docker Compose for Vault Testing
+# Docker Compose for Testing
 # Usage: docker-compose -f docker-compose.test.yml up -d
-# This file provides isolated test services for vault testing
+# This file provides isolated test services for integration testing
+#
+# Services:
+#   - postgres-test: PostgreSQL database for testing
+#   - migrations-test: Runs database migrations
+#   - rustyvault-service-test: Vault service for secrets management
+#   - api-service-test: Main API service (optional, for full integration tests)
+#   - rustyvault-ui-test: Vault UI for E2E testing
+#
+# Ports:
+#   - 5433: PostgreSQL
+#   - 8217: RustyVault Service API
+#   - 8118: API Service (if enabled)
+#   - 8215: RustyVault UI
 
 services:
   # PostgreSQL Database for Testing
@@ -112,6 +125,74 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4117/v1/sys/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - vault-test-network
+    restart: "no"
+
+  # API Service for Integration Testing (optional)
+  api-service-test:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: backend/api-service/Dockerfile
+      args:
+        BUILD_MODE: ${BUILD_MODE:-release}
+        SKIP_CHECKS: ${SKIP_CHECKS:-true}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+    container_name: health-api-service-test
+    environment:
+      # Server
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: "*"
+      
+      # Session Configuration
+      SESSION_ADMIN_UI_TTL_HOURS: 8
+      SESSION_CLIENT_UI_TTL_HOURS: 24
+      SESSION_API_TTL_HOURS: 1
+      
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-test_user}:${POSTGRES_PASSWORD:-test_password}@postgres-test:5432/${POSTGRES_DB:-vault_test_db}
+      DATABASE_MAX_CONNECTIONS: 5
+      DATABASE_MIN_CONNECTIONS: 1
+      
+      # Vault Integration
+      KMS_PROVIDER: rustyvault
+      VAULT_ADDR: http://rustyvault-service-test:4117
+      VAULT_TOKEN: ${VAULT_TOKEN:-test-root-token}
+      VAULT_MOUNT_PATH: secret
+      ENABLE_RUSTYVAULT: "true"
+      
+      # JWT
+      JWT_SECRET: test-jwt-secret-key-for-testing-only-min-32-chars
+      JWT_EXPIRATION: 3600
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      RUST_LOG: ${RUST_LOG:-warn}
+      
+      # Deployment
+      DEPLOYMENT_ENV: test
+      
+      # Memory optimization
+      TOKIO_WORKER_THREADS: 2
+    ports:
+      - "${API_SERVICE_TEST_PORT:-8118}:8080"
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      rustyvault-service-test:
+        condition: service_healthy
+      migrations-test:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
       retries: 5

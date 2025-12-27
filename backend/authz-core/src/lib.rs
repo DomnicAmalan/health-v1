@@ -6,5 +6,5 @@ pub mod dto;
 
 pub use auth::{LoginUseCase, LogoutUseCase, RefreshTokenUseCase, UserInfoUseCase};
 pub use authorization::GetUserPermissionsUseCase;
-pub use oidc::{TokenManager, JWKS, Provider};
+pub use oidc::{TokenManager, Jwks, OidcProvider, Claims};
 

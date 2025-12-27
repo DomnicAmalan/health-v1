@@ -33,6 +33,12 @@ export interface LoginResponse {
   refreshToken: string;
   expiresIn: number;
   user: User;
+  /** Session token for cookie-based auth (web apps) */
+  sessionToken?: string;
+  /** Organization ID for this session */
+  organizationId?: string;
+  /** Vault Realm ID for this organization (used for on-demand vault token minting) */
+  realmId?: string;
 }
 
 export interface RefreshTokenRequest {

@@ -87,7 +87,11 @@
       "types": "./dist/styles/tailwind.config.d.ts",
       "default": "./src/styles/tailwind.config.ts"
     },
-    "./styles/postcss.config": "./src/styles/postcss.config.js"
+    "./styles/postcss.config": "./src/styles/postcss.config.js",
+    "./vault": {
+      "types": "./dist/vault/index.d.ts",
+      "default": "./dist/vault/index.js"
+    }
   },
   "scripts": {
     "build": "tsup",

@@ -60,7 +60,8 @@ export const appAccessApi = {
     if (filters?.access_level) params.append("access_level", filters.access_level);
 
     const query = params.toString() ? `?${params.toString()}` : "";
-    return apiClient.get<AppAccessListResponse>(`/app-access${query}`);
+    const response = await apiClient.get<AppAccessListResponse>(`/app-access${query}`);
+    return response.data || { entries: [], total: 0 };
   },
 
   /**
@@ -69,7 +70,7 @@ export const appAccessApi = {
   getMatrix: async (organizationId?: string): Promise<AppAccessMatrix> => {
     const query = organizationId ? `?organization_id=${organizationId}` : "";
     const response = await apiClient.get<AppAccessMatrixResponse>(`/app-access/matrix${query}`);
-    return response.matrix;
+    return response.data?.matrix || { users: [], apps: [], access: {} };
   },
 
   /**
@@ -101,14 +102,16 @@ export const appAccessApi = {
    * Bulk grant app access
    */
   bulkGrant: async (request: BulkGrantRequest): Promise<{ granted: number }> => {
-    return apiClient.post<{ granted: number }>(`/app-access/bulk-grant`, request);
+    const response = await apiClient.post<{ granted: number }>(`/app-access/bulk-grant`, request);
+    return response.data || { granted: 0 };
   },
 
   /**
    * Bulk revoke app access
    */
   bulkRevoke: async (request: BulkRevokeRequest): Promise<{ revoked: number }> => {
-    return apiClient.post<{ revoked: number }>(`/app-access/bulk-revoke`, request);
+    const response = await apiClient.post<{ revoked: number }>(`/app-access/bulk-revoke`, request);
+    return response.data || { revoked: 0 };
   },
 
   /**
@@ -118,7 +121,7 @@ export const appAccessApi = {
     const response = await apiClient.get<{ entries: AppAccessEntry[] }>(
       `/users/${userId}/app-access`
     );
-    return response.entries || [];
+    return response.data?.entries || [];
   },
 
   /**
@@ -126,6 +129,6 @@ export const appAccessApi = {
    */
   getForApp: async (appName: string): Promise<AppAccessEntry[]> => {
     const response = await apiClient.get<{ entries: AppAccessEntry[] }>(`/apps/${appName}/access`);
-    return response.entries || [];
+    return response.data?.entries || [];
   },
 };
