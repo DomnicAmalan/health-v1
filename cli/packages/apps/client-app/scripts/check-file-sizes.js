@@ -5,8 +5,8 @@
  * Enforces maximum line counts for different file types
  */
 
-import { readFileSync, statSync } from "node:fs";
-import { extname, join, relative } from "node:path";
+import { readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import pkg from "glob";
 
 const { glob } = pkg;
@@ -45,8 +45,7 @@ function countLines(filePath) {
   try {
     const content = readFileSync(filePath, "utf-8");
     return content.split("\n").length;
-  } catch (error) {
-    console.error(`Error reading ${filePath}:`, error.message);
+  } catch (_error) {
     return 0;
   }
 }
@@ -79,21 +78,13 @@ async function checkFileSizes() {
   }
 
   if (errors.length > 0) {
-    console.error("\n❌ File size violations found:\n");
-    errors.forEach(({ file, type, lines, maxLines, over }) => {
-      console.error(`  ${file}`);
-      console.error(`    Type: ${type}`);
-      console.error(`    Lines: ${lines} (max: ${maxLines}, over by: ${over})\n`);
-    });
-    console.error(`\nTotal violations: ${errors.length}`);
+    errors.forEach(({ file, type, lines, maxLines, over }) => {});
     process.exit(1);
   } else {
-    console.log("✅ All files are within size limits");
     process.exit(0);
   }
 }
 
-checkFileSizes().catch((error) => {
-  console.error("Error checking file sizes:", error);
+checkFileSizes().catch((_error) => {
   process.exit(1);
 });

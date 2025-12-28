@@ -55,7 +55,7 @@ class VaultApiClient extends BaseApiClient {
    * Vault API doesn't use /api prefix - routes are directly under /v1/
    * This override bypasses the parent class logic that might add /api
    */
-  protected buildUrl(endpoint: string): string {
+  protected override buildUrl(endpoint: string): string {
     // Handle absolute URLs
     if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
       return endpoint;
@@ -91,7 +91,7 @@ class VaultApiClient extends BaseApiClient {
 
   // Override methods to throw errors instead of returning ApiResponse
   // This maintains backward compatibility with existing code
-  async get<T>(endpoint: string): Promise<T> {
+  override async get<T>(endpoint: string): Promise<T> {
     const result = await super.get<T>(endpoint);
     if (result.error) {
       throw new ApiError(result.error.message, result.error.status, [result.error.message]);
@@ -99,7 +99,7 @@ class VaultApiClient extends BaseApiClient {
     return result.data as T;
   }
 
-  async post<T>(endpoint: string, body?: unknown): Promise<T> {
+  override async post<T>(endpoint: string, body?: unknown): Promise<T> {
     const result = await super.post<T>(endpoint, body);
     if (result.error) {
       throw new ApiError(result.error.message, result.error.status, [result.error.message]);
@@ -107,7 +107,7 @@ class VaultApiClient extends BaseApiClient {
     return result.data as T;
   }
 
-  async put<T>(endpoint: string, body?: unknown): Promise<T> {
+  override async put<T>(endpoint: string, body?: unknown): Promise<T> {
     const result = await super.put<T>(endpoint, body);
     if (result.error) {
       throw new ApiError(result.error.message, result.error.status, [result.error.message]);
@@ -115,7 +115,7 @@ class VaultApiClient extends BaseApiClient {
     return result.data as T;
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
+  override async delete<T>(endpoint: string): Promise<T> {
     const result = await super.delete<T>(endpoint);
     if (result.error) {
       throw new ApiError(result.error.message, result.error.status, [result.error.message]);

@@ -31,7 +31,9 @@ export function ProtectedField({
     if (hideIfDenied) {
       return null;
     }
-    return <Input {...inputProps} value="" placeholder="No access" readOnly disabled />;
+    return (
+      <Input {...inputProps} value="" placeholder="No access" readOnly={true} disabled={true} />
+    );
   }
 
   // If can view but can't edit, make read-only

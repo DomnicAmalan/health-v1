@@ -5,9 +5,6 @@ import {
   Download,
   Eye,
   GripVertical,
-  Maximize2,
-  Move,
-  Plus,
   Settings,
   Trash2,
   Upload,
@@ -134,7 +131,9 @@ export function FormPlaygroundEnhanced({ FormBuilder }: FormPlaygroundEnhancedPr
   // Duplicate field
   const duplicateField = (fieldId: string) => {
     const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
+    if (!field) {
+      return;
+    }
     const newField: FormField = {
       ...field,
       id: `field-${Date.now()}`,
@@ -151,7 +150,9 @@ export function FormPlaygroundEnhanced({ FormBuilder }: FormPlaygroundEnhancedPr
   // Move field
   const moveField = (fieldId: string, direction: "up" | "down") => {
     const index = fields.findIndex((f) => f.id === fieldId);
-    if (index === -1) return;
+    if (index === -1) {
+      return;
+    }
 
     const newFields = [...fields];
     if (direction === "up" && index > 0) {
@@ -189,7 +190,9 @@ export function FormPlaygroundEnhanced({ FormBuilder }: FormPlaygroundEnhancedPr
   // Import form config
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -197,8 +200,7 @@ export function FormPlaygroundEnhanced({ FormBuilder }: FormPlaygroundEnhancedPr
         const config = JSON.parse(e.target?.result as string) as FormConfig;
         setFormConfig(config);
         setFields(config.fields);
-      } catch (error) {
-        console.error("Error importing config:", error);
+      } catch (_error) {
         alert("Error importing form config. Please check the file format.");
       }
     };
@@ -237,9 +239,7 @@ export function MyForm() {
       await navigator.clipboard.writeText(generateCode());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
+    } catch (_error) {}
   };
 
   const selectedFieldData = fields.find((f) => f.id === selectedField);
@@ -330,7 +330,7 @@ export function MyForm() {
               Export JSON
             </Button>
             <label className="w-full">
-              <Button variant="outline" size="sm" asChild className="w-full">
+              <Button variant="outline" size="sm" asChild={true} className="w-full">
                 <span>
                   <Upload className="h-3 w-3 mr-2" />
                   Import JSON
@@ -516,8 +516,7 @@ export function MyForm() {
                         fields,
                       } as FormConfig
                     }
-                    onSubmit={(data: Record<string, unknown>) => {
-                      console.log("Form submitted:", data);
+                    onSubmit={(_data: Record<string, unknown>) => {
                       alert("Form submitted! Check console for data.");
                     }}
                     onCancel={() => setActiveTab("edit")}
@@ -652,7 +651,7 @@ export function MyForm() {
                 </Label>
                 <select
                   id="field-size"
-                  value={selectedFieldData.layout?.size || "md"}
+                  value={selectedFieldData.layout?.size ?? "md"}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     selectedField &&
                     updateField(selectedField, {
@@ -680,7 +679,7 @@ export function MyForm() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={selectedFieldData.validation?.required || false}
+                      checked={selectedFieldData.validation?.required}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         selectedField &&
                         updateField(selectedField, {

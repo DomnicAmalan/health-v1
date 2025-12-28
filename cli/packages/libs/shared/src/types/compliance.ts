@@ -54,7 +54,9 @@ export interface GeographicRegion {
 }
 
 export function isGeographicRegion(value: unknown): value is GeographicRegion {
-  if (!isObject(value)) return false;
+  if (!isObject(value)) {
+    return false;
+  }
 
   return (
     isString(value.id) &&
@@ -68,7 +70,10 @@ export function isGeographicRegion(value: unknown): value is GeographicRegion {
   );
 }
 
-export function assertGeographicRegion(value: unknown, path = "GeographicRegion"): GeographicRegion {
+export function assertGeographicRegion(
+  value: unknown,
+  path = "GeographicRegion"
+): GeographicRegion {
   const obj = assertObject(value, path);
 
   return {
@@ -136,7 +141,9 @@ export interface Regulation {
 }
 
 export function isRegulation(value: unknown): value is Regulation {
-  if (!isObject(value)) return false;
+  if (!isObject(value)) {
+    return false;
+  }
 
   return (
     isString(value.id) &&
@@ -190,7 +197,9 @@ export interface RegulationVersion {
 }
 
 export function isRegulationVersion(value: unknown): value is RegulationVersion {
-  if (!isObject(value)) return false;
+  if (!isObject(value)) {
+    return false;
+  }
 
   return (
     isString(value.id) &&
@@ -203,7 +212,10 @@ export function isRegulationVersion(value: unknown): value is RegulationVersion 
   );
 }
 
-export function assertRegulationVersion(value: unknown, path = "RegulationVersion"): RegulationVersion {
+export function assertRegulationVersion(
+  value: unknown,
+  path = "RegulationVersion"
+): RegulationVersion {
   const obj = assertObject(value, path);
 
   return {
@@ -232,7 +244,9 @@ export interface RegulationSection {
 }
 
 export function isRegulationSection(value: unknown): value is RegulationSection {
-  if (!isObject(value)) return false;
+  if (!isObject(value)) {
+    return false;
+  }
 
   return (
     isString(value.id) &&
@@ -245,13 +259,20 @@ export function isRegulationSection(value: unknown): value is RegulationSection 
   );
 }
 
-export function assertRegulationSection(value: unknown, path = "RegulationSection"): RegulationSection {
+export function assertRegulationSection(
+  value: unknown,
+  path = "RegulationSection"
+): RegulationSection {
   const obj = assertObject(value, path);
 
   return {
     id: assertString(obj.id, `${path}.id`),
     version_id: assertString(obj.version_id, `${path}.version_id`),
-    parent_section_id: assertOptional(obj.parent_section_id, assertString, `${path}.parent_section_id`),
+    parent_section_id: assertOptional(
+      obj.parent_section_id,
+      assertString,
+      `${path}.parent_section_id`
+    ),
     section_number: assertString(obj.section_number, `${path}.section_number`),
     title: assertOptional(obj.title, assertString, `${path}.title`),
     content: assertString(obj.content, `${path}.content`),
@@ -275,7 +296,9 @@ export interface ApplicableRegulation {
 }
 
 export function isApplicableRegulation(value: unknown): value is ApplicableRegulation {
-  if (!isObject(value)) return false;
+  if (!isObject(value)) {
+    return false;
+  }
 
   return (
     isString(value.regulation_id) &&
@@ -289,7 +312,10 @@ export function isApplicableRegulation(value: unknown): value is ApplicableRegul
   );
 }
 
-export function assertApplicableRegulation(value: unknown, path = "ApplicableRegulation"): ApplicableRegulation {
+export function assertApplicableRegulation(
+  value: unknown,
+  path = "ApplicableRegulation"
+): ApplicableRegulation {
   const obj = assertObject(value, path);
 
   return {

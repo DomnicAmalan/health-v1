@@ -12,7 +12,6 @@ import {
   getVoiceInteractableComponents,
 } from "@/components/ui/component-registry";
 import { getTranslation } from "@/lib/i18n";
-import { useAccessibilityStore } from "@/stores/accessibilityStore";
 
 export interface ActionMetadata {
   id: string;
@@ -82,7 +81,9 @@ export class ActionExecutor {
 
     for (const { componentId, action } of allActions) {
       const componentConfig = getComponentConfig(componentId);
-      if (!componentConfig) continue;
+      if (!componentConfig) {
+        continue;
+      }
 
       // Check voice commands
       if (action.voiceCommand) {
@@ -161,7 +162,7 @@ export class ActionExecutor {
   ): Promise<ActionResult> {
     try {
       const componentConfig = getComponentConfig(componentId);
-      if (!componentConfig || !componentConfig.actionItems) {
+      if (!componentConfig?.actionItems) {
         return {
           success: false,
           error: `Component ${componentId} not found or has no actions`,
@@ -183,7 +184,7 @@ export class ActionExecutor {
       }
 
       // Execute the action
-      const result = await action.action();
+      const _result = await action.action();
 
       return {
         success: true,
@@ -232,7 +233,7 @@ export class ActionExecutor {
    */
   public validateAction(actionId: string, componentId: string): boolean {
     const componentConfig = getComponentConfig(componentId);
-    if (!componentConfig || !componentConfig.actionItems) {
+    if (!componentConfig?.actionItems) {
       return false;
     }
 

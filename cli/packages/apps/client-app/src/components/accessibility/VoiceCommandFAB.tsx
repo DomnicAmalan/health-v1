@@ -4,8 +4,8 @@
  */
 
 import { Box, Button } from "@lazarus-life/ui-components";
-import { Mic, MicOff } from "lucide-react";
 import { cn } from "@lazarus-life/ui-components/utils";
+import { Mic, MicOff } from "lucide-react";
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
@@ -32,7 +32,7 @@ export function VoiceCommandFAB() {
         // Request microphone permission first
         try {
           await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (permError) {
+        } catch (_permError) {
           setError(
             "Microphone permission denied. Please enable microphone access in your browser settings."
           );

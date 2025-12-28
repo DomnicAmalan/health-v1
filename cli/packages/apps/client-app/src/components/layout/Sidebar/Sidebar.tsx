@@ -1,5 +1,5 @@
-import { memo } from "react";
 import { cn } from "@lazarus-life/ui-components/utils";
+import { memo } from "react";
 import { useSidebarExpandedItems, useToggleSidebarExpand } from "@/stores/uiStore";
 import { SidebarCollapseButton } from "./SidebarCollapseButton";
 import { SidebarFooter } from "./SidebarFooter";
@@ -26,7 +26,6 @@ export const Sidebar = memo(function Sidebar({
     if (onNavAction) {
       onNavAction(actionId, navPath);
     } else {
-      console.log(`Nav action: ${actionId} for path: ${navPath}`);
     }
   };
 

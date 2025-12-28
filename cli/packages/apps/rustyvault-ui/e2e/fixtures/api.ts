@@ -9,7 +9,7 @@ export class VaultAPIClient {
   constructor(
     private request: APIRequestContext,
     private baseURL: string,
-    private token?: string
+    private token?: string,
   ) {}
 
   private headers(): Record<string, string> {
@@ -66,7 +66,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async createSecret(path: string, data: Record<string, unknown>, token: string) {
+  async createSecret(path: string, data: Record<string, unknown>, _token: string) {
     const response = await this.request.post(`${this.baseURL}/v1/secret/${path}`, {
       headers: this.headers(),
       data,
@@ -79,7 +79,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async readSecret(path: string, token: string) {
+  async readSecret(path: string, _token: string) {
     const response = await this.request.get(`${this.baseURL}/v1/secret/${path}`, {
       headers: this.headers(),
     });
@@ -91,7 +91,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async deleteSecret(path: string, token: string) {
+  async deleteSecret(path: string, _token: string) {
     const response = await this.request.delete(`${this.baseURL}/v1/secret/${path}`, {
       headers: this.headers(),
     });
@@ -103,7 +103,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async createRealm(name: string, organizationId: string, token: string) {
+  async createRealm(name: string, organizationId: string, _token: string) {
     const response = await this.request.post(`${this.baseURL}/v1/sys/realm`, {
       headers: this.headers(),
       data: {
@@ -119,7 +119,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async listRealms(token: string) {
+  async listRealms(_token: string) {
     const response = await this.request.get(`${this.baseURL}/v1/sys/realm`, {
       headers: this.headers(),
     });
@@ -131,7 +131,13 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async createUser(username: string, password: string, policies: string[], token: string, realmId?: string) {
+  async createUser(
+    username: string,
+    password: string,
+    policies: string[],
+    _token: string,
+    realmId?: string,
+  ) {
     const path = realmId
       ? `/v1/realm/${realmId}/auth/userpass/users/${username}`
       : `/v1/auth/userpass/users/${username}`;
@@ -169,7 +175,7 @@ export class VaultAPIClient {
     return await response.json();
   }
 
-  async createPolicy(name: string, policy: string, token: string) {
+  async createPolicy(name: string, policy: string, _token: string) {
     const response = await this.request.post(`${this.baseURL}/v1/sys/policies/acl/${name}`, {
       headers: this.headers(),
       data: {
@@ -188,7 +194,7 @@ export class VaultAPIClient {
 export function createVaultClient(
   request: APIRequestContext,
   baseURL: string,
-  token?: string
+  token?: string,
 ): VaultAPIClient {
   return new VaultAPIClient(request, baseURL, token);
 }

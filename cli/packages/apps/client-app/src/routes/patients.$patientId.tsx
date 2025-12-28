@@ -191,10 +191,7 @@ function PatientDetailComponentInner() {
               variant="outline"
               className="w-full justify-start"
               aria-label={t("patients.actions.createNote")}
-              onClick={() => {
-                // In a real app, this would open a note creation form
-                console.log("New note clicked");
-              }}
+              onClick={() => {}}
             >
               <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
               {t("quickActions.createClinicalNote")}
@@ -204,9 +201,7 @@ function PatientDetailComponentInner() {
               variant="outline"
               className="w-full justify-start"
               aria-label={t("patients.actions.scheduleAppointment")}
-              onClick={() => {
-                console.log("Schedule clicked");
-              }}
+              onClick={() => {}}
             >
               <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
               {t("quickActions.scheduleAppointment")}
@@ -216,9 +211,7 @@ function PatientDetailComponentInner() {
               variant="outline"
               className="w-full justify-start"
               aria-label={t("patients.actions.viewResults")}
-              onClick={() => {
-                console.log("View results clicked");
-              }}
+              onClick={() => {}}
             >
               <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
               {t("results.title")}
@@ -228,9 +221,7 @@ function PatientDetailComponentInner() {
               variant="outline"
               className="w-full justify-start"
               aria-label={t("patients.actions.viewMedications")}
-              onClick={() => {
-                console.log("Medications clicked");
-              }}
+              onClick={() => {}}
             >
               <Pill className="mr-2 h-4 w-4" aria-hidden="true" />
               {t("orders.medications")}

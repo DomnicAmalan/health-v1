@@ -44,7 +44,7 @@ export default defineConfig({
   outDir: "dist",
   outExtension() {
     return {
-      js: `.js`,
+      js: ".js",
     };
   },
 });

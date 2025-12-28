@@ -34,7 +34,13 @@ interface WizardStep {
   completed: boolean;
 }
 
-export function SetupWizard({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function SetupWizard({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const navigate = useNavigate();
   const { currentRealm, isGlobalMode } = useRealmStore();
   const [steps, setSteps] = useState<WizardStep[]>([
@@ -85,9 +91,7 @@ export function SetupWizard({ open, onOpenChange }: { open: boolean; onOpenChang
 
   // Update step completion status
   const updateStepCompletion = useCallback((stepId: string, completed: boolean) => {
-    setSteps((prev) =>
-      prev.map((step) => (step.id === stepId ? { ...step, completed } : step)),
-    );
+    setSteps((prev) => prev.map((step) => (step.id === stepId ? { ...step, completed } : step)));
   }, []);
 
   const handleNext = () => {
@@ -106,8 +110,10 @@ export function SetupWizard({ open, onOpenChange }: { open: boolean; onOpenChang
   };
 
   const handleGoToStep = () => {
-    navigate({ to: currentStepData.route });
-    onOpenChange(false);
+    if (currentStepData) {
+      navigate({ to: currentStepData.route });
+      onOpenChange(false);
+    }
   };
 
   const handleSkip = () => {
@@ -314,8 +320,8 @@ export function SetupWizard({ open, onOpenChange }: { open: boolean; onOpenChang
             </Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleGoToStep}>
-              Go to {currentStepData.title}
+            <Button variant="outline" onClick={handleGoToStep} disabled={!currentStepData}>
+              Go to {currentStepData?.title}
             </Button>
             {currentStep < steps.length - 1 ? (
               <Button onClick={handleNext}>
@@ -331,5 +337,3 @@ export function SetupWizard({ open, onOpenChange }: { open: boolean; onOpenChang
     </Dialog>
   );
 }
-
-

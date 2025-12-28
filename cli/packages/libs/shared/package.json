@@ -3,102 +3,37 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./api": {
-      "types": "./dist/api/index.d.ts",
-      "default": "./dist/api/index.js"
-    },
-    "./api/config": {
-      "types": "./dist/api/config.d.ts",
-      "default": "./dist/api/config.js"
-    },
-    "./api/routes": {
-      "types": "./dist/api/routes.d.ts",
-      "default": "./dist/api/routes.js"
-    },
-    "./api/types": {
-      "types": "./dist/api/types.d.ts",
-      "default": "./dist/api/types.js"
-    },
-    "./constants": {
-      "types": "./dist/constants/index.d.ts",
-      "default": "./dist/constants/index.js"
-    },
-    "./constants/fields": {
-      "types": "./dist/constants/fields.d.ts",
-      "default": "./dist/constants/fields.js"
-    },
-    "./constants/oidc": {
-      "types": "./dist/constants/oidc.d.ts",
-      "default": "./dist/constants/oidc.js"
-    },
-    "./constants/permissions": {
-      "types": "./dist/constants/permissions.d.ts",
-      "default": "./dist/constants/permissions.js"
-    },
-    "./constants/security": {
-      "types": "./dist/constants/security.d.ts",
-      "default": "./dist/constants/security.js"
-    },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "default": "./dist/types/index.js"
-    },
-    "./types/user": {
-      "types": "./dist/types/user.d.ts",
-      "default": "./dist/types/user.js"
-    },
-    "./types/stores": {
-      "types": "./dist/types/stores/index.d.ts",
-      "default": "./dist/types/stores/index.js"
-    },
-    "./types/components": {
-      "types": "./dist/types/components/registry.d.ts",
-      "default": "./dist/types/components/registry.js"
-    },
-    "./types/components/registry": {
-      "types": "./dist/types/components/registry.d.ts",
-      "default": "./dist/types/components/registry.js"
-    },
-    "./i18n": {
-      "types": "./dist/i18n/index.d.ts",
-      "default": "./dist/i18n/index.js"
-    },
-    "./i18n/context": {
-      "types": "./dist/i18n/context.d.ts",
-      "default": "./dist/i18n/context.js"
-    },
-    "./i18n/useTranslation": {
-      "types": "./dist/i18n/useTranslation.d.ts",
-      "default": "./dist/i18n/useTranslation.js"
-    },
-    "./i18n/TranslationProvider": {
-      "types": "./dist/i18n/TranslationProvider.d.ts",
-      "default": "./dist/i18n/TranslationProvider.js"
-    },
+    ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./api/config": "./src/api/config.ts",
+    "./api/routes": "./src/api/routes.ts",
+    "./api/types": "./src/api/types.ts",
+    "./constants": "./src/constants/index.ts",
+    "./constants/fields": "./src/constants/fields.ts",
+    "./constants/oidc": "./src/constants/oidc.ts",
+    "./constants/permissions": "./src/constants/permissions.ts",
+    "./constants/security": "./src/constants/security.ts",
+    "./types": "./src/types/index.ts",
+    "./types/user": "./src/types/user.ts",
+    "./types/stores": "./src/types/stores/index.ts",
+    "./types/components": "./src/types/components/registry.ts",
+    "./types/components/registry": "./src/types/components/registry.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./i18n/context": "./src/i18n/context.ts",
+    "./i18n/useTranslation": "./src/i18n/useTranslation.ts",
+    "./i18n/TranslationProvider": "./src/i18n/TranslationProvider.ts",
+    "./vault": "./src/vault/index.ts",
+    "./query": "./src/query/index.ts",
     "./styles/base.css": "./src/styles/base.css",
-    "./styles/tailwind.config": {
-      "types": "./dist/styles/tailwind.config.d.ts",
-      "default": "./src/styles/tailwind.config.ts"
-    },
-    "./styles/postcss.config": "./src/styles/postcss.config.js",
-    "./vault": {
-      "types": "./dist/vault/index.d.ts",
-      "default": "./dist/vault/index.js"
-    },
-    "./query": {
-      "types": "./dist/query/index.d.ts",
-      "default": "./dist/query/index.js"
-    }
+    "./styles/tailwind.config": "./src/styles/tailwind.config.ts",
+    "./styles/postcss.config": "./src/styles/postcss.config.js"
   },
   "scripts": {
     "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },

@@ -25,16 +25,22 @@ export function useCanvasResize({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
   const snap = (value: number) => {
-    if (!snapToGrid) return value;
+    if (!snapToGrid) {
+      return value;
+    }
     return Math.round(value / gridSize) * gridSize;
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!resizingField || !canvasRef.current) return;
+      if (!(resizingField && canvasRef.current)) {
+        return;
+      }
 
       const field = fields.find((f) => f.id === resizingField);
-      if (!field) return;
+      if (!field) {
+        return;
+      }
 
       const deltaX = e.clientX - resizeStart.x;
       const deltaY = e.clientY - resizeStart.y;
@@ -62,10 +68,14 @@ export function useCanvasResize({
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!resizingGroup || !canvasRef.current) return;
+      if (!(resizingGroup && canvasRef.current)) {
+        return;
+      }
 
       const group = groups.find((g) => g.id === resizingGroup);
-      if (!group) return;
+      if (!group) {
+        return;
+      }
 
       const deltaX = e.clientX - resizeStart.x;
       const deltaY = e.clientY - resizeStart.y;
@@ -102,7 +112,9 @@ export function useCanvasResize({
     e.preventDefault();
     e.stopPropagation();
     const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     setResizingField(fieldId);
     setResizeStart({
@@ -117,7 +129,9 @@ export function useCanvasResize({
     e.preventDefault();
     e.stopPropagation();
     const group = groups.find((g) => g.id === groupId);
-    if (!group) return;
+    if (!group) {
+      return;
+    }
 
     setResizingGroup(groupId);
     setResizeStart({

@@ -1,9 +1,9 @@
 import type { FieldType, FormConfig, FormFieldConfig } from "@lazarus-life/ui-components";
 import { Button, Card, CardContent, Checkbox, Input, Label } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
 import { FormBuilder } from "@/components/forms/builder";
-import { cn } from "@lazarus-life/ui-components/utils";
 /**
  * Visual Form Builder Playground
  * Drag-and-drop interface for building forms with live preview
@@ -78,7 +78,9 @@ export function FormPlayground() {
   // Import form config
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -86,9 +88,7 @@ export function FormPlayground() {
         const config = JSON.parse(e.target?.result as string) as FormConfig;
         setFormConfig(config);
         setFields(config.fields);
-      } catch (error) {
-        console.error("Error importing config:", error);
-      }
+      } catch (_error) {}
     };
     reader.readAsText(file);
   };
@@ -168,7 +168,7 @@ export function FormPlayground() {
                 Export
               </Button>
               <Label htmlFor="import-file" className="flex-1 cursor-pointer">
-                <Button variant="outline" size="sm" asChild className="w-full">
+                <Button variant="outline" size="sm" asChild={true} className="w-full">
                   <span>
                     <Upload className="h-3 w-3 mr-1" />
                     Import
@@ -225,8 +225,7 @@ export function FormPlayground() {
                       fields,
                     } as FormConfig
                   }
-                  onSubmit={(data: Record<string, unknown>) => {
-                    console.log("Form submitted:", data);
+                  onSubmit={(_data: Record<string, unknown>) => {
                     alert("Form submitted! Check console.");
                   }}
                   onCancel={() => setPreviewMode(false)}
@@ -408,7 +407,7 @@ export function FormPlayground() {
                 </Label>
                 <select
                   id="field-size"
-                  value={selectedFieldData.layout?.size || "md"}
+                  value={selectedFieldData.layout?.size > 0 || "md"}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     if (selectedField) {
                       updateField(selectedField, {
@@ -466,13 +465,13 @@ export function FormPlayground() {
                 >
                   <Checkbox
                     id="field-required"
-                    checked={selectedFieldData.validation?.required || false}
+                    checked={selectedFieldData.validation?.required}
                     onCheckedChange={(checked: boolean) => {
                       if (selectedField) {
                         updateField(selectedField, {
                           validation: {
                             ...selectedFieldData.validation,
-                            required: checked || false,
+                            required: checked,
                           },
                         });
                       }

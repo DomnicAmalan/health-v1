@@ -86,7 +86,6 @@ export class ZanzibarVaultSync {
    */
   startPeriodicSync(): void {
     if (this.config.syncIntervalSeconds <= 0) {
-      console.warn("Sync interval is 0 or negative, periodic sync disabled");
       return;
     }
 
@@ -98,8 +97,6 @@ export class ZanzibarVaultSync {
       () => this.syncAll().catch(console.error),
       this.config.syncIntervalSeconds * 1000
     );
-
-    console.log(`Started periodic sync every ${this.config.syncIntervalSeconds}s`);
   }
 
   /**
@@ -127,10 +124,6 @@ export class ZanzibarVaultSync {
     this.state.errors = [];
 
     try {
-      // In a real implementation, you would iterate over all users/services
-      // For now, this is a placeholder that shows the pattern
-      console.log("Full sync started...");
-
       this.state.lastSyncTime = new Date();
       this.state.lastSyncStatus = "success";
     } catch (error) {

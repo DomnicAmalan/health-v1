@@ -1,12 +1,5 @@
 import { PERMISSIONS, type Permission } from "@lazarus-life/shared/constants/permissions";
-import { Box, Container, Flex } from "@lazarus-life/ui-components";
-import {
-  createRootRoute,
-  Outlet,
-  redirect,
-  useLocation,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createRootRoute, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import {
   Activity,
@@ -22,9 +15,6 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
-import { ActionRibbon } from "@/components/ActionRibbon";
-import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
-import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
 import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChatbox";
 import { VoiceCommandFAB } from "@/components/accessibility/VoiceCommandFAB";
 import { VoiceCommandFeedback } from "@/components/accessibility/VoiceCommandFeedback";
@@ -36,7 +26,7 @@ import {
   MinimalLayout,
 } from "@/components/layout/Layouts";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
-import { initializeAccessibility, SkipToMainContent } from "@/lib/accessibility";
+import { initializeAccessibility } from "@/lib/accessibility";
 import { checkSetupStatus } from "@/lib/api/setup";
 import { getLayoutForRoute } from "@/lib/layouts/routeLayouts";
 import { useAuthStore } from "@/stores/authStore";
@@ -65,8 +55,6 @@ export const Route = createRootRoute({
       if (err && typeof err === "object" && "to" in err) {
         throw err;
       }
-      // If API is not available, allow access (for development)
-      console.warn("Could not check setup status:", err);
     }
 
     if (isPublicRoute) {
@@ -143,10 +131,8 @@ function RootComponentInner() {
   useEffect(() => {
     const authStore = useAuthStore.getState();
     // Only check if we don't already have auth state
-    if (!authStore.isAuthenticated && !authStore.isLoading) {
-      authStore.checkAuth().catch((error) => {
-        console.error("Auth initialization error:", error);
-      });
+    if (!(authStore.isAuthenticated || authStore.isLoading)) {
+      authStore.checkAuth().catch((_error) => {});
     }
   }, []);
 
@@ -196,7 +182,7 @@ function RootComponentInner() {
             path: tabData.path || location.pathname,
             icon: getIconForPath(tabData.path || location.pathname),
             closable: tabData.closable !== false && (tabData.path || location.pathname) !== "/",
-            allowDuplicate: tabData.allowDuplicate || false,
+            allowDuplicate: tabData.allowDuplicate,
           },
           (path) => navigate({ to: path as "/" | (string & {}) })
         );
@@ -210,8 +196,7 @@ function RootComponentInner() {
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete("_tab");
         window.history.replaceState({}, "", newUrl.toString());
-      } catch (err) {
-        console.error("Error restoring standalone tab:", err);
+      } catch (_err) {
         // On error, try to clean up
         try {
           sessionStorage.removeItem(`_tab_${tabToken}`);
@@ -311,13 +296,9 @@ function RootComponentInner() {
       case "print":
       case "link-actions":
       case "view-templates":
-        // These actions would typically navigate or open modals
-        // For now, we'll log them - you can implement specific handlers
-        console.log(`Action: ${actionId} for path: ${tabPath}`);
         // Example: You could dispatch an event or call a callback here
         break;
       default:
-        console.log(`Unknown action: ${actionId}`);
     }
   };
 
@@ -432,7 +413,9 @@ function RootComponentInner() {
   const navigationItems = useMemo(() => {
     const state = useAuthStore.getState();
     return allNavigationItems.filter((item) => {
-      if (!item.permission) return true; // No permission required
+      if (!item.permission) {
+        return true; // No permission required
+      }
       return state.permissions.includes(item.permission);
     });
   }, [allNavigationItems]); // Filter based on navigation items and permissions

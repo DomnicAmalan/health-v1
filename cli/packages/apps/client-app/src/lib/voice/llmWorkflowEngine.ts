@@ -8,10 +8,9 @@ import { getComponentConfig } from "@/components/ui/component-registry";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 import { getActionExecutor } from "./actionExecutor";
-import { getTextToSpeechEngine, getVoiceCommandEngine } from "./voiceCommandEngine";
+import { getTextToSpeechEngine } from "./voiceCommandEngine";
 import { type BuiltWorkflow, getWorkflowBuilder, type WorkflowContext } from "./workflowBuilder";
 import { getWorkflowExecutor } from "./workflowExecutor";
-import { getAvailableActionsDescription, getWorkflowPrompt } from "./workflowI18n";
 
 export interface LLMWorkflowContext {
   componentId: string;
@@ -138,7 +137,7 @@ export class LLMWorkflowEngine {
 
   public async executeFormFillingWorkflow(componentId: string): Promise<void> {
     const component = getComponentConfig(componentId);
-    if (!component || !component.componentStructure) {
+    if (!component?.componentStructure) {
       throw new Error("Component not found or does not have structure");
     }
 
@@ -177,7 +176,7 @@ export class LLMWorkflowEngine {
     // Process each field
     for (let i = 0; i < structure.fields.length; i++) {
       const field = structure.fields[i];
-      const prompt = this.buildFieldPrompt(field, structure.fields);
+      const _prompt = this.buildFieldPrompt(field, structure.fields);
 
       // Ask for field value
       const question = field.placeholder || `What is your ${field.label}?`;

@@ -9,13 +9,15 @@ import type { ApiResponse, RequestConfig } from "./types";
 
 const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token";
 const TOKEN_STORAGE_KEY_REFRESH = "auth_refresh_token";
-const refreshPromise: Promise<string> | null = null;
+const _refreshPromise: Promise<string> | null = null;
 
 /**
  * Store tokens in sessionStorage (more secure than localStorage - cleared on tab close)
  */
 export function setTokens(access: string | null, refresh: string | null) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   if (access) {
     sessionStorage.setItem(TOKEN_STORAGE_KEY_ACCESS, access);
@@ -34,7 +36,9 @@ export function setTokens(access: string | null, refresh: string | null) {
  * Get access token from sessionStorage
  */
 export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
   return sessionStorage.getItem(TOKEN_STORAGE_KEY_ACCESS);
 }
 
@@ -42,7 +46,9 @@ export function getAccessToken(): string | null {
  * Get refresh token from sessionStorage
  */
 export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
   return sessionStorage.getItem(TOKEN_STORAGE_KEY_REFRESH);
 }
 
@@ -50,14 +56,18 @@ export function getRefreshToken(): string | null {
  * Detect device type from user agent
  */
 function detectDeviceType(): string {
-  if (typeof window === "undefined") return "web";
+  if (typeof window === "undefined") {
+    return "web";
+  }
 
   const ua = navigator.userAgent.toLowerCase();
   if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
     return "mobile";
-  } else if (ua.includes("tablet") || ua.includes("ipad")) {
+  }
+  if (ua.includes("tablet") || ua.includes("ipad")) {
     return "tablet";
-  } else if (
+  }
+  if (
     ua.includes("desktop") ||
     ua.includes("windows") ||
     ua.includes("mac") ||
@@ -103,7 +113,7 @@ export async function requestInterceptor(
  */
 export async function responseInterceptor<T>(
   response: Response,
-  url: string
+  _url: string
 ): Promise<ApiResponse<T>> {
   // Handle 401 Unauthorized - session expired or invalid
   if (response.status === 401) {
@@ -114,8 +124,6 @@ export async function responseInterceptor<T>(
 
   // Handle 403 Forbidden - log and show access denied
   if (response.status === 403) {
-    // Log unauthorized access attempt
-    console.warn("Access denied:", url);
     // This would trigger audit logging
     throw new Error("Access denied");
   }
@@ -138,8 +146,6 @@ export async function responseInterceptor<T>(
 
   // Log PHI access for audit
   if (SECURITY_CONFIG.AUDIT.LOG_PHI_ACCESS) {
-    // This would send to audit log
-    console.debug("PHI access logged:", url);
   }
 
   return {
@@ -150,7 +156,7 @@ export async function responseInterceptor<T>(
 /**
  * Error interceptor - sanitizes error messages, removes PHI
  */
-export function errorInterceptor(error: unknown, url: string): ApiError {
+export function errorInterceptor(error: unknown, _url: string): ApiError {
   // Sanitize error messages to remove any PHI
   let message = "An error occurred";
   let code: string | undefined;
@@ -165,9 +171,6 @@ export function errorInterceptor(error: unknown, url: string): ApiError {
     code = error.status.toString();
     message = `HTTP ${error.status}: ${error.statusText}`;
   }
-
-  // Log error securely (masked)
-  console.error("API Error:", { url, code, message: sanitizeErrorMessage(message) });
 
   return {
     message,

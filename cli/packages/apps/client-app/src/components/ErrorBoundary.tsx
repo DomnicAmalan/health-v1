@@ -27,13 +27,8 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error securely (sanitized, no PHI)
-    console.error("Error caught by boundary:", {
-      message: this.sanitizeError(error.message),
-      stack: error.stack ? this.sanitizeError(error.stack) : undefined,
-      componentStack: errorInfo.componentStack,
-    });
+  override componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
+    // Error logging can be added here
   }
 
   sanitizeError(message: string): string {
@@ -56,7 +51,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

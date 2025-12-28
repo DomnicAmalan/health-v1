@@ -27,7 +27,9 @@ export function CanvasPropertyPanel({
   onRemoveGroup,
   onRemoveSection,
 }: CanvasPropertyPanelProps) {
-  if (!selectedField && !selectedGroup && !selectedSection) return null;
+  if (!(selectedField || selectedGroup || selectedSection)) {
+    return null;
+  }
 
   return (
     <Box className="w-80 border-l bg-white">

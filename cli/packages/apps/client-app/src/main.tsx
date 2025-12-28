@@ -1,11 +1,11 @@
 import { ClientTranslationProvider } from "@lazarus-life/shared/i18n";
+import { createQueryClient } from "@lazarus-life/shared/query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { initializeAxe } from "./lib/accessibility/axe";
 import { validateEnv } from "./lib/env";
-import { createQueryClient } from "@lazarus-life/shared/query";
 import Router from "./router.tsx";
 import "./index.css";
 
@@ -16,7 +16,7 @@ validateEnv();
 initializeAxe();
 
 // Create a client
-const queryClient = createQueryClient();
+const _queryClient = createQueryClient();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

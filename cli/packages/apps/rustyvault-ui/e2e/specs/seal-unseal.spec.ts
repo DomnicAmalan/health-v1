@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/vault";
+import { expect, test } from "../fixtures/vault";
 
 test.describe("Seal/Unseal Operations", () => {
   test("should unseal vault with keys", async ({ page, initializedVault, unsealVault, apiURL }) => {
@@ -25,7 +25,7 @@ test.describe("Seal/Unseal Operations", () => {
       await page.locator('button:has-text("Unseal")').click();
 
       // Should show progress
-      await expect(page.locator('text=/.*[0-9]+\\/[0-9]+.*/')).toBeVisible();
+      await expect(page.locator("text=/.*[0-9]+\\/[0-9]+.*/")).toBeVisible();
     }
   });
 

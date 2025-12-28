@@ -21,9 +21,6 @@ function validateField(
 ): ValidationError | null {
   // Check immutability
   if (fieldDef.immutable && value !== undefined && value !== null) {
-    // In a real implementation, we'd check if this is an update vs create
-    // For now, we'll just log a warning
-    console.warn(`Attempted to modify immutable field: ${fieldName}`);
   }
 
   // Type validation
@@ -111,7 +108,6 @@ export function validationMiddleware<T>(
         const errors = validateObject(dataToValidate, entityType);
 
         if (errors.length > 0) {
-          console.error("Validation errors:", errors);
           // In a production system, you might want to throw an error or return early
           // For now, we'll log and continue
           // throw new Error(`Validation failed: ${errors.map(e => e.message).join(', ')}`);

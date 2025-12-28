@@ -26,7 +26,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
   // Optimized tab sorting: Dashboard always first, all others in reverse order (newest first)
   // Uses efficient single-pass algorithm
   const sortedTabs = useMemo(() => {
-    if (tabs.length === 0) return [];
+    if (tabs.length === 0) {
+      return [];
+    }
 
     // Single pass to separate dashboard and other tabs
     let dashboard: (typeof tabs)[0] | undefined;
@@ -34,7 +36,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
 
     for (let i = 0; i < tabs.length; i++) {
       const tab = tabs[i];
-      if (!tab) continue;
+      if (!tab) {
+        continue;
+      }
       if (tab.path === "/" || tab.id === DASHBOARD_ID) {
         dashboard = tab;
       } else {
@@ -103,7 +107,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
           className="items-center gap-1 px-2 py-1 overflow-x-auto scrollbar-hide flex-1 min-w-0"
         >
           {sortedTabs.map((tab) => {
-            if (!tab) return null;
+            if (!tab) {
+              return null;
+            }
             const isDashboard = tab.id === DASHBOARD_ID || tab.path === "/";
             const isDragging = draggedTabId === tab.id;
 
@@ -182,7 +188,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
           dragPosition &&
           (() => {
             const draggedTab = sortedTabs.find((t) => t && t.id === draggedTabId);
-            if (!draggedTab) return null;
+            if (!draggedTab) {
+              return null;
+            }
 
             return (
               <TabDragPreview

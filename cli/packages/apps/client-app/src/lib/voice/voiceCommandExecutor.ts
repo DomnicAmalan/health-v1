@@ -3,7 +3,6 @@
  * Execute voice commands by finding and triggering component actions
  */
 
-import { getComponentConfig } from "@/components/ui/component-registry";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { useTabStore } from "@/stores/tabStore";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
@@ -11,7 +10,6 @@ import { getActionExecutor } from "./actionExecutor";
 import { getLLMWorkflowEngine } from "./llmWorkflowEngine";
 import { getTextToSpeechEngine } from "./voiceCommandEngine";
 import type { VoiceIntent } from "./voiceCommandParser";
-import { getWorkflowBuilder } from "./workflowBuilder";
 
 export class VoiceCommandExecutor {
   private tts: ReturnType<typeof getTextToSpeechEngine>;
@@ -91,11 +89,10 @@ export class VoiceCommandExecutor {
       if (formComponent) {
         await this.llmEngine.executeFormFillingWorkflow(formComponent.componentId);
         return true;
-      } else {
-        // Use workflow builder to create dynamic workflow
-        await this.llmEngine.createAndExecuteWorkflow("fill the form");
-        return true;
       }
+      // Use workflow builder to create dynamic workflow
+      await this.llmEngine.createAndExecuteWorkflow("fill the form");
+      return true;
     } catch (error) {
       this.speak(`Error filling form: ${error instanceof Error ? error.message : "Unknown error"}`);
       return false;
@@ -120,10 +117,9 @@ export class VoiceCommandExecutor {
       if (result.success) {
         this.speak(`Executed ${match.action.label}.`);
         return true;
-      } else {
-        this.speak(`Failed to execute ${buttonName}: ${result.error}`);
-        return false;
       }
+      this.speak(`Failed to execute ${buttonName}: ${result.error}`);
+      return false;
     }
 
     // Fallback to generic message
@@ -298,12 +294,11 @@ export class VoiceCommandExecutor {
 
       this.speak(`Navigating to ${route.label}.`);
       return true;
-    } else {
-      this.speak(
-        `I couldn't find a route for "${target}". Please try saying "go to patients" or "open dashboard".`
-      );
-      return false;
     }
+    this.speak(
+      `I couldn't find a route for "${target}". Please try saying "go to patients" or "open dashboard".`
+    );
+    return false;
   }
 
   private async executeOpenModal(modalName: string): Promise<boolean> {

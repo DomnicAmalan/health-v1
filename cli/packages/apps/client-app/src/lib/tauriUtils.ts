@@ -46,7 +46,7 @@ export async function openNewWindow(
         height: options?.height || 800,
         x: options?.x,
         y: options?.y,
-        center: !options?.x || !options?.y, // Center if position not specified
+        center: !(options?.x && options?.y), // Center if position not specified
         resizable: true,
         minimizable: true,
         maximizable: true,
@@ -72,8 +72,7 @@ export async function openNewWindow(
         },
       };
       return mockWindow as Window;
-    } catch (error) {
-      console.error("Error creating Tauri window:", error);
+    } catch (_error) {
       return null;
     }
   } else {

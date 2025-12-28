@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useVaultStore } from "./store";
-import type { VaultCapability, VaultSecret } from "./types";
+import type { VaultCapability } from "./types";
 
 /**
  * Hook for checking vault capabilities on a path
@@ -65,7 +65,9 @@ export function useVaultSecret<T = Record<string, unknown>>(
   const enabled = options?.enabled !== false;
 
   const refetch = useCallback(async () => {
-    if (!isAuthenticated || !enabled) return;
+    if (!(isAuthenticated && enabled)) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -140,14 +142,16 @@ export function useVaultSecretMutation(mount: string) {
 /**
  * Hook for listing secrets in a path
  */
-export function useVaultSecretList(mount: string, path: string = "") {
+export function useVaultSecretList(mount: string, path = "") {
   const { client, isAuthenticated } = useVaultStore();
   const [keys, setKeys] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const refetch = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      return;
+    }
 
     setLoading(true);
     setError(null);

@@ -111,18 +111,18 @@ export function trapFocus(container: HTMLElement) {
   const lastElement = focusableElements[focusableElements.length - 1];
 
   function handleTabKey(e: KeyboardEvent) {
-    if (e.key !== "Tab") return;
+    if (e.key !== "Tab") {
+      return;
+    }
 
     if (e.shiftKey) {
       if (document.activeElement === firstElement) {
         e.preventDefault();
         lastElement?.focus();
       }
-    } else {
-      if (document.activeElement === lastElement) {
-        e.preventDefault();
-        firstElement?.focus();
-      }
+    } else if (document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement?.focus();
     }
   }
 
@@ -145,7 +145,9 @@ export function getErrorMessage(fieldName: string, error: string): string {
  * High contrast mode detection
  */
 export function prefersHighContrast(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") {
+    return false;
+  }
   return window.matchMedia("(prefers-contrast: high)").matches;
 }
 
@@ -153,7 +155,9 @@ export function prefersHighContrast(): boolean {
  * Reduced motion detection
  */
 export function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") {
+    return false;
+  }
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 

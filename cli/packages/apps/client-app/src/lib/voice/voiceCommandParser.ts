@@ -3,8 +3,6 @@
  * Parse voice commands to intents and actions
  */
 
-import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
-
 export interface VoiceIntent {
   type: string;
   action: string;
@@ -67,7 +65,7 @@ export class VoiceCommandParser {
   }
 
   public parse(command: string): VoiceIntent | null {
-    const normalizedCommand = command.trim().toLowerCase();
+    const _normalizedCommand = command.trim().toLowerCase();
 
     // Try to match against known intents
     for (const [intentType, pattern] of this.intents.entries()) {

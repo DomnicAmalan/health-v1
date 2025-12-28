@@ -3,7 +3,6 @@
  * Tests for route navigation and permission-based access
  */
 
-import { PERMISSIONS } from "../../src/lib/constants/permissions";
 import { expect, test } from "../fixtures/auth";
 
 test.describe("Navigation", () => {
@@ -112,7 +111,7 @@ test.describe("Navigation", () => {
       // This test may pass or fail depending on your permission implementation
       // Adjust expectations based on your actual behavior
       expect(isAccessDenied || page.url().includes("/settings")).toBeTruthy();
-    } catch (error) {
+    } catch (_error) {
       // Skip if test user doesn't exist
       test.skip();
     }
@@ -127,7 +126,7 @@ test.describe("Navigation", () => {
     const sidebar = authenticatedPage
       .locator('[data-testid="sidebar"], nav, aside, [role="navigation"]')
       .first();
-    const isSidebarVisible = await sidebar.isVisible().catch(() => false);
+    const _isSidebarVisible = await sidebar.isVisible().catch(() => false);
 
     // Sidebar may or may not be visible depending on your UI
     // This is just a basic check

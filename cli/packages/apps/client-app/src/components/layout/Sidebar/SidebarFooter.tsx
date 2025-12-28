@@ -8,7 +8,9 @@ interface SidebarFooterProps {
 export function SidebarFooter({ isCollapsed }: SidebarFooterProps) {
   const { t } = useTranslation();
 
-  if (isCollapsed) return null;
+  if (isCollapsed) {
+    return null;
+  }
 
   return (
     <Box className="p-4 border-t shrink-0">

@@ -4,11 +4,9 @@
  * Discovers actions from component registry and builds workflows on-the-fly
  */
 
-import { getComponentConfig } from "@/components/ui/component-registry";
-import { getTranslation } from "@/lib/i18n";
 import { useAccessibilityStore } from "@/stores/accessibilityStore";
 import { type ActionMetadata, getActionExecutor } from "./actionExecutor";
-import { type WorkflowDefinition, type WorkflowResult, workflowRegistry } from "./workflowRegistry";
+import type { WorkflowDefinition, WorkflowResult } from "./workflowRegistry";
 
 export interface WorkflowContext {
   currentPage?: string;
@@ -171,8 +169,7 @@ Return ONLY valid JSON array of workflow steps.`,
       // Parse LLM response
       const parsed = JSON.parse(content);
       return parsed.steps || this.createWorkflowStepsFallback(context);
-    } catch (error) {
-      console.error("LLM workflow creation error:", error);
+    } catch (_error) {
       return this.createWorkflowStepsFallback(context);
     }
   }
@@ -228,7 +225,7 @@ Return JSON in format: { "steps": [ { "id": "step1", "type": "action", "actionId
     userCommand: string;
     availableActions: ActionMetadata[];
   }): WorkflowStep[] {
-    const normalizedCommand = context.userCommand.toLowerCase();
+    const _normalizedCommand = context.userCommand.toLowerCase();
     const steps: WorkflowStep[] = [];
 
     // Try to find matching action
@@ -264,15 +261,15 @@ Return JSON in format: { "steps": [ { "id": "step1", "type": "action", "actionId
 
     for (const step of workflow.steps) {
       if (step.type === "action") {
-        if (!step.actionId || !step.componentId) {
-          errors.push(`Step ${step.id} is missing actionId or componentId`);
-        } else {
+        if (step.actionId && step.componentId) {
           const isValid = this.actionExecutor.validateAction(step.actionId, step.componentId);
           if (!isValid) {
             errors.push(
               `Step ${step.id}: Action ${step.actionId} is not valid for component ${step.componentId}`
             );
           }
+        } else {
+          errors.push(`Step ${step.id} is missing actionId or componentId`);
         }
       }
     }
@@ -324,8 +321,6 @@ Return JSON in format: { "steps": [ { "id": "step1", "type": "action", "actionId
               // Use text-to-speech if available
               const preferences = useAccessibilityStore.getState().preferences;
               if (preferences.voiceCommandsFeedback) {
-                // Would use TTS here
-                console.log("Speak:", step.message);
               }
             }
             break;

@@ -1,7 +1,6 @@
 import { Menu } from "@base-ui/react/menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
-import { Slot } from "../lib/slot";
 import { cn } from "../lib/utils";
 
 const DropdownMenu = Menu.Root;

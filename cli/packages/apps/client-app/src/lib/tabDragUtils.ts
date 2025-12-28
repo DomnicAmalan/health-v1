@@ -21,14 +21,18 @@ export function calculateInsertionIndex({
   sortedTabsRef,
 }: CalculateInsertionIndexOptions): number {
   const container = scrollContainerRef.current;
-  if (!container) return 0;
+  if (!container) {
+    return 0;
+  }
 
   const containerRect = container.getBoundingClientRect();
 
   // Get all tab elements in DOM order (including dashboard)
   const allTabElements = Array.from(container.querySelectorAll<HTMLElement>("[data-tab-id]"));
 
-  if (allTabElements.length === 0) return 0;
+  if (allTabElements.length === 0) {
+    return 0;
+  }
 
   // Separate dashboard and non-dashboard tabs
   const dashboardElement = allTabElements.find(
@@ -38,7 +42,9 @@ export function calculateInsertionIndex({
     (el) => el.getAttribute("data-tab-id") !== DASHBOARD_ID
   );
 
-  if (nonDashboardElements.length === 0) return 0;
+  if (nonDashboardElements.length === 0) {
+    return 0;
+  }
 
   // Calculate mouse X position relative to container (accounting for scroll)
   const mouseX = e.clientX - containerRect.left + container.scrollLeft;
@@ -73,7 +79,9 @@ export function calculateInsertionIndex({
   // Find which tab the mouse is over or between
   for (let i = 0; i < nonDashboardElements.length; i++) {
     const element = nonDashboardElements[i];
-    if (!element) continue;
+    if (!element) {
+      continue;
+    }
     const rect = element.getBoundingClientRect();
     const relativeLeft = rect.left - containerRect.left + container.scrollLeft - dashboardWidth;
     const relativeRight = rect.right - containerRect.left + container.scrollLeft - dashboardWidth;
@@ -95,11 +103,13 @@ export function calculateInsertionIndex({
         targetIndex = actualTabIndex + 1;
       }
       break;
-    } else if (adjustedMouseX < relativeLeft && i === 0) {
+    }
+    if (adjustedMouseX < relativeLeft && i === 0) {
       // Mouse is before first tab
       targetIndex = actualTabIndex;
       break;
-    } else if (i < nonDashboardElements.length - 1) {
+    }
+    if (i < nonDashboardElements.length - 1) {
       // Check if mouse is between this tab and the next
       const nextElement = nonDashboardElements[i + 1];
       if (nextElement) {

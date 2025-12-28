@@ -1,11 +1,5 @@
 import { useTranslation } from "@lazarus-life/shared/i18n";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Stack,
-} from "@lazarus-life/ui-components";
+import { Card, CardDescription, CardHeader, CardTitle, Stack } from "@lazarus-life/ui-components";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, FileText, Globe, Shield } from "lucide-react";
 
@@ -15,29 +9,25 @@ export function ComplianceIndexPage() {
   const modules = [
     {
       title: t("compliance.regulations.title"),
-      description: t(
-        "compliance.regulations.description"),
+      description: t("compliance.regulations.description"),
       icon: FileText,
       link: "/compliance/regulations",
     },
     {
       title: t("compliance.geographicRegions.title"),
-      description: t(
-        "compliance.geographicRegions.description"),
+      description: t("compliance.geographicRegions.description"),
       icon: Globe,
       link: "/compliance/geographic-regions",
     },
     {
       title: t("compliance.detection.title"),
-      description: t(
-        "compliance.detection.description"),
+      description: t("compliance.detection.description"),
       icon: Shield,
       link: "/compliance/detection",
     },
     {
       title: t("compliance.training.title"),
-      description: t(
-        "compliance.training.description"),
+      description: t("compliance.training.description"),
       icon: BookOpen,
       link: "/compliance/training",
     },
@@ -47,9 +37,7 @@ export function ComplianceIndexPage() {
     <Stack spacing="lg">
       <Stack spacing="xs">
         <h1 className="text-3xl font-bold">{t("compliance.title")}</h1>
-        <p className="text-muted-foreground">
-          {t("compliance.description")}
-        </p>
+        <p className="text-muted-foreground">{t("compliance.description")}</p>
       </Stack>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

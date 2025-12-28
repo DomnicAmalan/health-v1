@@ -3,7 +3,7 @@
  * Different layout configurations for different route types
  */
 
-import { Box, Container, Flex } from "@lazarus-life/ui-components";
+import { Container, Flex } from "@lazarus-life/ui-components";
 import { Outlet } from "@tanstack/react-router";
 import { ActionRibbon } from "@/components/ActionRibbon";
 import { Sidebar } from "@/components/layout/Sidebar";

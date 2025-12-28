@@ -6,9 +6,6 @@ import {
   Eye,
   Grid3x3,
   GripVertical,
-  Maximize2,
-  Move,
-  Plus,
   Settings,
   Trash2,
   Upload,
@@ -145,7 +142,9 @@ export function FormPlaygroundWithResizer({
   // Duplicate field
   const duplicateField = (fieldId: string) => {
     const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
+    if (!field) {
+      return;
+    }
     const newField: FormField = {
       ...field,
       id: `field-${Date.now()}`,
@@ -178,10 +177,14 @@ export function FormPlaygroundWithResizer({
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    if (!draggedField) return;
+    if (!draggedField) {
+      return;
+    }
 
     const draggedIndex = fields.findIndex((f) => f.id === draggedField);
-    if (draggedIndex === -1) return;
+    if (draggedIndex === -1) {
+      return;
+    }
 
     const newFields = [...fields];
     const [removed] = newFields.splice(draggedIndex, 1);
@@ -199,14 +202,18 @@ export function FormPlaygroundWithResizer({
     e.preventDefault();
     e.stopPropagation();
     const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     setResizingField(fieldId);
     setResizeStartX(e.clientX);
     setResizeStartColSpan(field.layout?.colSpan || 12);
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!resizingField) return;
+      if (!resizingField) {
+        return;
+      }
       const deltaX = moveEvent.clientX - resizeStartX;
       const pixelsPerColumn = 50; // Approximate pixels per column
       const columnDelta = Math.round(deltaX / pixelsPerColumn);
@@ -248,7 +255,9 @@ export function FormPlaygroundWithResizer({
 
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -256,8 +265,7 @@ export function FormPlaygroundWithResizer({
         const config = JSON.parse(e.target?.result as string) as FormConfig;
         setFormConfig(config);
         setFields(config.fields);
-      } catch (error) {
-        console.error("Error importing config:", error);
+      } catch (_error) {
         alert("Error importing form config. Please check the file format.");
       }
     };
@@ -290,9 +298,7 @@ export function MyForm() {
       await navigator.clipboard.writeText(generateCode());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
+    } catch (_error) {}
   };
 
   const selectedFieldData = fields.find((f) => f.id === selectedField);
@@ -388,7 +394,7 @@ export function MyForm() {
               Export JSON
             </Button>
             <label className="w-full">
-              <Button variant="outline" size="sm" asChild className="w-full">
+              <Button variant="outline" size="sm" asChild={true} className="w-full">
                 <span>
                   <Upload className="h-3 w-3 mr-2" />
                   Import JSON
@@ -469,7 +475,7 @@ export function MyForm() {
                       return (
                         <fieldset
                           key={field.id}
-                          draggable
+                          draggable={true}
                           onDragStart={(e) => handleDragStart(e, field.id)}
                           onDragOver={(e) => handleDragOver(e, index)}
                           onDragLeave={handleDragLeave}
@@ -607,8 +613,7 @@ export function MyForm() {
                         fields,
                       } as FormConfig
                     }
-                    onSubmit={(data: Record<string, unknown>) => {
-                      console.log("Form submitted:", data);
+                    onSubmit={(_data: Record<string, unknown>) => {
                       alert("Form submitted! Check console.");
                     }}
                     onCancel={() => setActiveTab("edit")}
@@ -719,7 +724,7 @@ export function MyForm() {
                   </Label>
                   <select
                     id="field-size"
-                    value={selectedFieldData.layout?.size || "md"}
+                    value={selectedFieldData.layout?.size ?? "md"}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       if (selectedField) {
                         updateField(selectedField, {

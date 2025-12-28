@@ -178,7 +178,9 @@ export function Sidebar() {
                       <span className="w-5 h-5 flex items-center justify-center shrink-0">
                         <Icon className="h-4 w-4" />
                       </span>
-                      {!sidebarCollapsed && <span className="ml-3 truncate">{t(item.nameKey)}</span>}
+                      {!sidebarCollapsed && (
+                        <span className="ml-3 truncate">{t(item.nameKey)}</span>
+                      )}
                     </Link>
                   </TooltipTrigger>
                   {sidebarCollapsed && (

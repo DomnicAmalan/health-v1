@@ -205,23 +205,29 @@ function CreateRegulationForm({ onSubmit, onCancel, isLoading }: CreateRegulatio
         <Input
           label={t("compliance.regulations.code")}
           value={formData.code}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, code: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFormData({ ...formData, code: e.target.value })
+          }
           placeholder="HIPAA"
-          required
+          required={true}
         />
         <Input
           label={t("compliance.regulations.name")}
           value={formData.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFormData({ ...formData, name: e.target.value })
+          }
           placeholder="Health Insurance Portability and Accountability Act"
-          required
+          required={true}
         />
         <Input
           label={t("compliance.regulations.issuingBody")}
           value={formData.issuing_body}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, issuing_body: e.target.value })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setFormData({ ...formData, issuing_body: e.target.value })
+          }
           placeholder="HHS"
-          required
+          required={true}
         />
       </Stack>
       <DialogFooter>

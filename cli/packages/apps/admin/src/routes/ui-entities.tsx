@@ -370,7 +370,9 @@ function PageButtonsSection({ page }: { page: UiPage }) {
 
   const buttons = buttonsResponse?.data?.buttons || [];
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="border rounded-lg p-4">
@@ -413,7 +415,9 @@ function PageFieldsSection({ page }: { page: UiPage }) {
 
   const fields = fieldsResponse?.data?.fields || [];
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="border rounded-lg p-4">

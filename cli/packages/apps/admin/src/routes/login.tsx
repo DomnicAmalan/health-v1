@@ -37,7 +37,7 @@ export function LoginPage() {
     setLocalError(null);
 
     // Basic validation
-    if (!email || !password) {
+    if (!(email && password)) {
       setLocalError(t("login.errors.emailPasswordRequired"));
       return;
     }
@@ -85,9 +85,9 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
-                  required
+                  required={true}
                   autoComplete="email"
-                  autoFocus
+                  autoFocus={true}
                 />
               </div>
 
@@ -100,7 +100,7 @@ export function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
-                  required
+                  required={true}
                   autoComplete="current-password"
                 />
               </div>

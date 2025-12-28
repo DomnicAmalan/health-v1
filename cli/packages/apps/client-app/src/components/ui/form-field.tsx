@@ -1,6 +1,6 @@
 import { Input, Label } from "@lazarus-life/ui-components";
-import type * as React from "react";
 import { cn } from "@lazarus-life/ui-components/utils";
+import type * as React from "react";
 
 export interface FormFieldProps {
   id: string;

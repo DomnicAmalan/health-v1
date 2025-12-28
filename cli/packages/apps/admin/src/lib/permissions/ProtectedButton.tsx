@@ -35,7 +35,7 @@ export function ProtectedButton({
     <Button
       {...buttonProps}
       disabled={disabled || !canAccess}
-      title={!canAccess ? tooltipDenied : buttonProps.title}
+      title={canAccess ? buttonProps.title : tooltipDenied}
     />
   );
 }

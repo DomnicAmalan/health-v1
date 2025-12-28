@@ -60,8 +60,7 @@ export function DekManagementPage() {
     const searchLower = searchQuery.toLowerCase();
     return (
       dek.user_id.toLowerCase().includes(searchLower) ||
-      dek.user_email?.toLowerCase().includes(searchLower) ||
-      false
+      dek.user_email?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -71,7 +70,9 @@ export function DekManagementPage() {
   };
 
   const handleRotate = () => {
-    if (!selectedUserId) return;
+    if (!selectedUserId) {
+      return;
+    }
     rotateMutation.mutate({
       user_id: selectedUserId,
       reason: rotateReason || undefined,
@@ -194,17 +195,14 @@ export function DekManagementPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <Input
-                label="User ID"
-                id="user-id"
-                value={selectedUserId}
-                disabled
-              />
+              <Input label="User ID" id="user-id" value={selectedUserId} disabled={true} />
               <Input
                 label="Reason (Optional)"
                 id="reason"
                 value={rotateReason}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRotateReason(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setRotateReason(e.target.value)
+                }
                 placeholder="e.g., Password reset, Security event"
               />
               <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">

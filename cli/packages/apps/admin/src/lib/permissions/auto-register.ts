@@ -15,22 +15,20 @@ export async function autoRegisterPage(
 ): Promise<void> {
   try {
     await registerPage({ name, path, description });
-    console.log(`Auto-registered page: ${name} (${path})`);
-  } catch (error) {
-    // Page might already be registered, which is fine
-    console.debug(`Page ${name} may already be registered:`, error);
-  }
+  } catch (_error) {}
 }
 
 /**
  * Auto-register buttons with data-permission attribute
  */
-export async function autoRegisterButtons(pageId: string, pageName: string): Promise<void> {
+export async function autoRegisterButtons(pageId: string, _pageName: string): Promise<void> {
   const buttons = document.querySelectorAll('[data-permission^="button:"]');
 
   for (const button of buttons) {
     const permissionAttr = button.getAttribute("data-permission");
-    if (!permissionAttr) continue;
+    if (!permissionAttr) {
+      continue;
+    }
 
     const buttonId = permissionAttr.replace("button:", "");
     const label = button.textContent?.trim() || buttonId;
@@ -43,22 +41,21 @@ export async function autoRegisterButtons(pageId: string, pageName: string): Pro
         label,
         action,
       });
-      console.log(`Auto-registered button: ${buttonId} on page ${pageName}`);
-    } catch (error) {
-      console.debug(`Button ${buttonId} may already be registered:`, error);
-    }
+    } catch (_error) {}
   }
 }
 
 /**
  * Auto-register fields with data-permission attribute
  */
-export async function autoRegisterFields(pageId: string, pageName: string): Promise<void> {
+export async function autoRegisterFields(pageId: string, _pageName: string): Promise<void> {
   const fields = document.querySelectorAll('[data-permission^="field:"]');
 
   for (const field of fields) {
     const permissionAttr = field.getAttribute("data-permission");
-    if (!permissionAttr) continue;
+    if (!permissionAttr) {
+      continue;
+    }
 
     const fieldId = permissionAttr.replace("field:", "");
     const label =
@@ -76,10 +73,7 @@ export async function autoRegisterFields(pageId: string, pageName: string): Prom
         label,
         field_type: fieldType,
       });
-      console.log(`Auto-registered field: ${fieldId} on page ${pageName}`);
-    } catch (error) {
-      console.debug(`Field ${fieldId} may already be registered:`, error);
-    }
+    } catch (_error) {}
   }
 }
 
@@ -94,10 +88,7 @@ export async function autoRegisterApi(
 ): Promise<void> {
   try {
     await registerApi({ endpoint, method, description });
-    console.log(`Auto-registered API: ${method} ${endpoint}`);
-  } catch (error) {
-    console.debug(`API ${method} ${endpoint} may already be registered:`, error);
-  }
+  } catch (_error) {}
 }
 
 /**
@@ -126,8 +117,7 @@ export async function initializePageAutoRegistration(
     }
 
     return null;
-  } catch (error) {
-    console.error("Failed to initialize page auto-registration:", error);
+  } catch (_error) {
     return null;
   }
 }

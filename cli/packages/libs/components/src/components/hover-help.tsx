@@ -25,7 +25,7 @@ export function HoverHelp({ content, title, position = "top-right", className }:
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
-        <TooltipTrigger asChild>
+        <TooltipTrigger asChild={true}>
           <button
             type="button"
             className={cn(

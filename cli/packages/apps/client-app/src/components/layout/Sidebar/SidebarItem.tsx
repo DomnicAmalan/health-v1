@@ -7,10 +7,10 @@ import {
   ContextMenuTrigger,
   Stack,
 } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { memo } from "react";
 import { getNavActions, getNavContextActions } from "@/lib/nav-actions";
-import { cn } from "@lazarus-life/ui-components/utils";
 
 export interface SidebarItem {
   path: string;
@@ -52,7 +52,7 @@ export const SidebarItemComponent = memo(function SidebarItemComponent({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
+      <ContextMenuTrigger asChild={true}>
         <Box>
           <button
             type="button"

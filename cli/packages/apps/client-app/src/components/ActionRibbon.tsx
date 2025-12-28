@@ -14,7 +14,9 @@ export const ActionRibbon = memo(function ActionRibbon({ onAction }: ActionRibbo
   const activeTab = useMemo(() => tabs.find((t) => t.id === activeTabId), [tabs, activeTabId]);
 
   const allActions = useMemo(() => {
-    if (!activeTab) return [];
+    if (!activeTab) {
+      return [];
+    }
 
     // Get all action groups from tab actions
     const actionGroups = getTabActions(activeTab.path, activeTab.label, onAction || (() => {}));

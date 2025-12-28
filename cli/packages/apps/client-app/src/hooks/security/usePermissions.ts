@@ -3,11 +3,7 @@
  * Hook for checking user permissions and roles
  */
 
-import {
-  PERMISSIONS,
-  type Permission,
-  ROLE_PERMISSIONS,
-} from "@lazarus-life/shared/constants/permissions";
+import { type Permission, ROLE_PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useCallback, useMemo } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -53,7 +49,9 @@ export function usePermissions() {
 
   // Get all permissions for current role
   const rolePermissions = useMemo(() => {
-    if (!role) return [];
+    if (!role) {
+      return [];
+    }
     return ROLE_PERMISSIONS[role] || [];
   }, [role]);
 

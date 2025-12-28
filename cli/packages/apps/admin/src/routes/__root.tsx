@@ -15,7 +15,7 @@ export const Route = createRootRoute({
       const setupStatus = await getSetupStatus();
       // If setup is not completed, we still allow access to login for initial setup
       // The setup can be done after login or via a separate setup flow
-      if (!setupStatus.setup_completed && !isPublicRoute) {
+      if (!(setupStatus.setup_completed || isPublicRoute)) {
         // For now, allow access - setup can be handled post-login
         // You may want to redirect to a setup page if needed
       }
@@ -24,8 +24,6 @@ export const Route = createRootRoute({
       if (err && typeof err === "object" && "to" in err) {
         throw err;
       }
-      // If API is not available, allow access (for development)
-      console.warn("Could not check setup status:", err);
     }
 
     if (isPublicRoute) {

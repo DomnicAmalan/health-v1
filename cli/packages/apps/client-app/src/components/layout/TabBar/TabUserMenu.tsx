@@ -10,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react";
 import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
 import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
 import { useDisclosure } from "@/hooks/ui/useDisclosure";
-import { cn } from "@lazarus-life/ui-components/utils";
 import { useAuthStore } from "@/stores/authStore";
 
 export function TabUserMenu() {
@@ -28,8 +28,7 @@ export function TabUserMenu() {
     try {
       await logout();
       navigate({ to: "/login" });
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (_error) {
       // Still navigate to login even if logout API call fails
       navigate({ to: "/login" });
     }
@@ -55,7 +54,7 @@ export function TabUserMenu() {
     <div className={cn("flex items-center gap-2 px-2 py-1 bg-[#F4F6F8]")}>
       {/* User Menu Dropdown */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild={true}>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreVertical className="h-4 w-4" />
           </Button>

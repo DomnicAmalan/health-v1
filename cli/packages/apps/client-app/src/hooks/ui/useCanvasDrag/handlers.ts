@@ -31,7 +31,9 @@ export function createDragHandlers({
     e.preventDefault();
     e.stopPropagation();
     const field = fields.find((f) => f.id === fieldId);
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     setDraggedField(fieldId);
     const canvasRect = canvasRef.current?.getBoundingClientRect();
@@ -47,7 +49,9 @@ export function createDragHandlers({
     e.preventDefault();
     e.stopPropagation();
     const group = groups.find((g) => g.id === groupId);
-    if (!group) return;
+    if (!group) {
+      return;
+    }
 
     setDraggedGroup(groupId);
     const canvasRect = canvasRef.current?.getBoundingClientRect();
@@ -63,7 +67,9 @@ export function createDragHandlers({
     e.preventDefault();
     e.stopPropagation();
     const section = sections.find((s) => s.id === sectionId);
-    if (!section) return;
+    if (!section) {
+      return;
+    }
 
     setDraggedSection(sectionId);
     const canvasRect = canvasRef.current?.getBoundingClientRect();

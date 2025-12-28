@@ -37,14 +37,18 @@ export function handleMouseMove(e: MouseEvent, options: MoveOptions) {
     setSections,
   } = options;
 
-  if (!canvasRef.current) return;
+  if (!canvasRef.current) {
+    return;
+  }
 
   const canvasRect = canvasRef.current.getBoundingClientRect();
   const canvasWidth = canvasConfig.canvasWidth || 1200;
   const canvasHeight = canvasConfig.canvasHeight || 1600;
 
   const snap = (value: number) => {
-    if (!snapToGrid) return value;
+    if (!snapToGrid) {
+      return value;
+    }
     return Math.round(value / gridSize) * gridSize;
   };
 

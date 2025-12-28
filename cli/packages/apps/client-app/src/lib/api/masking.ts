@@ -33,7 +33,9 @@ export function maskField(value: string, visibleChars: number, maskChar = "*"): 
  * Format: ***-**-1234
  */
 export function maskSSN(value: string, level: MaskingLevel = "partial"): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
   if (level === "complete") {
     return "[REDACTED]";
@@ -53,7 +55,9 @@ export function maskSSN(value: string, level: MaskingLevel = "partial"): string 
  * Format: **st@example.com
  */
 export function maskEmail(value: string, level: MaskingLevel = "partial"): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
   if (level === "complete") {
     return "[REDACTED]";
@@ -77,7 +81,9 @@ export function maskEmail(value: string, level: MaskingLevel = "partial"): strin
  * Format: ***-***-7890
  */
 export function maskPhone(value: string, level: MaskingLevel = "partial"): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
   if (level === "complete") {
     return "[REDACTED]";
@@ -96,7 +102,9 @@ export function maskPhone(value: string, level: MaskingLevel = "partial"): strin
  * Mask Medical Record Number (MRN)
  */
 export function maskMRN(value: string, level: MaskingLevel = "partial"): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
   if (level === "complete") {
     return "[REDACTED]";
@@ -111,7 +119,9 @@ export function maskMRN(value: string, level: MaskingLevel = "partial"): string 
  * Always completely masked
  */
 export function maskCreditCard(value: string): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
   return "[REDACTED]";
 }
 

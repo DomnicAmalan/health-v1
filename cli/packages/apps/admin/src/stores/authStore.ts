@@ -14,10 +14,14 @@ const USER_STORAGE_KEY = "admin_auth_user";
  * Load user from sessionStorage
  */
 function loadUserFromStorage(): UserInfo | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   const userStr = sessionStorage.getItem(USER_STORAGE_KEY);
-  if (!userStr) return null;
+  if (!userStr) {
+    return null;
+  }
 
   try {
     return JSON.parse(userStr) as UserInfo;
@@ -30,7 +34,9 @@ function loadUserFromStorage(): UserInfo | null {
  * Save user to sessionStorage
  */
 function saveUserToStorage(user: UserInfo | null): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   if (user) {
     sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
@@ -110,9 +116,7 @@ export const useAuthStore = create<AuthStore>()(
       try {
         // Session cookie will be cleared by the backend
         await apiLogout();
-      } catch (error) {
-        // Continue with logout even if API call fails
-        console.error("Logout API call failed:", error);
+      } catch (_error) {
       } finally {
         // Clear state and storage
         set((state) => {
@@ -154,7 +158,7 @@ export const useAuthStore = create<AuthStore>()(
           state.isLoading = false;
         });
         saveUserToStorage(userInfo);
-      } catch (error) {
+      } catch (_error) {
         // If session is invalid, clear auth state
         set((state) => {
           state.user = null;

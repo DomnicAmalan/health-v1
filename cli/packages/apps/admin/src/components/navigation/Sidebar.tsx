@@ -134,7 +134,9 @@ export function Sidebar() {
 
   // Filter nav items based on permissions
   const visibleItems = navItems.filter((item) => {
-    if (!item.permission) return true;
+    if (!item.permission) {
+      return true;
+    }
     return permissionMap[item.permission] ?? false;
   });
 

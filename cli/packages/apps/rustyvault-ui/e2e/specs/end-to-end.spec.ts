@@ -1,21 +1,23 @@
-import { test, expect } from "../fixtures/vault";
 import { createVaultClient } from "../fixtures/api";
+import { expect, test } from "../fixtures/vault";
 
 test.describe("End-to-End Vault Workflow", () => {
-  test("should complete full vault workflow", async ({ page, initializedVault, unsealVault, apiURL }) => {
+  test("should complete full vault workflow", async ({
+    page,
+    initializedVault,
+    unsealVault,
+    apiURL,
+  }) => {
     // 1. Initialize and unseal
     await page.goto("/");
     const keysToUse = initializedVault.keys.slice(0, 3);
     await unsealVault(keysToUse);
 
     // 2. Authenticate
-    await page.evaluate(
-      (token) => {
-        localStorage.setItem("vault_token", token);
-        window.dispatchEvent(new Event("storage"));
-      },
-      initializedVault.rootToken
-    );
+    await page.evaluate((token) => {
+      localStorage.setItem("vault_token", token);
+      window.dispatchEvent(new Event("storage"));
+    }, initializedVault.rootToken);
     await page.reload();
     await page.waitForLoadState("networkidle");
 
@@ -60,7 +62,7 @@ test.describe("End-to-End Vault Workflow", () => {
       await page.waitForLoadState("networkidle");
 
       // Verify secret was created
-      await expect(page.locator('text=test-secret')).toBeVisible();
+      await expect(page.locator("text=test-secret")).toBeVisible();
     }
 
     // 5. Verify via API

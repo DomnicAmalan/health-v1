@@ -158,13 +158,20 @@ export function ApplicationsPage() {
 
   const handleUpdate = () => {
     if (selectedApp) {
+      // Build update data, only including defined properties
+      const updateData: Partial<CreateAppRequest> = {};
+      if (formData.display_name) {
+        updateData.display_name = formData.display_name;
+      }
+      if (formData.description) {
+        updateData.description = formData.description;
+      }
+      if (formData.allowed_auth_methods) {
+        updateData.allowed_auth_methods = formData.allowed_auth_methods;
+      }
       updateMutation.mutate({
         appName: selectedApp.app_name,
-        data: {
-          display_name: formData.display_name,
-          description: formData.description,
-          allowed_auth_methods: formData.allowed_auth_methods,
-        },
+        data: updateData,
       });
     }
   };
@@ -314,7 +321,7 @@ export function ApplicationsPage() {
                       <div key={method} className="flex items-center space-x-2">
                         <Checkbox
                           id={`auth-${method}`}
-                          checked={formData.allowed_auth_methods?.includes(method)}
+                          checked={formData.allowed_auth_methods?.includes(method) ?? false}
                           onCheckedChange={() => handleAuthMethodToggle(method)}
                         />
                         <label htmlFor={`auth-${method}`} className="text-sm">
@@ -495,7 +502,7 @@ export function ApplicationsPage() {
                   <div key={method} className="flex items-center space-x-2">
                     <Checkbox
                       id={`edit-auth-${method}`}
-                      checked={formData.allowed_auth_methods?.includes(method)}
+                      checked={formData.allowed_auth_methods?.includes(method) ?? false}
                       onCheckedChange={() => handleAuthMethodToggle(method)}
                     />
                     <label htmlFor={`edit-auth-${method}`} className="text-sm">

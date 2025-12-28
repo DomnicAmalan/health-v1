@@ -20,7 +20,7 @@ interface PermissionContextValue {
 
   // Permission checking functions
   canAccess: (relation: string, object: string) => Promise<boolean>;
-  canAccessBatch: (checks: Array<[string, string]>) => Promise<boolean[]>;
+  canAccessBatch: (checks: [string, string][]) => Promise<boolean[]>;
 
   // Cached permission data
   userPermissions: UserPermissionsResponse | undefined;
@@ -71,8 +71,7 @@ export function PermissionProvider({ children, userId: initialUserId }: Permissi
       try {
         const response = await checkPermission(currentUserId, relation, object);
         return response.allowed;
-      } catch (error) {
-        console.error("Failed to check permission:", error);
+      } catch (_error) {
         return false;
       }
     },
@@ -81,21 +80,20 @@ export function PermissionProvider({ children, userId: initialUserId }: Permissi
 
   // Batch check permissions
   const canAccessBatch = useCallback(
-    async (checks: Array<[string, string]>): Promise<boolean[]> => {
+    async (checks: [string, string][]): Promise<boolean[]> => {
       if (!currentUserId) {
         return checks.map(() => false);
       }
 
       try {
-        const batchChecks: Array<[string, string, string]> = checks.map(([relation, object]) => [
+        const batchChecks: [string, string, string][] = checks.map(([relation, object]) => [
           currentUserId,
           relation,
           object,
         ]);
         const response = await checkPermissionsBatch(batchChecks);
         return response.results;
-      } catch (error) {
-        console.error("Failed to batch check permissions:", error);
+      } catch (_error) {
         return checks.map(() => false);
       }
     },
@@ -140,7 +138,7 @@ export function usePermissions(): PermissionContextValue {
  * @param object - The object (e.g., "page:users", "button:create-user")
  * @param fallback - Default value if permission check fails (default: false)
  */
-export function useCanAccess(relation: string, object: string, fallback: boolean = false): boolean {
+export function useCanAccess(relation: string, object: string, fallback = false): boolean {
   const { canAccess, currentUserId } = usePermissions();
   const [allowed, setAllowed] = useState<boolean>(fallback);
 
@@ -176,7 +174,7 @@ export function useCanAccess(relation: string, object: string, fallback: boolean
  * Hook for batch permission checks
  * @param checks - Array of [relation, object] tuples
  */
-export function usePermissionCheck(checks: Array<[string, string]>): boolean[] {
+export function usePermissionCheck(checks: [string, string][]): boolean[] {
   const { canAccessBatch, currentUserId } = usePermissions();
   const [results, setResults] = useState<boolean[]>(checks.map(() => false));
 

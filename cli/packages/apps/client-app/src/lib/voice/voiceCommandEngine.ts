@@ -32,7 +32,9 @@ export class VoiceCommandEngine {
   }
 
   private setupRecognition() {
-    if (!this.recognition) return;
+    if (!this.recognition) {
+      return;
+    }
 
     const preferences = useAccessibilityStore.getState().preferences;
 
@@ -56,7 +58,7 @@ export class VoiceCommandEngine {
           if (useVoiceCommandStore.getState().isListening) {
             try {
               this.recognition?.start();
-            } catch (err) {
+            } catch (_err) {
               // Ignore restart errors (may already be running)
             }
           }
@@ -76,7 +78,7 @@ export class VoiceCommandEngine {
           if (useVoiceCommandStore.getState().isListening) {
             try {
               this.recognition?.start();
-            } catch (err) {
+            } catch (_err) {
               // Ignore restart errors
             }
           }
@@ -121,8 +123,6 @@ export class VoiceCommandEngine {
 
   private async handleCommand(transcript: string) {
     try {
-      console.log("Voice command received:", transcript);
-
       // Parse the command
       const parser = getVoiceCommandParser();
       const intent = parser.parse(transcript);
@@ -140,14 +140,13 @@ export class VoiceCommandEngine {
       // Add to history
       useVoiceCommandStore.getState().addToHistory(transcript, intent.type, success);
 
-      if (!success) {
-        useVoiceCommandStore.getState().setError(`Failed to execute command: ${transcript}`);
-      } else {
+      if (success) {
         // Clear any previous errors on success
         useVoiceCommandStore.getState().setError(null);
+      } else {
+        useVoiceCommandStore.getState().setError(`Failed to execute command: ${transcript}`);
       }
     } catch (error) {
-      console.error("Error handling voice command:", error);
       useVoiceCommandStore
         .getState()
         .setError(error instanceof Error ? error.message : "Failed to process voice command");
@@ -171,17 +170,23 @@ export class VoiceCommandEngine {
     }
 
     if (options) {
-      if (options.language) this.recognition.lang = options.language;
-      if (options.continuous !== undefined) this.recognition.continuous = options.continuous;
-      if (options.interimResults !== undefined)
+      if (options.language) {
+        this.recognition.lang = options.language;
+      }
+      if (options.continuous !== undefined) {
+        this.recognition.continuous = options.continuous;
+      }
+      if (options.interimResults !== undefined) {
         this.recognition.interimResults = options.interimResults;
-      if (options.maxAlternatives !== undefined)
+      }
+      if (options.maxAlternatives !== undefined) {
         this.recognition.maxAlternatives = options.maxAlternatives;
+      }
     }
 
     try {
       this.recognition.start();
-    } catch (error) {
+    } catch (_error) {
       useVoiceCommandStore
         .getState()
         .setError("Failed to start voice recognition. It may already be running.");
@@ -235,8 +240,7 @@ export class TextToSpeechEngine {
       voiceName?: string | null;
     }
   ): void {
-    if (!this.isSupported || !this.synth) {
-      console.warn("Text-to-speech is not supported in this browser.");
+    if (!(this.isSupported && this.synth)) {
       return;
     }
 

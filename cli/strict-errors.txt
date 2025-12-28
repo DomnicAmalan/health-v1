@@ -1,0 +1,986 @@
+src/api/baseClient.ts(157,5): error TS2412: Type 'number | undefined' is not assignable to type 'number' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'number'.
+src/api/baseClient.ts(159,5): error TS2412: Type 'Error | undefined' is not assignable to type 'Error' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'Error'.
+src/api/baseClient.ts(218,5): error TS2412: Type 'AuthConfig | undefined' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'AuthConfig'.
+src/api/baseClient.ts(229,5): error TS2412: Type 'ResponseTransformer<unknown> | undefined' is not assignable to type 'ResponseTransformer<unknown>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'ResponseTransformer<unknown>'.
+src/api/baseClient.ts(317,7): error TS2375: Type '{ message: string; code: string; status: number | undefined; details: unknown; originalError: Error | undefined; }' is not assignable to type 'ApiError' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'status' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/api/baseClient.ts(429,41): error TS2379: Argument of type '{ method: HttpMethod; headers: Record<string, string>; body: string | undefined; signal: AbortSignal | undefined; credentials: RequestCredentials; cache: RequestCache | undefined; mode: RequestMode | undefined; redirect: RequestRedirect | undefined; referrerPolicy: ReferrerPolicy | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/api/baseClient.ts(644,20): error TS4111: Property 'message' comes from an index signature, so it must be accessed with ['message'].
+src/api/baseClient.ts(644,53): error TS4111: Property 'message' comes from an index signature, so it must be accessed with ['message'].
+src/api/baseClient.ts(645,20): error TS4111: Property 'error' comes from an index signature, so it must be accessed with ['error'].
+src/api/baseClient.ts(645,51): error TS4111: Property 'error' comes from an index signature, so it must be accessed with ['error'].
+src/api/baseClient.ts(646,27): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(646,49): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(646,84): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(647,20): error TS4111: Property 'detail' comes from an index signature, so it must be accessed with ['detail'].
+src/api/baseClient.ts(647,52): error TS4111: Property 'detail' comes from an index signature, so it must be accessed with ['detail'].
+src/api/baseClient.ts(648,20): error TS4111: Property 'msg' comes from an index signature, so it must be accessed with ['msg'].
+src/api/baseClient.ts(648,49): error TS4111: Property 'msg' comes from an index signature, so it must be accessed with ['msg'].
+src/api/baseClient.ts(661,30): error TS2379: Argument of type '{ baseUrl: string; timeout: number; credentials: RequestCredentials; headers: { [x: string]: string; }; retryAttempts: number; retryDelay: number; retryStatusCodes: number[]; ... 10 more ...; logger: (message: string, data?: unknown) => void; }' is not assignable to parameter of type 'BaseClientConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'auth' are incompatible.
+    Type 'AuthConfig | undefined' is not assignable to type 'AuthConfig'.
+      Type 'undefined' is not assignable to type 'AuthConfig'.
+src/api/baseClient.ts(748,5): error TS2375: Type '{ type: "apiKey"; apiKey: string | undefined; getApiKey: (() => string | null) | undefined; apiKeyHeader: string | undefined; }' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'apiKey' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/api/baseClient.ts(785,7): error TS2375: Type '{ type: "bearer"; getToken: () => string | null; onAuthError: (() => Promise<boolean>) | undefined; }' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onAuthError' are incompatible.
+    Type '(() => Promise<boolean>) | undefined' is not assignable to type 'AuthErrorHandler'.
+      Type 'undefined' is not assignable to type 'AuthErrorHandler'.
+src/api/config.ts(11,32): error TS4111: Property 'VITE_API_PREFIX' comes from an index signature, so it must be accessed with ['VITE_API_PREFIX'].
+src/i18n/context.ts(32,10): error TS6133: 'getNestedValue' is declared but its value is never read.
+src/i18n/context.ts(50,67): error TS4111: Property 'en' comes from an index signature, so it must be accessed with ['en'].
+src/types/compliance.ts(60,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(61,23): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(61,52): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(62,20): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(63,23): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(63,47): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(64,29): error TS4111: Property 'level' comes from an index signature, so it must be accessed with ['level'].
+src/types/compliance.ts(65,20): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(66,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(67,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(67,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(74,3): error TS2375: Type '{ id: string; parent_id: string | undefined; name: string; code: string | undefined; level: "continent" | "country" | "state" | "province" | "city" | "district" | "town" | "village" | "street"; metadata: Record<...>; effective_from: string; effective_to: string | undefined; }' is not assignable to type 'GeographicRegion' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parent_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(75,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(76,35): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(77,28): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(78,30): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(79,28): error TS4111: Property 'level' comes from an index signature, so it must be accessed with ['level'].
+src/types/compliance.ts(80,32): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(81,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(82,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(142,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(143,20): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(144,20): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(145,32): error TS4111: Property 'category' comes from an index signature, so it must be accessed with ['category'].
+src/types/compliance.ts(146,20): error TS4111: Property 'issuing_body' comes from an index signature, so it must be accessed with ['issuing_body'].
+src/types/compliance.ts(147,23): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(147,58): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(148,23): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(148,70): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(149,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(150,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(150,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(151,30): error TS4111: Property 'status' comes from an index signature, so it must be accessed with ['status'].
+src/types/compliance.ts(152,20): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(159,3): error TS2375: Type '{ id: string; code: string; name: string; category: "accessibility" | "security" | "clinical" | "privacy" | "billing" | "quality" | "safety" | "data_protection" | "other"; issuing_body: string; ... 5 more ...; metadata: Record<...>; }' is not assignable to type 'Regulation' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'jurisdiction_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(160,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(161,28): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(162,28): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(163,31): error TS4111: Property 'category' comes from an index signature, so it must be accessed with ['category'].
+src/types/compliance.ts(164,36): error TS4111: Property 'issuing_body' comes from an index signature, so it must be accessed with ['issuing_body'].
+src/types/compliance.ts(165,41): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(167,11): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(171,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(172,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(173,29): error TS4111: Property 'status' comes from an index signature, so it must be accessed with ['status'].
+src/types/compliance.ts(174,32): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(196,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(197,20): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(198,20): error TS4111: Property 'version_number' comes from an index signature, so it must be accessed with ['version_number'].
+src/types/compliance.ts(199,20): error TS4111: Property 'content_hash' comes from an index signature, so it must be accessed with ['content_hash'].
+src/types/compliance.ts(200,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(201,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(201,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(202,23): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(202,57): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(209,3): error TS2375: Type '{ id: string; regulation_id: string; version_number: string; content_hash: string; effective_from: string; effective_to: string | undefined; change_summary: string | undefined; }' is not assignable to type 'RegulationVersion' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'effective_to' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(210,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(211,37): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(212,38): error TS4111: Property 'version_number' comes from an index signature, so it must be accessed with ['version_number'].
+src/types/compliance.ts(213,36): error TS4111: Property 'content_hash' comes from an index signature, so it must be accessed with ['content_hash'].
+src/types/compliance.ts(214,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(215,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(216,40): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(238,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(239,20): error TS4111: Property 'version_id' comes from an index signature, so it must be accessed with ['version_id'].
+src/types/compliance.ts(240,23): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(240,60): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(241,20): error TS4111: Property 'section_number' comes from an index signature, so it must be accessed with ['section_number'].
+src/types/compliance.ts(242,23): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(242,48): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(243,20): error TS4111: Property 'content' comes from an index signature, so it must be accessed with ['content'].
+src/types/compliance.ts(244,18): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(251,3): error TS2375: Type '{ id: string; version_id: string; parent_section_id: string | undefined; section_number: string; title: string | undefined; content: string; order_index: number; }' is not assignable to type 'RegulationSection' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parent_section_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(252,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(253,34): error TS4111: Property 'version_id' comes from an index signature, so it must be accessed with ['version_id'].
+src/types/compliance.ts(254,43): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(255,38): error TS4111: Property 'section_number' comes from an index signature, so it must be accessed with ['section_number'].
+src/types/compliance.ts(256,31): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(257,31): error TS4111: Property 'content' comes from an index signature, so it must be accessed with ['content'].
+src/types/compliance.ts(258,29): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(258,60): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(281,20): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(282,20): error TS4111: Property 'regulation_code' comes from an index signature, so it must be accessed with ['regulation_code'].
+src/types/compliance.ts(283,20): error TS4111: Property 'regulation_name' comes from an index signature, so it must be accessed with ['regulation_name'].
+src/types/compliance.ts(284,18): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(285,20): error TS4111: Property 'source_region_id' comes from an index signature, so it must be accessed with ['source_region_id'].
+src/types/compliance.ts(286,20): error TS4111: Property 'source_region_name' comes from an index signature, so it must be accessed with ['source_region_name'].
+src/types/compliance.ts(287,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(288,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(288,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(295,3): error TS2375: Type '{ regulation_id: string; regulation_code: string; regulation_name: string; priority: number; source_region_id: string; source_region_name: string; effective_from: string; effective_to: string | undefined; }' is not assignable to type 'ApplicableRegulation' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'effective_to' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(296,37): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(297,39): error TS4111: Property 'regulation_code' comes from an index signature, so it must be accessed with ['regulation_code'].
+src/types/compliance.ts(298,39): error TS4111: Property 'regulation_name' comes from an index signature, so it must be accessed with ['regulation_name'].
+src/types/compliance.ts(299,26): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(299,54): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(300,40): error TS4111: Property 'source_region_id' comes from an index signature, so it must be accessed with ['source_region_id'].
+src/types/compliance.ts(301,42): error TS4111: Property 'source_region_name' comes from an index signature, so it must be accessed with ['source_region_name'].
+src/types/compliance.ts(302,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(303,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/vault/client.ts(28,5): error TS2412: Type 'string | undefined' is not assignable to type 'string' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'string'.
+src/vault/client.ts(64,39): error TS2379: Argument of type '{ method: string; headers: HeadersInit; body: string | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/vault/components.tsx(9,1): error TS6133: 'VaultCapability' is declared but its value is never read.
+src/vault/hooks.ts(8,32): error TS6196: 'VaultSecret' is declared but never used.
+src/vault/permissions.ts(134,9): error TS2532: Object is possibly 'undefined'.
+src/vault/proxy.ts(94,5): error TS2412: Type '((error: VaultProxyError) => void) | undefined' is not assignable to type '(error: VaultProxyError) => void' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type '(error: VaultProxyError) => void'.
+src/vault/proxy.ts(104,15): error TS4111: Property 'Authorization' comes from an index signature, so it must be accessed with ['Authorization'].
+src/vault/proxy.ts(117,39): error TS2379: Argument of type '{ method: string; headers: HeadersInit; body: string | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/components/button.tsx(85,19): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/card.tsx(22,17): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(75,14): error TS2375: Type '{ content: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...> | null; title: string | undefined; variant: "default" | ... 1 more ... | "icon-only"; size: "sm" | ... 1 more ... | "md"; }' is not assignable to type 'HelpButtonProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(124,8): error TS2375: Type '{ content: ReactNode; title: string | undefined; variant: "default" | "subtle" | "icon-only"; size: "sm" | "lg" | "md"; id: string | undefined; "aria-label": string | undefined; }' is not assignable to type 'HelpButtonProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(319,10): error TS2375: Type '{ content: string | number | bigint | true | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...>; title: string | undefined; variant: "default" | ... 1 more ... | "icon-only"; size: "sm" | ... 1 more ... | "md"; position: "top-right"; }' is not assignable to type 'HelpHintProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/context-menu.tsx(98,4): error TS2375: Type '{ children: (Element | ReactNode)[]; defaultChecked?: boolean; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; ... 280 more ...; checked: boolean | undefined; }' is not assignable to type 'MenuCheckboxItemProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/dropdown-menu.tsx(4,1): error TS6133: 'Slot' is declared but its value is never read.
+src/components/dropdown-menu.tsx(124,4): error TS2375: Type '{ children: (Element | ReactNode)[]; defaultChecked?: boolean; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; ... 280 more ...; checked: boolean | undefined; }' is not assignable to type 'MenuCheckboxItemProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/form-builder-example.tsx(6,10): error TS2305: Module '"./form-builder"' has no exported member 'FormBuilder'.
+src/components/form-builder-example.tsx(6,10): error TS6133: 'FormBuilder' is declared but its value is never read.
+src/components/form-canvas-preview.tsx(2,1): error TS6133: 'cn' is declared but its value is never read.
+src/components/form-field.tsx(51,8): error TS2375: Type '{ children: (string | false | Element | undefined)[]; htmlFor: string; help: { content: ReactNode; title?: string; } | undefined; }' is not assignable to type 'LabelProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/form-field.tsx(61,8): error TS2375: Type '{ id: string; type: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void | undefined; onBlur: (() => void) | undefined; disabled: boolean | undefined; ... 4 more ...; className: string; }' is not assignable to type 'InputProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/form-playground-enhanced.tsx(8,3): error TS6133: 'Maximize2' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(9,3): error TS6133: 'Move' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(10,3): error TS6133: 'Plus' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(289,35): error TS2345: Argument of type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to parameter of type 'SetStateAction<Partial<FormConfig>>'.
+  Type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to type 'Partial<FormConfig>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'layout' are incompatible.
+      Type '"single" | "two-column" | "three-column" | "four-column" | "custom" | undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+        Type 'undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+src/components/form-playground-with-resizer.tsx(9,3): error TS6133: 'Maximize2' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(10,3): error TS6133: 'Move' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(11,3): error TS6133: 'Plus' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(333,35): error TS2345: Argument of type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to parameter of type 'SetStateAction<Partial<FormConfig>>'.
+  Type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to type 'Partial<FormConfig>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'layout' are incompatible.
+      Type '"single" | "two-column" | "three-column" | "four-column" | "custom" | undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+        Type 'undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+src/components/form-playground.tsx(1,51): error TS6133: 'Save' is declared but its value is never read.
+src/components/form-playground.tsx(5,29): error TS6133: 'CardDescription' is declared but its value is never read.
+src/components/form-playground.tsx(5,46): error TS6133: 'CardHeader' is declared but its value is never read.
+src/components/form-playground.tsx(5,58): error TS6133: 'CardTitle' is declared but its value is never read.
+src/components/form-playground.tsx(6,1): error TS6192: All imports in import declaration are unused.
+src/components/form-playground.tsx(14,1): error TS6192: All imports in import declaration are unused.
+src/components/form-playground.tsx(73,9): error TS6133: 'moveField' is declared but its value is never read.
+src/components/input.tsx(45,8): error TS2375: Type '{ accept?: string | undefined; alt?: string | undefined; autoComplete?: HTMLInputAutoCompleteAttribute | undefined; capture?: boolean | "user" | "environment" | undefined; ... 304 more ...; placeholder: string | undefined; }' is not assignable to type 'InputProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'style' are incompatible.
+    Type 'CSSProperties | undefined' is not assignable to type 'CSSProperties | (CSSProperties & ((state: InputState) => CSSProperties | undefined))'.
+      Type 'undefined' is not assignable to type 'CSSProperties | (CSSProperties & ((state: InputState) => CSSProperties | undefined))'.
+src/components/input.tsx(65,12): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; className: string; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/input.tsx(79,12): error TS2375: Type '{ children: (string | number | bigint | boolean | Element | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...> | undefined)[]; htmlFor: string | undefined; className: string | undefined; help: { ...; } | undefined; }' is not assignable to type 'LabelProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/label.tsx(29,10): error TS2375: Type '{ content: ReactNode; title: string | undefined; variant: "subtle"; size: "sm"; position: "inline"; }' is not assignable to type 'HelpHintProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/select.tsx(57,20): error TS2379: Argument of type '{ label: React.ReactNode; value: string; disabled: boolean | undefined; }' is not assignable to parameter of type 'ExtractedItem' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'disabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/select.tsx(83,6): error TS2375: Type '{ children: Element[]; value: string | undefined; defaultValue: string | undefined; onValueChange: (newValue: string | null | undefined) => void; disabled: boolean | undefined; required: boolean | undefined; name: string | undefined; id: string | undefined; items: ExtractedItem[]; }' is not assignable to type 'Props<string | undefined, false>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(48,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(48,60): error TS4111: Property 'single' comes from an index signature, so it must be accessed with ['single'].
+src/lib/formLayoutUtils/grid.ts(59,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(59,47): error TS4111: Property 'md' comes from an index signature, so it must be accessed with ['md'].
+src/lib/slot.tsx(15,7): error TS2698: Spread types may only be created from object types.
+src/lib/slot.tsx(16,36): error TS18046: 'children.props' is of type 'unknown'.
+src/components/SetupWizard.tsx(109,20): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/components/SetupWizard.tsx(318,22): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/lib/api/client.ts(58,13): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(94,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(102,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(110,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(118,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/system.ts(161,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/routes/__root.tsx(40,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/applications.tsx(163,9): error TS2375: Type '{ display_name: string | undefined; description: string | undefined; allowed_auth_methods: AuthMethod[] | undefined; }' is not assignable to type 'Partial<CreateAppRequest>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'display_name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/routes/applications.tsx(315,26): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/applications.tsx(496,22): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(221,21): error TS2345: Argument of type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(316,18): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(332,35): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(346,35): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_num_uses' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(364,35): error TS2345: Argument of type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(378,35): error TS2345: Argument of type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_max_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(535,51): error TS2379: Argument of type '{ role_name: string; role_id: string; id: string; realm_id: string; bind_secret_id: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies: string[]; created_at?: string; updated_at?: string; } | { ...; }' is not assignable to parameter of type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ role_name: string; role_id: string; policies: string[]; bind_secret_id: boolean; token_ttl: number | undefined; secret_id_num_uses: number | undefined; }' is not assignable to type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(594,16): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(610,37): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(624,37): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(642,37): error TS2345: Argument of type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(656,37): error TS2345: Argument of type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_max_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/users.tsx(311,18): error TS2375: Type '{ label: string; selectedPolicies: string[]; onPoliciesChange: (policies: string[]) => void; realmId: string | undefined; useGlobalMode: boolean; }' is not assignable to type 'PolicySelectorProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'realmId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/permissions/AssignPermissionDialog.tsx(78,21): error TS2379: Argument of type '{ subject: string; relation: string; object: string; expires_at: string | undefined; valid_from: string | undefined; }' is not assignable to parameter of type 'AssignPermissionRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'expires_at' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterApiForm.tsx(42,21): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterButtonForm.tsx(55,21): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterPageForm.tsx(34,21): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/users/ProvisionUserDialog.tsx(125,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(131,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(149,30): error TS2379: Argument of type '{ app_access: AppAccessRequest[]; vault_access: { policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined; email: string; password: string; display_name: string; organization_id: string; role_name?: string; group_names?: string[]; }' is not assignable to parameter of type 'ProvisionUserRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'vault_access' are incompatible.
+    Type '{ policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined' is not assignable to type 'VaultAccessRequest'.
+      Type 'undefined' is not assignable to type 'VaultAccessRequest'.
+src/lib/permissions/auto-register.ts(17,24): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(40,28): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(96,23): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/ProtectedRoute.tsx(46,8): error TS2375: Type '{ children: Element; pageName: string; relation: string | undefined; fallbackPath: string | undefined; }' is not assignable to type 'ProtectedRouteProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'relation' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/main.tsx(3,35): error TS2307: Cannot find module '@lazarus-life/shared/query' or its corresponding type declarations.
+src/routes/__root.tsx(46,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/app-access.tsx(269,67): error TS4111: Property 'read' comes from an index signature, so it must be accessed with ['read'].
+src/routes/app-access.tsx(272,67): error TS4111: Property 'write' comes from an index signature, so it must be accessed with ['write'].
+src/routes/app-access.tsx(275,67): error TS4111: Property 'admin' comes from an index signature, so it must be accessed with ['admin'].
+src/routes/encryption/deks.tsx(75,27): error TS2379: Argument of type '{ user_id: string; reason: string | undefined; }' is not assignable to parameter of type 'RotateDekRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+Failed to parse configuration file.
+
+  x Failed to parse config with error Error("Unknown plugin: 'security'.", line: 0, column: 0)
+
+src/api/baseClient.ts(157,5): error TS2412: Type 'number | undefined' is not assignable to type 'number' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'number'.
+src/api/baseClient.ts(159,5): error TS2412: Type 'Error | undefined' is not assignable to type 'Error' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'Error'.
+src/api/baseClient.ts(218,5): error TS2412: Type 'AuthConfig | undefined' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'AuthConfig'.
+src/api/baseClient.ts(229,5): error TS2412: Type 'ResponseTransformer<unknown> | undefined' is not assignable to type 'ResponseTransformer<unknown>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'ResponseTransformer<unknown>'.
+src/api/baseClient.ts(317,7): error TS2375: Type '{ message: string; code: string; status: number | undefined; details: unknown; originalError: Error | undefined; }' is not assignable to type 'ApiError' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'status' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/api/baseClient.ts(429,41): error TS2379: Argument of type '{ method: HttpMethod; headers: Record<string, string>; body: string | undefined; signal: AbortSignal | undefined; credentials: RequestCredentials; cache: RequestCache | undefined; mode: RequestMode | undefined; redirect: RequestRedirect | undefined; referrerPolicy: ReferrerPolicy | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/api/baseClient.ts(644,20): error TS4111: Property 'message' comes from an index signature, so it must be accessed with ['message'].
+src/api/baseClient.ts(644,53): error TS4111: Property 'message' comes from an index signature, so it must be accessed with ['message'].
+src/api/baseClient.ts(645,20): error TS4111: Property 'error' comes from an index signature, so it must be accessed with ['error'].
+src/api/baseClient.ts(645,51): error TS4111: Property 'error' comes from an index signature, so it must be accessed with ['error'].
+src/api/baseClient.ts(646,27): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(646,49): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(646,84): error TS4111: Property 'errors' comes from an index signature, so it must be accessed with ['errors'].
+src/api/baseClient.ts(647,20): error TS4111: Property 'detail' comes from an index signature, so it must be accessed with ['detail'].
+src/api/baseClient.ts(647,52): error TS4111: Property 'detail' comes from an index signature, so it must be accessed with ['detail'].
+src/api/baseClient.ts(648,20): error TS4111: Property 'msg' comes from an index signature, so it must be accessed with ['msg'].
+src/api/baseClient.ts(648,49): error TS4111: Property 'msg' comes from an index signature, so it must be accessed with ['msg'].
+src/api/baseClient.ts(661,30): error TS2379: Argument of type '{ baseUrl: string; timeout: number; credentials: RequestCredentials; headers: { [x: string]: string; }; retryAttempts: number; retryDelay: number; retryStatusCodes: number[]; ... 10 more ...; logger: (message: string, data?: unknown) => void; }' is not assignable to parameter of type 'BaseClientConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'auth' are incompatible.
+    Type 'AuthConfig | undefined' is not assignable to type 'AuthConfig'.
+      Type 'undefined' is not assignable to type 'AuthConfig'.
+src/api/baseClient.ts(748,5): error TS2375: Type '{ type: "apiKey"; apiKey: string | undefined; getApiKey: (() => string | null) | undefined; apiKeyHeader: string | undefined; }' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'apiKey' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/api/baseClient.ts(785,7): error TS2375: Type '{ type: "bearer"; getToken: () => string | null; onAuthError: (() => Promise<boolean>) | undefined; }' is not assignable to type 'AuthConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onAuthError' are incompatible.
+    Type '(() => Promise<boolean>) | undefined' is not assignable to type 'AuthErrorHandler'.
+      Type 'undefined' is not assignable to type 'AuthErrorHandler'.
+src/api/config.ts(11,32): error TS4111: Property 'VITE_API_PREFIX' comes from an index signature, so it must be accessed with ['VITE_API_PREFIX'].
+src/i18n/context.ts(32,10): error TS6133: 'getNestedValue' is declared but its value is never read.
+src/i18n/context.ts(50,67): error TS4111: Property 'en' comes from an index signature, so it must be accessed with ['en'].
+src/types/compliance.ts(60,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(61,23): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(61,52): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(62,20): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(63,23): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(63,47): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(64,29): error TS4111: Property 'level' comes from an index signature, so it must be accessed with ['level'].
+src/types/compliance.ts(65,20): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(66,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(67,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(67,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(74,3): error TS2375: Type '{ id: string; parent_id: string | undefined; name: string; code: string | undefined; level: "continent" | "country" | "state" | "province" | "city" | "district" | "town" | "village" | "street"; metadata: Record<...>; effective_from: string; effective_to: string | undefined; }' is not assignable to type 'GeographicRegion' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parent_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(75,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(76,35): error TS4111: Property 'parent_id' comes from an index signature, so it must be accessed with ['parent_id'].
+src/types/compliance.ts(77,28): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(78,30): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(79,28): error TS4111: Property 'level' comes from an index signature, so it must be accessed with ['level'].
+src/types/compliance.ts(80,32): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(81,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(82,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(142,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(143,20): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(144,20): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(145,32): error TS4111: Property 'category' comes from an index signature, so it must be accessed with ['category'].
+src/types/compliance.ts(146,20): error TS4111: Property 'issuing_body' comes from an index signature, so it must be accessed with ['issuing_body'].
+src/types/compliance.ts(147,23): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(147,58): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(148,23): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(148,70): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(149,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(150,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(150,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(151,30): error TS4111: Property 'status' comes from an index signature, so it must be accessed with ['status'].
+src/types/compliance.ts(152,20): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(159,3): error TS2375: Type '{ id: string; code: string; name: string; category: "accessibility" | "security" | "clinical" | "privacy" | "billing" | "quality" | "safety" | "data_protection" | "other"; issuing_body: string; ... 5 more ...; metadata: Record<...>; }' is not assignable to type 'Regulation' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'jurisdiction_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(160,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(161,28): error TS4111: Property 'code' comes from an index signature, so it must be accessed with ['code'].
+src/types/compliance.ts(162,28): error TS4111: Property 'name' comes from an index signature, so it must be accessed with ['name'].
+src/types/compliance.ts(163,31): error TS4111: Property 'category' comes from an index signature, so it must be accessed with ['category'].
+src/types/compliance.ts(164,36): error TS4111: Property 'issuing_body' comes from an index signature, so it must be accessed with ['issuing_body'].
+src/types/compliance.ts(165,41): error TS4111: Property 'jurisdiction_id' comes from an index signature, so it must be accessed with ['jurisdiction_id'].
+src/types/compliance.ts(167,11): error TS4111: Property 'jurisdiction_level' comes from an index signature, so it must be accessed with ['jurisdiction_level'].
+src/types/compliance.ts(171,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(172,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(173,29): error TS4111: Property 'status' comes from an index signature, so it must be accessed with ['status'].
+src/types/compliance.ts(174,32): error TS4111: Property 'metadata' comes from an index signature, so it must be accessed with ['metadata'].
+src/types/compliance.ts(196,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(197,20): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(198,20): error TS4111: Property 'version_number' comes from an index signature, so it must be accessed with ['version_number'].
+src/types/compliance.ts(199,20): error TS4111: Property 'content_hash' comes from an index signature, so it must be accessed with ['content_hash'].
+src/types/compliance.ts(200,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(201,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(201,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(202,23): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(202,57): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(209,3): error TS2375: Type '{ id: string; regulation_id: string; version_number: string; content_hash: string; effective_from: string; effective_to: string | undefined; change_summary: string | undefined; }' is not assignable to type 'RegulationVersion' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'effective_to' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(210,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(211,37): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(212,38): error TS4111: Property 'version_number' comes from an index signature, so it must be accessed with ['version_number'].
+src/types/compliance.ts(213,36): error TS4111: Property 'content_hash' comes from an index signature, so it must be accessed with ['content_hash'].
+src/types/compliance.ts(214,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(215,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(216,40): error TS4111: Property 'change_summary' comes from an index signature, so it must be accessed with ['change_summary'].
+src/types/compliance.ts(238,20): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(239,20): error TS4111: Property 'version_id' comes from an index signature, so it must be accessed with ['version_id'].
+src/types/compliance.ts(240,23): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(240,60): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(241,20): error TS4111: Property 'section_number' comes from an index signature, so it must be accessed with ['section_number'].
+src/types/compliance.ts(242,23): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(242,48): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(243,20): error TS4111: Property 'content' comes from an index signature, so it must be accessed with ['content'].
+src/types/compliance.ts(244,18): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(251,3): error TS2375: Type '{ id: string; version_id: string; parent_section_id: string | undefined; section_number: string; title: string | undefined; content: string; order_index: number; }' is not assignable to type 'RegulationSection' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'parent_section_id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(252,26): error TS4111: Property 'id' comes from an index signature, so it must be accessed with ['id'].
+src/types/compliance.ts(253,34): error TS4111: Property 'version_id' comes from an index signature, so it must be accessed with ['version_id'].
+src/types/compliance.ts(254,43): error TS4111: Property 'parent_section_id' comes from an index signature, so it must be accessed with ['parent_section_id'].
+src/types/compliance.ts(255,38): error TS4111: Property 'section_number' comes from an index signature, so it must be accessed with ['section_number'].
+src/types/compliance.ts(256,31): error TS4111: Property 'title' comes from an index signature, so it must be accessed with ['title'].
+src/types/compliance.ts(257,31): error TS4111: Property 'content' comes from an index signature, so it must be accessed with ['content'].
+src/types/compliance.ts(258,29): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(258,60): error TS4111: Property 'order_index' comes from an index signature, so it must be accessed with ['order_index'].
+src/types/compliance.ts(281,20): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(282,20): error TS4111: Property 'regulation_code' comes from an index signature, so it must be accessed with ['regulation_code'].
+src/types/compliance.ts(283,20): error TS4111: Property 'regulation_name' comes from an index signature, so it must be accessed with ['regulation_name'].
+src/types/compliance.ts(284,18): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(285,20): error TS4111: Property 'source_region_id' comes from an index signature, so it must be accessed with ['source_region_id'].
+src/types/compliance.ts(286,20): error TS4111: Property 'source_region_name' comes from an index signature, so it must be accessed with ['source_region_name'].
+src/types/compliance.ts(287,20): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(288,23): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(288,55): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/types/compliance.ts(295,3): error TS2375: Type '{ regulation_id: string; regulation_code: string; regulation_name: string; priority: number; source_region_id: string; source_region_name: string; effective_from: string; effective_to: string | undefined; }' is not assignable to type 'ApplicableRegulation' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'effective_to' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/types/compliance.ts(296,37): error TS4111: Property 'regulation_id' comes from an index signature, so it must be accessed with ['regulation_id'].
+src/types/compliance.ts(297,39): error TS4111: Property 'regulation_code' comes from an index signature, so it must be accessed with ['regulation_code'].
+src/types/compliance.ts(298,39): error TS4111: Property 'regulation_name' comes from an index signature, so it must be accessed with ['regulation_name'].
+src/types/compliance.ts(299,26): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(299,54): error TS4111: Property 'priority' comes from an index signature, so it must be accessed with ['priority'].
+src/types/compliance.ts(300,40): error TS4111: Property 'source_region_id' comes from an index signature, so it must be accessed with ['source_region_id'].
+src/types/compliance.ts(301,42): error TS4111: Property 'source_region_name' comes from an index signature, so it must be accessed with ['source_region_name'].
+src/types/compliance.ts(302,38): error TS4111: Property 'effective_from' comes from an index signature, so it must be accessed with ['effective_from'].
+src/types/compliance.ts(303,38): error TS4111: Property 'effective_to' comes from an index signature, so it must be accessed with ['effective_to'].
+src/vault/client.ts(28,5): error TS2412: Type 'string | undefined' is not assignable to type 'string' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'string'.
+src/vault/client.ts(64,39): error TS2379: Argument of type '{ method: string; headers: HeadersInit; body: string | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/vault/components.tsx(9,1): error TS6133: 'VaultCapability' is declared but its value is never read.
+src/vault/hooks.ts(8,32): error TS6196: 'VaultSecret' is declared but never used.
+src/vault/permissions.ts(134,9): error TS2532: Object is possibly 'undefined'.
+src/vault/proxy.ts(94,5): error TS2412: Type '((error: VaultProxyError) => void) | undefined' is not assignable to type '(error: VaultProxyError) => void' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type '(error: VaultProxyError) => void'.
+src/vault/proxy.ts(104,15): error TS4111: Property 'Authorization' comes from an index signature, so it must be accessed with ['Authorization'].
+src/vault/proxy.ts(117,39): error TS2379: Argument of type '{ method: string; headers: HeadersInit; body: string | undefined; }' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'body' are incompatible.
+    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
+      Type 'undefined' is not assignable to type 'BodyInit | null'.
+src/components/button.tsx(85,19): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/card.tsx(22,17): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(75,14): error TS2375: Type '{ content: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...> | null; title: string | undefined; variant: "default" | ... 1 more ... | "icon-only"; size: "sm" | ... 1 more ... | "md"; }' is not assignable to type 'HelpButtonProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(124,8): error TS2375: Type '{ content: ReactNode; title: string | undefined; variant: "default" | "subtle" | "icon-only"; size: "sm" | "lg" | "md"; id: string | undefined; "aria-label": string | undefined; }' is not assignable to type 'HelpButtonProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/component-registry.tsx(319,10): error TS2375: Type '{ content: string | number | bigint | true | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...>; title: string | undefined; variant: "default" | ... 1 more ... | "icon-only"; size: "sm" | ... 1 more ... | "md"; position: "top-right"; }' is not assignable to type 'HelpHintProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/context-menu.tsx(98,4): error TS2375: Type '{ children: (Element | ReactNode)[]; defaultChecked?: boolean; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; ... 280 more ...; checked: boolean | undefined; }' is not assignable to type 'MenuCheckboxItemProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/dropdown-menu.tsx(4,1): error TS6133: 'Slot' is declared but its value is never read.
+src/components/dropdown-menu.tsx(124,4): error TS2375: Type '{ children: (Element | ReactNode)[]; defaultChecked?: boolean; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; ... 280 more ...; checked: boolean | undefined; }' is not assignable to type 'MenuCheckboxItemProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/form-builder-example.tsx(6,10): error TS2305: Module '"./form-builder"' has no exported member 'FormBuilder'.
+src/components/form-builder-example.tsx(6,10): error TS6133: 'FormBuilder' is declared but its value is never read.
+src/components/form-canvas-preview.tsx(2,1): error TS6133: 'cn' is declared but its value is never read.
+src/components/form-field.tsx(51,8): error TS2375: Type '{ children: (string | false | Element | undefined)[]; htmlFor: string; help: { content: ReactNode; title?: string; } | undefined; }' is not assignable to type 'LabelProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/form-field.tsx(61,8): error TS2375: Type '{ id: string; type: string; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void | undefined; onBlur: (() => void) | undefined; disabled: boolean | undefined; ... 4 more ...; className: string; }' is not assignable to type 'InputProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/form-playground-enhanced.tsx(8,3): error TS6133: 'Maximize2' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(9,3): error TS6133: 'Move' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(10,3): error TS6133: 'Plus' is declared but its value is never read.
+src/components/form-playground-enhanced.tsx(289,35): error TS2345: Argument of type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to parameter of type 'SetStateAction<Partial<FormConfig>>'.
+  Type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to type 'Partial<FormConfig>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'layout' are incompatible.
+      Type '"single" | "two-column" | "three-column" | "four-column" | "custom" | undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+        Type 'undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+src/components/form-playground-with-resizer.tsx(9,3): error TS6133: 'Maximize2' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(10,3): error TS6133: 'Move' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(11,3): error TS6133: 'Plus' is declared but its value is never read.
+src/components/form-playground-with-resizer.tsx(333,35): error TS2345: Argument of type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to parameter of type 'SetStateAction<Partial<FormConfig>>'.
+  Type '{ layout: FormConfig["layout"]; id?: string; title?: string; description?: string; fields?: FormFieldConfig[]; groups?: FormFieldGroup[]; ... 5 more ...; className?: string; }' is not assignable to type 'Partial<FormConfig>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'layout' are incompatible.
+      Type '"single" | "two-column" | "three-column" | "four-column" | "custom" | undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+        Type 'undefined' is not assignable to type '"single" | "two-column" | "three-column" | "four-column" | "custom"'.
+src/components/form-playground.tsx(1,51): error TS6133: 'Save' is declared but its value is never read.
+src/components/form-playground.tsx(5,29): error TS6133: 'CardDescription' is declared but its value is never read.
+src/components/form-playground.tsx(5,46): error TS6133: 'CardHeader' is declared but its value is never read.
+src/components/form-playground.tsx(5,58): error TS6133: 'CardTitle' is declared but its value is never read.
+src/components/form-playground.tsx(6,1): error TS6192: All imports in import declaration are unused.
+src/components/form-playground.tsx(14,1): error TS6192: All imports in import declaration are unused.
+src/components/form-playground.tsx(73,9): error TS6133: 'moveField' is declared but its value is never read.
+src/components/input.tsx(45,8): error TS2375: Type '{ accept?: string | undefined; alt?: string | undefined; autoComplete?: HTMLInputAutoCompleteAttribute | undefined; capture?: boolean | "user" | "environment" | undefined; ... 304 more ...; placeholder: string | undefined; }' is not assignable to type 'InputProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'style' are incompatible.
+    Type 'CSSProperties | undefined' is not assignable to type 'CSSProperties | (CSSProperties & ((state: InputState) => CSSProperties | undefined))'.
+      Type 'undefined' is not assignable to type 'CSSProperties | (CSSProperties & ((state: InputState) => CSSProperties | undefined))'.
+src/components/input.tsx(65,12): error TS2375: Type '{ content: ReactNode; title: string | undefined; position: "top-right"; className: string; }' is not assignable to type 'HoverHelpProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/input.tsx(79,12): error TS2375: Type '{ children: (string | number | bigint | boolean | Element | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...> | undefined)[]; htmlFor: string | undefined; className: string | undefined; help: { ...; } | undefined; }' is not assignable to type 'LabelProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'help' are incompatible.
+    Type '{ content: ReactNode; title?: string; } | undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+      Type 'undefined' is not assignable to type '{ content: ReactNode; title?: string; }'.
+src/components/label.tsx(29,10): error TS2375: Type '{ content: ReactNode; title: string | undefined; variant: "subtle"; size: "sm"; position: "inline"; }' is not assignable to type 'HelpHintProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'title' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/select.tsx(57,20): error TS2379: Argument of type '{ label: React.ReactNode; value: string; disabled: boolean | undefined; }' is not assignable to parameter of type 'ExtractedItem' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'disabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/components/select.tsx(83,6): error TS2375: Type '{ children: Element[]; value: string | undefined; defaultValue: string | undefined; onValueChange: (newValue: string | null | undefined) => void; disabled: boolean | undefined; required: boolean | undefined; name: string | undefined; id: string | undefined; items: ExtractedItem[]; }' is not assignable to type 'Props<string | undefined, false>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(48,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(48,60): error TS4111: Property 'single' comes from an index signature, so it must be accessed with ['single'].
+src/lib/formLayoutUtils/grid.ts(59,3): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/lib/formLayoutUtils/grid.ts(59,47): error TS4111: Property 'md' comes from an index signature, so it must be accessed with ['md'].
+src/lib/slot.tsx(15,7): error TS2698: Spread types may only be created from object types.
+src/lib/slot.tsx(16,36): error TS18046: 'children.props' is of type 'unknown'.
+src/components/SetupWizard.tsx(109,20): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/components/SetupWizard.tsx(318,22): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/lib/api/client.ts(58,13): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(94,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(102,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(110,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(118,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/system.ts(161,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/routes/__root.tsx(40,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/applications.tsx(163,9): error TS2375: Type '{ display_name: string | undefined; description: string | undefined; allowed_auth_methods: AuthMethod[] | undefined; }' is not assignable to type 'Partial<CreateAppRequest>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'display_name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/routes/applications.tsx(315,26): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/applications.tsx(496,22): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(221,21): error TS2345: Argument of type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(316,18): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(332,35): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(346,35): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_num_uses' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(364,35): error TS2345: Argument of type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(378,35): error TS2345: Argument of type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_max_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(535,51): error TS2379: Argument of type '{ role_name: string; role_id: string; id: string; realm_id: string; bind_secret_id: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies: string[]; created_at?: string; updated_at?: string; } | { ...; }' is not assignable to parameter of type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ role_name: string; role_id: string; policies: string[]; bind_secret_id: boolean; token_ttl: number | undefined; secret_id_num_uses: number | undefined; }' is not assignable to type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(594,16): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(610,37): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(624,37): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(642,37): error TS2345: Argument of type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(656,37): error TS2345: Argument of type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_max_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/users.tsx(311,18): error TS2375: Type '{ label: string; selectedPolicies: string[]; onPoliciesChange: (policies: string[]) => void; realmId: string | undefined; useGlobalMode: boolean; }' is not assignable to type 'PolicySelectorProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'realmId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/permissions/AssignPermissionDialog.tsx(78,21): error TS2379: Argument of type '{ subject: string; relation: string; object: string; expires_at: string | undefined; valid_from: string | undefined; }' is not assignable to parameter of type 'AssignPermissionRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'expires_at' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterApiForm.tsx(42,21): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterButtonForm.tsx(55,21): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterPageForm.tsx(34,21): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/users/ProvisionUserDialog.tsx(125,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(131,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(149,30): error TS2379: Argument of type '{ app_access: AppAccessRequest[]; vault_access: { policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined; email: string; password: string; display_name: string; organization_id: string; role_name?: string; group_names?: string[]; }' is not assignable to parameter of type 'ProvisionUserRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'vault_access' are incompatible.
+    Type '{ policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined' is not assignable to type 'VaultAccessRequest'.
+      Type 'undefined' is not assignable to type 'VaultAccessRequest'.
+src/lib/permissions/auto-register.ts(17,24): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(40,28): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(96,23): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/ProtectedRoute.tsx(46,8): error TS2375: Type '{ children: Element; pageName: string; relation: string | undefined; fallbackPath: string | undefined; }' is not assignable to type 'ProtectedRouteProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'relation' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/main.tsx(3,35): error TS2307: Cannot find module '@lazarus-life/shared/query' or its corresponding type declarations.
+src/routes/__root.tsx(46,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/app-access.tsx(269,67): error TS4111: Property 'read' comes from an index signature, so it must be accessed with ['read'].
+src/routes/app-access.tsx(272,67): error TS4111: Property 'write' comes from an index signature, so it must be accessed with ['write'].
+src/routes/app-access.tsx(275,67): error TS4111: Property 'admin' comes from an index signature, so it must be accessed with ['admin'].
+src/routes/encryption/deks.tsx(75,27): error TS2379: Argument of type '{ user_id: string; reason: string | undefined; }' is not assignable to parameter of type 'RotateDekRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 673.
+Checked 444 files in 138ms. No fixes applied.
+Found 593 errors.
+Found 100 warnings.
+Failed to parse configuration file.
+
+  x Failed to parse config with error Error("Unknown plugin: 'security'.", line: 0, column: 0)
+
+$ tsc --noEmit
+src/components/SetupWizard.tsx(109,20): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/components/SetupWizard.tsx(318,22): error TS18048: 'currentStepData' is possibly 'undefined'.
+src/lib/api/client.ts(58,13): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(94,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(102,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(110,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/client.ts(118,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseApiClient'.
+src/lib/api/system.ts(161,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/routes/__root.tsx(40,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/applications.tsx(163,9): error TS2375: Type '{ display_name: string | undefined; description: string | undefined; allowed_auth_methods: AuthMethod[] | undefined; }' is not assignable to type 'Partial<CreateAppRequest>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'display_name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/routes/applications.tsx(315,26): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/applications.tsx(496,22): error TS2375: Type '{ id: string; checked: boolean | undefined; onCheckedChange: () => void; }' is not assignable to type 'CheckboxProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(221,21): error TS2345: Argument of type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ bind_secret_id: boolean; secret_id_ttl: number | undefined; secret_id_num_uses: number | undefined; token_ttl: number | undefined; token_max_ttl: number | undefined; policies: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(316,18): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(332,35): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(346,35): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ secret_id_num_uses: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'secret_id_num_uses' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(364,35): error TS2345: Argument of type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(378,35): error TS2345: Argument of type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<{ roleName: string; } & CreateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type '{ roleName: string; } & CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ token_max_ttl: number | undefined; roleName: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'CreateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'token_max_ttl' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(535,51): error TS2379: Argument of type '{ role_name: string; role_id: string; id: string; realm_id: string; bind_secret_id: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies: string[]; created_at?: string; updated_at?: string; } | { ...; }' is not assignable to parameter of type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ role_name: string; role_id: string; policies: string[]; bind_secret_id: boolean; token_ttl: number | undefined; secret_id_num_uses: number | undefined; }' is not assignable to type '{ role_name: string; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(594,16): error TS2375: Type '{ checked: boolean | undefined; onCheckedChange: (checked: boolean) => void; }' is not assignable to type 'SwitchProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'checked' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/routes/approles.tsx(610,37): error TS2345: Argument of type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_ttl: number | undefined; bind_secret_id?: boolean; secret_id_num_uses?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(624,37): error TS2345: Argument of type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ secret_id_num_uses: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; token_ttl?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'secret_id_num_uses' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(642,37): error TS2345: Argument of type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_max_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/approles.tsx(656,37): error TS2345: Argument of type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to parameter of type 'SetStateAction<UpdateAppRoleRequest>'.
+  Type '{ token_max_ttl: number | undefined; bind_secret_id?: boolean; secret_id_ttl?: number; secret_id_num_uses?: number; token_ttl?: number; policies?: string[]; }' is not assignable to type 'UpdateAppRoleRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'token_max_ttl' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/routes/users.tsx(311,18): error TS2375: Type '{ label: string; selectedPolicies: string[]; onPoliciesChange: (policies: string[]) => void; realmId: string | undefined; useGlobalMode: boolean; }' is not assignable to type 'PolicySelectorProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'realmId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+$ tsc --noEmit
+src/components/permissions/AssignPermissionDialog.tsx(78,21): error TS2379: Argument of type '{ subject: string; relation: string; object: string; expires_at: string | undefined; valid_from: string | undefined; }' is not assignable to parameter of type 'AssignPermissionRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'expires_at' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterApiForm.tsx(42,21): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterButtonForm.tsx(55,21): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/ui-entities/RegisterPageForm.tsx(34,21): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/components/users/ProvisionUserDialog.tsx(125,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(131,15): error TS2345: Argument of type 'Step | undefined' is not assignable to parameter of type 'SetStateAction<Step>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Step>'.
+src/components/users/ProvisionUserDialog.tsx(149,30): error TS2379: Argument of type '{ app_access: AppAccessRequest[]; vault_access: { policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined; email: string; password: string; display_name: string; organization_id: string; role_name?: string; group_names?: string[]; }' is not assignable to parameter of type 'ProvisionUserRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'vault_access' are incompatible.
+    Type '{ policies: string[]; realm_id?: string; create_user?: boolean; create_token?: boolean; } | undefined' is not assignable to type 'VaultAccessRequest'.
+      Type 'undefined' is not assignable to type 'VaultAccessRequest'.
+src/lib/permissions/auto-register.ts(17,24): error TS2379: Argument of type '{ name: string; path: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterPageRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(40,28): error TS2379: Argument of type '{ page_id: string; button_id: string; label: string; action: string | undefined; }' is not assignable to parameter of type 'RegisterButtonRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'action' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/auto-register.ts(96,23): error TS2379: Argument of type '{ endpoint: string; method: string; description: string | undefined; }' is not assignable to parameter of type 'RegisterApiRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'description' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/lib/permissions/ProtectedRoute.tsx(46,8): error TS2375: Type '{ children: Element; pageName: string; relation: string | undefined; fallbackPath: string | undefined; }' is not assignable to type 'ProtectedRouteProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'relation' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/main.tsx(3,35): error TS2307: Cannot find module '@lazarus-life/shared/query' or its corresponding type declarations.
+src/routes/__root.tsx(46,22): error TS2379: Argument of type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to parameter of type 'RedirectOptions<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, string, "/l...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ to: "/login"; search: { redirect: string; } | undefined; }' is not assignable to type 'MakeOptionalSearchParams<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>, st...' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'search' are incompatible.
+      Type '{ redirect: string; } | undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+        Type 'undefined' is not assignable to type 'true | {} | ParamsReducerFn<RouterCore<Route<Register, any, "/", "/", string, "__root__", undefined, {}, {}, AnyContext, ({ location }: BeforeLoadContextOptions<Register, any, undefined, {}, {}, AnyContext, unknown, undefined>) => Promise<...>, ... 6 more ..., undefined>, "never", false, RouterHistory, Record<...>>,...'.
+src/routes/app-access.tsx(269,67): error TS4111: Property 'read' comes from an index signature, so it must be accessed with ['read'].
+src/routes/app-access.tsx(272,67): error TS4111: Property 'write' comes from an index signature, so it must be accessed with ['write'].
+src/routes/app-access.tsx(275,67): error TS4111: Property 'admin' comes from an index signature, so it must be accessed with ['admin'].
+src/routes/encryption/deks.tsx(75,27): error TS2379: Argument of type '{ user_id: string; reason: string | undefined; }' is not assignable to parameter of type 'RotateDekRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'reason' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.

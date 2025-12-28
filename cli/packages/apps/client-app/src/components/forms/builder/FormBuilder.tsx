@@ -14,8 +14,8 @@ import {
   Label,
   Stack,
 } from "@lazarus-life/ui-components";
-import { useFormBuilder } from "@/hooks/forms/useFormBuilder";
 import { cn } from "@lazarus-life/ui-components/utils";
+import { useFormBuilder } from "@/hooks/forms/useFormBuilder";
 import { FormFieldGroupComponent } from "./FormFieldGroup";
 import { FormFieldRenderer } from "./FormFieldRenderer";
 import { FormFieldSection } from "./FormFieldSection";
@@ -42,19 +42,22 @@ export function FormBuilder({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-    } catch (error) {
-      console.error("Form submission error:", error);
+    } catch (_error) {
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const renderField = (field: FormField) => {
-    if (!isFieldVisible(field)) return null;
+    if (!isFieldVisible(field)) {
+      return null;
+    }
 
     const value = formData[field.id] ?? field.defaultValue ?? "";
     const error = errors[field.id];
@@ -113,7 +116,9 @@ export function FormBuilder({
     if (config.groups && config.groups.length > 0) {
       return config.groups.map((group: FormFieldGroup) => {
         const groupFields = sortedFields.filter((f) => f.groupId === group.id);
-        if (groupFields.length === 0) return null;
+        if (groupFields.length === 0) {
+          return null;
+        }
 
         return (
           <FormFieldGroupComponent
@@ -130,7 +135,7 @@ export function FormBuilder({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn("overflow-auto", className)} noValidate>
+    <form onSubmit={handleSubmit} className={cn("overflow-auto", className)} noValidate={true}>
       <Stack spacing="lg">
         {(config.title || config.description) && (
           <Stack spacing="xs">

@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Card,
   CardContent,
@@ -51,9 +50,7 @@ function SetupPage() {
         } else {
           setIsChecking(false);
         }
-      } catch (err) {
-        // If API is not available, allow setup to proceed
-        console.warn("Could not check setup status:", err);
+      } catch (_err) {
         setIsChecking(false);
       }
     };
@@ -70,12 +67,24 @@ function SetupPage() {
     }
 
     let strength = 0;
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    if (password.length >= 8) {
+      strength++;
+    }
+    if (password.length >= 12) {
+      strength++;
+    }
+    if (/[a-z]/.test(password)) {
+      strength++;
+    }
+    if (/[A-Z]/.test(password)) {
+      strength++;
+    }
+    if (/[0-9]/.test(password)) {
+      strength++;
+    }
+    if (/[^a-zA-Z0-9]/.test(password)) {
+      strength++;
+    }
 
     setPasswordStrength(strength);
   }, [formData.admin_password]);
@@ -101,7 +110,7 @@ function SetupPage() {
       return;
     }
 
-    if (!formData.admin_email.trim() || !formData.admin_email.includes("@")) {
+    if (!(formData.admin_email.trim() && formData.admin_email.includes("@"))) {
       setError("Valid admin email is required");
       return;
     }
@@ -153,15 +162,25 @@ function SetupPage() {
   };
 
   const getPasswordStrengthLabel = () => {
-    if (passwordStrength === 0) return "";
-    if (passwordStrength <= 2) return "Weak";
-    if (passwordStrength <= 4) return "Medium";
+    if (passwordStrength === 0) {
+      return "";
+    }
+    if (passwordStrength <= 2) {
+      return "Weak";
+    }
+    if (passwordStrength <= 4) {
+      return "Medium";
+    }
     return "Strong";
   };
 
   const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 2) return "bg-destructive";
-    if (passwordStrength <= 4) return "bg-warning";
+    if (passwordStrength <= 2) {
+      return "bg-destructive";
+    }
+    if (passwordStrength <= 4) {
+      return "bg-warning";
+    }
     return "bg-success";
   };
 
@@ -222,7 +241,7 @@ function SetupPage() {
                         setFormData({ ...formData, organization_name: e.target.value })
                       }
                       disabled={isSubmitting}
-                      required
+                      required={true}
                     />
                   </div>
 
@@ -240,7 +259,7 @@ function SetupPage() {
                         })
                       }
                       disabled={isSubmitting}
-                      required
+                      required={true}
                       pattern="[a-z0-9-]+"
                     />
                     <p className="text-xs text-muted-foreground">
@@ -276,7 +295,7 @@ function SetupPage() {
                       value={formData.admin_email}
                       onChange={(e) => setFormData({ ...formData, admin_email: e.target.value })}
                       disabled={isSubmitting}
-                      required
+                      required={true}
                       autoComplete="email"
                     />
                   </div>
@@ -290,7 +309,7 @@ function SetupPage() {
                       value={formData.admin_username}
                       onChange={(e) => setFormData({ ...formData, admin_username: e.target.value })}
                       disabled={isSubmitting}
-                      required
+                      required={true}
                       autoComplete="username"
                     />
                   </div>
@@ -304,7 +323,7 @@ function SetupPage() {
                       value={formData.admin_password}
                       onChange={(e) => setFormData({ ...formData, admin_password: e.target.value })}
                       disabled={isSubmitting}
-                      required
+                      required={true}
                       autoComplete="new-password"
                     />
                     {formData.admin_password && (
@@ -335,7 +354,7 @@ function SetupPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       disabled={isSubmitting}
-                      required
+                      required={true}
                       autoComplete="new-password"
                     />
                   </div>

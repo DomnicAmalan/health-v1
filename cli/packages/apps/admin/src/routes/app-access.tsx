@@ -352,7 +352,11 @@ export function AppAccessPage() {
                                   className={`w-20 h-7 ${ACCESS_COLORS[level]}`}
                                   value={level}
                                   onValueChange={(value) =>
-                                    handleAccessLevelChange(user.id, app, value as "read" | "write" | "admin")
+                                    handleAccessLevelChange(
+                                      user.id,
+                                      app,
+                                      value as "read" | "write" | "admin"
+                                    )
                                   }
                                 >
                                   <SelectItem value="read">Read</SelectItem>
@@ -399,7 +403,7 @@ export function AppAccessPage() {
                 Application
               </label>
               <Select id="bulk-app-select" value={bulkApp} onValueChange={setBulkApp}>
-                <SelectItem value="" disabled>
+                <SelectItem value="" disabled={true}>
                   Select application
                 </SelectItem>
                 {apps.map((app) => (

@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/vault";
+import { expect, test } from "../fixtures/vault";
 
 test.describe("Secrets Management", () => {
   test("should create a secret", async ({ authenticatedPage }) => {
@@ -9,7 +9,9 @@ test.describe("Secrets Management", () => {
     await createButton.click();
 
     // Fill in secret path
-    const pathInput = authenticatedPage.locator('input[placeholder*="path" i], input[name*="path" i]').first();
+    const pathInput = authenticatedPage
+      .locator('input[placeholder*="path" i], input[name*="path" i]')
+      .first();
     await pathInput.fill("test/my-secret");
 
     // Add key-value pair
@@ -19,29 +21,33 @@ test.describe("Secrets Management", () => {
     await valueInput.fill("testuser");
 
     // Submit
-    const addButton = authenticatedPage.locator('button:has-text("Add"), button:has-text("+")').first();
+    const addButton = authenticatedPage
+      .locator('button:has-text("Add"), button:has-text("+")')
+      .first();
     await addButton.click();
 
-    const saveButton = authenticatedPage.locator('button:has-text("Save"), button:has-text("Create")').first();
+    const saveButton = authenticatedPage
+      .locator('button:has-text("Save"), button:has-text("Create")')
+      .first();
     await saveButton.click();
 
     await authenticatedPage.waitForLoadState("networkidle");
 
     // Verify secret appears in list
-    await expect(authenticatedPage.locator('text=my-secret')).toBeVisible();
+    await expect(authenticatedPage.locator("text=my-secret")).toBeVisible();
   });
 
   test("should read a secret", async ({ authenticatedPage }) => {
     await authenticatedPage.goto("/secrets");
 
     // Click on a secret in the list
-    const secretItem = authenticatedPage.locator('text=/.*secret.*/').first();
+    const secretItem = authenticatedPage.locator("text=/.*secret.*/").first();
     if (await secretItem.isVisible()) {
       await secretItem.click();
       await authenticatedPage.waitForLoadState("networkidle");
 
       // Should show secret data
-      await expect(authenticatedPage.locator('input[value]')).toBeVisible();
+      await expect(authenticatedPage.locator("input[value]")).toBeVisible();
     }
   });
 
@@ -49,7 +55,7 @@ test.describe("Secrets Management", () => {
     await authenticatedPage.goto("/secrets");
 
     // Select a secret
-    const secretItem = authenticatedPage.locator('text=/.*secret.*/').first();
+    const secretItem = authenticatedPage.locator("text=/.*secret.*/").first();
     if (await secretItem.isVisible()) {
       await secretItem.click();
       await authenticatedPage.waitForLoadState("networkidle");
@@ -65,7 +71,7 @@ test.describe("Secrets Management", () => {
         await authenticatedPage.waitForLoadState("networkidle");
 
         // Verify update
-        await expect(authenticatedPage.locator('text=updated-value')).toBeVisible();
+        await expect(authenticatedPage.locator("text=updated-value")).toBeVisible();
       }
     }
   });
@@ -74,7 +80,7 @@ test.describe("Secrets Management", () => {
     await authenticatedPage.goto("/secrets");
 
     // Select a secret
-    const secretItem = authenticatedPage.locator('text=/.*secret.*/').first();
+    const secretItem = authenticatedPage.locator("text=/.*secret.*/").first();
     if (await secretItem.isVisible()) {
       await secretItem.click();
       await authenticatedPage.waitForLoadState("networkidle");
@@ -85,7 +91,9 @@ test.describe("Secrets Management", () => {
         await deleteButton.click();
 
         // Confirm deletion if dialog appears
-        const confirmButton = authenticatedPage.locator('button:has-text("Confirm"), button:has-text("Delete")').last();
+        const confirmButton = authenticatedPage
+          .locator('button:has-text("Confirm"), button:has-text("Delete")')
+          .last();
         if (await confirmButton.isVisible()) {
           await confirmButton.click();
         }
@@ -114,15 +122,19 @@ test.describe("Secrets Management", () => {
     const valueInput = authenticatedPage.locator('input[placeholder*="Value" i]').first();
     await valueInput.fill("postgres://localhost/db");
 
-    const addButton = authenticatedPage.locator('button:has-text("Add"), button:has-text("+")').first();
+    const addButton = authenticatedPage
+      .locator('button:has-text("Add"), button:has-text("+")')
+      .first();
     await addButton.click();
 
-    const saveButton = authenticatedPage.locator('button:has-text("Save"), button:has-text("Create")').first();
+    const saveButton = authenticatedPage
+      .locator('button:has-text("Save"), button:has-text("Create")')
+      .first();
     await saveButton.click();
 
     await authenticatedPage.waitForLoadState("networkidle");
 
     // Should show breadcrumb navigation
-    await expect(authenticatedPage.locator('text=app')).toBeVisible();
+    await expect(authenticatedPage.locator("text=app")).toBeVisible();
   });
 });

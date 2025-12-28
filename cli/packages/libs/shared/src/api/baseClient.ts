@@ -241,7 +241,9 @@ export class BaseApiClient {
   // ==========================================================================
 
   protected async getAuthHeaders(): Promise<Record<string, string>> {
-    if (!this.auth) return {};
+    if (!this.auth) {
+      return {};
+    }
 
     switch (this.auth.type) {
       case "none":
@@ -289,7 +291,9 @@ export class BaseApiClient {
   }
 
   protected async handleAuthError(response: Response, url: string): Promise<boolean> {
-    if (!this.auth) return false;
+    if (!this.auth) {
+      return false;
+    }
 
     // Try token refresh first
     if (
@@ -297,7 +301,9 @@ export class BaseApiClient {
       (this.auth.shouldRefresh?.(response) ?? response.status === 401)
     ) {
       const refreshed = await this.auth.refreshToken();
-      if (refreshed) return true;
+      if (refreshed) {
+        return true;
+      }
     }
 
     // Call custom auth error handler
@@ -636,16 +642,28 @@ export class BaseApiClient {
   // ==========================================================================
 
   protected extractErrorMessage(data: unknown): string | undefined {
-    if (!data || typeof data !== "object") return undefined;
+    if (!data || typeof data !== "object") {
+      return undefined;
+    }
 
     const obj = data as Record<string, unknown>;
 
     // Common error message patterns
-    if (typeof obj.message === "string") return obj.message;
-    if (typeof obj.error === "string") return obj.error;
-    if (Array.isArray(obj.errors) && typeof obj.errors[0] === "string") return obj.errors[0];
-    if (typeof obj.detail === "string") return obj.detail;
-    if (typeof obj.msg === "string") return obj.msg;
+    if (typeof obj.message === "string") {
+      return obj.message;
+    }
+    if (typeof obj.error === "string") {
+      return obj.error;
+    }
+    if (Array.isArray(obj.errors) && typeof obj.errors[0] === "string") {
+      return obj.errors[0];
+    }
+    if (typeof obj.detail === "string") {
+      return obj.detail;
+    }
+    if (typeof obj.msg === "string") {
+      return obj.msg;
+    }
 
     return undefined;
   }

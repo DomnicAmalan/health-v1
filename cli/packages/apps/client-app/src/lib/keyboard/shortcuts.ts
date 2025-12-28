@@ -43,7 +43,9 @@ class KeyboardShortcutManager {
     // Check for matching shortcuts
     for (const id of this.activeShortcuts) {
       const shortcut = this.shortcuts.get(id);
-      if (!shortcut) continue;
+      if (!shortcut) {
+        continue;
+      }
 
       if (this.matchesShortcut(shortcut, event)) {
         event.preventDefault();

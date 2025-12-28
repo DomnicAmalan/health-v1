@@ -36,7 +36,9 @@ export function createMouseHandlers(options: MouseHandlersOptions) {
   } = options;
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!draggedTabIdRef.current || !scrollContainerRef.current || !tabBarRef.current) return;
+    if (!(draggedTabIdRef.current && scrollContainerRef.current && tabBarRef.current)) {
+      return;
+    }
 
     // Update drag position for preview animation
     setDragPosition({
@@ -91,9 +93,7 @@ export function createMouseHandlers(options: MouseHandlersOptions) {
           draggedTab,
           e,
           onClose: closeTab,
-        }).catch((err) => {
-          console.error("Error creating standalone window:", err);
-        });
+        }).catch((_err) => {});
       }
     } else if (
       currentDraggedTabId &&

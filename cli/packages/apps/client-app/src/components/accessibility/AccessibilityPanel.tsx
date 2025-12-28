@@ -37,7 +37,7 @@ export function AccessibilityPanel({ showTrigger = false }: AccessibilityPanelPr
   return (
     <Dialog open={isOpen} onOpenChange={onToggle}>
       {showTrigger && (
-        <DialogTrigger asChild>
+        <DialogTrigger asChild={true}>
           <Button
             variant="ghost"
             size="icon"

@@ -4,9 +4,9 @@
  */
 
 import { Box, Button, Card, CardContent, CardHeader, Input } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { MessageSquare, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@lazarus-life/ui-components/utils";
 
 import { getVoiceCommandEngine } from "@/lib/voice/voiceCommandEngine";
 import { getVoiceCommandExecutor } from "@/lib/voice/voiceCommandExecutor";
@@ -44,7 +44,7 @@ export function VoiceCommandChatbox() {
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, []);
 
   // Handle voice command recognition
   useEffect(() => {
@@ -141,7 +141,9 @@ export function VoiceCommandChatbox() {
   };
 
   const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim()) {
+      return;
+    }
 
     const newMessage: ChatMessage = {
       id: `msg-${Date.now()}`,

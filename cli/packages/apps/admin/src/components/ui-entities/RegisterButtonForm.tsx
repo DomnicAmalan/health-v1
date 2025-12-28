@@ -69,7 +69,7 @@ export function RegisterButtonForm({
             id="button-page"
             value={pageId}
             onChange={(e) => setPageId(e.target.value)}
-            required
+            required={true}
           >
             <SelectValue placeholder="Select a page" />
             {pages.map((page) => (
@@ -87,7 +87,7 @@ export function RegisterButtonForm({
             value={buttonId}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setButtonId(e.target.value)}
             placeholder="create-user, delete-user, etc."
-            required
+            required={true}
           />
         </div>
 
@@ -98,7 +98,7 @@ export function RegisterButtonForm({
             value={label}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
             placeholder="Create User"
-            required
+            required={true}
           />
         </div>
 

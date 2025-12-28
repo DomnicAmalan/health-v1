@@ -200,7 +200,7 @@ export function CanvasFieldLibrary({
               Export JSON
             </Button>
             <label className="w-full">
-              <Button variant="outline" size="sm" asChild className="w-full">
+              <Button variant="outline" size="sm" asChild={true} className="w-full">
                 <span>
                   <Upload className="h-3 w-3 mr-2" />
                   Import JSON

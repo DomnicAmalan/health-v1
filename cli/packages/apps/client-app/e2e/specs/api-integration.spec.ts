@@ -11,7 +11,7 @@ test.describe("API Integration @api", () => {
 
     if (response.ok()) {
       expect(response.status()).toBe(200);
-      const data = await response.json().catch(() => null);
+      const _data = await response.json().catch(() => null);
       // Health endpoint may return different formats
       expect(response.status()).toBe(200);
     } else {

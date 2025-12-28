@@ -11,20 +11,10 @@
  */
 
 // Re-export vault proxy (recommended for client apps)
-export {
-  createVaultProxy,
-  VaultProxyClient,
-  VaultProxyError,
-  type VaultProxyCapabilitiesResponse,
-  type VaultProxyConfig,
-  type VaultSecretResponse,
-  type VaultTokenRequest,
-  type VaultTokenResponse,
-} from "@lazarus-life/shared/vault";
-
 // Re-export permission utilities and components from shared vault module
 export {
   CombinedPermissionGate,
+  createVaultProxy,
   // Permission mappings
   DEFAULT_VAULT_PATH_MAPPINGS,
   generateVaultPoliciesForRoles,
@@ -52,11 +42,18 @@ export {
   VaultPermissionGate,
   type VaultPolicy,
   VaultProvider,
+  type VaultProxyCapabilitiesResponse,
+  VaultProxyClient,
+  type VaultProxyConfig,
+  VaultProxyError,
   type VaultSecret,
+  type VaultSecretResponse,
   type VaultState,
   VaultStatus,
   type VaultStore,
   type VaultTokenInfo,
+  type VaultTokenRequest,
+  type VaultTokenResponse,
   withVaultPermission,
 } from "@lazarus-life/shared/vault";
 
@@ -121,7 +118,7 @@ export function useCombinedAccess(healthPermission: Permission) {
     // Vault checks (only relevant if permission requires vault)
     vaultPath,
     requiresVault,
-    canAccessVault: !requiresVault || !isDenied,
+    canAccessVault: !(requiresVault && isDenied),
     canReadVault: !requiresVault || canRead,
     canWriteVault: !requiresVault || canWrite,
     canDeleteVault: !requiresVault || canDelete,
@@ -129,7 +126,7 @@ export function useCombinedAccess(healthPermission: Permission) {
     vaultCapabilities: capabilities,
 
     // Combined result
-    allowed: hasHealthPermission && (!requiresVault || !isDenied),
+    allowed: hasHealthPermission && !(requiresVault && isDenied),
     loading: vaultLoading,
   };
 }
@@ -163,8 +160,8 @@ export function useMultipleAccess(permissions: Permission[], mode: "all" | "any"
 
   const vaultAllowed =
     mode === "all"
-      ? vaultResults.every((r) => !r.requiresVault || !r.isDenied)
-      : vaultResults.some((r) => !r.requiresVault || !r.isDenied);
+      ? vaultResults.every((r) => !(r.requiresVault && r.isDenied))
+      : vaultResults.some((r) => !(r.requiresVault && r.isDenied));
 
   const loading = vaultResults.some((r) => r.loading);
 

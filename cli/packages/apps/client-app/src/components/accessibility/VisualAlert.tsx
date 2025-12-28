@@ -53,7 +53,7 @@ export function VisualAlert({ message, type = "info", duration = 3000 }: VisualA
       };
     }
     return undefined;
-  }, [visualAlerts, message]);
+  }, [visualAlerts]);
 
   if (!visible) {
     return null;

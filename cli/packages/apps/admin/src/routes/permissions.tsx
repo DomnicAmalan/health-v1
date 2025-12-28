@@ -108,7 +108,70 @@ export function PermissionsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {!selectedUserId ? (
+              {selectedUserId ? (
+                isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <p className="text-muted-foreground">Loading permissions...</p>
+                  </div>
+                ) : filteredPermissions.length === 0 ? (
+                  <div className="flex items-center justify-center py-12 text-center">
+                    <div className="space-y-2">
+                      <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        {searchQuery
+                          ? "No permissions found matching your search"
+                          : "No permissions found for this user"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Relation</TableHead>
+                        <TableHead>Object</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPermissions.map((perm, index) => (
+                        <TableRow key={`${perm.relation}-${perm.object}-${index}`}>
+                          <TableCell className="font-medium">
+                            <Badge variant="outline">{perm.relation}</Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">{perm.object}</TableCell>
+                          <TableCell>
+                            <Badge variant="default">Active</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <ProtectedButton
+                              buttonId={`revoke-permission-${index}`}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (
+                                  confirm(
+                                    `Are you sure you want to revoke permission "${perm.relation}" on "${perm.object}"?`
+                                  )
+                                ) {
+                                  revokeMutation.mutate({
+                                    subject: `user:${selectedUserId}`,
+                                    relation: perm.relation,
+                                    object: perm.object,
+                                  });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </ProtectedButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )
+              ) : (
                 <div className="flex items-center justify-center py-12 text-center">
                   <div className="space-y-2">
                     <User className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -117,67 +180,6 @@ export function PermissionsPage() {
                     </p>
                   </div>
                 </div>
-              ) : isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <p className="text-muted-foreground">Loading permissions...</p>
-                </div>
-              ) : filteredPermissions.length === 0 ? (
-                <div className="flex items-center justify-center py-12 text-center">
-                  <div className="space-y-2">
-                    <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      {searchQuery
-                        ? "No permissions found matching your search"
-                        : "No permissions found for this user"}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Relation</TableHead>
-                      <TableHead>Object</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPermissions.map((perm, index) => (
-                      <TableRow key={`${perm.relation}-${perm.object}-${index}`}>
-                        <TableCell className="font-medium">
-                          <Badge variant="outline">{perm.relation}</Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">{perm.object}</TableCell>
-                        <TableCell>
-                          <Badge variant="default">Active</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <ProtectedButton
-                            buttonId={`revoke-permission-${index}`}
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (
-                                confirm(
-                                  `Are you sure you want to revoke permission "${perm.relation}" on "${perm.object}"?`
-                                )
-                              ) {
-                                revokeMutation.mutate({
-                                  subject: `user:${selectedUserId}`,
-                                  relation: perm.relation,
-                                  object: perm.object,
-                                });
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </ProtectedButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
               )}
             </CardContent>
           </Card>

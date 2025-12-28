@@ -16,11 +16,8 @@ export function initializeAxe() {
         if (axe.default) {
           axe.default(React, ReactDOM, 1000);
           axeInitialized = true;
-          console.log("Axe accessibility testing initialized");
         }
       })
-      .catch((err) => {
-        console.warn("Failed to load axe-core:", err);
-      });
+      .catch((_err) => {});
   }
 }

@@ -121,14 +121,16 @@ export function ProvisionUserDialog({
   const isLastStep = currentStepIndex === STEPS.length - 1;
 
   const handleNext = () => {
-    if (!isLastStep) {
-      setStep(STEPS[currentStepIndex + 1]);
+    const nextStep = STEPS[currentStepIndex + 1];
+    if (!isLastStep && nextStep) {
+      setStep(nextStep);
     }
   };
 
   const handleBack = () => {
-    if (!isFirstStep) {
-      setStep(STEPS[currentStepIndex - 1]);
+    const prevStep = STEPS[currentStepIndex - 1];
+    if (!isFirstStep && prevStep) {
+      setStep(prevStep);
     }
   };
 
@@ -227,14 +229,18 @@ export function ProvisionUserDialog({
         id="email"
         type="email"
         value={formData.email}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setFormData({ ...formData, email: e.target.value })
+        }
         placeholder="user@example.com"
       />
       <Input
         label="Display Name"
         id="display_name"
         value={formData.display_name}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, display_name: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setFormData({ ...formData, display_name: e.target.value })
+        }
         placeholder="John Doe"
       />
       <Input
@@ -242,7 +248,9 @@ export function ProvisionUserDialog({
         id="password"
         type="password"
         value={formData.password}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, password: e.target.value })}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setFormData({ ...formData, password: e.target.value })
+        }
         placeholder="••••••••"
       />
       <div className="space-y-2">
@@ -252,7 +260,7 @@ export function ProvisionUserDialog({
           value={formData.organization_id}
           onValueChange={(value) => setFormData({ ...formData, organization_id: value })}
         >
-          <SelectItem value="" disabled>
+          <SelectItem value="" disabled={true}>
             Select organization
           </SelectItem>
           {organizations.map((org) => (
@@ -355,7 +363,7 @@ export function ProvisionUserDialog({
             </p>
           </div>
           <Switch
-            checked={formData.vault_access?.create_user || false}
+            checked={formData.vault_access?.create_user}
             onCheckedChange={(checked) =>
               setFormData({
                 ...formData,
@@ -372,7 +380,7 @@ export function ProvisionUserDialog({
             </p>
           </div>
           <Switch
-            checked={formData.vault_access?.create_token || false}
+            checked={formData.vault_access?.create_token}
             onCheckedChange={(checked) =>
               setFormData({
                 ...formData,
@@ -451,7 +459,7 @@ export function ProvisionUserDialog({
                   {p}
                 </Badge>
               ))}
-              {!formData.vault_access?.create_user && !formData.vault_access?.create_token && (
+              {!(formData.vault_access?.create_user || formData.vault_access?.create_token) && (
                 <span className="text-muted-foreground">None</span>
               )}
             </div>
@@ -482,7 +490,9 @@ export function ProvisionUserDialog({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) resetForm();
+        if (!isOpen) {
+          resetForm();
+        }
         onOpenChange(isOpen);
       }}
     >

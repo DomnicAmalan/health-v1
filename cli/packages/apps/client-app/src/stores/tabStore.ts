@@ -172,7 +172,7 @@ export const useTabStore = create<TabStore>()(
     closeTab: (tabId: string, navigate?: (path: string) => void) => {
       set((state) => {
         const tabToClose = state.tabs.find((t) => t.id === tabId);
-        if (!tabToClose || !tabToClose.closable || tabToClose.id === DASHBOARD_ID) {
+        if (!tabToClose?.closable || tabToClose.id === DASHBOARD_ID) {
           return; // Cannot close dashboard
         }
 

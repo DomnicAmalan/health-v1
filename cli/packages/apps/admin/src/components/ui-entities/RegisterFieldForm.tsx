@@ -65,7 +65,7 @@ export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: Regist
             id="field-page"
             value={pageId}
             onChange={(e) => setPageId(e.target.value)}
-            required
+            required={true}
           >
             <SelectValue placeholder="Select a page" />
             {pages.map((page) => (
@@ -82,7 +82,7 @@ export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: Regist
           value={fieldId}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFieldId(e.target.value)}
           placeholder="user-email, user-password, etc."
-          required
+          required={true}
         />
 
         <Input
@@ -91,7 +91,7 @@ export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: Regist
           value={label}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)}
           placeholder="Email Address"
-          required
+          required={true}
         />
 
         <div className="grid gap-2">
@@ -100,7 +100,7 @@ export function RegisterFieldForm({ defaultPageId, onSuccess, onCancel }: Regist
             id="field-type"
             value={fieldType}
             onChange={(e) => setFieldType(e.target.value)}
-            required
+            required={true}
           >
             <SelectValue placeholder="Select field type" />
             <SelectItem value="text">Text</SelectItem>

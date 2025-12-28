@@ -1,7 +1,9 @@
 import type { FieldLayout } from "../../components/form-builder";
 
 export function getAlignmentClasses(alignment?: FieldLayout["alignment"]): string {
-  if (!alignment) return "";
+  if (!alignment) {
+    return "";
+  }
   const classes: string[] = [];
   if (alignment.horizontal) {
     switch (alignment.horizontal) {

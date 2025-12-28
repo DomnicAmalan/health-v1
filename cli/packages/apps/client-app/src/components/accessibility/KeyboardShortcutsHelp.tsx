@@ -28,10 +28,18 @@ export function KeyboardShortcutsHelp({ showTrigger = false }: KeyboardShortcuts
   const formatKeys = (keys: string[]): string => {
     return keys
       .map((k) => {
-        if (k.toLowerCase() === "ctrl") return "Ctrl";
-        if (k.toLowerCase() === "alt") return "Alt";
-        if (k.toLowerCase() === "shift") return "Shift";
-        if (k.toLowerCase() === "meta") return "Cmd";
+        if (k.toLowerCase() === "ctrl") {
+          return "Ctrl";
+        }
+        if (k.toLowerCase() === "alt") {
+          return "Alt";
+        }
+        if (k.toLowerCase() === "shift") {
+          return "Shift";
+        }
+        if (k.toLowerCase() === "meta") {
+          return "Cmd";
+        }
         return k;
       })
       .join(" + ");
@@ -52,7 +60,7 @@ export function KeyboardShortcutsHelp({ showTrigger = false }: KeyboardShortcuts
   return (
     <Dialog open={isOpen} onOpenChange={onToggle}>
       {showTrigger && (
-        <DialogTrigger asChild>
+        <DialogTrigger asChild={true}>
           <Button
             variant="ghost"
             size="icon"

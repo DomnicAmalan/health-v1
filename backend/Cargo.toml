@@ -82,6 +82,30 @@ petgraph = "0.8"
 # LRU Cache
 lru = "0.12"
 
+[workspace.lints.clippy]
+# Allow unwrap/expect in test code - deny in production
+unwrap_used = "warn"
+expect_used = "warn"
+
+# Code quality
+cognitive_complexity = "warn"
+too_many_arguments = "warn"
+too_many_lines = "warn"
+
+# Correctness
+redundant_closure = "warn"
+len_without_is_empty = "warn"
+
+# Style
+should_implement_trait = "warn"
+inherent_to_string = "warn"
+
+[workspace.lints.rust]
+# Deny unsafe code in the workspace
+unsafe_code = "deny"
+# Warn on missing docs
+missing_docs = "warn"
+
 [profile.dev]
 # Reduce memory usage during development builds
 incremental = true

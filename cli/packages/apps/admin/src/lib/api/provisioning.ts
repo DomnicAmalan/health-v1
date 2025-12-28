@@ -71,7 +71,9 @@ export const provisioningApi = {
    */
   provisionUser: async (request: ProvisionUserRequest): Promise<ProvisionUserResponse> => {
     const response = await apiClient.post<ProvisionUserResponse>("/users/provision", request);
-    if (!response.data) throw new Error(response.error?.message || "Failed to provision user");
+    if (!response.data) {
+      throw new Error(response.error?.message || "Failed to provision user");
+    }
     return response.data;
   },
 
@@ -100,7 +102,10 @@ export const provisioningApi = {
     userId: string,
     request: GrantVaultAccessRequest
   ): Promise<GrantVaultAccessResponse> => {
-    const response = await apiClient.post<GrantVaultAccessResponse>(`/users/${userId}/vault-access`, request);
+    const response = await apiClient.post<GrantVaultAccessResponse>(
+      `/users/${userId}/vault-access`,
+      request
+    );
     return response.data || {};
   },
 

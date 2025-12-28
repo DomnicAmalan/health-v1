@@ -4,7 +4,6 @@
  */
 
 import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
-import { apiClient } from "./client";
 import { maskObject } from "./masking";
 import type { AuditEntry } from "./types";
 
@@ -34,7 +33,6 @@ export async function logAuditEntry(
   // In a real implementation, this would send to the audit API
   // For now, we'll log to console in development
   if (import.meta.env.DEV) {
-    console.debug("Audit Entry:", auditEntry);
   }
 
   // TODO: Send to audit API endpoint when available

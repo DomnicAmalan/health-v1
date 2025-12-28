@@ -29,7 +29,8 @@ export function setTranslations(locale: string, translationData: Record<string, 
 }
 
 // Helper function to get nested value from object using dot notation
-function getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
+// @ts-expect-error - kept for potential future use
+function _getNestedValue(obj: Record<string, unknown>, path: string): string | undefined {
   const keys = path.split(".");
   let current: unknown = obj;
   for (const key of keys) {
@@ -86,7 +87,7 @@ export function formatCurrencyInLocale(locale: string, value: number, currency =
 
 export function isRTL(locale: string): boolean {
   const localeInfo = SUPPORTED_LOCALES.find((l) => l.code === locale);
-  return localeInfo?.rtl || false;
+  return localeInfo?.rtl ?? false;
 }
 
 export function getLocaleInfo(locale: string): Locale | undefined {

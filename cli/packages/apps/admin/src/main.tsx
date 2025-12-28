@@ -1,6 +1,6 @@
 import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@lazarus-life/shared/query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { PermissionProvider } from "./lib/permissions";
@@ -21,7 +21,6 @@ async function init() {
   try {
     await import("./lib/env");
   } catch (error) {
-    console.error("Environment validation failed:", error);
     // Show error in development
     if (import.meta.env.DEV) {
       const root = document.getElementById("root");

@@ -1,24 +1,8 @@
-import { Code, Download, Eye, GripVertical, Plus, Save, Trash2, Upload } from "lucide-react";
+import { Code, Download, Eye, GripVertical, Plus, Trash2, Upload } from "lucide-react";
 import * as React from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
+import { Card, CardContent } from "./card";
 import type { FieldType, FormConfig, FormField } from "./form-builder";
 // FormBuilder is app-specific, should be passed as prop or imported from app
 import { Input } from "./input";
@@ -69,15 +53,15 @@ export function FormPlayground() {
     setFields(fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f)));
   };
 
-  // Move field
-  const moveField = (fromIndex: number, toIndex: number) => {
-    const newFields = [...fields];
-    const [moved] = newFields.splice(fromIndex, 1);
-    if (moved) {
-      newFields.splice(toIndex, 0, moved);
-      setFields(newFields);
-    }
-  };
+  // Move field (kept for future drag-and-drop implementation)
+  // const moveField = (fromIndex: number, toIndex: number) => {
+  //   const newFields = [...fields];
+  //   const [moved] = newFields.splice(fromIndex, 1);
+  //   if (moved) {
+  //     newFields.splice(toIndex, 0, moved);
+  //     setFields(newFields);
+  //   }
+  // };
 
   // Export form config
   const exportConfig = () => {
@@ -98,7 +82,9 @@ export function FormPlayground() {
   // Import form config
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -106,8 +92,8 @@ export function FormPlayground() {
         const config = JSON.parse(e.target?.result as string) as FormConfig;
         setFormConfig(config);
         setFields(config.fields);
-      } catch (error) {
-        console.error("Error importing config:", error);
+      } catch {
+        // Ignore JSON parse errors
       }
     };
     reader.readAsText(file);
@@ -184,7 +170,7 @@ export function FormPlayground() {
                 Export
               </Button>
               <label className="flex-1">
-                <Button variant="outline" size="sm" asChild className="w-full">
+                <Button variant="outline" size="sm" asChild={true} className="w-full">
                   <span>
                     <Upload className="h-3 w-3 mr-1" />
                     Import
@@ -410,7 +396,7 @@ export function FormPlayground() {
                 </Label>
                 <select
                   id="field-size"
-                  value={selectedFieldData.layout?.size || "md"}
+                  value={selectedFieldData.layout?.size ?? "md"}
                   onChange={(e) => {
                     if (selectedField) {
                       updateField(selectedField, {
@@ -465,7 +451,7 @@ export function FormPlayground() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={selectedFieldData.validation?.required || false}
+                    checked={selectedFieldData.validation?.required}
                     onChange={(e) => {
                       const fieldId = selectedField;
                       if (fieldId) {

@@ -22,7 +22,9 @@ function loadFromStorage(): { token: string | null; policies: string[] } {
 }
 
 function saveToStorage(token: string | null, policies: string[]): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   if (token) {
     sessionStorage.setItem(VAULT_TOKEN_KEY, token);
@@ -280,24 +282,31 @@ export const useVaultStore = create<VaultStore>((set, get) => ({
       }));
 
       return caps;
-    } catch (error) {
-      console.error("Failed to check capabilities:", error);
+    } catch (_error) {
       return ["deny"] as VaultCapability[];
     }
   },
 
   hasCapability: async (path: string, capability: VaultCapability) => {
     const caps = await get().getCapabilities(path);
-    if (caps.includes("deny")) return false;
-    if (caps.includes("root")) return true;
+    if (caps.includes("deny")) {
+      return false;
+    }
+    if (caps.includes("root")) {
+      return true;
+    }
     return caps.includes(capability);
   },
 
   canRead: async (path: string) => get().hasCapability(path, "read"),
   canWrite: async (path: string) => {
     const caps = await get().getCapabilities(path);
-    if (caps.includes("deny")) return false;
-    if (caps.includes("root")) return true;
+    if (caps.includes("deny")) {
+      return false;
+    }
+    if (caps.includes("root")) {
+      return true;
+    }
     return caps.includes("create") || caps.includes("update");
   },
   canDelete: async (path: string) => get().hasCapability(path, "delete"),

@@ -208,7 +208,7 @@ export class VaultClient {
     await this.request("POST", `/v1/${mount}/destroy/${path}`, { versions });
   }
 
-  async kvList(mount: string, path: string = ""): Promise<string[]> {
+  async kvList(mount: string, path = ""): Promise<string[]> {
     try {
       const response = await this.request<{ data: { keys: string[] } }>(
         "GET",
@@ -279,8 +279,12 @@ export class VaultClient {
     const response = await this.checkCapabilities([path]);
     const caps = response[path] || response.capabilities || [];
 
-    if (caps.includes("deny")) return false;
-    if (caps.includes("root")) return true;
+    if (caps.includes("deny")) {
+      return false;
+    }
+    if (caps.includes("root")) {
+      return true;
+    }
 
     return caps.includes(capability);
   }
@@ -293,8 +297,12 @@ export class VaultClient {
     const response = await this.checkCapabilities([path]);
     const caps = response[path] || response.capabilities || [];
 
-    if (caps.includes("deny")) return false;
-    if (caps.includes("root")) return true;
+    if (caps.includes("deny")) {
+      return false;
+    }
+    if (caps.includes("root")) {
+      return true;
+    }
 
     return caps.includes("create") || caps.includes("update");
   }

@@ -8,14 +8,16 @@ interface FormFieldSectionProps {
 }
 
 export function FormFieldSection({ field, className }: FormFieldSectionProps) {
-  if (field.type !== "separator" && field.type !== "display-text") return null;
+  if (field.type !== "separator" && field.type !== "display-text") {
+    return null;
+  }
 
   if (field.type === "separator") {
     return (
       <Box className={cn("col-span-12 my-4", className)}>
         <Box className="relative">
           <Box className="absolute inset-0 flex items-center">
-            <Box className="w-full border-t border-[#E1E4E8]"></Box>
+            <Box className="w-full border-t border-[#E1E4E8]" />
           </Box>
           {field.label && (
             <Flex className="relative justify-center text-sm">

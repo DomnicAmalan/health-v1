@@ -41,7 +41,7 @@ export function ImmutableField({
         {immutable && (
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild={true}>
                 <Lock className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>

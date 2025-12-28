@@ -1,4 +1,4 @@
-import { test, expect } from "../fixtures/vault";
+import { expect, test } from "../fixtures/vault";
 
 test.describe("Vault Initialization", () => {
   test("should initialize vault and display keys", async ({ page, initializedVault }) => {
@@ -11,7 +11,7 @@ test.describe("Vault Initialization", () => {
       await page.waitForLoadState("networkidle");
 
       // Should show keys
-      expect(await page.locator('text=/.*[A-Za-z0-9+/=]{20,}.*/').count()).toBeGreaterThan(0);
+      expect(await page.locator("text=/.*[A-Za-z0-9+/=]{20,}.*/").count()).toBeGreaterThan(0);
     }
   });
 

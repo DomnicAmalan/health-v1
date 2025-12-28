@@ -9,9 +9,9 @@ import {
   CardTitle,
   Flex,
 } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@lazarus-life/ui-components/utils";
 
 interface FormFieldGroupProps {
   group: FormFieldGroup;
@@ -26,7 +26,7 @@ export function FormFieldGroupComponent({
   getGridLayoutClasses,
   getGapClasses,
 }: FormFieldGroupProps) {
-  const [isCollapsed, setIsCollapsed] = useState(group.defaultCollapsed || false);
+  const [isCollapsed, setIsCollapsed] = useState(group.defaultCollapsed);
 
   return (
     <Box className="col-span-12">

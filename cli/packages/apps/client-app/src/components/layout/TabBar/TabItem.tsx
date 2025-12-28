@@ -1,7 +1,7 @@
 import { Box, Tooltip, TooltipContent, TooltipTrigger } from "@lazarus-life/ui-components";
+import { cn } from "@lazarus-life/ui-components/utils";
 import { memo, useRef } from "react";
 import { useTabDrag } from "@/hooks/ui/useTabDrag";
-import { cn } from "@lazarus-life/ui-components/utils";
 import { TabCloseButton } from "./TabCloseButton";
 import { TabDragHandle } from "./TabDragHandle";
 import { getModuleColor } from "./useTabColors";
@@ -76,7 +76,7 @@ export const TabItem = memo(function TabItem({
     >
       {isDraggable && <TabDragHandle />}
       <Tooltip>
-        <TooltipTrigger asChild>
+        <TooltipTrigger asChild={true}>
           <Box
             role="tab"
             aria-selected={isActive}
@@ -89,17 +89,14 @@ export const TabItem = memo(function TabItem({
               "text-[14px] font-medium tracking-[0.25px]",
               "rounded-t-sm", // 4px top corners only (Fluent UI)
               isDraggable && !isDragging && "cursor-grab active:cursor-grabbing",
-              !isDraggable && !tab.disabled && "cursor-pointer",
+              !(isDraggable || tab.disabled) && "cursor-pointer",
               tab.disabled && "cursor-not-allowed opacity-60",
 
               // Default (Inactive) State - Fluent UI styling
-              !isActive &&
-                !tab.disabled &&
-                !tab.alert &&
-                !tab.success && [
-                  "bg-[#F4F6F8] border-[#E1E4E8] text-[#4A4A4E]",
-                  "hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E]",
-                ],
+              !(isActive || tab.disabled || tab.alert || tab.success) && [
+                "bg-[#F4F6F8] border-[#E1E4E8] text-[#4A4A4E]",
+                "hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E]",
+              ],
 
               // Active State - Microsoft Fluent style with 4px bottom border
               isActive &&
@@ -131,9 +128,9 @@ export const TabItem = memo(function TabItem({
                 : undefined
             }
             onMouseDown={isDraggable ? handleMouseDown : undefined}
-            onClick={!isDraggable && !tab.disabled ? onSelect : undefined}
+            onClick={isDraggable || tab.disabled ? undefined : onSelect}
             onKeyDown={(e) => {
-              if (!isDraggable && !tab.disabled && (e.key === "Enter" || e.key === " ")) {
+              if (!(isDraggable || tab.disabled) && (e.key === "Enter" || e.key === " ")) {
                 e.preventDefault();
                 onSelect();
               }
@@ -143,7 +140,7 @@ export const TabItem = memo(function TabItem({
               <span
                 className={cn(
                   "shrink-0 transition-colors",
-                  !isActive && !tab.alert && !tab.success && "text-[#4A4A4E]",
+                  !(isActive || tab.alert || tab.success) && "text-[#4A4A4E]",
                   tab.alert && "text-warning",
                   tab.success && "text-accent",
                   tab.disabled && "text-[#A5A5A5]"
@@ -164,7 +161,7 @@ export const TabItem = memo(function TabItem({
             <span
               className={cn(
                 "truncate flex-1 capitalize",
-                !isActive && !tab.alert && !tab.success && "text-[#4A4A4E]",
+                !(isActive || tab.alert || tab.success) && "text-[#4A4A4E]",
                 tab.alert && "text-warning",
                 tab.success && "text-accent",
                 tab.disabled && "text-[#A5A5A5]"

@@ -40,7 +40,7 @@ interface ExtractedItem {
  */
 function extractItems(children: React.ReactNode): ExtractedItem[] {
   const items: ExtractedItem[] = [];
-  
+
   React.Children.forEach(children, (child) => {
     if (React.isValidElement(child)) {
       if (child.type === SelectValue) {
@@ -54,15 +54,15 @@ function extractItems(children: React.ReactNode): ExtractedItem[] {
       } else if (child.type === SelectItem) {
         // Add regular item
         const itemProps = child.props as SelectItemProps;
-        items.push({ 
-          label: itemProps.children, 
+        items.push({
+          label: itemProps.children,
           value: itemProps.value,
-          disabled: itemProps.disabled 
+          disabled: itemProps.disabled,
         });
       }
     }
   });
-  
+
   return items;
 }
 
@@ -78,7 +78,7 @@ const Select = ({
   className,
 }: SelectProps) => {
   const items = extractItems(children);
-  
+
   return (
     <BaseSelect.Root
       value={value}

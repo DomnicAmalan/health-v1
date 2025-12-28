@@ -80,7 +80,7 @@ export function UsersPage() {
   });
 
   // Fetch selected user details
-  const { data: userDetails } = useQuery({
+  const { data: userDetails, isLoading: isLoadingUser } = useQuery({
     queryKey: ["user", selectedUser, currentRealm?.id, isGlobalMode],
     queryFn: () => {
       if (!selectedUser) {
@@ -266,7 +266,9 @@ export function UsersPage() {
                   ? `Edit User: ${selectedUser}`
                   : selectedUser
                     ? `User: ${selectedUser}`
-                    : "Select a User"}
+                    : users.length === 0
+                      ? "Get Started"
+                      : "Select a User"}
             </CardTitle>
             <CardDescription>
               {isCreating
@@ -275,7 +277,9 @@ export function UsersPage() {
                   ? "Update user settings"
                   : selectedUser
                     ? "View and manage user details"
-                    : "Select a user from the list to view details"}
+                    : users.length === 0
+                      ? "Create your first user to get started"
+                      : "Select a user from the list to view details"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -363,16 +367,20 @@ export function UsersPage() {
                   </Button>
                 </div>
               </div>
-            ) : selectedUser && user ? (
+            ) : selectedUser && isLoadingUser ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : selectedUser ? (
               <div className="space-y-4">
                 <div>
                   <Label className="text-muted-foreground">Username</Label>
-                  <p className="font-medium">{user.username}</p>
+                  <p className="font-medium">{user?.username || selectedUser}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Assigned Policies</Label>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {user.policies?.length > 0 ? (
+                    {user?.policies && user.policies.length > 0 ? (
                       user.policies.map((policy) => {
                         // Highlight special policies
                         const isAdmin = policy === "admin" || policy === "root";
@@ -390,10 +398,10 @@ export function UsersPage() {
                       <span className="text-muted-foreground">No policies assigned</span>
                     )}
                   </div>
-                  {user.policies?.length > 0 && (
+                  {user?.policies && user.policies.length > 0 && (
                     <p className="text-xs text-muted-foreground mt-2">
                       {user.policies.includes("admin") || user.policies.includes("root")
-                        ? "⚠️ This user has administrative access"
+                        ? "This user has administrative access"
                         : user.policies.includes("writer")
                           ? "This user can read and write secrets"
                           : user.policies.includes("reader")
@@ -405,15 +413,15 @@ export function UsersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-muted-foreground">Token TTL</Label>
-                    <p className="font-medium">{user.ttl}s</p>
+                    <p className="font-medium">{user?.ttl ?? "N/A"}s</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Max Token TTL</Label>
-                    <p className="font-medium">{user.max_ttl}s</p>
+                    <p className="font-medium">{user?.max_ttl ?? "N/A"}s</p>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button variant="outline" onClick={handleEditUser}>
+                  <Button variant="outline" onClick={handleEditUser} disabled={!user}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit User
                   </Button>
@@ -426,6 +434,12 @@ export function UsersPage() {
                     {deleteUserMutation.isPending ? "Deleting..." : "Delete User"}
                   </Button>
                 </div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <UserIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No users yet</p>
+                <p className="text-sm mt-2">Click "New User" to create your first user</p>
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">

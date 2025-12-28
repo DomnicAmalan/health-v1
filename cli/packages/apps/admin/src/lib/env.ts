@@ -49,13 +49,12 @@ function validateEnv(): EnvConfig {
     // Provide default for VITE_API_BASE_URL in development
     if (!value && key === "VITE_API_BASE_URL" && import.meta.env.DEV) {
       value = "http://localhost:4117";
-      console.warn(`Using default ${key}=${value} for development`);
     }
 
-    if (!value) {
-      missing.push(key);
-    } else {
+    if (value) {
       config[key] = value;
+    } else {
+      missing.push(key);
     }
   }
 
@@ -70,23 +69,18 @@ function validateEnv(): EnvConfig {
   if (missing.length > 0) {
     const errorMessage =
       `Missing required environment variables: ${missing.join(", ")}\n\n` +
-      `Please set these in your .env file or environment.\n` +
-      `See .env.example for reference.`;
+      "Please set these in your .env file or environment.\n" +
+      "See .env.example for reference.";
 
     if (import.meta.env.DEV) {
-      console.error(errorMessage);
       // In development, provide defaults if possible
       if (missing.includes("VITE_API_BASE_URL")) {
         config.VITE_API_BASE_URL = "http://localhost:4117";
-        console.warn("Using default VITE_API_BASE_URL=http://localhost:4117 for development");
         return config as EnvConfig;
       }
       throw new Error(errorMessage);
-    } else {
-      // In production, fail silently but log
-      console.error(errorMessage);
-      throw new Error(errorMessage);
     }
+    throw new Error(errorMessage);
   }
 
   return config as EnvConfig;
@@ -102,7 +96,6 @@ try {
     envConfig = {
       VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:4117",
     };
-    console.warn("Using default environment configuration for development");
   } else {
     throw error;
   }

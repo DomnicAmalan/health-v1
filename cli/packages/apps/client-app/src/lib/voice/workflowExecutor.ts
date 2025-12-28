@@ -5,7 +5,6 @@
 
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 import { getActionExecutor } from "./actionExecutor";
-import { getVoiceCommandExecutor } from "./voiceCommandExecutor";
 import type { BuiltWorkflow, WorkflowStep } from "./workflowBuilder";
 import { type WorkflowDefinition, type WorkflowResult, workflowRegistry } from "./workflowRegistry";
 
@@ -108,8 +107,6 @@ export class WorkflowExecutor {
 
         case "speak":
           if (step.message) {
-            // Would use TTS here
-            console.log("Speak:", step.message);
           }
           return { success: true };
 
@@ -147,9 +144,6 @@ export class WorkflowExecutor {
    * Handle workflow error with recovery
    */
   public handleWorkflowError(error: Error, workflow: WorkflowDefinition): WorkflowResult {
-    // Log error
-    console.error("Workflow error:", error);
-
     // Try to recover or provide helpful error message
     return {
       success: false,

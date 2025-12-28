@@ -21,7 +21,9 @@ export async function createStandaloneWindow({
   e,
   onClose,
 }: CreateStandaloneWindowOptions): Promise<void> {
-  if (!draggedTab.path) return;
+  if (!draggedTab.path) {
+    return;
+  }
 
   // Generate a secure, one-time token for passing tab data
   // This avoids exposing sensitive data (like patient names in tab labels) in URLs
@@ -74,8 +76,7 @@ export async function createStandaloneWindow({
       sessionStorage.removeItem(`_tab_${token}`);
       sessionStorage.removeItem(`_tab_${token}_expires`);
     }
-  } catch (err) {
-    console.error("Error creating standalone window:", err);
+  } catch (_err) {
     // Cleanup on error
     try {
       sessionStorage.removeItem(`_tab_${token}`);

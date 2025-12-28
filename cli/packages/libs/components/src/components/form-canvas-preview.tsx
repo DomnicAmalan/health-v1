@@ -1,5 +1,4 @@
 import * as React from "react";
-import { cn } from "../lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Label } from "./label";
@@ -165,7 +164,7 @@ export function FormCanvasPreview({
           }}
         >
           <div className="relative w-full h-full flex items-center">
-            <div className="w-full border-t-2 border-[#1C1C1E]"></div>
+            <div className="w-full border-t-2 border-[#1C1C1E]" />
             {field.label && (
               <div className="absolute left-1/2 -translate-x-1/2 bg-white px-2">
                 <span className="text-xs text-[#1C1C1E]">{field.label}</span>
@@ -446,7 +445,9 @@ export function FormCanvasPreview({
                 <div className="p-2">
                   {group.fields.map((fieldId) => {
                     const field = fields.find((f) => f.id === fieldId);
-                    if (!field) return null;
+                    if (!field) {
+                      return null;
+                    }
                     // Adjust field position relative to group
                     const relativeField = {
                       ...field,

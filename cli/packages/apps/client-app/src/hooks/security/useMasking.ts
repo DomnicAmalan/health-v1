@@ -39,7 +39,9 @@ export function useMasking() {
 
   const mask = useCallback(
     (value: string, field: string, level?: MaskingLevel) => {
-      if (!value) return "";
+      if (!value) {
+        return "";
+      }
 
       // Use provided level or get contextual level
       const maskingLevel = level || getMaskingLevel(field, userRole);

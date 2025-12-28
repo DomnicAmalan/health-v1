@@ -66,13 +66,10 @@ export const test = base.extend<VaultFixtures>({
 
     // Set token in localStorage
     await page.goto("/");
-    await page.evaluate(
-      (token) => {
-        localStorage.setItem("vault_token", token);
-        window.dispatchEvent(new Event("storage"));
-      },
-      initializedVault.rootToken
-    );
+    await page.evaluate((token) => {
+      localStorage.setItem("vault_token", token);
+      window.dispatchEvent(new Event("storage"));
+    }, initializedVault.rootToken);
 
     await page.reload();
     await page.waitForLoadState("networkidle");

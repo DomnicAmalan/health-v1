@@ -148,7 +148,9 @@ export function Canvas({
           >
             {group.fields.map((fieldId) => {
               const field = fields.find((f) => f.id === fieldId);
-              if (!field) return null;
+              if (!field) {
+                return null;
+              }
               return (
                 <Card
                   key={fieldId}

@@ -29,7 +29,7 @@ const HelpButton = React.forwardRef<HTMLButtonElement, HelpButtonProps>(
     return (
       <TooltipProvider delayDuration={200}>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild={true}>
             <button
               ref={ref}
               type="button"

@@ -45,8 +45,12 @@ export function PermissionGate({
 
   // Determine vault path to check
   const effectiveVaultPath = useMemo(() => {
-    if (vaultPath) return vaultPath;
-    if (!checkVault) return null;
+    if (vaultPath) {
+      return vaultPath;
+    }
+    if (!checkVault) {
+      return null;
+    }
 
     // Find the first permission that requires vault access
     for (const perm of permissions) {
@@ -73,8 +77,12 @@ export function PermissionGate({
 
   // Check vault permissions if applicable
   const vaultGranted = useMemo(() => {
-    if (!effectiveVaultPath) return true;
-    if (vaultDenied) return false;
+    if (!effectiveVaultPath) {
+      return true;
+    }
+    if (vaultDenied) {
+      return false;
+    }
 
     switch (vaultCapability) {
       case "read":
@@ -100,9 +108,9 @@ export function PermissionGate({
   if (!granted) {
     // Log access denied
     if (resource) {
-      const reason = !healthGranted
-        ? permissions.join(mode === "all" ? " AND " : " OR ")
-        : `vault:${effectiveVaultPath}:${vaultCapability}`;
+      const reason = healthGranted
+        ? `vault:${effectiveVaultPath}:${vaultCapability}`
+        : permissions.join(mode === "all" ? " AND " : " OR ");
       logDenied(resource, reason);
     }
 
@@ -115,7 +123,7 @@ export function PermissionGate({
         type="component"
         resource={resource || "resource"}
         requiredPermissions={permissions}
-        vaultPath={!vaultGranted ? effectiveVaultPath || undefined : undefined}
+        vaultPath={vaultGranted ? undefined : effectiveVaultPath || undefined}
       />
     );
   }

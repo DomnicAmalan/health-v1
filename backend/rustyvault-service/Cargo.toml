@@ -4,6 +4,9 @@ version = "1.2.0"
 edition.workspace = true
 rust-version.workspace = true
 
+[lints]
+workspace = true
+
 [[bin]]
 name = "rustyvault-service"
 path = "src/main.rs"

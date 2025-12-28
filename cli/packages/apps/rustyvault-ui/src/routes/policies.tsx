@@ -422,9 +422,7 @@ export function PoliciesPage() {
                           <Label>Path Pattern</Label>
                           <div className="flex gap-2">
                             <Select
-                              value={
-                                PATH_TEMPLATES.find((t) => t.value === rule.path)?.value || ""
-                              }
+                              value={PATH_TEMPLATES.find((t) => t.value === rule.path)?.value || ""}
                               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                                 const value = e.target.value;
                                 if (value) updateRulePath(rule.id, value);
@@ -487,7 +485,8 @@ export function PoliciesPage() {
                     disabled={
                       savePolicyMutation.isPending ||
                       !newPolicyName ||
-                      (!useAdvancedMode && pathRules.every((r) => !r.path || r.capabilities.length === 0))
+                      (!useAdvancedMode &&
+                        pathRules.every((r) => !r.path || r.capabilities.length === 0))
                     }
                   >
                     {savePolicyMutation.isPending ? (

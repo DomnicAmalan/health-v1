@@ -67,12 +67,16 @@ export function ZanzibarRelationshipsPage() {
   };
 
   const isExpired = (expiresAt?: string) => {
-    if (!expiresAt) return false;
+    if (!expiresAt) {
+      return false;
+    }
     return new Date(expiresAt) < new Date();
   };
 
   const isNotYetValid = (validFrom?: string) => {
-    if (!validFrom) return false;
+    if (!validFrom) {
+      return false;
+    }
     return new Date(validFrom) > new Date();
   };
 
@@ -154,13 +158,13 @@ export function ZanzibarRelationshipsPage() {
                       {filteredRelationships.map((rel) => {
                         const expired = isExpired(rel.expires_at);
                         const notYetValid = isNotYetValid(rel.valid_from);
-                        const status = !rel.is_active
-                          ? "Revoked"
-                          : expired
+                        const status = rel.is_active
+                          ? expired
                             ? "Expired"
                             : notYetValid
                               ? "Not Yet Valid"
-                              : "Active";
+                              : "Active"
+                          : "Revoked";
 
                         return (
                           <TableRow key={rel.id}>

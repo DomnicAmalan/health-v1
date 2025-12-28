@@ -24,7 +24,9 @@ const PHI_FIELDS = [
  * Check if an object contains PHI fields
  */
 function containsPHI(obj: unknown): boolean {
-  if (!obj || typeof obj !== "object") return false;
+  if (!obj || typeof obj !== "object") {
+    return false;
+  }
 
   const keys = Object.keys(obj);
   return keys.some((key) =>
@@ -36,7 +38,9 @@ function containsPHI(obj: unknown): boolean {
  * Extract PHI-related changes from state update
  */
 function extractPHIChanges(partial: unknown): Record<string, unknown> | null {
-  if (!partial || typeof partial !== "object") return null;
+  if (!partial || typeof partial !== "object") {
+    return null;
+  }
 
   const changes: Record<string, unknown> = {};
   let hasPHI = false;

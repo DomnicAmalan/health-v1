@@ -48,7 +48,7 @@ export function RegisterPageForm({ onSuccess, onCancel }: RegisterPageFormProps)
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="users, organizations, etc."
-            required
+            required={true}
           />
         </div>
 
@@ -59,7 +59,7 @@ export function RegisterPageForm({ onSuccess, onCancel }: RegisterPageFormProps)
             value={path}
             onChange={(e) => setPath(e.target.value)}
             placeholder="/users, /organizations, etc."
-            required
+            required={true}
           />
         </div>
 

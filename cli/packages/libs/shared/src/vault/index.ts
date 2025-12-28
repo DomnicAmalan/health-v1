@@ -16,15 +16,13 @@
  * Only admin/vault UIs should use the direct VaultClient.
  */
 
-// Recommended: Backend-mediated vault access (for client apps)
-export * from "./proxy";
-
 // Direct vault access (for admin/vault UIs only)
 export * from "./client";
-
 export * from "./components";
 export * from "./hooks";
 export * from "./permissions";
+// Recommended: Backend-mediated vault access (for client apps)
+export * from "./proxy";
 export * from "./store";
 export * from "./sync";
 export * from "./types";

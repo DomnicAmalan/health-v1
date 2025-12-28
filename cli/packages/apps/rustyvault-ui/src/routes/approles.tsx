@@ -529,11 +529,7 @@ export function AppRolesPage() {
                 </div>
 
                 <div className="flex gap-2 mt-4 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(role)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => openEditDialog(role)}>
                     <Edit className="h-4 w-4 mr-1" />
                     {t("approles.list.edit")}
                   </Button>
@@ -615,7 +611,9 @@ export function AppRolesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_secret_uses">{t("approles.create.fields.secretIdMaxUses")}</Label>
+                <Label htmlFor="edit_secret_uses">
+                  {t("approles.create.fields.secretIdMaxUses")}
+                </Label>
                 <Input
                   id="edit_secret_uses"
                   type="number"
@@ -647,7 +645,9 @@ export function AppRolesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit_token_max_ttl">{t("approles.create.fields.tokenMaxTtl")}</Label>
+                <Label htmlFor="edit_token_max_ttl">
+                  {t("approles.create.fields.tokenMaxTtl")}
+                </Label>
                 <Input
                   id="edit_token_max_ttl"
                   type="number"
@@ -673,10 +673,7 @@ export function AppRolesPage() {
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
               {t("approles.create.actions.cancel")}
             </Button>
-            <Button
-              onClick={handleEdit}
-              disabled={updateMutation.isPending}
-            >
+            <Button onClick={handleEdit} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

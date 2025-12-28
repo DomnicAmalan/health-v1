@@ -34,8 +34,8 @@ export function GuidePage() {
               <h1 className="text-3xl font-bold">Lazarus Life Vault Access Control Guide</h1>
             </div>
             <p className="text-muted-foreground text-lg">
-              Learn how to configure access for different application types (Admin UI, Client App, Mobile
-              App) using the realm-based multi-tenant architecture.
+              Learn how to configure access for different application types (Admin UI, Client App,
+              Mobile App) using the realm-based multi-tenant architecture.
             </p>
           </div>
           <Button onClick={() => setWizardOpen(true)} size="lg">
@@ -93,7 +93,9 @@ export function GuidePage() {
       <Card>
         <CardHeader>
           <CardTitle>Step-by-Step Setup Flow</CardTitle>
-          <CardDescription>Follow these steps to set up access control for your organization</CardDescription>
+          <CardDescription>
+            Follow these steps to set up access control for your organization
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Step 1 */}
@@ -103,16 +105,24 @@ export function GuidePage() {
               <h3 className="text-xl font-semibold">Create a Realm</h3>
             </div>
             <p className="text-muted-foreground ml-10">
-              A <strong>Realm</strong> is a tenant/organization boundary that isolates all resources.
+              A <strong>Realm</strong> is a tenant/organization boundary that isolates all
+              resources.
             </p>
             <div className="ml-10 space-y-2">
               <p className="text-sm">
-                <strong>Location:</strong> Sidebar → <Link to="/realms" className="text-primary hover:underline">Realms</Link>
+                <strong>Location:</strong> Sidebar →{" "}
+                <Link to="/realms" className="text-primary hover:underline">
+                  Realms
+                </Link>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Click <strong>"Create Realm"</strong></li>
+                <li>
+                  Click <strong>"Create Realm"</strong>
+                </li>
                 <li>Enter: Name, Description, Organization ID (optional)</li>
-                <li>Click <strong>"Create"</strong></li>
+                <li>
+                  Click <strong>"Create"</strong>
+                </li>
                 <li>
                   <strong>Select the realm</strong> from the list to work within it
                 </li>
@@ -131,7 +141,11 @@ export function GuidePage() {
             </p>
             <div className="ml-10 space-y-3">
               <p className="text-sm">
-                <strong>Location:</strong> Sidebar → <Link to="/applications" className="text-primary hover:underline">Applications</Link> (requires realm selected)
+                <strong>Location:</strong> Sidebar →{" "}
+                <Link to="/applications" className="text-primary hover:underline">
+                  Applications
+                </Link>{" "}
+                (requires realm selected)
               </p>
               <div className="space-y-2">
                 <div>
@@ -146,11 +160,16 @@ export function GuidePage() {
                 <div>
                   <p className="text-sm font-semibold mb-1">Option B: Manual Registration</p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    <li>Click <strong>"Register Application"</strong></li>
+                    <li>
+                      Click <strong>"Register Application"</strong>
+                    </li>
                     <li>Fill in:</li>
                     <ul className="list-circle list-inside ml-4 space-y-1">
                       <li>
-                        <strong>App Name:</strong> e.g., <code className="bg-muted px-1 rounded">admin-ui</code>, <code className="bg-muted px-1 rounded">client-app</code>, <code className="bg-muted px-1 rounded">mobile</code>
+                        <strong>App Name:</strong> e.g.,{" "}
+                        <code className="bg-muted px-1 rounded">admin-ui</code>,{" "}
+                        <code className="bg-muted px-1 rounded">client-app</code>,{" "}
+                        <code className="bg-muted px-1 rounded">mobile</code>
                       </li>
                       <li>
                         <strong>App Type:</strong> Admin UI, Client App, Mobile App, or API
@@ -161,10 +180,21 @@ export function GuidePage() {
                       <li>
                         <strong>Allowed Auth Methods:</strong>
                         <ul className="list-square list-inside ml-4 mt-1 space-y-1">
-                          <li>Admin UI: <code className="bg-muted px-1 rounded">token</code>, <code className="bg-muted px-1 rounded">userpass</code></li>
-                          <li>Client App: <code className="bg-muted px-1 rounded">token</code>, <code className="bg-muted px-1 rounded">userpass</code></li>
-                          <li>Mobile App: <code className="bg-muted px-1 rounded">jwt</code>, <code className="bg-muted px-1 rounded">approle</code></li>
-                          <li>API: <code className="bg-muted px-1 rounded">approle</code></li>
+                          <li>
+                            Admin UI: <code className="bg-muted px-1 rounded">token</code>,{" "}
+                            <code className="bg-muted px-1 rounded">userpass</code>
+                          </li>
+                          <li>
+                            Client App: <code className="bg-muted px-1 rounded">token</code>,{" "}
+                            <code className="bg-muted px-1 rounded">userpass</code>
+                          </li>
+                          <li>
+                            Mobile App: <code className="bg-muted px-1 rounded">jwt</code>,{" "}
+                            <code className="bg-muted px-1 rounded">approle</code>
+                          </li>
+                          <li>
+                            API: <code className="bg-muted px-1 rounded">approle</code>
+                          </li>
                         </ul>
                       </li>
                     </ul>
@@ -185,18 +215,42 @@ export function GuidePage() {
             </p>
             <div className="ml-10 space-y-3">
               <p className="text-sm">
-                <strong>Location:</strong> Sidebar → <Link to="/policies" className="text-primary hover:underline">Policies</Link>
+                <strong>Location:</strong> Sidebar →{" "}
+                <Link to="/policies" className="text-primary hover:underline">
+                  Policies
+                </Link>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Click <strong>"New Policy"</strong></li>
-                <li>Enter <strong>Policy Name</strong> (e.g., <code className="bg-muted px-1 rounded">admin-policy</code>, <code className="bg-muted px-1 rounded">reader-policy</code>)</li>
-                <li>Use <strong>Visual Builder</strong> to add path rules:</li>
+                <li>
+                  Click <strong>"New Policy"</strong>
+                </li>
+                <li>
+                  Enter <strong>Policy Name</strong> (e.g.,{" "}
+                  <code className="bg-muted px-1 rounded">admin-policy</code>,{" "}
+                  <code className="bg-muted px-1 rounded">reader-policy</code>)
+                </li>
+                <li>
+                  Use <strong>Visual Builder</strong> to add path rules:
+                </li>
                 <ul className="list-circle list-inside ml-4 space-y-1">
-                  <li>Select path template or enter custom path (e.g., <code className="bg-muted px-1 rounded">secret/data/*</code>)</li>
-                  <li>Check capabilities: <code className="bg-muted px-1 rounded">create</code>, <code className="bg-muted px-1 rounded">read</code>, <code className="bg-muted px-1 rounded">update</code>, <code className="bg-muted px-1 rounded">delete</code>, <code className="bg-muted px-1 rounded">list</code></li>
+                  <li>
+                    Select path template or enter custom path (e.g.,{" "}
+                    <code className="bg-muted px-1 rounded">secret/data/*</code>)
+                  </li>
+                  <li>
+                    Check capabilities: <code className="bg-muted px-1 rounded">create</code>,{" "}
+                    <code className="bg-muted px-1 rounded">read</code>,{" "}
+                    <code className="bg-muted px-1 rounded">update</code>,{" "}
+                    <code className="bg-muted px-1 rounded">delete</code>,{" "}
+                    <code className="bg-muted px-1 rounded">list</code>
+                  </li>
                 </ul>
-                <li>Add multiple rules with <strong>"Add Path"</strong></li>
-                <li>Click <strong>"Create Policy"</strong></li>
+                <li>
+                  Add multiple rules with <strong>"Add Path"</strong>
+                </li>
+                <li>
+                  Click <strong>"Create Policy"</strong>
+                </li>
               </ul>
               <div className="mt-4">
                 <p className="text-sm font-semibold mb-2">Example Policies:</p>
@@ -215,7 +269,8 @@ export function GuidePage() {
                           <code className="bg-muted px-1 rounded">admin-policy</code>
                         </td>
                         <td className="p-2">
-                          <code className="bg-muted px-1 rounded">secret/*</code>, <code className="bg-muted px-1 rounded">sys/*</code>
+                          <code className="bg-muted px-1 rounded">secret/*</code>,{" "}
+                          <code className="bg-muted px-1 rounded">sys/*</code>
                         </td>
                         <td className="p-2">create, read, update, delete, list</td>
                       </tr>
@@ -250,25 +305,37 @@ export function GuidePage() {
               <Badge className="w-8 h-8 flex items-center justify-center">4</Badge>
               <h3 className="text-xl font-semibold">Create Users (for Admin UI / Client App)</h3>
             </div>
-            <p className="text-muted-foreground ml-10">
-              Users authenticate via username/password.
-            </p>
+            <p className="text-muted-foreground ml-10">Users authenticate via username/password.</p>
             <div className="ml-10 space-y-2">
               <p className="text-sm">
-                <strong>Location:</strong> Sidebar → <Link to="/users" className="text-primary hover:underline">Users</Link>
+                <strong>Location:</strong> Sidebar →{" "}
+                <Link to="/users" className="text-primary hover:underline">
+                  Users
+                </Link>
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Click <strong>"New User"</strong></li>
+                <li>
+                  Click <strong>"New User"</strong>
+                </li>
                 <li>Enter:</li>
                 <ul className="list-circle list-inside ml-4 space-y-1">
-                  <li><strong>Username</strong></li>
-                  <li><strong>Password</strong></li>
                   <li>
-                    <strong>Policies</strong> (comma-separated, e.g., <code className="bg-muted px-1 rounded">admin-policy, default</code>)
+                    <strong>Username</strong>
                   </li>
-                  <li><strong>Token TTL</strong> (seconds)</li>
+                  <li>
+                    <strong>Password</strong>
+                  </li>
+                  <li>
+                    <strong>Policies</strong> (comma-separated, e.g.,{" "}
+                    <code className="bg-muted px-1 rounded">admin-policy, default</code>)
+                  </li>
+                  <li>
+                    <strong>Token TTL</strong> (seconds)
+                  </li>
                 </ul>
-                <li>Click <strong>"Create User"</strong></li>
+                <li>
+                  Click <strong>"Create User"</strong>
+                </li>
               </ul>
             </div>
           </div>
@@ -284,14 +351,22 @@ export function GuidePage() {
             </p>
             <div className="ml-10 space-y-2">
               <p className="text-sm">
-                <strong>Location:</strong> Sidebar → <Link to="/approles" className="text-primary hover:underline">AppRoles</Link> (requires realm selected)
+                <strong>Location:</strong> Sidebar →{" "}
+                <Link to="/approles" className="text-primary hover:underline">
+                  AppRoles
+                </Link>{" "}
+                (requires realm selected)
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Click <strong>"Create AppRole"</strong></li>
+                <li>
+                  Click <strong>"Create AppRole"</strong>
+                </li>
                 <li>Enter:</li>
                 <ul className="list-circle list-inside ml-4 space-y-1">
                   <li>
-                    <strong>Role Name:</strong> e.g., <code className="bg-muted px-1 rounded">mobile-role</code>, <code className="bg-muted px-1 rounded">api-role</code>
+                    <strong>Role Name:</strong> e.g.,{" "}
+                    <code className="bg-muted px-1 rounded">mobile-role</code>,{" "}
+                    <code className="bg-muted px-1 rounded">api-role</code>
                   </li>
                   <li>
                     <strong>Bind Secret ID:</strong> Enable (recommended)
@@ -303,10 +378,14 @@ export function GuidePage() {
                     <strong>Token TTL:</strong> e.g., 3600
                   </li>
                   <li>
-                    <strong>Policies:</strong> Check the policies to attach (e.g., <code className="bg-muted px-1 rounded">default</code>, <code className="bg-muted px-1 rounded">reader</code>)
+                    <strong>Policies:</strong> Check the policies to attach (e.g.,{" "}
+                    <code className="bg-muted px-1 rounded">default</code>,{" "}
+                    <code className="bg-muted px-1 rounded">reader</code>)
                   </li>
                 </ul>
-                <li>Click <strong>"Create Role"</strong></li>
+                <li>
+                  Click <strong>"Create Role"</strong>
+                </li>
                 <li>
                   <strong>Generate Secret ID</strong> for each role (one-time, save securely!)
                 </li>
@@ -320,7 +399,9 @@ export function GuidePage() {
       <Card>
         <CardHeader>
           <CardTitle>Authentication Flows by App Type</CardTitle>
-          <CardDescription>How different application types authenticate with the vault</CardDescription>
+          <CardDescription>
+            How different application types authenticate with the vault
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -378,10 +459,12 @@ export function GuidePage() {
               </div>
               <ul className="list-disc list-inside ml-7 space-y-1 text-sm text-muted-foreground">
                 <li>
-                  <code className="bg-muted px-1 rounded">admin-ui</code> (Admin UI type, token+userpass)
+                  <code className="bg-muted px-1 rounded">admin-ui</code> (Admin UI type,
+                  token+userpass)
                 </li>
                 <li>
-                  <code className="bg-muted px-1 rounded">client-app</code> (Client App type, token+userpass)
+                  <code className="bg-muted px-1 rounded">client-app</code> (Client App type,
+                  token+userpass)
                 </li>
                 <li>
                   <code className="bg-muted px-1 rounded">mobile</code> (Mobile type, jwt+approle)
@@ -395,10 +478,12 @@ export function GuidePage() {
               </div>
               <ul className="list-disc list-inside ml-7 space-y-1 text-sm text-muted-foreground">
                 <li>
-                  <code className="bg-muted px-1 rounded">admin-policy</code>: full access to <code className="bg-muted px-1 rounded">secret/*</code>
+                  <code className="bg-muted px-1 rounded">admin-policy</code>: full access to{" "}
+                  <code className="bg-muted px-1 rounded">secret/*</code>
                 </li>
                 <li>
-                  <code className="bg-muted px-1 rounded">app-reader</code>: read access to <code className="bg-muted px-1 rounded">secret/data/acme/*</code>
+                  <code className="bg-muted px-1 rounded">app-reader</code>: read access to{" "}
+                  <code className="bg-muted px-1 rounded">secret/data/acme/*</code>
                 </li>
               </ul>
             </div>
@@ -488,5 +573,3 @@ export function GuidePage() {
     </div>
   );
 }
-
-

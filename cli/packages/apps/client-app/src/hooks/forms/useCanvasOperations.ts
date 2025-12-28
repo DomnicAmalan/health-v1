@@ -90,12 +90,14 @@ export function useCanvasOperations({
 
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const config = JSON.parse(e.target?.result as string) as {
-          fields?: Array<Partial<CanvasField>>;
+          fields?: Partial<CanvasField>[];
         };
         const canvasFields = (config.fields || []).map((field, index: number) => ({
           ...field,
@@ -106,8 +108,7 @@ export function useCanvasOperations({
         }));
         setFields(canvasFields);
         setCanvasConfig({ ...canvasConfig, ...config });
-      } catch (error) {
-        console.error("Error importing config:", error);
+      } catch (_error) {
         alert("Error importing form config.");
       }
     };
@@ -134,9 +135,7 @@ export function useCanvasOperations({
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy:", error);
-    }
+    } catch (_error) {}
   };
 
   return {

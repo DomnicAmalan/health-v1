@@ -37,7 +37,9 @@ export function useImmutableFields() {
 
   const getImmutableFields = useCallback(<T extends EntityType>(entityType: T): string[] => {
     const fields = FIELD_DEFINITIONS[entityType];
-    if (!fields) return [];
+    if (!fields) {
+      return [];
+    }
 
     return Object.entries(fields)
       .filter(([, def]) => def.immutable)

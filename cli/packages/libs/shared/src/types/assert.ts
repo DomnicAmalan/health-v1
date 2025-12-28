@@ -60,7 +60,9 @@ export function isArray(value: unknown): value is unknown[] {
  * Check if value is a valid UUID string
  */
 export function isUUID(value: unknown): value is string {
-  if (!isString(value)) return false;
+  if (!isString(value)) {
+    return false;
+  }
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(value);
 }
@@ -69,7 +71,9 @@ export function isUUID(value: unknown): value is string {
  * Check if value is a valid email string
  */
 export function isEmail(value: unknown): value is string {
-  if (!isString(value)) return false;
+  if (!isString(value)) {
+    return false;
+  }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(value);
 }
@@ -78,7 +82,9 @@ export function isEmail(value: unknown): value is string {
  * Check if value is a valid ISO date string
  */
 export function isDateString(value: unknown): value is string {
-  if (!isString(value)) return false;
+  if (!isString(value)) {
+    return false;
+  }
   const date = new Date(value);
   return !Number.isNaN(date.getTime());
 }

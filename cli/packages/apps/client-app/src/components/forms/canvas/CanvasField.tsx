@@ -39,7 +39,7 @@ export function CanvasField({
         onSelect();
       }}
       onMouseDown={onDragStart}
-      draggable
+      draggable={true}
       onDragStart={(e) => {
         e.dataTransfer.setData("text/plain", field.id);
       }}

@@ -73,7 +73,9 @@ export function useFormBuilder({ config, initialValues = {} }: UseFormBuilderOpt
   };
 
   const isFieldVisible = (field: FormField): boolean => {
-    if (!field.dependencies) return true;
+    if (!field.dependencies) {
+      return true;
+    }
     const dependencyValue = formData[field.dependencies.field];
     return field.dependencies.condition(dependencyValue);
   };

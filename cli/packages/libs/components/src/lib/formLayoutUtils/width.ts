@@ -1,7 +1,9 @@
 import type { FieldLayout } from "../../components/form-builder";
 
 export function getWidthClasses(width?: FieldLayout["width"]): string {
-  if (!width) return "w-full";
+  if (!width) {
+    return "w-full";
+  }
   switch (width) {
     case "full":
       return "w-full";

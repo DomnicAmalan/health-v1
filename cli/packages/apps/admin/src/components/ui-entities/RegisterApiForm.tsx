@@ -56,7 +56,7 @@ export function RegisterApiForm({ onSuccess, onCancel }: RegisterApiFormProps) {
             value={endpoint}
             onChange={(e) => setEndpoint(e.target.value)}
             placeholder="/api/admin/users, /api/admin/users/:id, etc."
-            required
+            required={true}
           />
         </div>
 
@@ -66,7 +66,7 @@ export function RegisterApiForm({ onSuccess, onCancel }: RegisterApiFormProps) {
             id="api-method"
             value={method}
             onChange={(e) => setMethod(e.target.value)}
-            required
+            required={true}
           >
             <SelectValue placeholder="Select method" />
             <SelectItem value="GET">GET</SelectItem>

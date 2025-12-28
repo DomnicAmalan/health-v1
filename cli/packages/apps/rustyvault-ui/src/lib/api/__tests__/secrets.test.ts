@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { secretsApi } from "../secrets";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "../client";
+import { secretsApi } from "../secrets";
 
 // Mock the apiClient
 vi.mock("../client", () => ({
@@ -89,10 +89,9 @@ describe("secretsApi", () => {
 
       await secretsApi.writeForRealm(realmId, "app/config", secretData);
 
-      expect(apiClient.post).toHaveBeenCalledWith(
-        `/v1/realm/${realmId}/secret/data/app/config`,
-        { data: secretData }
-      );
+      expect(apiClient.post).toHaveBeenCalledWith(`/v1/realm/${realmId}/secret/data/app/config`, {
+        data: secretData,
+      });
     });
 
     it("should list realm secrets", async () => {

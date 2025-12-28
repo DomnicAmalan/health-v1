@@ -15,7 +15,7 @@ test.describe("Mobile UI @mobile", () => {
     const mobileMenu = authenticatedPage
       .locator('[data-testid="mobile-menu"], button[aria-label*="menu"], [aria-label*="Menu"]')
       .first();
-    const isMobileMenuVisible = await mobileMenu.isVisible().catch(() => false);
+    const _isMobileMenuVisible = await mobileMenu.isVisible().catch(() => false);
 
     // On mobile, sidebar might be hidden and menu button shown
     // Adjust expectations based on your actual mobile UI

@@ -55,9 +55,15 @@ export const appAccessApi = {
     access_level?: string;
   }): Promise<AppAccessListResponse> => {
     const params = new URLSearchParams();
-    if (filters?.app_name) params.append("app_name", filters.app_name);
-    if (filters?.organization_id) params.append("organization_id", filters.organization_id);
-    if (filters?.access_level) params.append("access_level", filters.access_level);
+    if (filters?.app_name) {
+      params.append("app_name", filters.app_name);
+    }
+    if (filters?.organization_id) {
+      params.append("organization_id", filters.organization_id);
+    }
+    if (filters?.access_level) {
+      params.append("access_level", filters.access_level);
+    }
 
     const query = params.toString() ? `?${params.toString()}` : "";
     const response = await apiClient.get<AppAccessListResponse>(`/app-access${query}`);
@@ -81,7 +87,7 @@ export const appAccessApi = {
     appName: string,
     accessLevel: "read" | "write" | "admin"
   ): Promise<void> => {
-    await apiClient.post(`/app-access/grant`, {
+    await apiClient.post("/app-access/grant", {
       user_id: userId,
       app_name: appName,
       access_level: accessLevel,
@@ -92,7 +98,7 @@ export const appAccessApi = {
    * Revoke app access from a user
    */
   revoke: async (userId: string, appName: string): Promise<void> => {
-    await apiClient.post(`/app-access/revoke`, {
+    await apiClient.post("/app-access/revoke", {
       user_id: userId,
       app_name: appName,
     });
@@ -102,7 +108,7 @@ export const appAccessApi = {
    * Bulk grant app access
    */
   bulkGrant: async (request: BulkGrantRequest): Promise<{ granted: number }> => {
-    const response = await apiClient.post<{ granted: number }>(`/app-access/bulk-grant`, request);
+    const response = await apiClient.post<{ granted: number }>("/app-access/bulk-grant", request);
     return response.data || { granted: 0 };
   },
 
@@ -110,7 +116,7 @@ export const appAccessApi = {
    * Bulk revoke app access
    */
   bulkRevoke: async (request: BulkRevokeRequest): Promise<{ revoked: number }> => {
-    const response = await apiClient.post<{ revoked: number }>(`/app-access/bulk-revoke`, request);
+    const response = await apiClient.post<{ revoked: number }>("/app-access/bulk-revoke", request);
     return response.data || { revoked: 0 };
   },
 

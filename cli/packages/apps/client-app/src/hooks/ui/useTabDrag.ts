@@ -16,7 +16,9 @@ export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOpt
       return;
     }
 
-    if (!isDraggable) return;
+    if (!isDraggable) {
+      return;
+    }
 
     const startEvent = e;
     mouseDownRef.current = {
@@ -27,7 +29,9 @@ export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOpt
     isDraggingRef.current = false;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!mouseDownRef.current) return;
+      if (!mouseDownRef.current) {
+        return;
+      }
 
       const deltaX = Math.abs(moveEvent.clientX - mouseDownRef.current.x);
       const deltaY = Math.abs(moveEvent.clientY - mouseDownRef.current.y);

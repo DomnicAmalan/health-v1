@@ -20,7 +20,9 @@ export function reorderTabsArray<T extends { id: string }>(
   _dashboardId = "dashboard"
 ): T[] {
   // Early return if empty
-  if (tabs.length === 0) return tabs;
+  if (tabs.length === 0) {
+    return tabs;
+  }
 
   // Find dragged tab index - O(n) single pass
   let draggedIndex = -1;
@@ -31,10 +33,14 @@ export function reorderTabsArray<T extends { id: string }>(
     }
   }
 
-  if (draggedIndex === -1) return tabs; // Tab not found
+  if (draggedIndex === -1) {
+    return tabs; // Tab not found
+  }
 
   // If already at target position, no change needed
-  if (draggedIndex === targetIndex) return tabs;
+  if (draggedIndex === targetIndex) {
+    return tabs;
+  }
 
   // Efficient reordering: remove from source, insert at target
   const result = [...tabs]; // Create copy
@@ -54,7 +60,9 @@ export function reorderTabsArray<T extends { id: string }>(
  * O(log n) time complexity - optimal for sorted position arrays
  */
 export function findInsertionIndex(positions: number[], dragPosition: number): number {
-  if (positions.length === 0) return 0;
+  if (positions.length === 0) {
+    return 0;
+  }
 
   let left = 0;
   let right = positions.length - 1;
@@ -80,7 +88,9 @@ export function findInsertionIndex(positions: number[], dragPosition: number): n
  * Uses getBoundingClientRect() efficiently with minimal DOM queries
  */
 export function getTabPositions(container: HTMLElement, tabElements: HTMLElement[]): number[] {
-  if (tabElements.length === 0) return [];
+  if (tabElements.length === 0) {
+    return [];
+  }
 
   const containerRect = container.getBoundingClientRect();
   const scrollLeft = container.scrollLeft;

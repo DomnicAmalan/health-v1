@@ -17,7 +17,7 @@ export interface CheckPermissionResponse {
 }
 
 export interface BatchCheckPermissionRequest {
-  checks: Array<[string, string, string]>; // (user, relation, object)
+  checks: [string, string, string][]; // (user, relation, object)
 }
 
 export interface BatchCheckPermissionResponse {
@@ -93,7 +93,7 @@ export async function checkPermission(
  * Batch check multiple permissions
  */
 export async function checkPermissionsBatch(
-  checks: Array<[string, string, string]>
+  checks: [string, string, string][]
 ): Promise<BatchCheckPermissionResponse> {
   return apiRequest<BatchCheckPermissionResponse>(API_ROUTES.ADMIN.PERMISSIONS.CHECK_BATCH, {
     method: "POST",

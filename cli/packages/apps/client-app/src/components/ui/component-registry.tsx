@@ -161,7 +161,7 @@ export function withHelp<T extends Readonly<Record<string, unknown>>>(
               content={helpContent}
               title={help?.title}
               variant={help?.variant || "default"}
-              size={help?.size || "md"}
+              size={help?.size > 0 || "md"}
             />
           </div>
         )}
@@ -405,7 +405,7 @@ export function ComponentWrapper({
           content={helpContent}
           title={helpTitle}
           variant={help?.variant || config?.helpVariant || "default"}
-          size={help?.size || config?.helpSize || "md"}
+          size={help?.size > 0 || config?.helpSize || "md"}
           position="top-right"
         />
       )}

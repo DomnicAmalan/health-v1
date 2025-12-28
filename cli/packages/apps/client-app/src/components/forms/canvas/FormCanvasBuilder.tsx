@@ -55,7 +55,9 @@ export function FormCanvasBuilder() {
   });
 
   const snap = (value: number) => {
-    if (!snapToGrid) return value;
+    if (!snapToGrid) {
+      return value;
+    }
     return Math.round(value / gridSize) * gridSize;
   };
 

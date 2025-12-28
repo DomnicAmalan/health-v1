@@ -15,7 +15,9 @@ export function useAuditLog() {
 
   const logPHI = useCallback(
     (resource: string, resourceId?: string, details?: Record<string, unknown>) => {
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       // Add to local store
       addEntry({
@@ -34,7 +36,9 @@ export function useAuditLog() {
 
   const logState = useCallback(
     (action: string, resource: string, resourceId?: string, details?: Record<string, unknown>) => {
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       addEntry({
         userId: user.id,
@@ -51,7 +55,9 @@ export function useAuditLog() {
 
   const logPermission = useCallback(
     (permission: string, granted: boolean, resource?: string) => {
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       addEntry({
         userId: user.id,
@@ -70,7 +76,9 @@ export function useAuditLog() {
 
   const logDenied = useCallback(
     (resource: string, requiredPermission: string) => {
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       addEntry({
         userId: user.id,

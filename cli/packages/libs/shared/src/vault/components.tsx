@@ -6,7 +6,6 @@
 import { type ReactNode, useCallback, useEffect } from "react";
 import { useVaultAuth, useVaultCapabilities } from "./hooks";
 import { useVaultStore } from "./store";
-import type { VaultCapability } from "./types";
 
 // ============================================
 // Permission Gate Component
@@ -51,8 +50,12 @@ export function VaultPermissionGate({
   }
 
   const hasPermission = (() => {
-    if (isDenied) return false;
-    if (capabilities.includes("root")) return true;
+    if (isDenied) {
+      return false;
+    }
+    if (capabilities.includes("root")) {
+      return true;
+    }
 
     switch (capability) {
       case "read":
@@ -179,10 +182,18 @@ export function CombinedPermissionGate({
 
   // Check vault permissions
   const hasVaultPermission = useCallback(() => {
-    if (!vaultPath) return true;
-    if (isRoot) return true;
-    if (isDenied) return false;
-    if (capabilities.includes("root")) return true;
+    if (!vaultPath) {
+      return true;
+    }
+    if (isRoot) {
+      return true;
+    }
+    if (isDenied) {
+      return false;
+    }
+    if (capabilities.includes("root")) {
+      return true;
+    }
 
     switch (vaultCapability) {
       case "read":
@@ -228,17 +239,31 @@ export function VaultStatus({ detailed = false, className = "" }: VaultStatusPro
   const { isAuthenticated } = useVaultAuth();
 
   const getStatusColor = () => {
-    if (!isConnected) return "bg-gray-400";
-    if (isSealed) return "bg-yellow-400";
-    if (!isAuthenticated) return "bg-orange-400";
+    if (!isConnected) {
+      return "bg-gray-400";
+    }
+    if (isSealed) {
+      return "bg-yellow-400";
+    }
+    if (!isAuthenticated) {
+      return "bg-orange-400";
+    }
     return "bg-green-400";
   };
 
   const getStatusText = () => {
-    if (!isConnected) return "Disconnected";
-    if (!isInitialized) return "Not Initialized";
-    if (isSealed) return "Sealed";
-    if (!isAuthenticated) return "Unauthenticated";
+    if (!isConnected) {
+      return "Disconnected";
+    }
+    if (!isInitialized) {
+      return "Not Initialized";
+    }
+    if (isSealed) {
+      return "Sealed";
+    }
+    if (!isAuthenticated) {
+      return "Unauthenticated";
+    }
     return "Connected";
   };
 
@@ -277,9 +302,15 @@ export function withVaultPermission<P extends object>(
     }
 
     const hasPermission = (() => {
-      if (isRoot) return true;
-      if (isDenied) return false;
-      if (capabilities.includes("root")) return true;
+      if (isRoot) {
+        return true;
+      }
+      if (isDenied) {
+        return false;
+      }
+      if (capabilities.includes("root")) {
+        return true;
+      }
 
       switch (capability) {
         case "read":

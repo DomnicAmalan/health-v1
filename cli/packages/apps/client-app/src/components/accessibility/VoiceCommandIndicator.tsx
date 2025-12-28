@@ -4,15 +4,15 @@
  */
 
 import { Box } from "@lazarus-life/ui-components";
-import { Mic } from "lucide-react";
 import { cn } from "@lazarus-life/ui-components/utils";
+import { Mic } from "lucide-react";
 import { useVoiceCommandStore } from "@/stores/voiceCommandStore";
 
 export function VoiceCommandIndicator() {
   const isListening = useVoiceCommandStore((state) => state.isListening);
   const isProcessing = useVoiceCommandStore((state) => state.isProcessing);
 
-  if (!isListening && !isProcessing) {
+  if (!(isListening || isProcessing)) {
     return null;
   }
 

@@ -2,8 +2,8 @@ import { createRoute, createRouter, RouterProvider } from "@tanstack/react-route
 import { Route as rootRoute } from "./routes/__root";
 import { ApplicationsPage } from "./routes/applications";
 import { AppRolesPage } from "./routes/approles";
-import { DashboardPage } from "./routes/index";
 import { GuidePage } from "./routes/guide";
+import { DashboardPage } from "./routes/index";
 import { LoginPage } from "./routes/login";
 import { PoliciesPage } from "./routes/policies";
 import { RealmsPage } from "./routes/realms";

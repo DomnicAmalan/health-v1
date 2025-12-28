@@ -124,7 +124,7 @@ export function AssignPermissionDialog({
               placeholder={
                 subjectType === "user" ? "user-id" : subjectType === "role" ? "admin" : "group-id"
               }
-              required
+              required={true}
             />
 
             <div className="grid gap-2">
@@ -148,7 +148,7 @@ export function AssignPermissionDialog({
               value={object}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setObject(e.target.value)}
               placeholder="page:users, button:create-user, field:user-email, etc."
-              required
+              required={true}
             />
 
             <Input

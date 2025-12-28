@@ -1,20 +1,10 @@
 {
+  "extends": "../../../tsconfig.strict.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
     "types": ["vite/client"],
-    "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist",
-    "jsx": "react-jsx"
+    "outDir": "./dist"
   },
   "include": ["src/**/*", "src/vite-env.d.ts"],
   "exclude": ["node_modules", "dist"]

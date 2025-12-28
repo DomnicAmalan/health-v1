@@ -9,11 +9,12 @@ interface SlotProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 function Slot({ children, ...props }: SlotProps) {
-  if (React.isValidElement(children)) {
+  if (React.isValidElement<Record<string, unknown>>(children)) {
+    const childProps = children.props as Record<string, unknown>;
     return React.cloneElement(children, {
       ...props,
-      ...children.props,
-      className: [props.className, children.props.className].filter(Boolean).join(" "),
+      ...childProps,
+      className: [props.className, childProps.className].filter(Boolean).join(" "),
     });
   }
 

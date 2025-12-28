@@ -37,9 +37,10 @@ export const Route = createRootRoute({
     if (!authStore.isAuthenticated) {
       tokenValidatedThisSession = false;
       const redirectTo = location.pathname !== "/" ? location.pathname : undefined;
+      // Use empty object instead of undefined for search to satisfy exactOptionalPropertyTypes
       throw redirect({
         to: "/login",
-        search: redirectTo ? { redirect: redirectTo } : undefined,
+        ...(redirectTo ? { search: { redirect: redirectTo } } : {}),
       });
     }
   },

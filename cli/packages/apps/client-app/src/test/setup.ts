@@ -12,8 +12,6 @@ expect.extend(matchers);
 
 // Ensure document exists (jsdom should provide this, but ensure it's available)
 if (typeof document === "undefined") {
-  // This should not happen with jsdom, but just in case
-  console.warn("Document is not available in test environment");
 }
 
 // Mock window.location for tests

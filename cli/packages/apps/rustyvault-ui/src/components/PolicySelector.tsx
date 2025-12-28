@@ -48,11 +48,9 @@ export function PolicySelector({
   });
 
   const availablePolicies = policiesData?.keys || [];
-  
+
   // Filter out already selected policies from dropdown options
-  const unselectedPolicies = availablePolicies.filter(
-    (p) => !selectedPolicies.includes(p)
-  );
+  const unselectedPolicies = availablePolicies.filter((p) => !selectedPolicies.includes(p));
 
   const handleAddPolicy = (policy: string) => {
     if (policy && !selectedPolicies.includes(policy)) {
@@ -103,7 +101,7 @@ export function PolicySelector({
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium">{label}</Label>
-      
+
       {/* Dropdown to add policies */}
       <Select
         value={selectValue}
@@ -151,8 +149,8 @@ export function PolicySelector({
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              {selectedPolicies.length}{" "}
-              {selectedPolicies.length === 1 ? "policy" : "policies"} selected
+              {selectedPolicies.length} {selectedPolicies.length === 1 ? "policy" : "policies"}{" "}
+              selected
             </p>
             <Button
               type="button"
@@ -166,7 +164,7 @@ export function PolicySelector({
           </div>
         </div>
       )}
-      
+
       {selectedPolicies.length === 0 && (
         <p className="text-xs text-muted-foreground">
           No policies selected. Use the dropdown above to add policies.

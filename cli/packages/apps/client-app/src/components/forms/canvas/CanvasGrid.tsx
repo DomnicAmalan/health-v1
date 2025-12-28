@@ -6,7 +6,9 @@ interface CanvasGridProps {
 }
 
 export function CanvasGrid({ showGrid, gridSize }: CanvasGridProps) {
-  if (!showGrid) return null;
+  if (!showGrid) {
+    return null;
+  }
 
   return (
     <Box

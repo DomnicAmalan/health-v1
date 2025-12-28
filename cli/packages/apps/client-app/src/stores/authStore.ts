@@ -3,7 +3,6 @@
  * Authentication state management with Zustand and Immer
  */
 
-import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
 import type { User } from "@lazarus-life/shared/types/user";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -37,7 +36,9 @@ function loadTokensFromStorage(): { accessToken: string | null; refreshToken: st
  * Save tokens to sessionStorage
  */
 function saveTokensToStorage(accessToken: string | null, refreshToken: string | null): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   if (accessToken) {
     sessionStorage.setItem(TOKEN_STORAGE_KEY_ACCESS, accessToken);
@@ -56,10 +57,14 @@ function saveTokensToStorage(accessToken: string | null, refreshToken: string | 
  * Load user from sessionStorage
  */
 function loadUserFromStorage(): User | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   const userStr = sessionStorage.getItem(USER_STORAGE_KEY);
-  if (!userStr) return null;
+  if (!userStr) {
+    return null;
+  }
 
   try {
     return JSON.parse(userStr) as User;
@@ -72,7 +77,9 @@ function loadUserFromStorage(): User | null {
  * Save user to sessionStorage
  */
 function saveUserToStorage(user: User | null): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   if (user) {
     sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
@@ -165,9 +172,7 @@ export const useAuthStore = create<AuthStore>()(
 
       try {
         await apiLogout();
-      } catch (error) {
-        // Continue with logout even if API call fails
-        console.error("Logout error:", error);
+      } catch (_error) {
       } finally {
         set((state) => {
           state.user = null;
@@ -307,7 +312,7 @@ export const useAuthStore = create<AuthStore>()(
         if (currentUser) {
           saveUserToStorage(currentUser);
         }
-      } catch (error) {
+      } catch (_error) {
         // Auth check failed, try to refresh token
         try {
           await get().refreshAccessToken();
@@ -331,7 +336,7 @@ export const useAuthStore = create<AuthStore>()(
           if (currentUser) {
             saveUserToStorage(currentUser);
           }
-        } catch (refreshError) {
+        } catch (_refreshError) {
           // Both check and refresh failed, clear auth
           set((state) => {
             state.user = null;

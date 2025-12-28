@@ -12,7 +12,7 @@ export function VoiceCommandFeedback() {
   const lastIntent = useVoiceCommandStore((state) => state.lastIntent);
   const error = useVoiceCommandStore((state) => state.error);
 
-  if (!lastCommand && !error) {
+  if (!(lastCommand || error)) {
     return null;
   }
 

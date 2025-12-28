@@ -157,7 +157,7 @@ export const systemApi = {
     let filename = "rustyvault-credentials.txt";
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-      if (filenameMatch) {
+      if (filenameMatch?.[1]) {
         filename = filenameMatch[1];
       }
     }

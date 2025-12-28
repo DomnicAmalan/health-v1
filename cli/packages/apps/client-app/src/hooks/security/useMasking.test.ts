@@ -4,7 +4,6 @@
 
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { maskEmail, maskPhone, maskSSN } from "@/lib/api/masking";
 import { useAuthStore } from "@/stores/authStore";
 import { useMasking } from "./useMasking";
 

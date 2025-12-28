@@ -29,10 +29,6 @@ export function validateEnv(): void {
   }
 
   if (missing.length > 0) {
-    console.warn(
-      `Missing required environment variables: ${missing.join(", ")}\n` +
-        "Using default values. This may cause issues in production."
-    );
   }
 }
 
