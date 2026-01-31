@@ -1,5 +1,6 @@
 import { AdminTranslationProvider } from "@lazarus-life/shared/i18n";
 import { createQueryClient } from "@lazarus-life/shared/query";
+import { ErrorBoundary } from "@lazarus-life/ui-components";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -46,13 +47,15 @@ async function init() {
 
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <AdminTranslationProvider>
-        <QueryClientProvider client={queryClient}>
-          <PermissionProvider>
-            <Router />
-          </PermissionProvider>
-        </QueryClientProvider>
-      </AdminTranslationProvider>
+      <ErrorBoundary>
+        <AdminTranslationProvider>
+          <QueryClientProvider client={queryClient}>
+            <PermissionProvider>
+              <Router />
+            </PermissionProvider>
+          </QueryClientProvider>
+        </AdminTranslationProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 }

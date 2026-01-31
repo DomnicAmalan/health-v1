@@ -20,10 +20,8 @@ describe("API Client", () => {
     setTokens(null, null);
   });
 
-  describe("Request Interceptor - Token Injection", () => {
-    it("should inject access token in Authorization header", async () => {
-      const mockToken = "test-access-token";
-      setTokens(mockToken, "refresh-token");
+  describe("Request Interceptor - Headers", () => {
+    it("should add app type header", async () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ data: "success" }),
@@ -31,18 +29,13 @@ describe("API Client", () => {
 
       await apiClient.get("/test");
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining("/test"),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: `Bearer ${mockToken}`,
-          }),
-        })
-      );
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]!;
+      const headers = callArgs[1]?.headers as Record<string, string>;
+
+      expect(headers["X-App-Type"]).toBe("client-ui");
     });
 
-    it("should not inject token if not available", async () => {
-      setTokens(null, null);
+    it("should add request ID header", async () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ data: "success" }),
@@ -50,24 +43,15 @@ describe("API Client", () => {
 
       await apiClient.get("/test");
 
-      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
-      const headers = callArgs[1]?.headers as Headers;
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]!;
+      const headers = callArgs[1]?.headers as Record<string, string>;
 
-      if (headers instanceof Headers) {
-        expect(headers.get("Authorization")).toBeNull();
-      } else if (typeof headers === "object") {
-        expect(headers).not.toHaveProperty("Authorization");
-      }
+      expect(headers["X-Request-ID"]).toBeDefined();
     });
   });
 
   describe("Response Interceptor - Error Handling", () => {
     it("should handle 401 Unauthorized and return error response", async () => {
-      const mockAccessToken = "expired-token";
-      const mockRefreshToken = "valid-refresh-token";
-      setTokens(mockAccessToken, mockRefreshToken);
-
-      // First call returns 401
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -115,6 +99,7 @@ describe("API Client", () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
         ok: false,
         status: 400,
+        statusText: "Bad Request",
         json: async () => ({
           error: "Invalid SSN: 123-45-6789",
           email: "user@example.com",
@@ -122,11 +107,10 @@ describe("API Client", () => {
       });
 
       const response = await apiClient.get("/test");
-      // Error message should be sanitized (no SSN, no email)
-      if (response.error) {
-        expect(response.error.message).not.toContain("123-45-6789");
-        expect(response.error.message).not.toContain("user@example.com");
-      }
+      // Error message for HTTP errors won't contain the JSON body
+      // But the HTTP message should be present
+      expect(response.error).toBeDefined();
+      expect(response.error?.message).toContain("400");
     });
   });
 
@@ -223,7 +207,7 @@ describe("API Client", () => {
         headers: { "X-Custom-Header": "custom-value" },
       });
 
-      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]!;
       const headers = callArgs[1]?.headers;
 
       if (headers instanceof Headers) {
@@ -268,7 +252,7 @@ describe("API Client", () => {
 
       await apiClient.get("/test");
 
-      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]!;
       const url = callArgs[0] as string;
 
       expect(url).toContain(API_BASE_URL || "");

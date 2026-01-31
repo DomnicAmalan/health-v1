@@ -1,9 +1,9 @@
-import type { FieldLayout, FormField } from "@lazarus-life/ui-components";
+import type { FieldLayout, FormFieldConfig } from "@lazarus-life/ui-components";
 import { Flex, Input, Label, Stack } from "@lazarus-life/ui-components";
 import { cn } from "@lazarus-life/ui-components/utils";
 
 interface FormFieldRendererProps {
-  field: FormField;
+  field: FormFieldConfig;
   value: unknown;
   hasError: boolean;
   layout: FieldLayout;
@@ -84,7 +84,7 @@ export function FormFieldRenderer({
         )}
       >
         {field.placeholder && <option value="">{field.placeholder}</option>}
-        {field.options?.map((option) => (
+        {field.options?.map((option: { value: string; label: string }) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -119,7 +119,7 @@ export function FormFieldRenderer({
   if (field.type === "radio" && field.options) {
     return (
       <Stack spacing="xs" className={getWidthClasses(layout.width)}>
-        {field.options.map((option) => (
+        {field.options.map((option: { value: string; label: string }) => (
           <Flex key={option.value} className="items-center gap-2">
             <input
               type="radio"

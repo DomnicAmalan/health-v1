@@ -8,13 +8,20 @@ import {
   CardTitle,
   Input,
   Label,
+  Separator,
+  Switch,
 } from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Copy, Key, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { type CreateTokenRequest, tokensApi } from "@/lib/api";
 
-export function TokensPage() {
+export const Route = createFileRoute("/tokens")({
+  component: TokensPage,
+});
+
+function TokensPage() {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -214,62 +221,82 @@ export function TokensPage() {
           </CardHeader>
           <CardContent>
             {isCreating ? (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="display_name">Display Name</Label>
-                  <Input
-                    id="display_name"
-                    value={createForm.display_name}
-                    onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
-                    placeholder="my-app-token"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="policies">Policies (comma-separated)</Label>
-                  <Input
-                    id="policies"
-                    value={policiesInput}
-                    onChange={(e) => setPoliciesInput(e.target.value)}
-                    placeholder="default, my-policy"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="ttl">TTL (seconds)</Label>
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">Token Information</div>
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="display_name">Display Name</Label>
                     <Input
-                      id="ttl"
-                      type="number"
-                      value={createForm.ttl}
-                      onChange={(e) =>
-                        setCreateForm({ ...createForm, ttl: parseInt(e.target.value, 10) || 0 })
-                      }
+                      id="display_name"
+                      value={createForm.display_name}
+                      onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
+                      placeholder="my-app-token"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="num_uses">Max Uses (0 = unlimited)</Label>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="policies">Policies (comma-separated)</Label>
                     <Input
-                      id="num_uses"
-                      type="number"
-                      value={createForm.num_uses}
-                      onChange={(e) =>
-                        setCreateForm({
-                          ...createForm,
-                          num_uses: parseInt(e.target.value, 10) || 0,
-                        })
-                      }
+                      id="policies"
+                      value={policiesInput}
+                      onChange={(e) => setPoliciesInput(e.target.value)}
+                      placeholder="default, my-policy"
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="renewable"
-                    checked={createForm.renewable}
-                    onChange={(e) => setCreateForm({ ...createForm, renewable: e.target.checked })}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="renewable">Renewable</Label>
+
+                {/* TTL Settings */}
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">Token Settings</div>
+                  <Separator />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ttl">TTL (seconds)</Label>
+                      <Input
+                        id="ttl"
+                        type="number"
+                        value={createForm.ttl}
+                        onChange={(e) =>
+                          setCreateForm({ ...createForm, ttl: parseInt(e.target.value, 10) || 0 })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="num_uses">Max Uses (0 = unlimited)</Label>
+                      <Input
+                        id="num_uses"
+                        type="number"
+                        value={createForm.num_uses}
+                        onChange={(e) =>
+                          setCreateForm({
+                            ...createForm,
+                            num_uses: parseInt(e.target.value, 10) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="renewable">Renewable</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Allow this token to be renewed before expiry
+                      </p>
+                    </div>
+                    <Switch
+                      id="renewable"
+                      checked={createForm.renewable}
+                      onCheckedChange={(checked) => setCreateForm({ ...createForm, renewable: checked })}
+                    />
+                  </div>
                 </div>
+
+                {/* Actions */}
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleCreateToken} disabled={createTokenMutation.isPending}>
                     {createTokenMutation.isPending ? "Creating..." : "Create Token"}

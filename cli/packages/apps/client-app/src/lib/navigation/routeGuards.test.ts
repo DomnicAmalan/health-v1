@@ -8,13 +8,21 @@ import { useAuthStore } from "@/stores/authStore";
 import { checkRoutePermission, createRouteGuard } from "./routeGuards";
 
 // Mock audit API
+import * as auditApi from "@/lib/api/audit";
 vi.mock("@/lib/api/audit", () => ({
   logAccessDenied: vi.fn(),
 }));
 
 describe("Route Guards", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     useAuthStore.setState({
+      user: {
+        id: "test-user-id",
+        email: "test@example.com",
+        role: "doctor",
+        permissions: [PERMISSIONS.PATIENTS.VIEW],
+      },
       permissions: [PERMISSIONS.PATIENTS.VIEW],
     });
   });
@@ -36,7 +44,7 @@ describe("Route Guards", () => {
       const hasPermission = (perm: string) => useAuthStore.getState().permissions.includes(perm);
 
       const result = checkRoutePermission(hasPermission, {
-        requiredPermission: PERMISSIONS.PATIENTS.EDIT,
+        requiredPermission: PERMISSIONS.PATIENTS.UPDATE,
         resource: "patients",
       });
 
@@ -45,15 +53,14 @@ describe("Route Guards", () => {
     });
 
     it("should log access denied when resource is provided", () => {
-      const { logAccessDenied } = require("@/lib/api/audit");
       const hasPermission = (perm: string) => useAuthStore.getState().permissions.includes(perm);
 
       checkRoutePermission(hasPermission, {
-        requiredPermission: PERMISSIONS.PATIENTS.EDIT,
+        requiredPermission: PERMISSIONS.PATIENTS.UPDATE,
         resource: "patients",
       });
 
-      expect(logAccessDenied).toHaveBeenCalled();
+      expect(vi.mocked(auditApi.logAccessDenied)).toHaveBeenCalled();
     });
   });
 

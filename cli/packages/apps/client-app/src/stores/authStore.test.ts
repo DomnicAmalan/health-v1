@@ -117,11 +117,13 @@ describe("Auth Store", () => {
       vi.mocked(authAPI.login).mockRejectedValueOnce(new Error("Invalid credentials"));
 
       const { login } = useAuthStore.getState();
-      await login("test@example.com", "wrong-password");
+
+      // login throws the error after setting state
+      await expect(login("test@example.com", "wrong-password")).rejects.toThrow("Invalid credentials");
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
-      expect(state.error).toBeTruthy();
+      expect(state.error).toBe("Invalid credentials");
     });
   });
 
@@ -151,10 +153,10 @@ describe("Auth Store", () => {
     });
   });
 
-  describe("refreshToken", () => {
+  describe("refreshAccessToken", () => {
     it("should refresh access token", async () => {
       const { setTokens } = useAuthStore.getState();
-      setTokens(null, "refresh-token");
+      setTokens("old-access-token", "refresh-token");
 
       vi.mocked(authAPI.refreshAccessToken).mockResolvedValueOnce({
         accessToken: "new-access-token",
@@ -162,8 +164,8 @@ describe("Auth Store", () => {
         expiresIn: 3600,
       });
 
-      const { refreshToken } = useAuthStore.getState();
-      await refreshToken();
+      const { refreshAccessToken } = useAuthStore.getState();
+      await refreshAccessToken();
 
       const state = useAuthStore.getState();
       expect(state.accessToken).toBe("new-access-token");
@@ -171,15 +173,18 @@ describe("Auth Store", () => {
 
     it("should handle refresh token errors", async () => {
       const { setTokens } = useAuthStore.getState();
-      setTokens(null, "invalid-refresh-token");
+      setTokens("old-access-token", "invalid-refresh-token");
 
       vi.mocked(authAPI.refreshAccessToken).mockRejectedValueOnce(new Error("Token expired"));
 
-      const { refreshToken } = useAuthStore.getState();
-      await refreshToken();
+      const { refreshAccessToken } = useAuthStore.getState();
+
+      // refreshAccessToken throws the error after clearing state
+      await expect(refreshAccessToken()).rejects.toThrow("Token expired");
 
       const state = useAuthStore.getState();
-      expect(state.error).toBeTruthy();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.accessToken).toBeNull();
     });
   });
 

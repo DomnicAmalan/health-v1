@@ -27,3 +27,5 @@ dist-ssr
 src/routeTree.gen.ts
 src/routes/routeTree.gen.ts
 
+# TanStack Router auto-generated files
+src/routeTree.gen.ts

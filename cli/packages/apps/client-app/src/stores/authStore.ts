@@ -299,8 +299,14 @@ export const useAuthStore = create<AuthStore>()(
             state.user.role = userInfo.role || state.user.role;
             state.permissions = userInfo.permissions || state.permissions;
           } else {
-            // Set user if not already set
-            state.user = userInfo;
+            // Set user if not already set - convert UserInfo to User
+            state.user = {
+              id: userInfo.sub,
+              email: userInfo.email,
+              username: userInfo.name,
+              role: userInfo.role || "user",
+              permissions: userInfo.permissions || [],
+            };
             state.permissions = userInfo.permissions || [];
             state.role = userInfo.role || null;
           }
@@ -324,7 +330,14 @@ export const useAuthStore = create<AuthStore>()(
               state.user.role = userInfo.role || state.user.role;
               state.permissions = userInfo.permissions || state.permissions;
             } else {
-              state.user = userInfo;
+              // Set user if not already set - convert UserInfo to User
+              state.user = {
+                id: userInfo.sub,
+                email: userInfo.email,
+                username: userInfo.name,
+                role: userInfo.role || "user",
+                permissions: userInfo.permissions || [],
+              };
               state.permissions = userInfo.permissions || [];
               state.role = userInfo.role || null;
             }

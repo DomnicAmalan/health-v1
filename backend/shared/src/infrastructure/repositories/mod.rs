@@ -9,6 +9,7 @@ pub mod group_repository_impl;
 pub mod ui_entity_repository_impl;
 pub mod session_repository_impl;
 pub mod request_log_repository_impl;
+pub mod ehr;
 
 pub use user_repository_impl::UserRepositoryImpl;
 pub use key_repository_impl::KeyRepositoryImpl;

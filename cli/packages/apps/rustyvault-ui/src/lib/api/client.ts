@@ -5,10 +5,7 @@
 
 import { BaseApiClient } from "@lazarus-life/shared/api";
 import { useAuthStore } from "@/stores/authStore";
-
-// Vault API base URL - should NOT include /api prefix
-// Vault routes are directly under /v1/ (e.g., /v1/sys/realm, /v1/sys/policies/acl)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4117/v1";
+import { API_BASE_URL, isDebugEnabled } from "@/lib/env";
 
 /**
  * Custom error class for Vault API errors (legacy compatibility)
@@ -46,7 +43,7 @@ class VaultApiClient extends BaseApiClient {
       },
       unwrapData: true,
       dataKey: "data",
-      debug: import.meta.env.DEV,
+      debug: isDebugEnabled,
     });
   }
 

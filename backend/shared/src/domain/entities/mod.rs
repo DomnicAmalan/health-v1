@@ -18,6 +18,7 @@ pub mod geographic_region;
 pub mod regulation;
 pub mod compliance_rule;
 pub mod training_course;
+pub mod ehr;
 
 pub use user::User;
 pub use role::Role;

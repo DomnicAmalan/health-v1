@@ -12,7 +12,6 @@ export type {
   RefreshTokenResponse,
   ServiceInfo,
   ServiceStatusResponse,
-  UserInfo,
 } from "@lazarus-life/shared/api/types";
 export type { AuditEntry } from "@lazarus-life/shared/types/audit";
 export type { HttpMethod, RequestConfig } from "@lazarus-life/shared/types/common";

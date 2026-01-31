@@ -1,245 +1,280 @@
+/**
+ * Patient Chart Route
+ * Comprehensive patient chart with clinical data panels
+ */
+
 import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
 import { useTranslation } from "@lazarus-life/shared/i18n";
+import type { EhrVitalType } from "@lazarus-life/shared/types/ehr";
 import {
-  Badge,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@lazarus-life/ui-components";
-import { createFileRoute } from "@tanstack/react-router";
-import { Activity, Calendar, FileText, Pill } from "lucide-react";
-import { useEffect, useRef } from "react";
+
+const Spinner = () => (
+  <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+);
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  Activity,
+  AlertTriangle,
+  Beaker,
+  Calendar,
+  ChevronLeft,
+  FileText,
+  Pill,
+  Stethoscope,
+} from "lucide-react";
+import { useState, useCallback } from "react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
-import { registerComponent } from "@/components/ui/component-registry";
+import {
+  PatientBanner,
+  ProblemList,
+  MedicationList,
+  AllergyList,
+  VitalSignsPanel,
+  LabResultsPanel,
+  SOAPNoteForm,
+} from "@/components/ehr";
+import { useEhrPatient, useEhrPatientAllergies } from "@/hooks/api/ehr";
 
 export const Route = createFileRoute("/patients/$patientId")({
-  component: PatientDetailComponent,
+  component: PatientChartComponent,
 });
 
-function PatientDetailComponent() {
+function PatientChartComponent() {
   return (
     <ProtectedRoute requiredPermission={PERMISSIONS.PATIENTS.VIEW} resource="patients">
-      <PatientDetailComponentInner />
+      <PatientChartInner />
     </ProtectedRoute>
   );
 }
 
-function PatientDetailComponentInner() {
-  const { t } = useTranslation();
+function PatientChartInner() {
+  const { t: _t } = useTranslation();
+  const navigate = useNavigate();
   const { patientId } = Route.useParams();
-  const newNoteButtonRef = useRef<HTMLButtonElement>(null);
-  const scheduleButtonRef = useRef<HTMLButtonElement>(null);
-  const viewResultsButtonRef = useRef<HTMLButtonElement>(null);
-  const medicationsButtonRef = useRef<HTMLButtonElement>(null);
+  const [activeTab, setActiveTab] = useState("summary");
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
 
-  // Mock patient data
-  const patient = {
-    id: patientId,
-    name: "John Doe",
-    mrn: "MRN-123456",
-    dob: "1985-05-15",
-    age: 39,
-    gender: "Male",
-    status: "Active",
-    primaryCare: "Dr. Jane Smith",
-    lastVisit: "2024-01-10",
-  };
+  const { data: patient, isLoading: isLoadingPatient, error: patientError } = useEhrPatient(patientId);
+  const { data: allergies } = useEhrPatientAllergies(patientId);
 
-  // Register patient detail page with component registry for voice commands
-  useEffect(() => {
-    const componentId = `patient-detail-${patientId}`;
+  const handleBack = useCallback(() => {
+    navigate({ to: "/patients" });
+  }, [navigate]);
 
-    registerComponent(componentId, {
-      ariaLabel: `Patient Detail: ${patient.name}`,
-      i18nKey: "patient.detail",
-      voiceInteractable: true,
-      voiceDescription: `Patient detail page for ${patient.name}, Medical Record Number ${patient.mrn}`,
+  const handleViewChart = useCallback(() => {
+    setActiveTab("summary");
+  }, []);
 
-      componentStructure: {
-        type: "card",
-        sections: [
-          {
-            id: "overview",
-            label: "Patient Overview",
-            content: `Patient ${patient.name}, ${patient.age} years old, ${patient.gender}`,
-          },
-          {
-            id: "quick-actions",
-            label: "Quick Actions",
-            content: "Available actions: New Note, Schedule, View Results, Medications",
-          },
-        ],
-        dataPoints: [
-          { id: "name", label: "Name", value: patient.name },
-          { id: "mrn", label: "MRN", value: patient.mrn },
-          { id: "dob", label: "Date of Birth", value: patient.dob },
-          { id: "age", label: "Age", value: String(patient.age) },
-          { id: "gender", label: "Gender", value: patient.gender },
-          { id: "status", label: "Status", value: patient.status },
-          { id: "primaryCare", label: "Primary Care", value: patient.primaryCare },
-          { id: "lastVisit", label: "Last Visit", value: patient.lastVisit },
-        ],
-      },
+  const handleViewAllergies = useCallback(() => {
+    setActiveTab("allergies");
+  }, []);
 
-      actionItems: [
-        {
-          id: "new-note",
-          label: "New Note",
-          voiceCommand: ["new note", "create note", "add note", "write note"],
-          action: () => {
-            newNoteButtonRef.current?.click();
-          },
-          i18nKey: "actions.newNote",
-        },
-        {
-          id: "schedule",
-          label: "Schedule Appointment",
-          voiceCommand: ["schedule", "schedule appointment", "book appointment"],
-          action: () => {
-            scheduleButtonRef.current?.click();
-          },
-          i18nKey: "actions.schedule",
-        },
-        {
-          id: "view-results",
-          label: "View Results",
-          voiceCommand: ["view results", "show results", "results"],
-          action: () => {
-            viewResultsButtonRef.current?.click();
-          },
-          i18nKey: "actions.viewResults",
-        },
-        {
-          id: "medications",
-          label: "Medications",
-          voiceCommand: ["medications", "show medications", "view medications"],
-          action: () => {
-            medicationsButtonRef.current?.click();
-          },
-          i18nKey: "actions.medications",
-        },
-      ],
-    });
+  const handleAddNote = useCallback(() => {
+    setShowNoteDialog(true);
+  }, []);
 
-    return () => {
-      // Component registry cleanup would go here if we had an unregister function
-    };
-  }, [
-    patientId,
-    patient.name,
-    patient.mrn,
-    patient.age,
-    patient.gender,
-    patient.status,
-    patient.primaryCare,
-    patient.dob,
-    patient.lastVisit,
-  ]);
+  const handleNoteSuccess = useCallback((_documentId: string) => {
+    setShowNoteDialog(false);
+    setActiveTab("notes");
+  }, []);
+
+  const handleViewVitalTrend = useCallback((vitalType: EhrVitalType) => {
+    // TODO: Open vital trend modal
+    console.log("View trend for:", vitalType);
+  }, []);
+
+  if (isLoadingPatient) {
+    return (
+      <Box className="flex items-center justify-center h-64">
+        <Spinner />
+        <span className="ml-2 text-muted-foreground">Loading patient...</span>
+      </Box>
+    );
+  }
+
+  if (patientError || !patient) {
+    return (
+      <Box className="text-center py-12">
+        <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+        <h2 className="text-xl font-semibold mb-2">Patient Not Found</h2>
+        <p className="text-muted-foreground mb-4">
+          The requested patient could not be found or you don't have permission to view it.
+        </p>
+        <Button onClick={handleBack}>
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          Back to Patients
+        </Button>
+      </Box>
+    );
+  }
 
   return (
-    <Box className="space-y-6" role="main" aria-label={`Patient detail for ${patient.name}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" aria-label={`Patient name: ${patient.name}`}>
-            {patient.name}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            MRN: {patient.mrn} | DOB: {patient.dob} | Age: {patient.age}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Badge variant="secondary">{patient.status}</Badge>
-          <Button variant="outline" aria-label={t("patients.actions.menu")}>
-            {t("common.actions")}
-          </Button>
-        </div>
-      </div>
+    <Box className="space-y-6" role="main" aria-label={`Patient chart for ${patient.firstName} ${patient.lastName}`}>
+      {/* Back Button */}
+      <Button variant="ghost" size="sm" onClick={handleBack}>
+        <ChevronLeft className="h-4 w-4 mr-1" />
+        Back to Patients
+      </Button>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>{t("patients.overview")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">{t("patients.gender")}</p>
-                <p className="font-medium">{patient.gender}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t("patients.primaryCare")}</p>
-                <p className="font-medium">{patient.primaryCare}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t("patients.lastVisit")}</p>
-                <p className="font-medium">{patient.lastVisit}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Patient Banner */}
+      <PatientBanner
+        patient={patient}
+        allergies={allergies}
+        onViewChart={handleViewChart}
+        onViewAllergies={handleViewAllergies}
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("patients.quickActions")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button
-              ref={newNoteButtonRef}
-              variant="outline"
-              className="w-full justify-start"
-              aria-label={t("patients.actions.createNote")}
-              onClick={() => {}}
-            >
-              <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
-              {t("quickActions.createClinicalNote")}
-            </Button>
-            <Button
-              ref={scheduleButtonRef}
-              variant="outline"
-              className="w-full justify-start"
-              aria-label={t("patients.actions.scheduleAppointment")}
-              onClick={() => {}}
-            >
-              <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
-              {t("quickActions.scheduleAppointment")}
-            </Button>
-            <Button
-              ref={viewResultsButtonRef}
-              variant="outline"
-              className="w-full justify-start"
-              aria-label={t("patients.actions.viewResults")}
-              onClick={() => {}}
-            >
-              <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
-              {t("results.title")}
-            </Button>
-            <Button
-              ref={medicationsButtonRef}
-              variant="outline"
-              className="w-full justify-start"
-              aria-label={t("patients.actions.viewMedications")}
-              onClick={() => {}}
-            >
-              <Pill className="mr-2 h-4 w-4" aria-hidden="true" />
-              {t("orders.medications")}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Chart Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="summary" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Summary
+          </TabsTrigger>
+          <TabsTrigger value="problems" className="flex items-center gap-2">
+            <Stethoscope className="h-4 w-4" />
+            Problems
+          </TabsTrigger>
+          <TabsTrigger value="medications" className="flex items-center gap-2">
+            <Pill className="h-4 w-4" />
+            Medications
+          </TabsTrigger>
+          <TabsTrigger value="allergies" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Allergies
+          </TabsTrigger>
+          <TabsTrigger value="vitals" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Vitals
+          </TabsTrigger>
+          <TabsTrigger value="labs" className="flex items-center gap-2">
+            <Beaker className="h-4 w-4" />
+            Labs
+          </TabsTrigger>
+          <TabsTrigger value="notes" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Notes
+          </TabsTrigger>
+          <TabsTrigger value="appointments" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Appointments
+          </TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("patients.recentActivity")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <p>{t("table.noData")}</p>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Summary Tab - Overview of all clinical data */}
+        <TabsContent value="summary" className="space-y-6 mt-6">
+          <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <Box className="space-y-6">
+              <AllergyList patientId={patientId} compact />
+              <ProblemList patientId={patientId} compact />
+              <MedicationList patientId={patientId} compact />
+            </Box>
+
+            {/* Right Column */}
+            <Box className="space-y-6">
+              <VitalSignsPanel
+                patientId={patientId}
+                onAddVitals={() => {}}
+                onViewTrend={handleViewVitalTrend}
+              />
+              <LabResultsPanel patientId={patientId} compact />
+            </Box>
+          </Box>
+        </TabsContent>
+
+        {/* Problems Tab */}
+        <TabsContent value="problems" className="mt-6">
+          <ProblemList
+            patientId={patientId}
+            showInactive
+            onAddProblem={() => {}}
+          />
+        </TabsContent>
+
+        {/* Medications Tab */}
+        <TabsContent value="medications" className="mt-6">
+          <MedicationList
+            patientId={patientId}
+            activeOnly={false}
+            onAddMedication={() => {}}
+          />
+        </TabsContent>
+
+        {/* Allergies Tab */}
+        <TabsContent value="allergies" className="mt-6">
+          <AllergyList
+            patientId={patientId}
+            showActions
+            onAddAllergy={() => {}}
+          />
+        </TabsContent>
+
+        {/* Vitals Tab */}
+        <TabsContent value="vitals" className="mt-6">
+          <VitalSignsPanel
+            patientId={patientId}
+            onAddVitals={() => {}}
+            onViewTrend={handleViewVitalTrend}
+          />
+        </TabsContent>
+
+        {/* Labs Tab */}
+        <TabsContent value="labs" className="mt-6">
+          <LabResultsPanel
+            patientId={patientId}
+            onOrderLab={() => {}}
+          />
+        </TabsContent>
+
+        {/* Notes Tab */}
+        <TabsContent value="notes" className="mt-6">
+          <Box className="space-y-4">
+            <Button onClick={handleAddNote}>
+              <FileText className="h-4 w-4 mr-2" />
+              New SOAP Note
+            </Button>
+            <Box className="text-center py-12 text-muted-foreground border rounded-lg">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Clinical notes will be displayed here</p>
+              <p className="text-sm mt-2">Click "New SOAP Note" to create a note</p>
+            </Box>
+          </Box>
+        </TabsContent>
+
+        {/* Appointments Tab */}
+        <TabsContent value="appointments" className="mt-6">
+          <Box className="text-center py-12 text-muted-foreground border rounded-lg">
+            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Patient appointments will be displayed here</p>
+          </Box>
+        </TabsContent>
+      </Tabs>
+
+      {/* SOAP Note Dialog */}
+      <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>New Clinical Note</DialogTitle>
+          </DialogHeader>
+          <SOAPNoteForm
+            patientId={patientId}
+            onSuccess={handleNoteSuccess}
+            onCancel={() => setShowNoteDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

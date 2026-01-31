@@ -5,7 +5,10 @@
 
 export * from "./api";
 export * from "./constants";
+export * from "./env";
 export * from "./i18n";
+export * from "./middleware";
 export * from "./query";
+export * from "./security";
 export * from "./types";
 export * from "./vault";

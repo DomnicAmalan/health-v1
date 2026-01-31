@@ -6,14 +6,14 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { login as apiLogin, logout as apiLogout, getUserInfo } from "@/lib/api/auth";
-import type { UserInfo } from "@/lib/api/types";
+import type { UserInfoWithOrg } from "@/lib/api/types";
 
 const USER_STORAGE_KEY = "admin_auth_user";
 
 /**
  * Load user from sessionStorage
  */
-function loadUserFromStorage(): UserInfo | null {
+function loadUserFromStorage(): UserInfoWithOrg | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -24,7 +24,7 @@ function loadUserFromStorage(): UserInfo | null {
   }
 
   try {
-    return JSON.parse(userStr) as UserInfo;
+    return JSON.parse(userStr) as UserInfoWithOrg;
   } catch {
     return null;
   }
@@ -33,7 +33,7 @@ function loadUserFromStorage(): UserInfo | null {
 /**
  * Save user to sessionStorage
  */
-function saveUserToStorage(user: UserInfo | null): void {
+function saveUserToStorage(user: UserInfoWithOrg | null): void {
   if (typeof window === "undefined") {
     return;
   }
@@ -46,7 +46,7 @@ function saveUserToStorage(user: UserInfo | null): void {
 }
 
 interface AuthState {
-  user: UserInfo | null;
+  user: UserInfoWithOrg | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -55,7 +55,7 @@ interface AuthState {
 interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setUser: (user: UserInfo) => void;
+  setUser: (user: UserInfoWithOrg) => void;
   clearError: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -86,9 +86,10 @@ export const useAuthStore = create<AuthStore>()(
         const response = await apiLogin({ email, password });
 
         // Session is automatically set via cookie, we just store user info
-        const userInfo: UserInfo = {
-          sub: response.user.id,
+        const userInfo: UserInfoWithOrg = {
+          id: response.user.id,
           email: response.user.email,
+          username: response.user.username || response.user.email,
           name: response.user.username || response.user.email,
           role: response.user.role,
           permissions: response.user.permissions || [],
@@ -98,6 +99,7 @@ export const useAuthStore = create<AuthStore>()(
           state.user = userInfo;
           state.isAuthenticated = true;
           state.isLoading = false;
+          state.error = null;
         });
 
         // Persist user info to sessionStorage (for UI state, not auth)
@@ -126,13 +128,16 @@ export const useAuthStore = create<AuthStore>()(
         });
 
         saveUserToStorage(null);
+        // Clear all session storage
+        sessionStorage.clear();
       }
     },
 
-    setUser: (user: UserInfo) => {
+    setUser: (user: UserInfoWithOrg) => {
       set((state) => {
         state.user = user;
         state.isAuthenticated = true;
+        state.error = null;
       });
       saveUserToStorage(user);
     },

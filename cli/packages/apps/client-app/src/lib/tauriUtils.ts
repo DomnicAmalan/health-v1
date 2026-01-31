@@ -33,7 +33,7 @@ export async function openNewWindow(
   if (isTauri()) {
     try {
       // Dynamic import to avoid errors when not in Tauri
-      const { WebviewWindow } = await import("@tauri-apps/api/window");
+      const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
 
       // Generate a unique label for the window
       const windowLabel = `tab-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -55,7 +55,7 @@ export async function openNewWindow(
       });
 
       // Wait for window to be created and focused
-      await webview.once("tauri://created");
+      await webview.once("tauri://created", () => {});
       await webview.setFocus();
 
       // Return a mock window-like object for compatibility
@@ -71,7 +71,7 @@ export async function openNewWindow(
           await webview.close();
         },
       };
-      return mockWindow as Window;
+      return mockWindow as unknown as Window;
     } catch (_error) {
       return null;
     }

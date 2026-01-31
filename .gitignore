@@ -190,4 +190,21 @@ cli/packages/apps/*/venv/
 # SonarQube
 .sonar/
 .scannerwork/
-sonar-project.properties.localVAULT_CREDENTIALS.md
+sonar-project.properties.local
+
+# ============================================
+# YottaDB
+# ============================================
+# Ignore runtime data directory completely
+/ydb-data/
+
+# YottaDB source directory - keep .m files but ignore compiled .o files
+/yottadb/**/*.o
+/yottadb/**/node_modules/
+/yottadb/**/.DS_Store
+
+# YottaDB runtime files
+*.gld
+*.gdb
+*.mjl
+*.dat

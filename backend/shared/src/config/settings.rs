@@ -83,7 +83,7 @@ impl Settings {
                 .parse()
                 .unwrap_or(4117),
             cors_allowed_origins: env::var("CORS_ALLOWED_ORIGINS")
-                .unwrap_or_else(|_| "http://localhost:4111,http://localhost:3000,http://localhost:4115".to_string())
+                .unwrap_or_else(|_| "http://localhost:4111,http://localhost:3000,http://localhost:4115,http://localhost:5173,http://localhost:5174,http://localhost:5175".to_string())
                 .split(',')
                 .map(|s| s.trim().to_string())
                 .filter(|s| !s.is_empty())

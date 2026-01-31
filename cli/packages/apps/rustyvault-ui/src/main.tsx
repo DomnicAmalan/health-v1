@@ -1,4 +1,5 @@
 import { VaultTranslationProvider } from "@lazarus-life/shared/i18n";
+import { ErrorBoundary } from "@lazarus-life/ui-components";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
@@ -22,10 +23,12 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <StrictMode>
-    <VaultTranslationProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router />
-      </QueryClientProvider>
-    </VaultTranslationProvider>
+    <ErrorBoundary>
+      <VaultTranslationProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router />
+        </QueryClientProvider>
+      </VaultTranslationProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

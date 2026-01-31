@@ -1,120 +1,21 @@
-import { createRoute, createRouter, RouterProvider } from "@tanstack/react-router";
-import { Route as rootRoute } from "./routes/__root";
-import { ApplicationsPage } from "./routes/applications";
-import { AppRolesPage } from "./routes/approles";
-import { GuidePage } from "./routes/guide";
-import { DashboardPage } from "./routes/index";
-import { LoginPage } from "./routes/login";
-import { PoliciesPage } from "./routes/policies";
-import { RealmsPage } from "./routes/realms";
-import { SecretsPage } from "./routes/secrets";
-import { SystemPage } from "./routes/system";
-import { TokensPage } from "./routes/tokens";
-import { UsersPage } from "./routes/users";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 
-// Login route
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/login",
-  component: LoginPage,
-});
+// Import the generated route tree
+import { routeTree } from "./routeTree.gen";
 
-// Dashboard route
-const dashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: DashboardPage,
-});
+// Create a new router instance
+const router = createRouter({ routeTree });
 
-// Secrets route
-const secretsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/secrets",
-  component: SecretsPage,
-});
-
-// Policies route
-const policiesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/policies",
-  component: PoliciesPage,
-});
-
-// Tokens route
-const tokensRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/tokens",
-  component: TokensPage,
-});
-
-// Users route
-const usersRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/users",
-  component: UsersPage,
-});
-
-// Realms route
-const realmsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/realms",
-  component: RealmsPage,
-});
-
-// Applications route (realm-scoped)
-const applicationsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/applications",
-  component: ApplicationsPage,
-});
-
-// AppRoles route (realm-scoped)
-const approlesRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/approles",
-  component: AppRolesPage,
-});
-
-// System route
-const systemRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/system",
-  component: SystemPage,
-});
-
-// Guide route
-const guideRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/guide",
-  component: GuidePage,
-});
-
-// Route tree
-const routeTree = rootRoute.addChildren([
-  loginRoute,
-  dashboardRoute,
-  secretsRoute,
-  policiesRoute,
-  tokensRoute,
-  usersRoute,
-  realmsRoute,
-  applicationsRoute,
-  approlesRoute,
-  systemRoute,
-  guideRoute,
-]);
-
-// Create router
-export const router = createRouter({ routeTree });
-
-// Register router for type safety
+// Register the router instance for type safety
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
 }
 
-// Router component
-export default function Router() {
+function Router() {
   return <RouterProvider router={router} />;
 }
+
+export default Router;
+export { router };

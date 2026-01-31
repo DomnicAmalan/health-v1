@@ -1,5 +1,8 @@
 import { apiClient } from "./client";
-import { VAULT_ROUTES } from "./routes";
+import { API_ROUTES } from "@lazarus-life/shared/api";
+
+// Alias for convenience
+const VAULT_ROUTES = API_ROUTES.VAULT_DIRECT;
 
 export interface AppRole {
   id: string;
@@ -12,6 +15,10 @@ export interface AppRole {
   token_ttl?: number;
   token_max_ttl?: number;
   policies: string[];
+  token_policies?: string[];
+  token_type?: string;
+  bound_cidr_list?: string[];
+  is_active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -23,6 +30,9 @@ export interface CreateAppRoleRequest {
   token_ttl?: number;
   token_max_ttl?: number;
   policies?: string[];
+  token_policies?: string[];
+  bound_cidr_list?: string[];
+  is_active?: boolean;
 }
 
 export interface UpdateAppRoleRequest {
@@ -32,6 +42,9 @@ export interface UpdateAppRoleRequest {
   token_ttl?: number;
   token_max_ttl?: number;
   policies?: string[];
+  token_policies?: string[];
+  bound_cidr_list?: string[];
+  is_active?: boolean;
 }
 
 export interface AppRoleListResponse {

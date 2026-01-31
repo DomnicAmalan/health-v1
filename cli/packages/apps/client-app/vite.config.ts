@@ -14,6 +14,8 @@ export default defineConfig({
     alias: {
       "@": resolve(__dirname, "./src"),
     },
+    // Ensure consistent resolution of workspace dependencies
+    dedupe: ["react", "react-dom", "@tanstack/react-query", "@tanstack/react-router"],
   },
   build: {
     outDir: process.env.VITE_BUILD_OUT_DIR || resolve(__dirname, "dist"),
@@ -29,6 +31,7 @@ export default defineConfig({
           "ui-vendor": ["@base-ui/react"],
           // Shared libraries
           shared: ["@lazarus-life/shared"],
+          components: ["@lazarus-life/ui-components"],
         },
       },
     },
@@ -40,16 +43,26 @@ export default defineConfig({
     host: process.env.VITE_HOST || "localhost",
     strictPort: process.env.VITE_STRICT_PORT !== "false",
     open: process.env.VITE_OPEN === "true",
-    // Reduce memory usage in dev mode
+    // HMR configuration for workspace packages
     hmr: {
       overlay: false, // Disable error overlay to save memory
     },
+    // Watch workspace packages for changes
+    watch: {
+      // Watch the dist folders of workspace packages
+      ignored: ["!**/node_modules/@lazarus-life/**"],
+    },
   },
-  // Optimize dependencies to reduce memory usage
+  // Optimize dependencies - exclude workspace packages so they always get fresh builds
   optimizeDeps: {
     entries: ["src/main.tsx"],
     include: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-query"],
-    exclude: ["@tanstack/react-router-devtools"],
+    // Exclude workspace packages from pre-bundling to get live updates
+    exclude: [
+      "@tanstack/react-router-devtools",
+      "@lazarus-life/shared",
+      "@lazarus-life/ui-components",
+    ],
     esbuildOptions: {
       target: "es2020",
     },

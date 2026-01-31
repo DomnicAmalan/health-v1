@@ -20,6 +20,7 @@ WORKDIR /app
 
 # Only copy package files for dependency installation
 COPY package.json bun.lock* ./
+COPY tsconfig.strict.json* ./
 COPY packages/apps/client-app/package.json ./packages/apps/client-app/
 COPY packages/libs/components/package.json ./packages/libs/components/
 COPY packages/libs/shared/package.json ./packages/libs/shared/
@@ -87,9 +88,10 @@ WORKDIR /app
 # Copy node_modules from deps stage (includes all workspace dependencies)
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy root package files
+# Copy root package files and config
 COPY package.json bun.lock* ./
 COPY biome.json* ./
+COPY tsconfig.strict.json* ./
 
 # Copy all source files for libs and app
 COPY packages/libs/shared ./packages/libs/shared

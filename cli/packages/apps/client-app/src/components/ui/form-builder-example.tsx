@@ -3,7 +3,7 @@
  * This demonstrates all layout options available
  */
 
-import type { FormConfig } from "./form-builder";
+import type { FormConfig } from "@lazarus-life/ui-components";
 
 // Example: Patient Registration Form with custom layout
 export const patientRegistrationForm: FormConfig = {

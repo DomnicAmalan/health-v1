@@ -17,10 +17,11 @@ import {
   DialogTrigger,
   Input,
   Label,
+  Separator,
   Switch,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AlertCircle,
   Check,
@@ -46,7 +47,11 @@ import {
 } from "@/lib/api/approle";
 import { useRealmStore } from "@/stores/realmStore";
 
-export function AppRolesPage() {
+export const Route = createFileRoute("/approles")({
+  component: AppRolesPage,
+});
+
+function AppRolesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
@@ -67,6 +72,9 @@ export function AppRolesPage() {
     token_ttl: 3600,
     token_max_ttl: 86400,
     policies: ["default"],
+    token_policies: [],
+    bound_cidr_list: [],
+    is_active: true,
   });
 
   const [editFormData, setEditFormData] = useState<UpdateAppRoleRequest>({
@@ -76,7 +84,12 @@ export function AppRolesPage() {
     token_ttl: 3600,
     token_max_ttl: 86400,
     policies: ["default"],
+    token_policies: [],
+    bound_cidr_list: [],
+    is_active: true,
   });
+
+  const [cidrInput, setCidrInput] = useState("");
 
   // Fetch roles
   const {
@@ -187,7 +200,11 @@ export function AppRolesPage() {
       token_ttl: 3600,
       token_max_ttl: 86400,
       policies: ["default"],
+      token_policies: [],
+      bound_cidr_list: [],
+      is_active: true,
     });
+    setCidrInput("");
   };
 
   const handleCreate = () => {
@@ -216,6 +233,9 @@ export function AppRolesPage() {
     token_ttl?: number;
     token_max_ttl?: number;
     policies?: string[];
+    token_policies?: string[];
+    bound_cidr_list?: string[];
+    is_active?: boolean;
   }) => {
     setSelectedRole(role.role_name);
     setEditFormData({
@@ -225,7 +245,11 @@ export function AppRolesPage() {
       token_ttl: role.token_ttl,
       token_max_ttl: role.token_max_ttl,
       policies: role.policies || ["default"],
+      token_policies: role.token_policies || [],
+      bound_cidr_list: role.bound_cidr_list || [],
+      is_active: role.is_active ?? true,
     });
+    setCidrInput("");
     setIsEditOpen(true);
   };
 
@@ -293,103 +317,145 @@ export function AppRolesPage() {
               <DialogTitle>{t("approles.create.dialogTitle")}</DialogTitle>
               <DialogDescription>{t("approles.create.dialogDescription")}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
-              <div className="space-y-2">
-                <Label htmlFor="roleName">{t("approles.create.fields.roleName")}</Label>
-                <Input
-                  id="roleName"
-                  placeholder={t("approles.create.fields.roleNamePlaceholder")}
-                  value={formData.roleName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormData({ ...formData, roleName: e.target.value })
-                  }
-                />
+            <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+                <Separator />
+                <div className="space-y-2">
+                  <Label htmlFor="roleName">{t("approles.create.fields.roleName")} *</Label>
+                  <Input
+                    id="roleName"
+                    placeholder={t("approles.create.fields.roleNamePlaceholder")}
+                    value={formData.roleName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormData({ ...formData, roleName: e.target.value })
+                    }
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>{t("approles.create.fields.bindSecretId")}</Label>
+              {/* Authentication Settings */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Authentication</div>
+                <Separator />
+                
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label>{t("approles.create.fields.bindSecretId")}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("approles.create.fields.bindSecretIdDescription")}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formData.bind_secret_id}
+                    onCheckedChange={(checked: boolean) =>
+                      setFormData({ ...formData, bind_secret_id: checked })
+                    }
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="secret_ttl">{t("approles.create.fields.secretIdTtl")}</Label>
+                    <Input
+                      id="secret_ttl"
+                      type="number"
+                      value={formData.secret_id_ttl || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFormData({
+                          ...formData,
+                          secret_id_ttl: parseInt(e.target.value, 10) || undefined,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secret_uses">{t("approles.create.fields.secretIdMaxUses")}</Label>
+                    <Input
+                      id="secret_uses"
+                      type="number"
+                      value={formData.secret_id_num_uses || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFormData({
+                          ...formData,
+                          secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
+                        })
+                      }
+                      placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bound_cidr">Allowed CIDR Blocks</Label>
+                  <Input
+                    id="bound_cidr"
+                    value={cidrInput}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCidrInput(e.target.value)}
+                    placeholder="10.0.0.0/8, 192.168.1.0/24"
+                    onBlur={() => {
+                      if (cidrInput.trim()) {
+                        const cidrs = cidrInput.split(",").map(c => c.trim()).filter(Boolean);
+                        setFormData({ ...formData, bound_cidr_list: cidrs });
+                      }
+                    }}
+                  />
                   <p className="text-xs text-muted-foreground">
-                    {t("approles.create.fields.bindSecretIdDescription")}
+                    Comma-separated list of CIDR blocks. Leave empty to allow from any IP.
                   </p>
                 </div>
-                <Switch
-                  checked={formData.bind_secret_id}
-                  onCheckedChange={(checked: boolean) =>
-                    setFormData({ ...formData, bind_secret_id: checked })
-                  }
+              </div>
+
+              {/* Token Settings */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Token Settings</div>
+                <Separator />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="token_ttl">{t("approles.create.fields.tokenTtl")}</Label>
+                    <Input
+                      id="token_ttl"
+                      type="number"
+                      value={formData.token_ttl || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFormData({
+                          ...formData,
+                          token_ttl: parseInt(e.target.value, 10) || undefined,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="token_max_ttl">{t("approles.create.fields.tokenMaxTtl")}</Label>
+                    <Input
+                      id="token_max_ttl"
+                      type="number"
+                      value={formData.token_max_ttl || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setFormData({
+                          ...formData,
+                          token_max_ttl: parseInt(e.target.value, 10) || undefined,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Access Control */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Access Control</div>
+                <Separator />
+
+                <PolicySelector
+                  label={t("approles.create.fields.policies")}
+                  selectedPolicies={formData.policies || []}
+                  onPoliciesChange={(policies) => setFormData({ ...formData, policies })}
+                  realmId={currentRealm?.id}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="secret_ttl">{t("approles.create.fields.secretIdTtl")}</Label>
-                  <Input
-                    id="secret_ttl"
-                    type="number"
-                    value={formData.secret_id_ttl || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({
-                        ...formData,
-                        secret_id_ttl: parseInt(e.target.value, 10) || undefined,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="secret_uses">{t("approles.create.fields.secretIdMaxUses")}</Label>
-                  <Input
-                    id="secret_uses"
-                    type="number"
-                    value={formData.secret_id_num_uses || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({
-                        ...formData,
-                        secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
-                      })
-                    }
-                    placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="token_ttl">{t("approles.create.fields.tokenTtl")}</Label>
-                  <Input
-                    id="token_ttl"
-                    type="number"
-                    value={formData.token_ttl || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({
-                        ...formData,
-                        token_ttl: parseInt(e.target.value, 10) || undefined,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="token_max_ttl">{t("approles.create.fields.tokenMaxTtl")}</Label>
-                  <Input
-                    id="token_max_ttl"
-                    type="number"
-                    value={formData.token_max_ttl || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setFormData({
-                        ...formData,
-                        token_max_ttl: parseInt(e.target.value, 10) || undefined,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <PolicySelector
-                label={t("approles.create.fields.policies")}
-                selectedPolicies={formData.policies || []}
-                onPoliciesChange={(policies) => setFormData({ ...formData, policies })}
-                realmId={currentRealm?.id}
-              />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -579,95 +645,133 @@ export function AppRolesPage() {
               {t("approles.edit.dialogDescription", { roleName: selectedRole || "" })}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-96 overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label>{t("approles.create.fields.bindSecretId")}</Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("approles.create.fields.bindSecretIdDescription")}
-                </p>
+          <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
+            {/* Status */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Status</div>
+              <Separator />
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <Label>Active Status</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {editFormData.is_active ? "Role is enabled and can be used for authentication" : "Role is disabled"}
+                  </p>
+                </div>
+                <Switch
+                  checked={editFormData.is_active ?? true}
+                  onCheckedChange={(checked: boolean) =>
+                    setEditFormData({ ...editFormData, is_active: checked })
+                  }
+                />
               </div>
-              <Switch
-                checked={editFormData.bind_secret_id}
-                onCheckedChange={(checked: boolean) =>
-                  setEditFormData({ ...editFormData, bind_secret_id: checked })
-                }
+            </div>
+
+            {/* Authentication Settings */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Authentication</div>
+              <Separator />
+              
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <Label>{t("approles.create.fields.bindSecretId")}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t("approles.create.fields.bindSecretIdDescription")}
+                  </p>
+                </div>
+                <Switch
+                  checked={editFormData.bind_secret_id}
+                  onCheckedChange={(checked: boolean) =>
+                    setEditFormData({ ...editFormData, bind_secret_id: checked })
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_secret_ttl">{t("approles.create.fields.secretIdTtl")}</Label>
+                  <Input
+                    id="edit_secret_ttl"
+                    type="number"
+                    value={editFormData.secret_id_ttl || ""}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData({
+                        ...editFormData,
+                        secret_id_ttl: parseInt(e.target.value, 10) || undefined,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_secret_uses">
+                    {t("approles.create.fields.secretIdMaxUses")}
+                  </Label>
+                  <Input
+                    id="edit_secret_uses"
+                    type="number"
+                    value={editFormData.secret_id_num_uses || ""}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData({
+                        ...editFormData,
+                        secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
+                      })
+                    }
+                    placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Token Settings */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Token Settings</div>
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_token_ttl">{t("approles.create.fields.tokenTtl")}</Label>
+                  <Input
+                    id="edit_token_ttl"
+                    type="number"
+                    value={editFormData.token_ttl || ""}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData({
+                        ...editFormData,
+                        token_ttl: parseInt(e.target.value, 10) || undefined,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_token_max_ttl">
+                    {t("approles.create.fields.tokenMaxTtl")}
+                  </Label>
+                  <Input
+                    id="edit_token_max_ttl"
+                    type="number"
+                    value={editFormData.token_max_ttl || ""}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEditFormData({
+                        ...editFormData,
+                        token_max_ttl: parseInt(e.target.value, 10) || undefined,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Access Control */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Access Control</div>
+              <Separator />
+
+              <PolicySelector
+                label={t("approles.create.fields.policies")}
+                selectedPolicies={editFormData.policies || []}
+                onPoliciesChange={(policies) => setEditFormData({ ...editFormData, policies })}
+                realmId={currentRealm?.id}
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit_secret_ttl">{t("approles.create.fields.secretIdTtl")}</Label>
-                <Input
-                  id="edit_secret_ttl"
-                  type="number"
-                  value={editFormData.secret_id_ttl || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEditFormData({
-                      ...editFormData,
-                      secret_id_ttl: parseInt(e.target.value, 10) || undefined,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit_secret_uses">
-                  {t("approles.create.fields.secretIdMaxUses")}
-                </Label>
-                <Input
-                  id="edit_secret_uses"
-                  type="number"
-                  value={editFormData.secret_id_num_uses || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEditFormData({
-                      ...editFormData,
-                      secret_id_num_uses: parseInt(e.target.value, 10) || undefined,
-                    })
-                  }
-                  placeholder={t("approles.create.fields.secretIdMaxUsesPlaceholder")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit_token_ttl">{t("approles.create.fields.tokenTtl")}</Label>
-                <Input
-                  id="edit_token_ttl"
-                  type="number"
-                  value={editFormData.token_ttl || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEditFormData({
-                      ...editFormData,
-                      token_ttl: parseInt(e.target.value, 10) || undefined,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit_token_max_ttl">
-                  {t("approles.create.fields.tokenMaxTtl")}
-                </Label>
-                <Input
-                  id="edit_token_max_ttl"
-                  type="number"
-                  value={editFormData.token_max_ttl || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEditFormData({
-                      ...editFormData,
-                      token_max_ttl: parseInt(e.target.value, 10) || undefined,
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            <PolicySelector
-              label={t("approles.create.fields.policies")}
-              selectedPolicies={editFormData.policies || []}
-              onPoliciesChange={(policies) => setEditFormData({ ...editFormData, policies })}
-              realmId={currentRealm?.id}
-            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>

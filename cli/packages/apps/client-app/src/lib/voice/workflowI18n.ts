@@ -40,7 +40,7 @@ Analysez la commande de l'utilisateur et les actions disponibles pour créer un 
 Utilisez les actions disponibles pour créer des flux de travail qui atteignent les objectifs de l'utilisateur.`,
   };
 
-  return prompts[locale] || prompts.en;
+  return prompts[locale] || prompts.en || "";
 }
 
 /**
@@ -137,5 +137,5 @@ export function translateErrorMessage(error: string, locale: string): string {
     },
   };
 
-  return errorMessages[locale]?.[error] || errorMessages.en[error] || error;
+  return errorMessages[locale]?.[error] || errorMessages.en?.[error] || error;
 }

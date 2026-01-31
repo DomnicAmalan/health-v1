@@ -3,39 +3,179 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./api": "./src/api/index.ts",
-    "./api/config": "./src/api/config.ts",
-    "./api/routes": "./src/api/routes.ts",
-    "./api/types": "./src/api/types.ts",
-    "./constants": "./src/constants/index.ts",
-    "./constants/fields": "./src/constants/fields.ts",
-    "./constants/oidc": "./src/constants/oidc.ts",
-    "./constants/permissions": "./src/constants/permissions.ts",
-    "./constants/security": "./src/constants/security.ts",
-    "./types": "./src/types/index.ts",
-    "./types/user": "./src/types/user.ts",
-    "./types/stores": "./src/types/stores/index.ts",
-    "./types/components": "./src/types/components/registry.ts",
-    "./types/components/registry": "./src/types/components/registry.ts",
-    "./i18n": "./src/i18n/index.ts",
-    "./i18n/context": "./src/i18n/context.ts",
-    "./i18n/useTranslation": "./src/i18n/useTranslation.ts",
-    "./i18n/TranslationProvider": "./src/i18n/TranslationProvider.ts",
-    "./vault": "./src/vault/index.ts",
-    "./query": "./src/query/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
+    },
+    "./api/config": {
+      "types": "./dist/api/config.d.ts",
+      "import": "./dist/api/config.js"
+    },
+    "./api/routes": {
+      "types": "./dist/api/routes.d.ts",
+      "import": "./dist/api/routes.js"
+    },
+    "./api/types": {
+      "types": "./dist/api/types.d.ts",
+      "import": "./dist/api/types.js"
+    },
+    "./api/baseClient": {
+      "types": "./dist/api/baseClient.d.ts",
+      "import": "./dist/api/baseClient.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./dist/constants/index.js"
+    },
+    "./constants/*": {
+      "types": "./dist/constants/*.d.ts",
+      "import": "./dist/constants/*.js"
+    },
+    "./env": {
+      "types": "./dist/env/index.d.ts",
+      "import": "./dist/env/index.js"
+    },
+    "./env/*": {
+      "types": "./dist/env/*.d.ts",
+      "import": "./dist/env/*.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
+    },
+    "./middleware/*": {
+      "types": "./dist/middleware/*.d.ts",
+      "import": "./dist/middleware/*.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts",
+      "import": "./dist/types/*.js"
+    },
+    "./types/ehr": {
+      "types": "./dist/types/ehr/index.d.ts",
+      "import": "./dist/types/ehr/index.js"
+    },
+    "./types/billing": {
+      "types": "./dist/types/billing/index.d.ts",
+      "import": "./dist/types/billing/index.js"
+    },
+    "./types/rules": {
+      "types": "./dist/types/rules/index.d.ts",
+      "import": "./dist/types/rules/index.js"
+    },
+    "./types/departments": {
+      "types": "./dist/types/departments/index.d.ts",
+      "import": "./dist/types/departments/index.js"
+    },
+    "./types/diagnostics": {
+      "types": "./dist/types/diagnostics/index.d.ts",
+      "import": "./dist/types/diagnostics/index.js"
+    },
+    "./types/dashboard": {
+      "types": "./dist/types/dashboard/index.d.ts",
+      "import": "./dist/types/dashboard/index.js"
+    },
+    "./types/workflow": {
+      "types": "./dist/types/workflow/index.d.ts",
+      "import": "./dist/types/workflow/index.js"
+    },
+    "./types/stores": {
+      "types": "./dist/types/stores/index.d.ts",
+      "import": "./dist/types/stores/index.js"
+    },
+    "./types/components": {
+      "types": "./dist/types/components/index.d.ts",
+      "import": "./dist/types/components/index.js"
+    },
+    "./types/components/registry": {
+      "types": "./dist/types/components/registry.d.ts",
+      "import": "./dist/types/components/registry.js"
+    },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "import": "./dist/i18n/index.js"
+    },
+    "./i18n/*": {
+      "types": "./dist/i18n/*.d.ts",
+      "import": "./dist/i18n/*.js"
+    },
+    "./vault": {
+      "types": "./dist/vault/index.d.ts",
+      "import": "./dist/vault/index.js"
+    },
+    "./vault/*": {
+      "types": "./dist/vault/*.d.ts",
+      "import": "./dist/vault/*.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js"
+    },
+    "./query/*": {
+      "types": "./dist/query/*.d.ts",
+      "import": "./dist/query/*.js"
+    },
     "./styles/base.css": "./src/styles/base.css",
-    "./styles/tailwind.config": "./src/styles/tailwind.config.ts",
+    "./styles/tailwind.config": {
+      "types": "./dist/styles/tailwind.config.d.ts",
+      "import": "./dist/styles/tailwind.config.js"
+    },
     "./styles/postcss.config": "./src/styles/postcss.config.js"
   },
+  "typesVersions": {
+    "*": {
+      "api": ["./dist/api/index.d.ts"],
+      "api/*": ["./dist/api/*.d.ts"],
+      "constants": ["./dist/constants/index.d.ts"],
+      "constants/*": ["./dist/constants/*.d.ts"],
+      "env": ["./dist/env/index.d.ts"],
+      "env/*": ["./dist/env/*.d.ts"],
+      "middleware": ["./dist/middleware/index.d.ts"],
+      "middleware/*": ["./dist/middleware/*.d.ts"],
+      "types": ["./dist/types/index.d.ts"],
+      "types/*": ["./dist/types/*.d.ts"],
+      "types/ehr": ["./dist/types/ehr/index.d.ts"],
+      "types/billing": ["./dist/types/billing/index.d.ts"],
+      "types/rules": ["./dist/types/rules/index.d.ts"],
+      "types/departments": ["./dist/types/departments/index.d.ts"],
+      "types/diagnostics": ["./dist/types/diagnostics/index.d.ts"],
+      "types/dashboard": ["./dist/types/dashboard/index.d.ts"],
+      "types/workflow": ["./dist/types/workflow/index.d.ts"],
+      "types/stores": ["./dist/types/stores/index.d.ts"],
+      "types/components": ["./dist/types/components/index.d.ts"],
+      "i18n": ["./dist/i18n/index.d.ts"],
+      "i18n/*": ["./dist/i18n/*.d.ts"],
+      "vault": ["./dist/vault/index.d.ts"],
+      "vault/*": ["./dist/vault/*.d.ts"],
+      "query": ["./dist/query/index.d.ts"],
+      "query/*": ["./dist/query/*.d.ts"]
+    }
+  },
+  "files": [
+    "dist",
+    "src/styles/base.css",
+    "src/styles/postcss.config.js"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "zustand": "^5.0.9"

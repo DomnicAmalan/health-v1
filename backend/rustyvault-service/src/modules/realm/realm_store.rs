@@ -29,7 +29,7 @@ pub struct Realm {
 }
 
 /// Request to create a new realm
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CreateRealmRequest {
     pub name: String,
     pub description: Option<String>,

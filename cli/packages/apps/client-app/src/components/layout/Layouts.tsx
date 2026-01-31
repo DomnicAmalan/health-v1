@@ -18,7 +18,7 @@ interface FullLayoutProps {
   isMobileSidebarOpen: boolean;
   onCloseMobileSidebar: () => void;
   onToggleMobileSidebar: () => void;
-  onTabAction: (actionId: string) => void;
+  onTabAction: (actionId: string, tabPath: string) => void;
 }
 
 /**
@@ -83,7 +83,7 @@ export function FullLayout({
 }
 
 export interface MinimalLayoutProps {
-  onTabAction?: (actionId: string) => void;
+  onTabAction?: (actionId: string, tabPath: string) => void;
 }
 
 const defaultMinimalLayoutProps: MinimalLayoutProps = {

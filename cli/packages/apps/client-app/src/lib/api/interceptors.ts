@@ -4,6 +4,7 @@
  */
 
 import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
+import type { ApiError } from "@lazarus-life/shared/api/baseClient";
 import { maskObject } from "./masking";
 import type { ApiResponse, RequestConfig } from "./types";
 
@@ -167,9 +168,16 @@ export function errorInterceptor(error: unknown, _url: string): ApiError {
     message = sanitizeErrorMessage(message);
   }
 
-  if (error instanceof Response) {
-    code = error.status.toString();
-    message = `HTTP ${error.status}: ${error.statusText}`;
+  // Check for Response-like objects (works with both real Response and mocks)
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof (error as { status: unknown }).status === "number"
+  ) {
+    const responseError = error as Response;
+    code = responseError.status.toString();
+    message = `HTTP ${responseError.status}: ${responseError.statusText || "Error"}`;
   }
 
   return {

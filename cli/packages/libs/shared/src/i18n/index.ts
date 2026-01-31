@@ -1,5 +1,6 @@
 /**
  * i18n index
+ * Internationalization system for healthcare
  */
 
 export * from "./context";
@@ -23,3 +24,31 @@ export {
 } from "./translations";
 export * from "./types";
 export * from "./useTranslation";
+
+// International configuration and formatters
+export {
+  DEFAULT_LOCALE,
+  DEFAULT_CURRENCY,
+  DEFAULT_TIMEZONE,
+  SUPPORTED_CURRENCIES,
+  COMMON_TIMEZONES,
+  getCurrencyByCode,
+  getTimezoneByIdentifier,
+  isRtlLocale,
+  getBrowserLocale,
+  getBrowserTimezone,
+} from "./config";
+
+export {
+  formatNumber,
+  formatCurrency,
+  formatDate,
+  formatTime,
+  formatRelativeTime,
+  formatPercent,
+  formatPhoneNumber,
+  formatFileSize,
+  parseLocalizedNumber,
+  getCurrencySymbol,
+  convertCurrency,
+} from "./formatters";

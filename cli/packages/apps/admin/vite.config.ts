@@ -38,7 +38,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Vendor libraries
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "react-vendor": ["react", "react-dom", "@tanstack/react-router"],
           "query-vendor": ["@tanstack/react-query"],
           "ui-vendor": ["@lazarus-life/ui-components"],
           // Shared libraries

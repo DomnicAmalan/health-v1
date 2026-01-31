@@ -407,7 +407,7 @@ export function FormPlayground() {
                 </Label>
                 <select
                   id="field-size"
-                  value={selectedFieldData.layout?.size > 0 || "md"}
+                  value={selectedFieldData.layout?.size || "md"}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     if (selectedField) {
                       updateField(selectedField, {

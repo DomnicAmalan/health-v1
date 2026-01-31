@@ -2,6 +2,10 @@
  * PermissionGate Component
  * Fine-grained permission checking with AND/OR logic
  * Now supports optional vault ACL checking for secrets access
+ *
+ * NOTE: client-app uses its own AccessDenied component with advanced features
+ * (vault integration, role display, request access). The shared AccessDenied
+ * component from @lazarus-life/ui-components is available for simpler use cases.
  */
 
 import type { Permission } from "@lazarus-life/shared/constants/permissions";

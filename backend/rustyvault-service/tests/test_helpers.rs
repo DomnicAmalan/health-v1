@@ -11,11 +11,12 @@ use rustyvault_service::{
     core::VaultCore,
     http::routes::create_router,
     modules::policy::PolicyStore,
-    modules::realm::{RealmStore, AppStore},
+    modules::realm::RealmStore,
     storage::{StorageAdapter, BarrierStore, MetadataStore, physical_file::FileBackend, barrier_aes_gcm::AESGCMBarrier},
 };
 use shared::infrastructure::database::create_pool_with_options;
 use std::time::Duration;
+use base64::engine::Engine;
 
 /// Test server configuration
 pub struct TestServer {
@@ -41,7 +42,7 @@ pub async fn setup_test_database(database_url: &str) -> sqlx::PgPool {
 }
 
 /// Setup test vault storage
-pub fn setup_test_storage(storage_path: &str) -> Arc<StorageAdapter> {
+pub async fn setup_test_storage(storage_path: &str, database_url: &str) -> Arc<StorageAdapter> {
     let physical_backend = Arc::new(
         FileBackend::new(storage_path)
             .expect("Failed to create test file backend")
@@ -50,12 +51,9 @@ pub fn setup_test_storage(storage_path: &str) -> Arc<StorageAdapter> {
     let barrier = Arc::new(AESGCMBarrier::new(physical_backend.clone()));
     let barrier_store = Arc::new(BarrierStore::with_barrier(barrier.clone()));
     
-    // For tests, we might not need metadata store
-    // But we'll create a dummy one or use the actual database
+    let pool = setup_test_database(database_url).await;
     Arc::new(StorageAdapter::new(
-        Arc::new(MetadataStore::new(Arc::new(
-            setup_test_database("dummy").await // This won't work, needs refactoring
-        ))),
+        Arc::new(MetadataStore::new(Arc::new(pool))),
         barrier_store.clone(),
     ))
 }
@@ -80,9 +78,8 @@ pub async fn setup_test_vault_core(
 }
 
 /// Create test HTTP client
-pub fn create_test_client(base_url: &str) -> reqwest::Client {
+pub fn create_test_client(_base_url: &str) -> reqwest::Client {
     reqwest::Client::builder()
-        .base_url(base_url.parse().unwrap())
         .build()
         .unwrap()
 }

@@ -10,12 +10,16 @@ import {
   Label,
   Stack,
 } from "@lazarus-life/ui-components";
-import { useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
-export function LoginPage() {
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+});
+
+function LoginPage() {
   const { t } = useTranslation();
   const [loginMethod, setLoginMethod] = useState<"token" | "userpass" | "approle">("token");
   const [token, setToken] = useState("");

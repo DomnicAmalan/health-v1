@@ -9,24 +9,43 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkflowsRouteImport } from './routes/workflows'
+import { Route as WardsRouteImport } from './routes/wards'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchedulingRouteImport } from './routes/scheduling'
 import { Route as RevenueRouteImport } from './routes/revenue'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as RadiologyRouteImport } from './routes/radiology'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
 import { Route as PatientsRouteImport } from './routes/patients'
+import { Route as OtRouteImport } from './routes/ot'
 import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as OpdRouteImport } from './routes/opd'
 import { Route as MyTrainingRouteImport } from './routes/my-training'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LabRouteImport } from './routes/lab'
+import { Route as IpdRouteImport } from './routes/ipd'
 import { Route as FormBuilderRouteImport } from './routes/form-builder'
 import { Route as ComplianceStatusRouteImport } from './routes/compliance-status'
 import { Route as ClinicalRouteImport } from './routes/clinical'
+import { Route as BillingRouteImport } from './routes/billing'
+import { Route as BedsRouteImport } from './routes/beds'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AccessDeniedRouteImport } from './routes/access-denied'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PatientsPatientIdRouteImport } from './routes/patients.$patientId'
 
+const WorkflowsRoute = WorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WardsRoute = WardsRouteImport.update({
+  id: '/wards',
+  path: '/wards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -52,6 +71,11 @@ const ResultsRoute = ResultsRouteImport.update({
   path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RadiologyRoute = RadiologyRouteImport.update({
+  id: '/radiology',
+  path: '/radiology',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PharmacyRoute = PharmacyRouteImport.update({
   id: '/pharmacy',
   path: '/pharmacy',
@@ -62,9 +86,19 @@ const PatientsRoute = PatientsRouteImport.update({
   path: '/patients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OtRoute = OtRouteImport.update({
+  id: '/ot',
+  path: '/ot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpdRoute = OpdRouteImport.update({
+  id: '/opd',
+  path: '/opd',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyTrainingRoute = MyTrainingRouteImport.update({
@@ -75,6 +109,16 @@ const MyTrainingRoute = MyTrainingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabRoute = LabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IpdRoute = IpdRouteImport.update({
+  id: '/ipd',
+  path: '/ipd',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormBuilderRoute = FormBuilderRouteImport.update({
@@ -90,6 +134,16 @@ const ComplianceStatusRoute = ComplianceStatusRouteImport.update({
 const ClinicalRoute = ClinicalRouteImport.update({
   id: '/clinical',
   path: '/clinical',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillingRoute = BillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BedsRoute = BedsRouteImport.update({
+  id: '/beds',
+  path: '/beds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
@@ -117,38 +171,56 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
+  '/beds': typeof BedsRoute
+  '/billing': typeof BillingRoute
   '/clinical': typeof ClinicalRoute
   '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
+  '/ipd': typeof IpdRoute
+  '/lab': typeof LabRoute
   '/login': typeof LoginRoute
   '/my-training': typeof MyTrainingRoute
+  '/opd': typeof OpdRoute
   '/orders': typeof OrdersRoute
+  '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
   '/scheduling': typeof SchedulingRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
+  '/wards': typeof WardsRoute
+  '/workflows': typeof WorkflowsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
+  '/beds': typeof BedsRoute
+  '/billing': typeof BillingRoute
   '/clinical': typeof ClinicalRoute
   '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
+  '/ipd': typeof IpdRoute
+  '/lab': typeof LabRoute
   '/login': typeof LoginRoute
   '/my-training': typeof MyTrainingRoute
+  '/opd': typeof OpdRoute
   '/orders': typeof OrdersRoute
+  '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
   '/scheduling': typeof SchedulingRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
+  '/wards': typeof WardsRoute
+  '/workflows': typeof WorkflowsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRoutesById {
@@ -156,19 +228,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/access-denied': typeof AccessDeniedRoute
   '/analytics': typeof AnalyticsRoute
+  '/beds': typeof BedsRoute
+  '/billing': typeof BillingRoute
   '/clinical': typeof ClinicalRoute
   '/compliance-status': typeof ComplianceStatusRoute
   '/form-builder': typeof FormBuilderRoute
+  '/ipd': typeof IpdRoute
+  '/lab': typeof LabRoute
   '/login': typeof LoginRoute
   '/my-training': typeof MyTrainingRoute
+  '/opd': typeof OpdRoute
   '/orders': typeof OrdersRoute
+  '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
   '/scheduling': typeof SchedulingRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
+  '/wards': typeof WardsRoute
+  '/workflows': typeof WorkflowsRoute
   '/patients/$patientId': typeof PatientsPatientIdRoute
 }
 export interface FileRouteTypes {
@@ -177,57 +258,84 @@ export interface FileRouteTypes {
     | '/'
     | '/access-denied'
     | '/analytics'
+    | '/beds'
+    | '/billing'
     | '/clinical'
     | '/compliance-status'
     | '/form-builder'
+    | '/ipd'
+    | '/lab'
     | '/login'
     | '/my-training'
+    | '/opd'
     | '/orders'
+    | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/radiology'
     | '/results'
     | '/revenue'
     | '/scheduling'
     | '/settings'
     | '/setup'
+    | '/wards'
+    | '/workflows'
     | '/patients/$patientId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/access-denied'
     | '/analytics'
+    | '/beds'
+    | '/billing'
     | '/clinical'
     | '/compliance-status'
     | '/form-builder'
+    | '/ipd'
+    | '/lab'
     | '/login'
     | '/my-training'
+    | '/opd'
     | '/orders'
+    | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/radiology'
     | '/results'
     | '/revenue'
     | '/scheduling'
     | '/settings'
     | '/setup'
+    | '/wards'
+    | '/workflows'
     | '/patients/$patientId'
   id:
     | '__root__'
     | '/'
     | '/access-denied'
     | '/analytics'
+    | '/beds'
+    | '/billing'
     | '/clinical'
     | '/compliance-status'
     | '/form-builder'
+    | '/ipd'
+    | '/lab'
     | '/login'
     | '/my-training'
+    | '/opd'
     | '/orders'
+    | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/radiology'
     | '/results'
     | '/revenue'
     | '/scheduling'
     | '/settings'
     | '/setup'
+    | '/wards'
+    | '/workflows'
     | '/patients/$patientId'
   fileRoutesById: FileRoutesById
 }
@@ -235,23 +343,46 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccessDeniedRoute: typeof AccessDeniedRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  BedsRoute: typeof BedsRoute
+  BillingRoute: typeof BillingRoute
   ClinicalRoute: typeof ClinicalRoute
   ComplianceStatusRoute: typeof ComplianceStatusRoute
   FormBuilderRoute: typeof FormBuilderRoute
+  IpdRoute: typeof IpdRoute
+  LabRoute: typeof LabRoute
   LoginRoute: typeof LoginRoute
   MyTrainingRoute: typeof MyTrainingRoute
+  OpdRoute: typeof OpdRoute
   OrdersRoute: typeof OrdersRoute
+  OtRoute: typeof OtRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PharmacyRoute: typeof PharmacyRoute
+  RadiologyRoute: typeof RadiologyRoute
   ResultsRoute: typeof ResultsRoute
   RevenueRoute: typeof RevenueRoute
   SchedulingRoute: typeof SchedulingRoute
   SettingsRoute: typeof SettingsRoute
   SetupRoute: typeof SetupRoute
+  WardsRoute: typeof WardsRoute
+  WorkflowsRoute: typeof WorkflowsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workflows': {
+      id: '/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof WorkflowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wards': {
+      id: '/wards'
+      path: '/wards'
+      fullPath: '/wards'
+      preLoaderRoute: typeof WardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/setup': {
       id: '/setup'
       path: '/setup'
@@ -287,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/radiology': {
+      id: '/radiology'
+      path: '/radiology'
+      fullPath: '/radiology'
+      preLoaderRoute: typeof RadiologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pharmacy': {
       id: '/pharmacy'
       path: '/pharmacy'
@@ -301,11 +439,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PatientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ot': {
+      id: '/ot'
+      path: '/ot'
+      fullPath: '/ot'
+      preLoaderRoute: typeof OtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders': {
       id: '/orders'
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opd': {
+      id: '/opd'
+      path: '/opd'
+      fullPath: '/opd'
+      preLoaderRoute: typeof OpdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-training': {
@@ -320,6 +472,20 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab': {
+      id: '/lab'
+      path: '/lab'
+      fullPath: '/lab'
+      preLoaderRoute: typeof LabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ipd': {
+      id: '/ipd'
+      path: '/ipd'
+      fullPath: '/ipd'
+      preLoaderRoute: typeof IpdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/form-builder': {
@@ -341,6 +507,20 @@ declare module '@tanstack/react-router' {
       path: '/clinical'
       fullPath: '/clinical'
       preLoaderRoute: typeof ClinicalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/billing': {
+      id: '/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof BillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/beds': {
+      id: '/beds'
+      path: '/beds'
+      fullPath: '/beds'
+      preLoaderRoute: typeof BedsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analytics': {
@@ -390,19 +570,28 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccessDeniedRoute: AccessDeniedRoute,
   AnalyticsRoute: AnalyticsRoute,
+  BedsRoute: BedsRoute,
+  BillingRoute: BillingRoute,
   ClinicalRoute: ClinicalRoute,
   ComplianceStatusRoute: ComplianceStatusRoute,
   FormBuilderRoute: FormBuilderRoute,
+  IpdRoute: IpdRoute,
+  LabRoute: LabRoute,
   LoginRoute: LoginRoute,
   MyTrainingRoute: MyTrainingRoute,
+  OpdRoute: OpdRoute,
   OrdersRoute: OrdersRoute,
+  OtRoute: OtRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PharmacyRoute: PharmacyRoute,
+  RadiologyRoute: RadiologyRoute,
   ResultsRoute: ResultsRoute,
   RevenueRoute: RevenueRoute,
   SchedulingRoute: SchedulingRoute,
   SettingsRoute: SettingsRoute,
   SetupRoute: SetupRoute,
+  WardsRoute: WardsRoute,
+  WorkflowsRoute: WorkflowsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

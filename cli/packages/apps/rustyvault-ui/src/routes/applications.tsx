@@ -21,9 +21,11 @@ import {
   Label,
   Select,
   SelectItem,
+  Separator,
+  Switch,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle, AppWindow, Edit, Globe, Loader2, Plus, Trash2, Wand2 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -39,10 +41,14 @@ import {
 } from "@/lib/api/apps";
 import { useRealmStore } from "@/stores/realmStore";
 
+export const Route = createFileRoute("/applications")({
+  component: ApplicationsPage,
+});
+
 const APP_TYPES: AppType[] = ["admin-ui", "client-app", "mobile", "api"];
 const AUTH_METHODS: AuthMethod[] = ["token", "userpass", "approle", "jwt"];
 
-export function ApplicationsPage() {
+function ApplicationsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
@@ -470,46 +476,78 @@ export function ApplicationsPage() {
               {t("applications.edit.dialogDescription", { appName: selectedApp?.app_name || "" })}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-display_name">
-                {t("applications.create.fields.displayName")}
-              </Label>
-              <Input
-                id="edit-display_name"
-                value={formData.display_name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, display_name: e.target.value })
-                }
-              />
+          <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
+            {/* Status */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Status</div>
+              <Separator />
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <Label>Active Status</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedApp?.is_active ? "Application is enabled" : "Application is disabled"}
+                  </p>
+                </div>
+                <Switch
+                  checked={selectedApp?.is_active ?? true}
+                  disabled
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">
-                {t("applications.create.fields.description")}
-              </Label>
-              <Input
-                id="edit-description"
-                value={formData.description}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
+
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-display_name">
+                  {t("applications.create.fields.displayName")}
+                </Label>
+                <Input
+                  id="edit-display_name"
+                  value={formData.display_name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData({ ...formData, display_name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">
+                  {t("applications.create.fields.description")}
+                </Label>
+                <Input
+                  id="edit-description"
+                  value={formData.description}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>{t("applications.create.fields.allowedAuthMethods")}</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {AUTH_METHODS.map((method) => (
-                  <div key={method} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`edit-auth-${method}`}
-                      checked={formData.allowed_auth_methods?.includes(method) ?? false}
-                      onCheckedChange={() => handleAuthMethodToggle(method)}
-                    />
-                    <label htmlFor={`edit-auth-${method}`} className="text-sm">
-                      {t(`applications.authMethods.${method}`) || method}
-                    </label>
-                  </div>
-                ))}
+
+            {/* Auth Methods */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Authentication</div>
+              <Separator />
+
+              <div className="space-y-2">
+                <Label>{t("applications.create.fields.allowedAuthMethods")}</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {AUTH_METHODS.map((method) => (
+                    <div key={method} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`edit-auth-${method}`}
+                        checked={formData.allowed_auth_methods?.includes(method) ?? false}
+                        onCheckedChange={() => handleAuthMethodToggle(method)}
+                      />
+                      <label htmlFor={`edit-auth-${method}`} className="text-sm">
+                        {t(`applications.authMethods.${method}`) || method}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

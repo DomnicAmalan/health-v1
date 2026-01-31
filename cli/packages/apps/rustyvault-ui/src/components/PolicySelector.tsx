@@ -1,7 +1,6 @@
 import { Badge, Button, Label, Select, SelectItem, SelectValue } from "@lazarus-life/ui-components";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Loader2, X } from "lucide-react";
-import type React from "react";
 import { useState } from "react";
 import { policiesApi } from "@/lib/api";
 import { useRealmStore } from "@/stores/realmStore";
@@ -105,8 +104,7 @@ export function PolicySelector({
       {/* Dropdown to add policies */}
       <Select
         value={selectValue}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-          const value = e.target.value;
+        onValueChange={(value) => {
           if (value) {
             handleAddPolicy(value);
           }

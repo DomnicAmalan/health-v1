@@ -1,6 +1,4 @@
-import { useTranslation } from "@lazarus-life/shared/i18n";
-import { Card, CardContent } from "@lazarus-life/ui-components";
-import { AlertCircle, Lock } from "lucide-react";
+import { AccessDenied, PermissionLoading } from "@lazarus-life/ui-components";
 import type { ReactNode } from "react";
 import { useAuthStore, useCapabilities } from "@/stores/authStore";
 
@@ -37,7 +35,6 @@ export function PermissionGate({
   showLoading = false,
   showDenied = false,
 }: PermissionGateProps) {
-  const { t } = useTranslation();
   const { capabilities, loading, isDenied } = useCapabilities(path);
   const { isRoot } = useAuthStore();
 
@@ -48,7 +45,7 @@ export function PermissionGate({
 
   // Show loading state
   if (loading && showLoading) {
-    return <div className="animate-pulse bg-muted rounded h-8 w-full" />;
+    return <PermissionLoading variant="skeleton" />;
   }
 
   // Check specific capability
@@ -81,15 +78,11 @@ export function PermissionGate({
 
   if (showDenied) {
     return (
-      <Card className="border-destructive/50 bg-destructive/10">
-        <CardContent className="flex items-center gap-3 py-4">
-          <Lock className="h-5 w-5 text-destructive" />
-          <div>
-            <p className="font-medium text-destructive">{t("security.accessDenied")}</p>
-            <p className="text-sm text-muted-foreground">{t("errors.forbidden")}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <AccessDenied
+        type="component"
+        resource={path}
+        reason={`Requires ${capability} capability on ${path}`}
+      />
     );
   }
 
@@ -147,31 +140,17 @@ export function withPermission<P extends object>(
     const { hasPermission, loading } = useHasPermission(path, capability);
 
     if (loading) {
-      return (
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      );
+      return <PermissionLoading variant="spinner" message="Checking permissions..." />;
     }
 
     if (!hasPermission) {
       return (
-        <div className="flex items-center justify-center p-8">
-          <Card className="max-w-md">
-            <CardContent className="flex flex-col items-center gap-4 py-8">
-              <AlertCircle className="h-12 w-12 text-destructive" />
-              <div className="text-center">
-                <h2 className="text-lg font-semibold">Access Denied</h2>
-                <p className="text-muted-foreground mt-2">
-                  You don't have permission to access this page.
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Required: {capability} on {path}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <AccessDenied
+          type="page"
+          resource={path}
+          reason={`Required: ${capability} capability`}
+          variant="full-page"
+        />
       );
     }
 

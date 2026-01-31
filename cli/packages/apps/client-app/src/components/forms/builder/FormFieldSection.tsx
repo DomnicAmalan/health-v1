@@ -1,9 +1,9 @@
-import type { FormField } from "@lazarus-life/ui-components";
+import type { FormFieldConfig } from "@lazarus-life/ui-components";
 import { Box, Flex } from "@lazarus-life/ui-components";
 import { cn } from "@lazarus-life/ui-components/utils";
 
 interface FormFieldSectionProps {
-  field: FormField;
+  field: FormFieldConfig;
   className?: string;
 }
 

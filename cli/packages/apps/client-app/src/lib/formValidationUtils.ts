@@ -1,6 +1,6 @@
-import type { FormField } from "@lazarus-life/ui-components";
+import type { FormFieldConfig } from "@lazarus-life/ui-components";
 
-export function validateField(field: FormField, value: unknown): string | true {
+export function validateField(field: FormFieldConfig, value: unknown): string | true {
   if (!field.validation) {
     return true;
   }

@@ -44,7 +44,7 @@ class ClientApiClient extends BaseApiClient {
   /**
    * Override request to use existing interceptors for full compatibility
    */
-  async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+  override async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     const url = this.buildUrl(endpoint);
     const timeout = config.timeout || this.timeout;
 
@@ -102,18 +102,24 @@ class ClientApiClient extends BaseApiClient {
 // Legacy ApiClient class for backward compatibility
 export class ApiClient extends ClientApiClient {
   constructor(
-    baseUrl: string = API_BASE_URL,
-    timeout: number = API_TIMEOUT,
-    retryAttempts: number = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
-    retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
+    _baseUrl: string = API_BASE_URL,
+    _timeout: number = API_TIMEOUT,
+    _retryAttempts: number = Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
+    _retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
   ) {
+    // Parameters are unused - kept for backward compatibility
+    // The actual configuration is set in ClientApiClient parent
     super();
-    this._baseUrl = baseUrl;
-    this._timeout = timeout;
-    this._retryAttempts = retryAttempts;
-    this._retryDelay = retryDelay;
   }
 }
 
 // Export singleton instance
 export const apiClient = new ApiClient();
+
+/**
+ * Hook to access the API client
+ * Returns the singleton apiClient instance
+ */
+export function useApiClient(): ApiClient {
+  return apiClient;
+}

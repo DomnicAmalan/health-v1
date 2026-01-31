@@ -11,6 +11,7 @@ import {
   Label,
   Stack,
 } from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -27,7 +28,11 @@ import { UnsealLock } from "@/components/UnsealLock";
 import { type HealthStatus, systemApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
 
-export function SystemPage() {
+export const Route = createFileRoute("/system")({
+  component: SystemPage,
+});
+
+function SystemPage() {
   const [unsealKey, setUnsealKey] = useState("");
   const [initShares, setInitShares] = useState(1);
   const [initThreshold, setInitThreshold] = useState(1);

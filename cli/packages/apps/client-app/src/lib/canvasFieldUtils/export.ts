@@ -43,7 +43,10 @@ export function generateFormCode(
 ): string {
   const config: FormConfig = {
     id: canvasConfig.id || "form-1",
-    ...canvasConfig,
+    title: canvasConfig.title,
+    description: canvasConfig.description,
+    layout: canvasConfig.layout as "single" | "two-column" | "three-column" | "four-column" | "custom" | undefined,
+    gap: canvasConfig.gap,
     fields: fields.map(({ x, y, width, height, selected, ...field }) => field),
   };
   return `import { FormBuilder, FormConfig } from "@lazarus-life/ui-components"

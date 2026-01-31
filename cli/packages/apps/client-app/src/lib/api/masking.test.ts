@@ -210,10 +210,10 @@ describe("maskObject", () => {
     const fieldsToMask = ["ssn"];
     const masked = maskObject(obj, fieldsToMask);
 
-    expect(masked.patients[0].name).toBe("John");
-    expect(masked.patients[0].ssn).toBe(obj.patients[0].ssn); // Array items not masked
-    expect(masked.patients[1].name).toBe("Jane");
-    expect(masked.patients[1].ssn).toBe(obj.patients[1].ssn); // Array items not masked
+    expect(masked.patients[0]!.name).toBe("John");
+    expect(masked.patients[0]!.ssn).toBe(obj.patients[0]!.ssn); // Array items not masked
+    expect(masked.patients[1]!.name).toBe("Jane");
+    expect(masked.patients[1]!.ssn).toBe(obj.patients[1]!.ssn); // Array items not masked
     expect(masked.ssn).not.toBe(obj.ssn); // Top-level field is masked
   });
 

@@ -1,5 +1,8 @@
+import { API_ROUTES } from "@lazarus-life/shared/api";
 import { apiClient } from "./client";
-import { VAULT_ROUTES } from "./routes";
+
+// Alias for convenience
+const VAULT_ROUTES = API_ROUTES.VAULT_DIRECT;
 
 export interface SecretData {
   [key: string]: unknown;

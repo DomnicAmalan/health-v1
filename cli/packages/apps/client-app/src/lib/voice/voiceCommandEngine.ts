@@ -96,8 +96,8 @@ export class VoiceCommandEngine {
     };
 
     this.recognition.onresult = (event) => {
-      const lastResult = event.results[event.results.length - 1];
-      const transcript = lastResult[0].transcript.trim();
+      const lastResult = event.results[event.results.length - 1]!;
+      const transcript = lastResult[0]!.transcript.trim();
 
       if (lastResult.isFinal) {
         useVoiceCommandStore.getState().setLastCommand(transcript);

@@ -31,6 +31,7 @@ export interface RequestConfig {
   method?: HttpMethod;
   headers?: Record<string, string>;
   body?: unknown;
+  params?: Record<string, string | number | boolean | undefined>;
   timeout?: number;
   signal?: AbortSignal;
   credentials?: RequestCredentials;

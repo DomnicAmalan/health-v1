@@ -14,13 +14,18 @@ import {
   Select,
   SelectItem,
   SelectValue,
+  Separator,
 } from "@lazarus-life/ui-components";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle, Edit, FileText, Globe, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { policiesApi } from "@/lib/api";
 import { useRealmStore } from "@/stores/realmStore";
+
+export const Route = createFileRoute("/policies")({
+  component: PoliciesPage,
+});
 
 // Available capabilities for policies
 const CAPABILITIES = ["create", "read", "update", "delete", "list"] as const;
@@ -46,13 +51,14 @@ interface PathRule {
 // Helper to generate unique IDs
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-export function PoliciesPage() {
+function PoliciesPage() {
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
 
   const [selectedPolicy, setSelectedPolicy] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [newPolicyName, setNewPolicyName] = useState("");
+  const [policyDescription, setPolicyDescription] = useState("");
   const [policyContent, setPolicyContent] = useState("");
   const [pathRules, setPathRules] = useState<PathRule[]>([
     { id: generateId(), path: "secret/data/*", capabilities: ["read", "list"] },
@@ -340,40 +346,58 @@ export function PoliciesPage() {
           </CardHeader>
           <CardContent>
             {isCreating ? (
-              <div className="space-y-4">
-                {/* Policy Name */}
-                <div>
-                  <Label htmlFor="policy-name">Policy Name</Label>
-                  <Input
-                    id="policy-name"
-                    value={newPolicyName}
-                    onChange={(e) => setNewPolicyName(e.target.value)}
-                    placeholder="my-policy"
-                  />
+              <div className="space-y-6">
+                {/* Policy Basic Info */}
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="policy-name">Policy Name *</Label>
+                    <Input
+                      id="policy-name"
+                      value={newPolicyName}
+                      onChange={(e) => setNewPolicyName(e.target.value)}
+                      placeholder="my-policy"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="policy-description">Description</Label>
+                    <Input
+                      id="policy-description"
+                      value={policyDescription}
+                      onChange={(e) => setPolicyDescription(e.target.value)}
+                      placeholder="Describe what this policy is used for..."
+                    />
+                  </div>
                 </div>
 
                 {/* Mode Toggle */}
-                <div className="flex items-center justify-between border-b pb-3">
-                  <Label>Policy Definition</Label>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={useAdvancedMode ? "outline" : "default"}
-                      size="sm"
-                      onClick={() => setUseAdvancedMode(false)}
-                    >
-                      Visual Builder
-                    </Button>
-                    <Button
-                      variant={useAdvancedMode ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setUseAdvancedMode(true);
-                        setPolicyContent(pathRulesToJson(pathRules));
-                      }}
-                    >
-                      Advanced (JSON)
-                    </Button>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-muted-foreground">Policy Definition</div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={useAdvancedMode ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => setUseAdvancedMode(false)}
+                      >
+                        Visual Builder
+                      </Button>
+                      <Button
+                        variant={useAdvancedMode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setUseAdvancedMode(true);
+                          setPolicyContent(pathRulesToJson(pathRules));
+                        }}
+                      >
+                        Advanced (JSON)
+                      </Button>
+                    </div>
                   </div>
+                  <Separator />
                 </div>
 
                 {useAdvancedMode ? (
@@ -423,9 +447,8 @@ export function PoliciesPage() {
                           <div className="flex gap-2">
                             <Select
                               value={PATH_TEMPLATES.find((t) => t.value === rule.path)?.value || ""}
-                              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                                const value = e.target.value;
-                                if (value) updateRulePath(rule.id, value);
+                              onValueChange={(value) => {
+                                if (value && value !== "custom") updateRulePath(rule.id, value);
                               }}
                               className="w-48"
                             >

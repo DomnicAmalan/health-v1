@@ -147,7 +147,6 @@ export class VoiceCommandExecutor {
     if (normalizedName.includes("john") && normalizedName.includes("doe")) {
       // Open patient with ID "john-doe-123" (from the mock data in patients.tsx)
       openTab({
-        id: "patient-john-doe-123",
         label: "John Doe",
         path: "/patients/john-doe-123",
         icon: "User",
@@ -170,7 +169,6 @@ export class VoiceCommandExecutor {
 
     // Open patients list
     openTab({
-      id: "patients-list",
       label: "Patients",
       path: "/patients",
       icon: "Users",

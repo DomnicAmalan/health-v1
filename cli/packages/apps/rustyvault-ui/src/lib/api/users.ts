@@ -1,5 +1,8 @@
 import { apiClient } from "./client";
-import { VAULT_ROUTES } from "./routes";
+import { API_ROUTES } from "@lazarus-life/shared/api";
+
+// Alias for convenience
+const VAULT_ROUTES = API_ROUTES.VAULT_DIRECT;
 
 export interface User {
   username: string;
@@ -9,6 +12,10 @@ export interface User {
   realm_id?: string;
   display_name?: string;
   email?: string;
+  is_active?: boolean;
+  is_super_user?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UserListResponse {

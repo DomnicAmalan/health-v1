@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@lazarus-life/ui-components";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   AppWindow,
   BookOpen,
@@ -22,7 +22,11 @@ import {
 import { useState } from "react";
 import { SetupWizard } from "@/components/SetupWizard";
 
-export function GuidePage() {
+export const Route = createFileRoute("/guide")({
+  component: GuidePage,
+});
+
+function GuidePage() {
   const [wizardOpen, setWizardOpen] = useState(false);
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">

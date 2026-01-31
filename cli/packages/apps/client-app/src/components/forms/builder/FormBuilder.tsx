@@ -1,4 +1,4 @@
-import type { FormBuilderProps, FormField, FormFieldGroup } from "@lazarus-life/ui-components";
+import type { FormBuilderProps, FormFieldConfig, FormFieldGroup } from "@lazarus-life/ui-components";
 import {
   Box,
   Button,
@@ -54,7 +54,7 @@ export function FormBuilder({
     }
   };
 
-  const renderField = (field: FormField) => {
+  const renderField = (field: FormFieldConfig) => {
     if (!isFieldVisible(field)) {
       return null;
     }
@@ -97,7 +97,7 @@ export function FormBuilder({
           value={value}
           hasError={hasError}
           layout={layout}
-          onChange={(value) => handleChange(field.id, value)}
+          onChange={(value: unknown) => handleChange(field.id, value)}
           onBlur={() => handleBlur(field.id)}
           getFieldSizeClasses={getFieldSizeClasses}
           getWidthClasses={getWidthClasses}

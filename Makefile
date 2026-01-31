@@ -9,11 +9,27 @@
         clean clean-all
 
 # ============================================================================
+# Deprecation Warnings
+# ============================================================================
+
+define deprecation_warning
+	@echo ""
+	@echo "⚠️  WARNING: 'make $(1)' is DEPRECATED and will be removed in 4 weeks."
+	@echo "Please use the new consolidated commands instead:"
+	@echo "  $(2)"
+	@echo ""
+	@sleep 2
+endef
+
+# ============================================================================
 # Help
 # ============================================================================
 
 help: ## Show this help message
-	@echo 'Usage: make [target]'
+	@echo 'Usage: make [target] OR cd cli && bun run <command>'
+	@echo ''
+	@echo '⚠️  NOTICE: Makefile commands are being deprecated in favor of unified'
+	@echo 'bun commands. See COMMANDS.md or run: cd cli && bun run'
 	@echo ''
 	@echo 'Available targets:'
 	@echo ''
@@ -39,27 +55,38 @@ help: ## Show this help message
 build: ## Build all Docker images in dev mode
 	docker-compose -f docker-compose.dev.yml build
 
-up: dev-up ## Alias for dev-up
+up: ## [DEPRECATED] Use: cd cli && bun run docker:dev
+	$(call deprecation_warning,up,cd cli && bun run docker:dev)
+	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
 
-down: dev-down ## Alias for dev-down
+down: ## [DEPRECATED] Use: cd cli && bun run docker:dev:down
+	$(call deprecation_warning,down,cd cli && bun run docker:dev:down)
+	docker-compose -f docker-compose.dev.yml down
 
 restart: ## Restart all services in dev mode
 	docker-compose -f docker-compose.dev.yml restart
 
-logs: dev-logs ## Alias for dev-logs
+logs: ## [DEPRECATED] Use: cd cli && bun run docker:dev:logs
+	$(call deprecation_warning,logs,cd cli && bun run docker:dev:logs)
+	docker-compose -f docker-compose.dev.yml logs -f
 
 ps: ## Show running containers
 	docker-compose -f docker-compose.dev.yml ps
 
-dev: dev-up ## Start development environment
-
-dev-up: ## Build and start all services in dev mode
+dev: ## [DEPRECATED] Use: cd cli && bun run docker:dev
+	$(call deprecation_warning,dev,cd cli && bun run docker:dev)
 	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
 
-dev-down: ## Stop all dev services
+dev-up: ## [DEPRECATED] Use: cd cli && bun run docker:dev
+	$(call deprecation_warning,dev-up,cd cli && bun run docker:dev)
+	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
+
+dev-down: ## [DEPRECATED] Use: cd cli && bun run docker:dev:down
+	$(call deprecation_warning,dev-down,cd cli && bun run docker:dev:down)
 	docker-compose -f docker-compose.dev.yml down
 
-dev-logs: ## Show logs from dev services
+dev-logs: ## [DEPRECATED] Use: cd cli && bun run docker:dev:logs
+	$(call deprecation_warning,dev-logs,cd cli && bun run docker:dev:logs)
 	docker-compose -f docker-compose.dev.yml logs -f
 
 dev-build: ## Build dev images without cache
@@ -118,9 +145,13 @@ test-backend-coverage: ## Run backend tests with coverage
 	@echo "Running backend tests with coverage..."
 	cd backend && cargo tarpaulin --out Xml --out Html --output-dir coverage --exclude-files '*/tests/*'
 
-test-frontend: test-unit ## Alias for test-unit
+test-frontend: ## [DEPRECATED] Use: cd cli && bun run test:unit
+	$(call deprecation_warning,test-frontend,cd cli && bun run test:unit)
+	@echo "Running frontend unit tests..."
+	cd cli && bun run test
 
-test-unit: ## Run frontend unit tests
+test-unit: ## [DEPRECATED] Use: cd cli && bun run test:unit
+	$(call deprecation_warning,test-unit,cd cli && bun run test:unit)
 	@echo "Running frontend unit tests..."
 	cd cli && bun run test
 
@@ -185,7 +216,8 @@ lint-frontend: ## Run frontend lints (biome)
 	@echo "Running frontend lints..."
 	cd cli && bun run lint
 
-lint-fix: ## Fix linting issues automatically
+lint-fix: ## [DEPRECATED] Use: cd cli && bun run lint:fix
+	$(call deprecation_warning,lint-fix,cd cli && bun run lint:fix)
 	@echo "Fixing linting issues..."
 	cd backend && cargo fmt --all
 	cd cli && bun run lint:fix || bunx biome check --write .
@@ -295,11 +327,13 @@ strict-backend: ## Run all backend strict checks only
 # Build
 # ============================================================================
 
-build-backend: ## Build backend in release mode
+build-backend: ## [DEPRECATED] Use: cd cli && bun run build:backend
+	$(call deprecation_warning,build-backend,cd cli && bun run build:backend)
 	@echo "Building backend..."
 	cd backend && cargo build --release --workspace
 
-build-frontend: ## Build all frontend apps
+build-frontend: ## [DEPRECATED] Use: cd cli && bun run build:frontend
+	$(call deprecation_warning,build-frontend,cd cli && bun run build:frontend)
 	@echo "Building frontend..."
 	cd cli && bun run build
 
@@ -319,7 +353,8 @@ clean: ## Clean build artifacts
 	rm -rf cli/packages/*/dist
 	rm -rf cli/packages/*/.turbo
 
-clean-docker: ## Clean Docker resources
+clean-docker: ## [DEPRECATED] Use: cd cli && bun run docker:clean
+	$(call deprecation_warning,clean-docker,cd cli && bun run docker:clean)
 	@echo "Cleaning Docker resources..."
 	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
 	docker-compose -f docker-compose.test.yml down -v --remove-orphans

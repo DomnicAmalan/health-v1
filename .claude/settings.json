@@ -1,0 +1,36 @@
+{
+  "skills": {
+    "phi-audit": {
+      "description": "Review PHI (Protected Health Information) access logs and audit trail",
+      "path": ".claude/skills/phi-audit.md"
+    },
+    "hipaa-check": {
+      "description": "Run HIPAA compliance checks on code changes",
+      "path": ".claude/skills/hipaa-check.md"
+    },
+    "patient-api": {
+      "description": "Generate patient API endpoints, hooks, and types",
+      "path": ".claude/skills/patient-api.md"
+    },
+    "phi-scan": {
+      "description": "Scan code for potential PHI exposure or security issues",
+      "path": ".claude/skills/phi-scan.md"
+    },
+    "encryption-ops": {
+      "description": "Manage DEK rotation and encryption key operations",
+      "path": ".claude/skills/encryption-ops.md"
+    },
+    "clinical-feature": {
+      "description": "Generate clinical feature (orders, results, notes) with proper PHI handling",
+      "path": ".claude/skills/clinical-feature.md"
+    },
+    "audit-report": {
+      "description": "Generate audit reports for compliance reviews",
+      "path": ".claude/skills/audit-report.md"
+    },
+    "de-identify": {
+      "description": "De-identify PHI for research or testing using HIPAA Safe Harbor",
+      "path": ".claude/skills/de-identify.md"
+    }
+  }
+}

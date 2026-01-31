@@ -1,4 +1,4 @@
-import type { FormConfig, FormField } from "@lazarus-life/ui-components";
+import type { FormConfig, FormFieldConfig } from "@lazarus-life/ui-components";
 import { useEffect, useMemo, useState } from "react";
 import { validateField } from "@/lib/formValidationUtils";
 
@@ -72,7 +72,7 @@ export function useFormBuilder({ config, initialValues = {} }: UseFormBuilderOpt
     return isValid;
   };
 
-  const isFieldVisible = (field: FormField): boolean => {
+  const isFieldVisible = (field: FormFieldConfig): boolean => {
     if (!field.dependencies) {
       return true;
     }

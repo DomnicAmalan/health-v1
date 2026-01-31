@@ -18,7 +18,7 @@ describe("usePermissions", () => {
   });
 
   it("should return permissions from store", () => {
-    const testPermissions = [PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.EDIT];
+    const testPermissions = [PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.UPDATE];
     useAuthStore.setState({ permissions: testPermissions });
 
     const { result } = renderHook(() => usePermissions());
@@ -41,7 +41,7 @@ describe("usePermissions", () => {
     const { result } = renderHook(() => usePermissions());
 
     expect(result.current.hasPermission(PERMISSIONS.PATIENTS.VIEW)).toBe(true);
-    expect(result.current.hasPermission(PERMISSIONS.PATIENTS.EDIT)).toBe(false);
+    expect(result.current.hasPermission(PERMISSIONS.PATIENTS.UPDATE)).toBe(false);
   });
 
   it("should check if user has any of the permissions", () => {
@@ -51,22 +51,22 @@ describe("usePermissions", () => {
     const { result } = renderHook(() => usePermissions());
 
     expect(
-      result.current.hasAnyPermission([PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.EDIT])
+      result.current.hasAnyPermission([PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.UPDATE])
     ).toBe(true);
 
     expect(
-      result.current.hasAnyPermission([PERMISSIONS.PATIENTS.EDIT, PERMISSIONS.CLINICAL.VIEW])
+      result.current.hasAnyPermission([PERMISSIONS.PATIENTS.UPDATE, PERMISSIONS.CLINICAL.VIEW])
     ).toBe(false);
   });
 
   it("should check if user has all permissions", () => {
-    const testPermissions = [PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.EDIT];
+    const testPermissions = [PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.UPDATE];
     useAuthStore.setState({ permissions: testPermissions });
 
     const { result } = renderHook(() => usePermissions());
 
     expect(
-      result.current.hasAllPermissions([PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.EDIT])
+      result.current.hasAllPermissions([PERMISSIONS.PATIENTS.VIEW, PERMISSIONS.PATIENTS.UPDATE])
     ).toBe(true);
 
     expect(

@@ -27,7 +27,7 @@ export function reorderTabsArray<T extends { id: string }>(
   // Find dragged tab index - O(n) single pass
   let draggedIndex = -1;
   for (let i = 0; i < tabs.length; i++) {
-    if (tabs[i].id === draggedId) {
+    if (tabs[i]!.id === draggedId) {
       draggedIndex = i;
       break;
     }
@@ -50,7 +50,7 @@ export function reorderTabsArray<T extends { id: string }>(
   const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
 
   // Insert at target position
-  result.splice(adjustedTargetIndex, 0, draggedTab);
+  result.splice(adjustedTargetIndex, 0, draggedTab!);
 
   return result;
 }
@@ -71,7 +71,7 @@ export function findInsertionIndex(positions: number[], dragPosition: number): n
   // Binary search for optimal insertion point
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
-    if (positions[mid] > dragPosition) {
+    if (positions[mid]! > dragPosition) {
       result = mid;
       right = mid - 1;
     } else {
@@ -100,7 +100,7 @@ export function getTabPositions(container: HTMLElement, tabElements: HTMLElement
 
   // Single pass calculation
   for (let i = 0; i < tabElements.length; i++) {
-    const rect = tabElements[i].getBoundingClientRect();
+    const rect = tabElements[i]!.getBoundingClientRect();
     const left = rect.left - containerRect.left + scrollLeft;
     const width = rect.width;
     positions[i] = left + width / 2; // Return center position
@@ -126,7 +126,7 @@ export class TabIndex {
     this.pathMap.clear();
 
     for (let i = 0; i < tabs.length; i++) {
-      const tab = tabs[i];
+      const tab = tabs[i]!;
       this.idMap.set(tab.id, i);
       this.pathMap.set(tab.path, i);
     }

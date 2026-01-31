@@ -38,7 +38,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { ProvisionUserDialog } from "@/components/users/ProvisionUserDialog";
-import { apiClient } from "@/lib/api/client";
+import { apiClient, API_ROUTES } from "@/lib/api/client";
+import { ORGANIZATIONS_QUERY_KEYS, USERS_QUERY_KEYS } from "@/lib/api/queryKeys";
+import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { ProtectedButton, ProtectedPage } from "../lib/permissions";
 
 interface User {
@@ -66,21 +68,23 @@ interface OrganizationsListResponse {
   organizations: Organization[];
 }
 
-// API functions
+// API functions using centralized routes
 const usersApiAdmin = {
   list: async (search?: string): Promise<UsersListResponse> => {
-    const query = search ? `?search=${encodeURIComponent(search)}` : "";
-    const response = await apiClient.get<UsersListResponse>(`/users${query}`);
+    const endpoint = search
+      ? `${API_ROUTES.USERS.LIST}?search=${encodeURIComponent(search)}`
+      : API_ROUTES.USERS.LIST;
+    const response = await apiClient.get<UsersListResponse>(endpoint);
     return response.data || { users: [], total: 0 };
   },
   delete: async (userId: string): Promise<void> => {
-    await apiClient.delete(`/users/${userId}`);
+    await apiClient.delete(API_ROUTES.USERS.DELETE(userId));
   },
 };
 
 const organizationsApi = {
   list: async (): Promise<Organization[]> => {
-    const response = await apiClient.get<OrganizationsListResponse>("/organizations");
+    const response = await apiClient.get<OrganizationsListResponse>(API_ROUTES.ORGANIZATIONS.LIST);
     return response.data?.organizations || [];
   },
 };
@@ -88,6 +92,7 @@ const organizationsApi = {
 export function UsersPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { logPHI, logState } = useAuditLog();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isProvisionOpen, setIsProvisionOpen] = useState(false);
@@ -99,21 +104,25 @@ export function UsersPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["users", searchTerm],
+    queryKey: USERS_QUERY_KEYS.list({ searchTerm: searchTerm || undefined }),
     queryFn: () => usersApiAdmin.list(searchTerm || undefined),
   });
 
   // Fetch organizations for the provision dialog
   const { data: organizations = [] } = useQuery({
-    queryKey: ["organizations"],
+    queryKey: ORGANIZATIONS_QUERY_KEYS.list(),
     queryFn: organizationsApi.list,
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: usersApiAdmin.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+    onSuccess: (_data, userId) => {
+      // Log user deletion for audit trail
+      logState("USER_DELETED", "users", userId);
+      logPHI("users", userId, { action: "delete" });
+
+      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEYS.all });
       setDeleteUserId(null);
     },
   });

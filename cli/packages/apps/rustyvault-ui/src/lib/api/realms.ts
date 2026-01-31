@@ -1,28 +1,42 @@
 import { apiClient } from "./client";
-import { VAULT_ROUTES } from "./routes";
+import { API_ROUTES } from "@lazarus-life/shared/api";
+
+// Alias for convenience
+const VAULT_ROUTES = API_ROUTES.VAULT_DIRECT;
 
 export interface Realm {
   id: string;
   name: string;
   description?: string;
+  display_name?: string;
   organization_id?: string;
   organization_name?: string;
+  default_lease_ttl?: number;
+  max_lease_ttl?: number;
   is_active?: boolean;
   config?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface CreateRealmRequest {
   name: string;
   description?: string;
+  display_name?: string;
   organization_id?: string;
+  default_lease_ttl?: number;
+  max_lease_ttl?: number;
 }
 
 export interface UpdateRealmRequest {
   name?: string;
   description?: string;
+  display_name?: string;
   is_active?: boolean;
+  default_lease_ttl?: number;
+  max_lease_ttl?: number;
 }
 
 export interface RealmListResponse {

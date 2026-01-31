@@ -111,7 +111,7 @@ export function maskMRN(value: string, level: MaskingLevel = "partial"): string 
   }
 
   const config = SECURITY_CONFIG.MASKING.MRN;
-  return maskField(value, config.visibleChars, config.maskChar);
+  return maskField(value, config.visibleChars, "*");
 }
 
 /**
@@ -178,7 +178,7 @@ export function maskObject<T extends Record<string, unknown>>(
   fieldsToMask: string[],
   userRole = "receptionist"
 ): T {
-  const masked = { ...obj };
+  const masked: Record<string, unknown> = { ...obj };
 
   for (const field of fieldsToMask) {
     if (field in masked && typeof masked[field] === "string") {
@@ -186,5 +186,5 @@ export function maskObject<T extends Record<string, unknown>>(
     }
   }
 
-  return masked;
+  return masked as T;
 }

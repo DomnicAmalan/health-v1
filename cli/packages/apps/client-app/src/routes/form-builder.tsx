@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Layout } from "lucide-react";
 import { useState } from "react";
 import { FormCanvasBuilder } from "@/components/forms/canvas";
+import { FormBuilder } from "@/components/forms/builder/FormBuilder";
 
 export const Route = createFileRoute("/form-builder")({
   component: FormBuilderPage,

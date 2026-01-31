@@ -10,7 +10,9 @@ import {
   CardTitle,
   Input,
   Label,
+  Separator,
 } from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -25,9 +27,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { secretsApi } from "@/lib/api";
+import { SECRETS_QUERY_KEYS } from "@/lib/api/queryKeys";
 import { useRealmStore } from "@/stores/realmStore";
 
-export function SecretsPage() {
+export const Route = createFileRoute("/secrets")({
+  component: SecretsPage,
+});
+
+function SecretsPage() {
   const queryClient = useQueryClient();
   const { currentRealm, isGlobalMode } = useRealmStore();
 
@@ -53,7 +60,11 @@ export function SecretsPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["secrets", currentPath, currentRealm?.id, isGlobalMode],
+    queryKey: SECRETS_QUERY_KEYS.list({
+      path: currentPath,
+      realmId: currentRealm?.id,
+      isGlobal: isGlobalMode,
+    }),
     queryFn: () =>
       currentRealm && !isGlobalMode
         ? secretsApi.listForRealm(currentRealm.id, currentPath)
@@ -63,7 +74,13 @@ export function SecretsPage() {
 
   // Fetch selected secret
   const { isLoading: isLoadingSecret } = useQuery({
-    queryKey: ["secret", selectedSecret, currentRealm?.id, isGlobalMode],
+    queryKey: selectedSecret
+      ? SECRETS_QUERY_KEYS.detail({
+          name: selectedSecret,
+          realmId: currentRealm?.id,
+          isGlobal: isGlobalMode,
+        })
+      : ["secret", null],
     queryFn: async () => {
       if (!selectedSecret) {
         throw new Error("Secret not selected");
@@ -85,8 +102,7 @@ export function SecretsPage() {
         ? secretsApi.writeForRealm(currentRealm.id, path, data)
         : secretsApi.write(path, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["secrets"] });
-      queryClient.invalidateQueries({ queryKey: ["secret", selectedSecret] });
+      queryClient.invalidateQueries({ queryKey: SECRETS_QUERY_KEYS.all });
       setIsCreating(false);
       setNewSecretPath("");
       setSecretData({});
@@ -100,7 +116,7 @@ export function SecretsPage() {
         ? secretsApi.deleteForRealm(currentRealm.id, path)
         : secretsApi.delete(path),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["secrets"] });
+      queryClient.invalidateQueries({ queryKey: SECRETS_QUERY_KEYS.all });
       if (selectedSecret === currentPath) {
         setSelectedSecret(null);
       }
@@ -302,62 +318,75 @@ export function SecretsPage() {
           </CardHeader>
           <CardContent>
             {isCreating ? (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="secret-path">Secret Path</Label>
-                  <Input
-                    id="secret-path"
-                    value={newSecretPath}
-                    onChange={(e) => setNewSecretPath(e.target.value)}
-                    placeholder="myapp/database/password"
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Use forward slashes (/) to create nested paths
-                  </p>
+              <div className="space-y-6">
+                {/* Path Section */}
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">Secret Location</div>
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="secret-path">Secret Path *</Label>
+                    <Input
+                      id="secret-path"
+                      value={newSecretPath}
+                      onChange={(e) => setNewSecretPath(e.target.value)}
+                      placeholder="myapp/database/password"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use forward slashes (/) to create nested paths
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Key-Value Pairs</Label>
-                  {Object.keys(secretData).length > 0 ? (
-                    <div className="space-y-2 border rounded-md p-3">
-                      {Object.entries(secretData).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2">
-                          <div className="flex-1 grid grid-cols-2 gap-2">
-                            <Input value={key} readOnly className="font-mono text-sm" />
-                            <Input value={value} readOnly className="font-mono text-sm" />
+                {/* Key-Value Section */}
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-muted-foreground">Secret Data</div>
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <Label>Key-Value Pairs</Label>
+                    {Object.keys(secretData).length > 0 ? (
+                      <div className="space-y-2 border rounded-md p-3">
+                        {Object.entries(secretData).map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-2">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <Input value={key} readOnly className="font-mono text-sm" />
+                              <Input value={value} readOnly className="font-mono text-sm" />
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => handleRemoveKey(key)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button variant="ghost" size="sm" onClick={() => handleRemoveKey(key)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No key-value pairs added yet</p>
-                  )}
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No key-value pairs added yet</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Key"
+                      value={newKey}
+                      onChange={(e) => setNewKey(e.target.value)}
+                      className="font-mono"
+                    />
+                    <Input
+                      placeholder="Value"
+                      value={newValue}
+                      onChange={(e) => setNewValue(e.target.value)}
+                      className="font-mono"
+                      type="password"
+                    />
+                    <Button onClick={handleAddKeyValue} disabled={!newKey || !newValue}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Key"
-                    value={newKey}
-                    onChange={(e) => setNewKey(e.target.value)}
-                    className="font-mono"
-                  />
-                  <Input
-                    placeholder="Value"
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                    className="font-mono"
-                    type="password"
-                  />
-                  <Button onClick={handleAddKeyValue} disabled={!newKey || !newValue}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="flex gap-2">
+                {/* Actions */}
+                <div className="flex gap-2 pt-4">
                   <Button
                     onClick={handleCreateSecret}
                     disabled={

@@ -9,7 +9,7 @@ import { canAccessRoute, getRoutePermission } from "./permissionChecks";
 describe("Permission Checks", () => {
   const mockPermissions = [
     PERMISSIONS.PATIENTS.VIEW,
-    PERMISSIONS.PATIENTS.EDIT,
+    PERMISSIONS.PATIENTS.UPDATE,
     PERMISSIONS.CLINICAL.VIEW,
   ];
 

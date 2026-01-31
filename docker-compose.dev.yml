@@ -176,6 +176,7 @@ services:
       - ./cli/packages/libs/shared:/app/packages/libs/shared
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
+      - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
       # Exclude node_modules from mount to avoid version conflicts
       - /app/packages/apps/client-app/node_modules
       - /app/packages/libs/components/node_modules
@@ -216,6 +217,7 @@ services:
       - ./cli/packages/libs/shared:/app/packages/libs/shared
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
+      - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
     ports:
       - "${ADMIN_UI_PORT:-4111}:4111"
     depends_on:
@@ -340,6 +342,7 @@ services:
       - ./cli/packages/libs/shared:/app/packages/libs/shared
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
+      - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
       # Exclude node_modules from mount to avoid version conflicts
       - /app/packages/apps/rustyvault-ui/node_modules
       - /app/packages/libs/components/node_modules
@@ -354,6 +357,63 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - health-network
+    restart: unless-stopped
+
+  # YottaDB - Native MUMPS Database for VistA-style EHR
+  yottadb:
+    image: download.yottadb.com/yottadb/yottadb-debian:r2.02
+    container_name: health-yottadb
+    stdin_open: true
+    tty: true
+    ports:
+      - "${YOTTADB_PORT:-9090}:9080"
+      - "${YOTTADB_MWEB_PORT:-1338}:1337"
+    volumes:
+      - ./ydb-data:/data
+      - ./yottadb/routines:/data/r
+    healthcheck:
+      test: ["CMD-SHELL", ". /opt/yottadb/current/ydb_env_set && yottadb -run %XCMD 'W 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - health-network
+    restart: unless-stopped
+
+  # YottaDB REST API - Rust service for EHR access
+  yottadb-api:
+    build:
+      context: .
+      dockerfile: backend/yottadb-api/Dockerfile
+      target: runner-dev
+      args:
+        BUILD_MODE: dev
+        SKIP_CHECKS: "true"
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+    container_name: health-yottadb-api
+    environment:
+      PORT: 8080
+      RUST_LOG: ${RUST_LOG:-debug}
+      RUST_BACKTRACE: full
+    ports:
+      - "${YOTTADB_API_PORT:-9091}:8080"
+    volumes:
+      - ./ydb-data:/data
+      # Mount source code for hot reload in dev mode
+      - ./backend/yottadb-api/src:/app/backend/yottadb-api/src
+      - ./backend/yottadb-api/Cargo.toml:/app/backend/yottadb-api/Cargo.toml
+    depends_on:
+      yottadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - health-network
     restart: unless-stopped

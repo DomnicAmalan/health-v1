@@ -3,6 +3,8 @@
  * Wraps page content to check access before rendering
  */
 
+import { AccessDenied } from "@lazarus-life/ui-components";
+import { auditLogger } from "../security/audit";
 import { useCanAccess } from "./context";
 
 interface ProtectedPageProps {
@@ -19,13 +21,28 @@ export function ProtectedPage({
   children,
   pageName,
   relation = "can_view",
-  fallback = null,
+  fallback,
 }: ProtectedPageProps) {
   const object = `page:${pageName}`;
   const canAccess = useCanAccess(relation, object, false);
 
   if (!canAccess) {
-    return <>{fallback}</>;
+    // Log access denial for audit trail
+    auditLogger.logDenied(object, `Missing ${relation} relation`);
+
+    // Return custom fallback or default AccessDenied
+    if (fallback) {
+      return <>{fallback}</>;
+    }
+
+    return (
+      <AccessDenied
+        type="page"
+        resource={pageName}
+        reason={`Requires ${relation} permission`}
+        variant="full-page"
+      />
+    );
   }
 
   return <>{children}</>;

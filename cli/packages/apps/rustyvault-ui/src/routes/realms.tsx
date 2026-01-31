@@ -18,7 +18,10 @@ import {
   DialogTrigger,
   Input,
   Label,
+  Separator,
+  Switch,
 } from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -35,7 +38,11 @@ import { useState } from "react";
 import { type CreateRealmRequest, type Realm, realmsApi } from "@/lib/api/realms";
 import { useRealmStore } from "@/stores/realmStore";
 
-export function RealmsPage() {
+export const Route = createFileRoute("/realms")({
+  component: RealmsPage,
+});
+
+function RealmsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { setCurrentRealm, currentRealm, refreshRealms } = useRealmStore();
@@ -47,8 +54,12 @@ export function RealmsPage() {
   const [formData, setFormData] = useState<CreateRealmRequest>({
     name: "",
     description: "",
+    display_name: "",
     organization_id: "",
+    default_lease_ttl: 3600,
+    max_lease_ttl: 86400,
   });
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Fetch realms
   const {
@@ -102,7 +113,15 @@ export function RealmsPage() {
   });
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", organization_id: "" });
+    setFormData({ 
+      name: "", 
+      description: "", 
+      display_name: "",
+      organization_id: "",
+      default_lease_ttl: 3600,
+      max_lease_ttl: 86400,
+    });
+    setShowAdvanced(false);
   };
 
   const handleCreate = () => {
@@ -131,8 +150,12 @@ export function RealmsPage() {
     setFormData({
       name: realm.name,
       description: realm.description || "",
+      display_name: realm.display_name || "",
       organization_id: realm.organization_id || "",
+      default_lease_ttl: realm.default_lease_ttl || 3600,
+      max_lease_ttl: realm.max_lease_ttl || 86400,
     });
+    setShowAdvanced(false);
     setIsEditOpen(true);
   };
 
@@ -171,33 +194,91 @@ export function RealmsPage() {
               <DialogTitle>{t("realms.create.dialogTitle")}</DialogTitle>
               <DialogDescription>{t("realms.create.dialogDescription")}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t("realms.create.fields.name")}</Label>
-                <Input
-                  id="name"
-                  placeholder={t("realms.create.fields.namePlaceholder")}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
+            <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
+              {/* Basic Info */}
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+                <Separator />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t("realms.create.fields.name")} *</Label>
+                  <Input
+                    id="name"
+                    placeholder={t("realms.create.fields.namePlaceholder")}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="display_name">Display Name</Label>
+                  <Input
+                    id="display_name"
+                    placeholder="Friendly display name"
+                    value={formData.display_name || ""}
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t("realms.create.fields.description")}</Label>
+                  <Input
+                    id="description"
+                    placeholder={t("realms.create.fields.descriptionPlaceholder")}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="org_id">{t("realms.create.fields.organizationId")}</Label>
+                  <Input
+                    id="org_id"
+                    placeholder={t("realms.create.fields.organizationIdPlaceholder")}
+                    value={formData.organization_id}
+                    onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">{t("realms.create.fields.description")}</Label>
-                <Input
-                  id="description"
-                  placeholder={t("realms.create.fields.descriptionPlaceholder")}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="org_id">{t("realms.create.fields.organizationId")}</Label>
-                <Input
-                  id="org_id"
-                  placeholder={t("realms.create.fields.organizationIdPlaceholder")}
-                  value={formData.organization_id}
-                  onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
-                />
+
+              {/* Advanced Settings */}
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                >
+                  {showAdvanced ? "▼" : "▶"} Advanced Settings
+                </button>
+                
+                {showAdvanced && (
+                  <>
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="default_lease_ttl">Default Lease TTL (seconds)</Label>
+                        <Input
+                          id="default_lease_ttl"
+                          type="number"
+                          value={formData.default_lease_ttl || 3600}
+                          onChange={(e) => setFormData({ ...formData, default_lease_ttl: parseInt(e.target.value, 10) || 3600 })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="max_lease_ttl">Max Lease TTL (seconds)</Label>
+                        <Input
+                          id="max_lease_ttl"
+                          type="number"
+                          value={formData.max_lease_ttl || 86400}
+                          onChange={(e) => setFormData({ ...formData, max_lease_ttl: parseInt(e.target.value, 10) || 86400 })}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      These TTL values are used as defaults for secrets and tokens created in this realm.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <DialogFooter>
@@ -347,22 +428,83 @@ export function RealmsPage() {
               {t("realms.edit.dialogDescription", { name: selectedRealm?.name || "" })}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">{t("realms.create.fields.name")}</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
+          <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto">
+            {/* Status */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Status</div>
+              <Separator />
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <Label>Active Status</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedRealm?.is_active !== false ? "Realm is active and operational" : "Realm is disabled"}
+                  </p>
+                </div>
+                <Switch
+                  checked={selectedRealm?.is_active !== false}
+                  disabled
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">{t("realms.create.fields.description")}</Label>
-              <Input
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
+
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">{t("realms.create.fields.name")}</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-display_name">Display Name</Label>
+                <Input
+                  id="edit-display_name"
+                  value={formData.display_name || ""}
+                  onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">{t("realms.create.fields.description")}</Label>
+                <Input
+                  id="edit-description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* TTL Settings */}
+            <div className="space-y-4">
+              <div className="text-sm font-medium text-muted-foreground">Lease Settings</div>
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-default_lease_ttl">Default Lease TTL (seconds)</Label>
+                  <Input
+                    id="edit-default_lease_ttl"
+                    type="number"
+                    value={formData.default_lease_ttl || 3600}
+                    onChange={(e) => setFormData({ ...formData, default_lease_ttl: parseInt(e.target.value, 10) || 3600 })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-max_lease_ttl">Max Lease TTL (seconds)</Label>
+                  <Input
+                    id="edit-max_lease_ttl"
+                    type="number"
+                    value={formData.max_lease_ttl || 86400}
+                    onChange={(e) => setFormData({ ...formData, max_lease_ttl: parseInt(e.target.value, 10) || 86400 })}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>

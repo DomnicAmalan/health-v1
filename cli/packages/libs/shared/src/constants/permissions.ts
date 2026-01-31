@@ -70,6 +70,26 @@ export const PERMISSIONS = {
     DELETE: "revenue:delete",
   },
 
+  // Billing permissions
+  BILLING: {
+    VIEW: "billing:view",
+    CREATE: "billing:create",
+    UPDATE: "billing:update",
+    DELETE: "billing:delete",
+    PROCESS_PAYMENT: "billing:process_payment",
+    MANAGE_INVOICES: "billing:manage_invoices",
+  },
+
+  // Insurance permissions
+  INSURANCE: {
+    VIEW: "insurance:view",
+    CREATE: "insurance:create",
+    UPDATE: "insurance:update",
+    DELETE: "insurance:delete",
+    MANAGE_CLAIMS: "insurance:manage_claims",
+    MANAGE_PREAUTH: "insurance:manage_preauth",
+  },
+
   // Analytics permissions
   ANALYTICS: {
     VIEW: "analytics:view",
@@ -80,6 +100,67 @@ export const PERMISSIONS = {
   SETTINGS: {
     VIEW: "settings:view",
     UPDATE: "settings:update",
+  },
+
+  // Department permissions
+  DEPARTMENTS: {
+    // OPD
+    OPD_VIEW: "departments:opd:view",
+    OPD_MANAGE: "departments:opd:manage",
+    OPD_QUEUE: "departments:opd:queue",
+    // IPD
+    IPD_VIEW: "departments:ipd:view",
+    IPD_ADMIT: "departments:ipd:admit",
+    IPD_DISCHARGE: "departments:ipd:discharge",
+    IPD_TRANSFER: "departments:ipd:transfer",
+    // Beds
+    BEDS_VIEW: "departments:beds:view",
+    BEDS_MANAGE: "departments:beds:manage",
+    BEDS_ALLOCATE: "departments:beds:allocate",
+    // Wards
+    WARDS_VIEW: "departments:wards:view",
+    WARDS_MANAGE: "departments:wards:manage",
+    // OT
+    OT_VIEW: "departments:ot:view",
+    OT_SCHEDULE: "departments:ot:schedule",
+    OT_MANAGE: "departments:ot:manage",
+  },
+
+  // Diagnostics - Laboratory Information System (LIS)
+  LAB: {
+    VIEW: "lab:view",
+    ORDER: "lab:order",
+    COLLECT: "lab:collect",
+    PROCESS: "lab:process",
+    RESULT_ENTRY: "lab:result:entry",
+    RESULT_VERIFY: "lab:result:verify",
+    RESULT_AMEND: "lab:result:amend",
+    REPORT_SIGN: "lab:report:sign",
+    MANAGE_TESTS: "lab:manage:tests",
+    MANAGE_PANELS: "lab:manage:panels",
+    CRITICAL_NOTIFY: "lab:critical:notify",
+  },
+
+  // Diagnostics - Radiology Information System (RIS)
+  RADIOLOGY: {
+    VIEW: "radiology:view",
+    ORDER: "radiology:order",
+    SCHEDULE: "radiology:schedule",
+    PERFORM: "radiology:perform",
+    REPORT_CREATE: "radiology:report:create",
+    REPORT_SIGN: "radiology:report:sign",
+    REPORT_ADDENDUM: "radiology:report:addendum",
+    MANAGE_EXAMS: "radiology:manage:exams",
+    MANAGE_ROOMS: "radiology:manage:rooms",
+    CRITICAL_NOTIFY: "radiology:critical:notify",
+  },
+
+  // Workflow permissions
+  WORKFLOWS: {
+    VIEW: "workflows:view",
+    CREATE: "workflows:create",
+    UPDATE: "workflows:update",
+    DELETE: "workflows:delete",
   },
 } as const;
 
@@ -92,8 +173,14 @@ export type Permission =
   | (typeof PERMISSIONS.PHARMACY)[keyof typeof PERMISSIONS.PHARMACY]
   | (typeof PERMISSIONS.SCHEDULING)[keyof typeof PERMISSIONS.SCHEDULING]
   | (typeof PERMISSIONS.REVENUE)[keyof typeof PERMISSIONS.REVENUE]
+  | (typeof PERMISSIONS.BILLING)[keyof typeof PERMISSIONS.BILLING]
+  | (typeof PERMISSIONS.INSURANCE)[keyof typeof PERMISSIONS.INSURANCE]
   | (typeof PERMISSIONS.ANALYTICS)[keyof typeof PERMISSIONS.ANALYTICS]
-  | (typeof PERMISSIONS.SETTINGS)[keyof typeof PERMISSIONS.SETTINGS];
+  | (typeof PERMISSIONS.SETTINGS)[keyof typeof PERMISSIONS.SETTINGS]
+  | (typeof PERMISSIONS.DEPARTMENTS)[keyof typeof PERMISSIONS.DEPARTMENTS]
+  | (typeof PERMISSIONS.LAB)[keyof typeof PERMISSIONS.LAB]
+  | (typeof PERMISSIONS.RADIOLOGY)[keyof typeof PERMISSIONS.RADIOLOGY]
+  | (typeof PERMISSIONS.WORKFLOWS)[keyof typeof PERMISSIONS.WORKFLOWS];
 
 // Role-based permission mappings
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
@@ -108,6 +195,10 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.ORDERS.CREATE,
     PERMISSIONS.RESULTS.VIEW,
     PERMISSIONS.SCHEDULING.VIEW,
+    PERMISSIONS.LAB.VIEW,
+    PERMISSIONS.LAB.ORDER,
+    PERMISSIONS.RADIOLOGY.VIEW,
+    PERMISSIONS.RADIOLOGY.ORDER,
   ],
   nurse: [
     PERMISSIONS.PATIENTS.VIEW,
@@ -116,6 +207,9 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.ORDERS.VIEW,
     PERMISSIONS.RESULTS.VIEW,
     PERMISSIONS.SCHEDULING.VIEW,
+    PERMISSIONS.LAB.VIEW,
+    PERMISSIONS.LAB.COLLECT,
+    PERMISSIONS.RADIOLOGY.VIEW,
   ],
   receptionist: [
     PERMISSIONS.PATIENTS.VIEW,
@@ -123,5 +217,64 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.SCHEDULING.VIEW,
     PERMISSIONS.SCHEDULING.CREATE,
     PERMISSIONS.SCHEDULING.UPDATE,
+  ],
+  // Lab technician - sample collection and processing
+  lab_technician: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.LAB.VIEW,
+    PERMISSIONS.LAB.COLLECT,
+    PERMISSIONS.LAB.PROCESS,
+    PERMISSIONS.LAB.RESULT_ENTRY,
+  ],
+  // Lab supervisor - can verify results and manage tests
+  lab_supervisor: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.LAB.VIEW,
+    PERMISSIONS.LAB.COLLECT,
+    PERMISSIONS.LAB.PROCESS,
+    PERMISSIONS.LAB.RESULT_ENTRY,
+    PERMISSIONS.LAB.RESULT_VERIFY,
+    PERMISSIONS.LAB.RESULT_AMEND,
+    PERMISSIONS.LAB.MANAGE_TESTS,
+    PERMISSIONS.LAB.MANAGE_PANELS,
+    PERMISSIONS.LAB.CRITICAL_NOTIFY,
+  ],
+  // Pathologist - can sign reports
+  pathologist: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.LAB.VIEW,
+    PERMISSIONS.LAB.RESULT_VERIFY,
+    PERMISSIONS.LAB.RESULT_AMEND,
+    PERMISSIONS.LAB.REPORT_SIGN,
+    PERMISSIONS.LAB.CRITICAL_NOTIFY,
+  ],
+  // Radiology technician - performs exams
+  radiology_technician: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.RADIOLOGY.VIEW,
+    PERMISSIONS.RADIOLOGY.SCHEDULE,
+    PERMISSIONS.RADIOLOGY.PERFORM,
+  ],
+  // Radiologist - reads and reports
+  radiologist: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.RADIOLOGY.VIEW,
+    PERMISSIONS.RADIOLOGY.REPORT_CREATE,
+    PERMISSIONS.RADIOLOGY.REPORT_SIGN,
+    PERMISSIONS.RADIOLOGY.REPORT_ADDENDUM,
+    PERMISSIONS.RADIOLOGY.CRITICAL_NOTIFY,
+  ],
+  // Radiology supervisor
+  radiology_supervisor: [
+    PERMISSIONS.PATIENTS.VIEW,
+    PERMISSIONS.RADIOLOGY.VIEW,
+    PERMISSIONS.RADIOLOGY.SCHEDULE,
+    PERMISSIONS.RADIOLOGY.PERFORM,
+    PERMISSIONS.RADIOLOGY.REPORT_CREATE,
+    PERMISSIONS.RADIOLOGY.REPORT_SIGN,
+    PERMISSIONS.RADIOLOGY.REPORT_ADDENDUM,
+    PERMISSIONS.RADIOLOGY.MANAGE_EXAMS,
+    PERMISSIONS.RADIOLOGY.MANAGE_ROOMS,
+    PERMISSIONS.RADIOLOGY.CRITICAL_NOTIFY,
   ],
 };

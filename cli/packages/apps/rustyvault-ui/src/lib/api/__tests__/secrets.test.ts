@@ -25,7 +25,7 @@ describe("secretsApi", () => {
 
       expect(result.data).toEqual(mockData);
       expect(result.metadata).toBeDefined();
-      expect(apiClient.get).toHaveBeenCalledWith("/v1/secret/test/secret");
+      expect(apiClient.get).toHaveBeenCalledWith("/secret/test/secret");
     });
   });
 
@@ -36,7 +36,7 @@ describe("secretsApi", () => {
 
       await secretsApi.write("test/secret", secretData);
 
-      expect(apiClient.post).toHaveBeenCalledWith("/v1/secret/test/secret", secretData);
+      expect(apiClient.post).toHaveBeenCalledWith("/secret/test/secret", secretData);
     });
   });
 
@@ -48,7 +48,7 @@ describe("secretsApi", () => {
       const result = await secretsApi.list("test");
 
       expect(result).toEqual(["secret1", "secret2"]);
-      expect(apiClient.get).toHaveBeenCalledWith("/v1/secret/test/");
+      expect(apiClient.get).toHaveBeenCalledWith("/secret/test/");
     });
 
     it("should return empty array on error", async () => {
@@ -66,7 +66,7 @@ describe("secretsApi", () => {
 
       await secretsApi.delete("test/secret");
 
-      expect(apiClient.delete).toHaveBeenCalledWith("/v1/secret/test/secret");
+      expect(apiClient.delete).toHaveBeenCalledWith("/secret/test/secret");
     });
   });
 
@@ -80,7 +80,7 @@ describe("secretsApi", () => {
       const result = await secretsApi.readForRealm(realmId, "app/config");
 
       expect(result.data).toEqual(mockData);
-      expect(apiClient.get).toHaveBeenCalledWith(`/v1/realm/${realmId}/secret/data/app/config`);
+      expect(apiClient.get).toHaveBeenCalledWith(`/realm/${realmId}/secret/data/app/config`);
     });
 
     it("should write realm secret", async () => {
@@ -89,7 +89,7 @@ describe("secretsApi", () => {
 
       await secretsApi.writeForRealm(realmId, "app/config", secretData);
 
-      expect(apiClient.post).toHaveBeenCalledWith(`/v1/realm/${realmId}/secret/data/app/config`, {
+      expect(apiClient.post).toHaveBeenCalledWith(`/realm/${realmId}/secret/data/app/config`, {
         data: secretData,
       });
     });
@@ -108,7 +108,7 @@ describe("secretsApi", () => {
 
       await secretsApi.deleteForRealm(realmId, "app/config");
 
-      expect(apiClient.delete).toHaveBeenCalledWith(`/v1/realm/${realmId}/secret/data/app/config`);
+      expect(apiClient.delete).toHaveBeenCalledWith(`/realm/${realmId}/secret/data/app/config`);
     });
   });
 });

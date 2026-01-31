@@ -6,11 +6,16 @@ import {
   CardTitle,
   Stack,
 } from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Globe, Lock, Settings, XCircle } from "lucide-react";
 import { realmsApi, secretsApi, systemApi } from "@/lib/api";
 
-export function DashboardPage() {
+export const Route = createFileRoute("/")({
+  component: DashboardPage,
+});
+
+function DashboardPage() {
   const { data: sealStatus, isLoading: isLoadingSeal } = useQuery({
     queryKey: ["sealStatus"],
     queryFn: () => systemApi.getSealStatus(),

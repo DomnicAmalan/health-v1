@@ -26,11 +26,12 @@ if (typeof window !== "undefined") {
 }
 
 // Mock crypto.randomUUID
-if (typeof global !== "undefined") {
-  global.crypto = {
-    ...global.crypto,
-    randomUUID: () => `test-uuid-${Math.random().toString(36).substring(7)}`,
-  } as Crypto;
+if (typeof global !== "undefined" && global.crypto) {
+  Object.defineProperty(global.crypto, "randomUUID", {
+    value: () => `test-uuid-${Math.random().toString(36).substring(7)}`,
+    writable: true,
+    configurable: true,
+  });
 }
 
 // Cleanup after each test

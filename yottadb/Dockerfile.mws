@@ -1,0 +1,34 @@
+# YottaDB M Web Server - REST API for MUMPS Globals
+FROM yottadb/yottadb:latest
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set YottaDB environment
+ENV ydb_dist=/opt/yottadb/current
+ENV ydb_gbldir=/data/yottadb.gld
+ENV ydb_routines="/data/r /opt/yottadb/current/libyottadbutil.so"
+ENV ydb_dir=/data
+
+# Create directories
+RUN mkdir -p /data/r /data/g
+
+# Copy MUMPS routines
+COPY routines/*.m /data/r/
+
+# Copy global definitions
+COPY globals/yottadb.gld /data/yottadb.gld
+
+# Copy startup script
+COPY start-mws.sh /start-mws.sh
+RUN chmod +x /start-mws.sh
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+CMD ["/start-mws.sh"]

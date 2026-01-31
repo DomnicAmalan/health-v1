@@ -32,6 +32,9 @@ export class LLMWorkflowEngine {
   private actionExecutor = getActionExecutor();
   private workflowBuilder = getWorkflowBuilder();
   private workflowExecutor = getWorkflowExecutor();
+  private apiKey: string | null = null;
+  private model: string = "gpt-4";
+  private apiEndpoint: string = "https://api.openai.com/v1";
 
   constructor() {
     this.tts = getTextToSpeechEngine();
@@ -166,7 +169,7 @@ export class LLMWorkflowEngine {
       },
     ];
 
-    this.speak(conversation[0].content);
+    this.speak(conversation[0]!.content);
     useVoiceCommandStore.getState().setCurrentWorkflow({
       type: "form-filling",
       step: 0,
@@ -176,6 +179,8 @@ export class LLMWorkflowEngine {
     // Process each field
     for (let i = 0; i < structure.fields.length; i++) {
       const field = structure.fields[i];
+      if (!field) continue;
+
       const _prompt = this.buildFieldPrompt(field, structure.fields);
 
       // Ask for field value

@@ -1,5 +1,8 @@
 import { apiClient } from "./client";
-import { VAULT_ROUTES } from "./routes";
+import { API_ROUTES } from "@lazarus-life/shared/api";
+
+// Alias for convenience
+const VAULT_ROUTES = API_ROUTES.VAULT_DIRECT;
 
 export type AppType = "admin-ui" | "client-app" | "mobile" | "api";
 export type AuthMethod = "token" | "userpass" | "approle" | "jwt";

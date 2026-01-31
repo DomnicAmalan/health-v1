@@ -52,7 +52,7 @@ export const SidebarItemComponent = memo(function SidebarItemComponent({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild={true}>
+      <ContextMenuTrigger>
         <Box>
           <button
             type="button"

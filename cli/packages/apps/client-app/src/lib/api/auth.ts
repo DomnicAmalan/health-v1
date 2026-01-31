@@ -11,8 +11,8 @@ import type {
   LoginResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
-  UserInfo,
 } from "./types";
+import type { UserInfo } from "@lazarus-life/shared/types/user";
 
 /**
  * Login with email and password

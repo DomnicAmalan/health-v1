@@ -1,0 +1,274 @@
+/**
+ * OPD Page
+ * Outpatient Department management with queue and consultations
+ */
+
+import { PERMISSIONS } from "@lazarus-life/shared/constants/permissions";
+import { useTranslation } from "@lazarus-life/shared/i18n";
+import {
+  Box,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Flex,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@lazarus-life/ui-components";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  Clock,
+  Monitor,
+  Plus,
+  Settings,
+  Stethoscope,
+  UserCheck,
+  Users,
+} from "lucide-react";
+import { useState, useCallback } from "react";
+import { ProtectedRoute } from "@/components/security/ProtectedRoute";
+import { OPDQueue, DepartmentStats } from "@/components/departments";
+import { useOPDDashboard, useWaitingQueue } from "@/hooks/api/departments";
+
+export const Route = createFileRoute("/opd")({
+  component: OPDComponent,
+});
+
+function OPDComponent() {
+  return (
+    <ProtectedRoute
+      requiredPermission={PERMISSIONS.DEPARTMENTS.OPD_VIEW}
+      resource="opd"
+    >
+      <OPDPageInner />
+    </ProtectedRoute>
+  );
+}
+
+function OPDPageInner() {
+  const { t } = useTranslation();
+
+  const [activeTab, setActiveTab] = useState("queue");
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [showDisplayBoard, setShowDisplayBoard] = useState(false);
+
+  // Get dashboard stats
+  const { data: dashboardData } = useOPDDashboard();
+  const { data: waitingData } = useWaitingQueue();
+
+  const stats = dashboardData?.today;
+  const waitingCount = waitingData?.queue?.length ?? 0;
+
+  const handleCheckInSuccess = useCallback(() => {
+    setShowCheckIn(false);
+  }, []);
+
+  return (
+    <Box className="space-y-6">
+      {/* Header */}
+      <Flex align="center" justify="between">
+        <Box>
+          <h1 className="text-3xl font-bold">
+            {t("opd.title", "Outpatient Department")}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {t("opd.subtitle", "Manage patient queue and consultations")}
+          </p>
+        </Box>
+        <Flex gap="sm">
+          <Button variant="outline" onClick={() => setShowDisplayBoard(true)}>
+            <Monitor className="h-4 w-4 mr-2" />
+            Display Board
+          </Button>
+          <Button onClick={() => setShowCheckIn(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Check In Patient
+          </Button>
+        </Flex>
+      </Flex>
+
+      {/* Quick Stats */}
+      <Box className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setActiveTab("queue")}
+        >
+          <CardContent className="pt-6">
+            <Flex align="center" gap="md">
+              <Box className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                <Users className="h-6 w-6 text-yellow-600" />
+              </Box>
+              <Box>
+                <p className="text-2xl font-bold">{waitingCount}</p>
+                <p className="text-sm text-muted-foreground">Waiting</p>
+              </Box>
+            </Flex>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setActiveTab("queue")}
+        >
+          <CardContent className="pt-6">
+            <Flex align="center" gap="md">
+              <Box className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <Stethoscope className="h-6 w-6 text-blue-600" />
+              </Box>
+              <Box>
+                <p className="text-2xl font-bold">{stats?.inConsultation ?? 0}</p>
+                <p className="text-sm text-muted-foreground">In Consultation</p>
+              </Box>
+            </Flex>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setActiveTab("queue")}
+        >
+          <CardContent className="pt-6">
+            <Flex align="center" gap="md">
+              <Box className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
+                <UserCheck className="h-6 w-6 text-green-600" />
+              </Box>
+              <Box>
+                <p className="text-2xl font-bold">{stats?.completed ?? 0}</p>
+                <p className="text-sm text-muted-foreground">Completed</p>
+              </Box>
+            </Flex>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:bg-accent/50 transition-colors"
+          onClick={() => setActiveTab("queue")}
+        >
+          <CardContent className="pt-6">
+            <Flex align="center" gap="md">
+              <Box className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                <Clock className="h-6 w-6 text-purple-600" />
+              </Box>
+              <Box>
+                <p className="text-2xl font-bold">
+                  {stats?.averageWaitTime ?? 0} min
+                </p>
+                <p className="text-sm text-muted-foreground">Avg Wait</p>
+              </Box>
+            </Flex>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Main Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="queue" className="gap-2">
+            <Users className="h-4 w-4" />
+            Patient Queue
+            {waitingCount > 0 && (
+              <Badge variant="secondary">{waitingCount}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="rooms" className="gap-2">
+            <Stethoscope className="h-4 w-4" />
+            Consultation Rooms
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="gap-2">
+            <Monitor className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-2">
+            <Settings className="h-4 w-4" />
+            Settings
+          </TabsTrigger>
+        </TabsList>
+
+        <Box className="mt-4">
+          <TabsContent value="queue">
+            <OPDQueue />
+          </TabsContent>
+
+          <TabsContent value="rooms">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Stethoscope className="h-5 w-5" />
+                  Consultation Rooms
+                </CardTitle>
+                <CardDescription>
+                  View and manage consultation room assignments
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Box className="text-center text-muted-foreground py-8">
+                  <Stethoscope className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>Room management coming soon</p>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="dashboard">
+            <DepartmentStats />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  OPD Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure queue rules, wait time alerts, and display board
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Box className="text-center text-muted-foreground py-8">
+                  <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>OPD settings coming soon</p>
+                </Box>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Box>
+      </Tabs>
+
+      {/* Check In Dialog */}
+      <Dialog open={showCheckIn} onOpenChange={setShowCheckIn}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Check In Patient</DialogTitle>
+          </DialogHeader>
+          <Box className="text-center text-muted-foreground py-8">
+            <UserCheck className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>Patient check-in form coming soon</p>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Display Board Dialog */}
+      <Dialog open={showDisplayBoard} onOpenChange={setShowDisplayBoard}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Queue Display Board</DialogTitle>
+          </DialogHeader>
+          <Box className="text-center text-muted-foreground py-8">
+            <Monitor className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>Display board coming soon</p>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </Box>
+  );
+}

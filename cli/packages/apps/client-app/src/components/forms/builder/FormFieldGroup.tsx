@@ -1,4 +1,4 @@
-import type { FormField, FormFieldGroup } from "@lazarus-life/ui-components";
+import type { FormFieldConfig, FormFieldGroup } from "@lazarus-life/ui-components";
 import {
   Box,
   Button,
@@ -13,9 +13,9 @@ import { cn } from "@lazarus-life/ui-components/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 
-interface FormFieldGroupProps {
+interface FormFieldGroupComponentProps {
   group: FormFieldGroup;
-  fields: Array<{ field: FormField; render: () => React.ReactNode }>;
+  fields: Array<{ field: FormFieldConfig; render: () => React.ReactNode }>;
   getGridLayoutClasses: () => string;
   getGapClasses: () => string;
 }
@@ -25,7 +25,7 @@ export function FormFieldGroupComponent({
   fields,
   getGridLayoutClasses,
   getGapClasses,
-}: FormFieldGroupProps) {
+}: FormFieldGroupComponentProps) {
   const [isCollapsed, setIsCollapsed] = useState(group.defaultCollapsed);
 
   return (
@@ -61,7 +61,7 @@ export function FormFieldGroupComponent({
         {!isCollapsed && (
           <CardContent className="pt-6">
             <Box className={cn("grid", getGridLayoutClasses(), getGapClasses(), "auto-rows-min")}>
-              {fields.map((item) => item.render())}
+              {fields.map((item: { field: FormFieldConfig; render: () => React.ReactNode }) => item.render())}
             </Box>
           </CardContent>
         )}

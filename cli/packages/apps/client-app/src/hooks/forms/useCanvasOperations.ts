@@ -105,7 +105,7 @@ export function useCanvasOperations({
           y: 50 + Math.floor(index / 5) * 100,
           width: (field.layout?.colSpan || 6) * 100,
           height: field.type === "textarea" ? 100 : 40,
-        }));
+        })) as CanvasField[];
         setFields(canvasFields);
         setCanvasConfig({ ...canvasConfig, ...config });
       } catch (_error) {
