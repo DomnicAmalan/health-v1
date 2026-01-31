@@ -71,7 +71,7 @@ sha2.workspace = true
 # Additional utilities
 url = "2.5"
 regex = "1.11"
-strum = { version = "0.25", features = ["derive"] }
+strum = { version = "0.27", features = ["derive"] }
 enum-map = "2.6"
 lru.workspace = true
 
