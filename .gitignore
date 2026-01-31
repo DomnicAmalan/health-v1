@@ -104,6 +104,9 @@ cli/packages/**/.biome/
 cli/.tanstack/
 cli/packages/**/.tanstack/
 
+# TanStack Router auto-generated files
+**/routeTree.gen.ts
+
 # Lint-staged
 .lintstagedrc.json
 
