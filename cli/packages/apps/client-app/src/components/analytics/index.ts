@@ -7,3 +7,4 @@ export { ClinicalDashboard } from "./ClinicalDashboard";
 export { FinancialDashboard } from "./FinancialDashboard";
 export { OperationalDashboard } from "./OperationalDashboard";
 export { ComplianceDashboard } from "./ComplianceDashboard";
+export { ComprehensiveDashboard } from "./ComprehensiveDashboard";

@@ -1,9 +1,28 @@
-# Cargo configuration for low-memory systems
+# Cargo configuration for low-memory systems with build caching
 [build]
 # Limit parallel jobs to reduce memory usage
 jobs = 2
+# Enable incremental compilation for faster rebuilds
+incremental = true
+# Use pipelined compilation for faster builds
+pipelining = true
+
+# Cache compiled dependencies to speed up rebuilds
+[profile.dev]
+incremental = true
+
+[profile.release]
+# Enable some incremental features even in release
+incremental = true
+# Use less optimization to speed up builds (optional)
+# opt-level = 2
 
 [net]
 # Use git CLI for fetching to reduce memory usage
 git-fetch-with-cli = true
+
+# Target directory caching (shared across workspace)
+[target]
+# All workspace crates share the same target directory
+# This is already default behavior, but making it explicit
 

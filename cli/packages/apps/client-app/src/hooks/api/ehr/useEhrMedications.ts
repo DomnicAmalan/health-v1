@@ -6,7 +6,7 @@
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
-import { apiClient } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/yottadb-client";
 import type {
   EhrMedication,
   CreateEhrMedicationRequest,
@@ -30,7 +30,7 @@ export function useEhrPatientMedications(patientId: string, activeOnly = true) {
     queryKey: [...EHR_MEDICATION_QUERY_KEYS.byPatient(patientId), { activeOnly }],
     queryFn: async () => {
       const url = `${API_ROUTES.EHR.MEDICATIONS.BY_PATIENT(patientId)}?activeOnly=${activeOnly}`;
-      const response = await apiClient.get<EhrMedication[]>(url);
+      const response = await yottadbApiClient.get<EhrMedication[]>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -52,7 +52,7 @@ export function useCreateEhrMedication() {
 
   return useMutation({
     mutationFn: async (medication: CreateEhrMedicationRequest) => {
-      const response = await apiClient.post<EhrMedication>(
+      const response = await yottadbApiClient.post<EhrMedication>(
         API_ROUTES.EHR.MEDICATIONS.CREATE,
         medication
       );
@@ -80,7 +80,7 @@ export function useDiscontinueEhrMedication() {
 
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const response = await apiClient.post<EhrMedication>(
+      const response = await yottadbApiClient.post<EhrMedication>(
         API_ROUTES.EHR.MEDICATIONS.DISCONTINUE(id),
         { reason }
       );

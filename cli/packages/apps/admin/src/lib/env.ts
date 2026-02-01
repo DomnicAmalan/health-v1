@@ -48,7 +48,7 @@ function validateEnv(): EnvConfig {
 
     // Provide default for VITE_API_BASE_URL in development
     if (!value && key === "VITE_API_BASE_URL" && import.meta.env.DEV) {
-      value = "http://localhost:4117";
+      value = "http://localhost:8080/api";
     }
 
     if (value) {
@@ -75,7 +75,7 @@ function validateEnv(): EnvConfig {
     if (import.meta.env.DEV) {
       // In development, provide defaults if possible
       if (missing.includes("VITE_API_BASE_URL")) {
-        config.VITE_API_BASE_URL = "http://localhost:4117";
+        config.VITE_API_BASE_URL = "http://localhost:8080/api";
         return config as EnvConfig;
       }
       throw new Error(errorMessage);
@@ -94,7 +94,7 @@ try {
   // Final fallback - provide minimal defaults for development
   if (import.meta.env.DEV) {
     envConfig = {
-      VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:4117",
+      VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
     };
   } else {
     throw error;

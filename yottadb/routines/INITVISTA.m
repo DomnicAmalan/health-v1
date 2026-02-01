@@ -21,7 +21,12 @@ EN ; Entry point
  D INITDD     ; Data Dictionary
  D INITDIC    ; File definitions
  D INITIDX    ; Initialize indexes
- D SEEDDATA  ; Seed sample data
+ D SEEDDATA  ; Seed basic sample data
+ ;
+ ; Load comprehensive EHR data
+ I $D(^DPT)>1 D  ; Only if basic data exists
+ . W !,"Loading comprehensive EHR data...",!
+ . D EN^SEEDEHR  ; Call comprehensive seed script
  ;
  W "VistA globals initialized.",!
  Q

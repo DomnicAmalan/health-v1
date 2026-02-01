@@ -399,9 +399,13 @@ async fn async_main() -> Result<(), String> {
             crate::presentation::api::middleware::auth_middleware,
         ));
     
-    let app = axum::Router::new()
+    let api_routes = axum::Router::new()
         .merge(public_routes)
-        .merge(protected_routes)
+        .merge(protected_routes);
+
+    let app = axum::Router::new()
+        .route("/health", axum::routing::get(|| async { "OK" })) // Root health check for Docker
+        .nest("/api", api_routes)
         // Middleware order (from outer to inner):
         // 1. Request ID middleware - generates request ID
         // 2. Session middleware - creates/gets session, extracts IP

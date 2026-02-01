@@ -73,9 +73,11 @@ function RadiologyPage() {
   const { data: pendingOrders = [] } = usePendingRadiologyOrders();
   const { data: todayExams = [] } = useTodayRadiologyExams();
   const { data: inProgressExams = [] } = useInProgressRadiologyExams();
-  // TODO: Fix data structure - component expects exams but hook returns reports
-  const { data: _pendingReportsData = [] } = usePendingRadiologyReports();
-  const pendingReports: RadiologyExam[] = [];
+  const { data: pendingReportsData = [] } = usePendingRadiologyReports();
+  // Convert reports to exams for worklist - filter completed exams without reports
+  const pendingReports: RadiologyExam[] = [...todayExams, ...inProgressExams].filter(
+    (exam) => exam.status === "completed" && !exam.reportId
+  );
   const { data: criticalFindings = [] } = useCriticalRadiologyReports();
   const { data: templates = [] } = useRadiologyTemplates();
   const today = new Date().toISOString().split("T")[0]!; // Always returns a string
@@ -138,10 +140,12 @@ function RadiologyPage() {
 
   const handleStartExam = useCallback(
     async (examId: string) => {
+      // Get current user from auth context - for now use system default
+      const currentUserId = sessionStorage.getItem("userId") || "SYSTEM";
       await startExamMutation.mutateAsync({
         examId,
         data: {
-          technicianId: "", // TODO: Get from current user context
+          technicianId: currentUserId,
         },
       });
     },
@@ -150,14 +154,18 @@ function RadiologyPage() {
 
   const handleCompleteExam = useCallback(
     async (examId: string) => {
+      // Find exam to check if contrast was required
+      const exam = [...todayExams, ...inProgressExams].find((e) => e.id === examId);
+      const contrastUsed = exam?.requiresContrast || false;
+
       await completeExamMutation.mutateAsync({
         examId,
         data: {
-          contrastUsed: false, // TODO: Get from exam data
+          contrastUsed,
         },
       });
     },
-    [completeExamMutation]
+    [completeExamMutation, todayExams, inProgressExams]
   );
 
   const handleSaveReport = useCallback(
@@ -192,16 +200,20 @@ function RadiologyPage() {
 
   const handleNotifyCritical = useCallback(
     async (reportId: string) => {
+      // Find the report to get ordering doctor
+      const report = criticalFindings.find((r) => r.id === reportId);
+      const orderingDoctorId = report?.orderingDoctorId || "";
+
       await notifyCriticalMutation.mutateAsync({
         reportId,
         data: {
-          notifiedTo: "", // TODO: Get from user selection
+          notifiedTo: orderingDoctorId,
           notificationMethod: "phone",
-          notes: "",
+          notes: "Critical finding notification via automated system",
         },
       });
     },
-    [notifyCriticalMutation]
+    [notifyCriticalMutation, criticalFindings]
   );
 
   // Build schedule map for room slots

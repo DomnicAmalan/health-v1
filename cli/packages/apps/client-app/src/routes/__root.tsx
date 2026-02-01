@@ -21,6 +21,14 @@ import {
   Stethoscope,
   Users,
   UserPlus,
+  Workflow,
+  CheckCircle,
+  BookOpen,
+  Hospital,
+  TestTube,
+  DollarSign,
+  TrendingUp,
+  Cog,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { VoiceCommandChatbox } from "@/components/accessibility/VoiceCommandChatbox";
@@ -38,7 +46,7 @@ import { initializeAccessibility } from "@/lib/accessibility";
 import { checkSetupStatus } from "@/lib/api/setup";
 import { getLayoutForRoute } from "@/lib/layouts/routeLayouts";
 import { useAuthStore } from "@/stores/authStore";
-import { useActiveTabId, useOpenTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
+import { useActiveTabId, useOpenTab, useSetActiveTab, useTabStore, useTabs } from "@/stores/tabStore";
 import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore";
 
 export const Route = createRootRoute({
@@ -109,6 +117,9 @@ function getIconForPath(path: string): React.ReactNode {
     "/wards": <Building className="h-4 w-4" />,
     "/ot": <Scissors className="h-4 w-4" />,
     "/analytics": <BarChart3 className="h-4 w-4" />,
+    "/workflows": <Workflow className="h-4 w-4" />,
+    "/compliance-status": <CheckCircle className="h-4 w-4" />,
+    "/my-training": <BookOpen className="h-4 w-4" />,
     "/form-builder": <FileEdit className="h-4 w-4" />,
     "/settings": <Settings className="h-4 w-4" />,
   };
@@ -151,6 +162,26 @@ function RootComponentInner() {
       authStore.checkAuth().catch((_error) => {});
     }
   }, []);
+
+  // Restore icons for tabs loaded from localStorage
+  useEffect(() => {
+    const tabsNeedingIcons = tabs.filter(tab => !tab.icon && tab.path);
+    if (tabsNeedingIcons.length > 0) {
+      // Icons are added via getIconForPath when tabs are rendered
+      // This effect just ensures we trigger a re-render if needed
+      tabsNeedingIcons.forEach(tab => {
+        const icon = getIconForPath(tab.path);
+        if (icon && !tab.icon) {
+          // Update tab with icon
+          const tabStore = useTabStore.getState();
+          const updatedTabs = tabStore.tabs.map(t =>
+            t.id === tab.id ? { ...t, icon } : t
+          );
+          useTabStore.setState({ tabs: updatedTabs });
+        }
+      });
+    }
+  }, [tabs]);
 
   // Check for standalone tab on mount (when window is opened from drag-out)
   useEffect(() => {
@@ -263,6 +294,9 @@ function RootComponentInner() {
         "/wards": PERMISSIONS.DEPARTMENTS.WARDS_VIEW,
         "/ot": PERMISSIONS.DEPARTMENTS.OT_VIEW,
         "/analytics": PERMISSIONS.ANALYTICS.VIEW,
+        "/workflows": PERMISSIONS.WORKFLOWS.VIEW,
+        "/compliance-status": PERMISSIONS.COMPLIANCE.VIEW,
+        "/my-training": PERMISSIONS.TRAINING.VIEW,
         "/form-builder": undefined,
         "/settings": PERMISSIONS.SETTINGS.VIEW,
       };
@@ -476,6 +510,32 @@ function RootComponentInner() {
         permission: PERMISSIONS.ANALYTICS.VIEW,
       },
       {
+        path: "/workflows",
+        label: "Workflows",
+        icon: <Workflow className="h-5 w-5" />,
+        onClick: () => handleNavClick("/workflows", "Workflows", <Workflow className="h-4 w-4" />),
+        isActive: location.pathname.startsWith("/workflows"),
+        permission: PERMISSIONS.WORKFLOWS.VIEW,
+      },
+      {
+        path: "/compliance-status",
+        label: "Compliance",
+        icon: <CheckCircle className="h-5 w-5" />,
+        onClick: () =>
+          handleNavClick("/compliance-status", "Compliance", <CheckCircle className="h-4 w-4" />),
+        isActive: location.pathname.startsWith("/compliance-status"),
+        permission: PERMISSIONS.COMPLIANCE.VIEW,
+      },
+      {
+        path: "/my-training",
+        label: "My Training",
+        icon: <BookOpen className="h-5 w-5" />,
+        onClick: () =>
+          handleNavClick("/my-training", "My Training", <BookOpen className="h-4 w-4" />),
+        isActive: location.pathname.startsWith("/my-training"),
+        permission: PERMISSIONS.TRAINING.VIEW,
+      },
+      {
         path: "/form-builder",
         label: "Form Builder",
         icon: <FileEdit className="h-5 w-5" />,
@@ -507,6 +567,89 @@ function RootComponentInner() {
       return state.permissions.includes(item.permission);
     });
   }, [allNavigationItems]); // Filter based on navigation items and permissions
+
+  // Group navigation items into logical categories
+  const navigationGroups = useMemo(() => {
+    const itemsByPath = new Map(navigationItems.map((item) => [item.path, item]));
+
+    return [
+      {
+        id: "clinical",
+        label: "Clinical",
+        icon: <Stethoscope className="h-4 w-4" />,
+        defaultExpanded: true,
+        items: [
+          itemsByPath.get("/"),
+          itemsByPath.get("/patients"),
+          itemsByPath.get("/clinical"),
+          itemsByPath.get("/orders"),
+          itemsByPath.get("/results"),
+        ].filter(Boolean),
+      },
+      {
+        id: "operations",
+        label: "Operations",
+        icon: <Hospital className="h-4 w-4" />,
+        defaultExpanded: true,
+        items: [
+          itemsByPath.get("/opd"),
+          itemsByPath.get("/ipd"),
+          itemsByPath.get("/scheduling"),
+        ].filter(Boolean),
+      },
+      {
+        id: "departments",
+        label: "Departments",
+        icon: <Building className="h-4 w-4" />,
+        defaultExpanded: false,
+        items: [
+          itemsByPath.get("/beds"),
+          itemsByPath.get("/wards"),
+          itemsByPath.get("/ot"),
+        ].filter(Boolean),
+      },
+      {
+        id: "diagnostics",
+        label: "Diagnostics",
+        icon: <TestTube className="h-4 w-4" />,
+        defaultExpanded: false,
+        items: [
+          itemsByPath.get("/lab"),
+          itemsByPath.get("/radiology"),
+          itemsByPath.get("/pharmacy"),
+        ].filter(Boolean),
+      },
+      {
+        id: "financial",
+        label: "Financial",
+        icon: <DollarSign className="h-4 w-4" />,
+        defaultExpanded: false,
+        items: [itemsByPath.get("/billing"), itemsByPath.get("/revenue")].filter(Boolean),
+      },
+      {
+        id: "analytics",
+        label: "Analytics",
+        icon: <TrendingUp className="h-4 w-4" />,
+        defaultExpanded: false,
+        items: [
+          itemsByPath.get("/analytics"),
+          itemsByPath.get("/compliance-status"),
+          itemsByPath.get("/workflows"),
+        ].filter(Boolean),
+      },
+      {
+        id: "system",
+        label: "System",
+        icon: <Cog className="h-4 w-4" />,
+        defaultExpanded: false,
+        items: [
+          itemsByPath.get("/form-builder"),
+          itemsByPath.get("/my-training"),
+          itemsByPath.get("/settings"),
+        ].filter(Boolean),
+      },
+    ].filter((group) => group.items.length > 0); // Only include groups that have items
+  }, [navigationItems]);
 
   // Determine layout based on route
   const layoutType = getLayoutForRoute(location.pathname);
@@ -544,7 +687,7 @@ function RootComponentInner() {
       return (
         <>
           <FullLayout
-            sidebarItems={navigationItems}
+            sidebarGroups={navigationGroups}
             isSidebarCollapsed={isSidebarCollapsed}
             onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             isMobileSidebarOpen={isMobileSidebarOpen}

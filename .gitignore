@@ -138,6 +138,8 @@ cli/packages/apps/*/playwright/.cache/
 # ============================================
 *.tmp
 *.temp
+*.bak
+*.bak2
 .cache/
 .temp/
 .tmp/
@@ -211,3 +213,21 @@ sonar-project.properties.local
 *.gdb
 *.mjl
 *.dat
+
+# ============================================
+# Cube.js
+# ============================================
+# Cube.js cache and pre-aggregations
+.cubestore/
+cube/.cubestore/
+.cube/
+cube/.cube/
+
+# Cube.js node_modules
+cube/node_modules/
+
+# Cube.js build outputs
+cube/dist/
+
+# Cube.js logs
+cube/*.log

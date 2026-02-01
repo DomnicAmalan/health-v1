@@ -162,6 +162,25 @@ export const PERMISSIONS = {
     UPDATE: "workflows:update",
     DELETE: "workflows:delete",
   },
+
+  // Compliance permissions
+  COMPLIANCE: {
+    VIEW: "compliance:view",
+    CREATE: "compliance:create",
+    UPDATE: "compliance:update",
+    DELETE: "compliance:delete",
+    ASSESS: "compliance:assess",
+    REMEDIATE: "compliance:remediate",
+  },
+
+  // Training permissions
+  TRAINING: {
+    VIEW: "training:view",
+    ENROLL: "training:enroll",
+    COMPLETE: "training:complete",
+    MANAGE: "training:manage",
+    ASSIGN: "training:assign",
+  },
 } as const;
 
 export type Permission =
@@ -180,7 +199,9 @@ export type Permission =
   | (typeof PERMISSIONS.DEPARTMENTS)[keyof typeof PERMISSIONS.DEPARTMENTS]
   | (typeof PERMISSIONS.LAB)[keyof typeof PERMISSIONS.LAB]
   | (typeof PERMISSIONS.RADIOLOGY)[keyof typeof PERMISSIONS.RADIOLOGY]
-  | (typeof PERMISSIONS.WORKFLOWS)[keyof typeof PERMISSIONS.WORKFLOWS];
+  | (typeof PERMISSIONS.WORKFLOWS)[keyof typeof PERMISSIONS.WORKFLOWS]
+  | (typeof PERMISSIONS.COMPLIANCE)[keyof typeof PERMISSIONS.COMPLIANCE]
+  | (typeof PERMISSIONS.TRAINING)[keyof typeof PERMISSIONS.TRAINING];
 
 // Role-based permission mappings
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {

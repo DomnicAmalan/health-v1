@@ -1,233 +1,223 @@
-.PHONY: help build up down restart logs ps \
-        test test-backend test-frontend test-e2e test-unit test-coverage \
-        test-up test-down test-logs test-clean \
-        dev dev-up dev-down dev-logs \
-        prod prod-up prod-down \
-        db-migrate db-reset db-seed \
-        lint lint-backend lint-frontend lint-fix \
-        strict strict-all strict-typescript strict-biome strict-oxlint strict-clippy strict-deny strict-frontend strict-backend \
-        clean clean-all
-
-# ============================================================================
-# Deprecation Warnings
-# ============================================================================
-
-define deprecation_warning
-	@echo ""
-	@echo "⚠️  WARNING: 'make $(1)' is DEPRECATED and will be removed in 4 weeks."
-	@echo "Please use the new consolidated commands instead:"
-	@echo "  $(2)"
-	@echo ""
-	@sleep 2
-endef
+.PHONY: help \
+        dev dev-vault dev-admin dev-client dev-all dev-libs \
+        test test-all test-unit test-backend test-e2e test-e2e-ui test-watch test-coverage \
+        build build-all build-backend build-frontend build-libs build-release \
+        docker-dev docker-dev-down docker-dev-logs docker-prod docker-test docker-clean \
+        db-migrate db-migrate-test db-reset db-reset-test db-seed \
+        lint lint-fix lint-backend lint-frontend lint-all \
+        check check-types check-strict \
+        clean clean-all clean-node clean-cargo \
+        strict strict-all strict-frontend strict-backend
 
 # ============================================================================
 # Help
 # ============================================================================
 
 help: ## Show this help message
-	@echo 'Usage: make [target] OR cd cli && bun run <command>'
+	@echo 'Health V1 Monorepo - Universal Command Interface'
 	@echo ''
-	@echo '⚠️  NOTICE: Makefile commands are being deprecated in favor of unified'
-	@echo 'bun commands. See COMMANDS.md or run: cd cli && bun run'
+	@echo 'Usage: make <command>'
 	@echo ''
-	@echo 'Available targets:'
+	@echo 'Development Commands:'
+	@echo '  make dev             - Interactive app selector'
+	@echo '  make dev-vault       - RustyVault UI + libs (port 8215)'
+	@echo '  make dev-admin       - Admin dashboard + libs (port 4111)'
+	@echo '  make dev-client      - Client app + libs (port 4115)'
+	@echo '  make dev-all         - All apps in parallel'
 	@echo ''
-	@echo 'Development:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -E '(dev|up|down|build|restart|logs|ps)'
+	@echo 'Testing Commands:'
+	@echo '  make test            - Unit + backend tests'
+	@echo '  make test-all        - Full suite (unit + backend + E2E)'
+	@echo '  make test-unit       - Frontend unit tests'
+	@echo '  make test-backend    - Rust backend tests'
+	@echo '  make test-e2e        - Playwright E2E tests'
+	@echo '  make test-e2e-ui     - E2E with interactive UI'
 	@echo ''
-	@echo 'Testing:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -E 'test'
+	@echo 'Build Commands:'
+	@echo '  make build           - Build all (libs + apps)'
+	@echo '  make build-backend   - Build Rust backend'
+	@echo '  make build-frontend  - Build all frontend apps'
+	@echo '  make build-release   - Production release build'
 	@echo ''
-	@echo 'Database:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -E 'db-'
+	@echo 'Docker Commands:'
+	@echo '  make docker-dev      - Start dev environment'
+	@echo '  make docker-dev-down - Stop dev environment'
+	@echo '  make docker-dev-logs - View dev logs'
 	@echo ''
-	@echo 'Linting:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -E 'lint'
+	@echo 'Database Commands:'
+	@echo '  make db-migrate      - Run migrations'
+	@echo '  make db-reset        - Reset database'
+	@echo '  make db-seed         - Seed sample data'
 	@echo ''
-	@echo 'Cleanup:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -E 'clean'
+	@echo 'Quality Commands:'
+	@echo '  make lint            - Run all linters'
+	@echo '  make lint-fix        - Auto-fix issues'
+	@echo '  make check           - Lint + typecheck + tests'
+	@echo '  make check-strict    - All strict checks → strict-errors.txt'
+	@echo ''
+	@echo 'Cleanup Commands:'
+	@echo '  make clean           - Clean build artifacts'
+	@echo '  make clean-all       - Clean everything'
+	@echo ''
+	@echo 'For detailed documentation, see: COMMANDS.md'
 
 # ============================================================================
-# Development (Default)
+# Development Commands
 # ============================================================================
 
-build: ## Build all Docker images in dev mode
-	docker-compose -f docker-compose.dev.yml build
+dev: ## Interactive app selector
+	@cd cli && node scripts/dev-interactive.js
 
-up: ## [DEPRECATED] Use: cd cli && bun run docker:dev
-	$(call deprecation_warning,up,cd cli && bun run docker:dev)
+dev-vault: ## Start RustyVault UI + libs (port 8215)
+	@cd cli && bun run dev:vault
+
+dev-admin: ## Start Admin dashboard + libs (port 4111)
+	@cd cli && bun run dev:admin
+
+dev-client: ## Start Client app + libs (port 4115)
+	@cd cli && bun run dev:client
+
+dev-all: ## Start all apps in parallel
+	@echo "Starting all apps (vault, admin, client)..."
+	@echo "Note: Run each in separate terminals for better control:"
+	@echo "  Terminal 1: make dev-vault"
+	@echo "  Terminal 2: make dev-admin"
+	@echo "  Terminal 3: make dev-client"
+	@echo ""
+	@echo "Or use the interactive selector: make dev"
+
+dev-libs: ## Watch shared libraries only
+	@cd cli && bun run dev:libs
+
+# ============================================================================
+# Docker Commands
+# ============================================================================
+
+docker-dev: ## Start dev environment
 	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
 
-down: ## [DEPRECATED] Use: cd cli && bun run docker:dev:down
-	$(call deprecation_warning,down,cd cli && bun run docker:dev:down)
+docker-dev-down: ## Stop dev environment
 	docker-compose -f docker-compose.dev.yml down
 
-restart: ## Restart all services in dev mode
-	docker-compose -f docker-compose.dev.yml restart
-
-logs: ## [DEPRECATED] Use: cd cli && bun run docker:dev:logs
-	$(call deprecation_warning,logs,cd cli && bun run docker:dev:logs)
+docker-dev-logs: ## View dev environment logs
 	docker-compose -f docker-compose.dev.yml logs -f
 
-ps: ## Show running containers
-	docker-compose -f docker-compose.dev.yml ps
-
-dev: ## [DEPRECATED] Use: cd cli && bun run docker:dev
-	$(call deprecation_warning,dev,cd cli && bun run docker:dev)
-	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
-
-dev-up: ## [DEPRECATED] Use: cd cli && bun run docker:dev
-	$(call deprecation_warning,dev-up,cd cli && bun run docker:dev)
-	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
-
-dev-down: ## [DEPRECATED] Use: cd cli && bun run docker:dev:down
-	$(call deprecation_warning,dev-down,cd cli && bun run docker:dev:down)
-	docker-compose -f docker-compose.dev.yml down
-
-dev-logs: ## [DEPRECATED] Use: cd cli && bun run docker:dev:logs
-	$(call deprecation_warning,dev-logs,cd cli && bun run docker:dev:logs)
-	docker-compose -f docker-compose.dev.yml logs -f
-
-dev-build: ## Build dev images without cache
-	docker-compose -f docker-compose.dev.yml build --no-cache
-
-# ============================================================================
-# Production
-# ============================================================================
-
-prod: prod-up ## Start production environment
-
-prod-up: ## Build and start all services in production mode
+docker-prod: ## Start production environment
 	docker-compose -f docker-compose.yml up -d --build
 
-prod-down: ## Stop all production services
+docker-prod-down: ## Stop production environment
 	docker-compose -f docker-compose.yml down
 
-prod-logs: ## Show logs from production services
-	docker-compose -f docker-compose.yml logs -f
-
-# ============================================================================
-# Testing
-# ============================================================================
-
-test: test-unit test-backend ## Run all tests (unit + backend)
-
-test-all: test-unit test-backend test-e2e ## Run all tests including E2E
-
-test-up: ## Start test environment (vault only)
+docker-test: ## Start test environment
 	docker-compose -f docker-compose.test.yml up -d --build
-	@echo "Waiting for services to be healthy..."
-	@sleep 10
-	@docker-compose -f docker-compose.test.yml ps
 
-test-up-full: ## Start full test environment (with API service)
-	docker-compose -f docker-compose.test.yml --profile full up -d --build
-	@echo "Waiting for services to be healthy..."
-	@sleep 15
-	@docker-compose -f docker-compose.test.yml --profile full ps
+docker-test-down: ## Stop test environment
+	docker-compose -f docker-compose.test.yml down
 
-test-down: ## Stop test environment
-	docker-compose -f docker-compose.test.yml down -v
+docker-clean: ## Clean Docker resources
+	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
+	docker-compose -f docker-compose.test.yml down -v --remove-orphans
+	docker system prune -f
 
-test-logs: ## Show logs from test services
-	docker-compose -f docker-compose.test.yml logs -f
+# ============================================================================
+# Testing Commands
+# ============================================================================
 
-test-clean: ## Clean up test environment and volumes
-	docker-compose -f docker-compose.test.yml --profile full down -v --remove-orphans
-	@echo "Test environment cleaned up"
+test: ## Run unit + backend tests
+	@cd cli && bun run test
+
+test-all: ## Run full test suite (unit + backend + E2E)
+	@cd cli && bun run test:all
+
+test-unit: ## Run frontend unit tests
+	@cd cli && bun run test:unit
 
 test-backend: ## Run backend Rust tests
-	@echo "Running backend tests..."
-	cd backend && cargo test --workspace
+	@cd backend && cargo test --workspace
 
-test-backend-coverage: ## Run backend tests with coverage
-	@echo "Running backend tests with coverage..."
-	cd backend && cargo tarpaulin --out Xml --out Html --output-dir coverage --exclude-files '*/tests/*'
+test-e2e: ## Run Playwright E2E tests
+	@cd cli && bun run test:e2e
 
-test-frontend: ## [DEPRECATED] Use: cd cli && bun run test:unit
-	$(call deprecation_warning,test-frontend,cd cli && bun run test:unit)
-	@echo "Running frontend unit tests..."
-	cd cli && bun run test
+test-e2e-ui: ## Run E2E tests with Playwright UI
+	@cd cli && bun run test:e2e:ui
 
-test-unit: ## [DEPRECATED] Use: cd cli && bun run test:unit
-	$(call deprecation_warning,test-unit,cd cli && bun run test:unit)
-	@echo "Running frontend unit tests..."
-	cd cli && bun run test
+test-watch: ## Run tests in watch mode
+	@cd cli && bun run test:watch
 
-test-unit-coverage: ## Run frontend unit tests with coverage
-	@echo "Running frontend unit tests with coverage..."
-	cd cli/packages/apps/rustyvault-ui && bun run test:coverage
-	cd cli/packages/apps/admin && bun run test:coverage || true
-	cd cli/packages/apps/client-app && bun run test:coverage || true
-
-test-e2e: test-up ## Run E2E tests (starts test env if needed)
-	@echo "Running E2E tests..."
-	cd cli/packages/apps/rustyvault-ui && \
-		PLAYWRIGHT_BASE_URL="http://localhost:8215" \
-		PLAYWRIGHT_API_URL="http://localhost:8217" \
-		bunx playwright test
-
-test-e2e-ui: test-up ## Run E2E tests with UI
-	@echo "Running E2E tests with UI..."
-	cd cli/packages/apps/rustyvault-ui && \
-		PLAYWRIGHT_BASE_URL="http://localhost:8215" \
-		PLAYWRIGHT_API_URL="http://localhost:8217" \
-		bunx playwright test --ui
-
-test-coverage: test-backend-coverage test-unit-coverage ## Run all tests with coverage
-
-test-vault: ## Run vault-specific tests
-	@./scripts/run-vault-tests.sh
+test-coverage: ## Run tests with coverage
+	@cd cli && bun run test:coverage
 
 # ============================================================================
-# Database
+# Build Commands
+# ============================================================================
+
+build: ## Build all (libs + apps)
+	@cd cli && bun run build
+
+build-all: build ## Alias for build
+
+build-backend: ## Build Rust backend
+	@cd backend && cargo build --release --workspace
+
+build-frontend: ## Build all frontend apps
+	@cd cli && bun run build:frontend
+
+build-libs: ## Build shared libraries
+	@cd cli && bun run build:libs
+
+build-release: ## Production release build
+	@cd cli && bun run build:release
+
+# ============================================================================
+# Database Commands
 # ============================================================================
 
 db-migrate: ## Run database migrations
-	@echo "Running database migrations..."
-	cd backend && sqlx migrate run
+	@cd cli && bun run db:migrate
 
 db-migrate-test: ## Run migrations on test database
-	@echo "Running migrations on test database..."
-	DATABASE_URL="postgresql://test_user:test_password@localhost:5433/vault_test_db" \
-		cd backend && sqlx migrate run
+	@cd cli && bun run db:migrate:test
 
-db-reset: ## Reset database (drop and recreate)
-	@echo "Resetting database..."
-	cd backend && sqlx database drop -y && sqlx database create && sqlx migrate run
+db-reset: ## Reset database (drop + recreate + migrate)
+	@cd cli && bun run db:reset
+
+db-reset-test: ## Reset test database
+	@cd cli && bun run db:reset:test
 
 db-seed: ## Seed database with sample data
-	@echo "Seeding database..."
-	cd backend && cargo run --bin seed || echo "No seed binary found"
+	@cd cli && bun run db:seed
 
 # ============================================================================
-# Linting & Formatting
+# Linting & Quality Commands
 # ============================================================================
 
-lint: lint-backend lint-frontend ## Run all linters
+lint: ## Run all linters
+	@cd cli && bun run lint
 
-lint-backend: ## Run Rust lints (clippy + fmt check)
-	@echo "Running backend lints..."
-	cd backend && cargo fmt --all -- --check
-	cd backend && cargo clippy --workspace -- -D warnings
+lint-fix: ## Auto-fix linting issues
+	@cd cli && bun run lint:fix
 
-lint-frontend: ## Run frontend lints (biome)
-	@echo "Running frontend lints..."
-	cd cli && bun run lint
+lint-backend: ## Lint Rust code only
+	@cd cli && bun run lint:backend
 
-lint-fix: ## [DEPRECATED] Use: cd cli && bun run lint:fix
-	$(call deprecation_warning,lint-fix,cd cli && bun run lint:fix)
-	@echo "Fixing linting issues..."
-	cd backend && cargo fmt --all
-	cd cli && bun run lint:fix || bunx biome check --write .
+lint-frontend: ## Lint TypeScript code only
+	@cd cli && bun run lint:frontend
 
-typecheck: ## Run TypeScript type checking
-	@echo "Running TypeScript type checks..."
-	cd cli/packages/libs/shared && bun run typecheck
-	cd cli/packages/libs/components && bun run typecheck
-	cd cli/packages/apps/rustyvault-ui && bun run typecheck
-	cd cli/packages/apps/admin && bun run typecheck
+lint-all: ## Run all linters including Oxlint
+	@cd cli && bun run lint:all
+
+# ============================================================================
+# Check Commands
+# ============================================================================
+
+check: ## Lint + typecheck + unit tests
+	@cd cli && bun run check
+
+check-types: ## TypeScript type checking
+	@cd cli && bun run check:types
+
+check-strict: ## All strict checks → strict-errors.txt
+	@$(MAKE) strict
 
 # ============================================================================
 # Strict Checks - Like Physics Laws, No Leniency
@@ -324,58 +314,26 @@ strict-backend: ## Run all backend strict checks only
 	@echo "Backend errors exported to: $(STRICT_REPORT_FILE)"
 
 # ============================================================================
-# Build
-# ============================================================================
-
-build-backend: ## [DEPRECATED] Use: cd cli && bun run build:backend
-	$(call deprecation_warning,build-backend,cd cli && bun run build:backend)
-	@echo "Building backend..."
-	cd backend && cargo build --release --workspace
-
-build-frontend: ## [DEPRECATED] Use: cd cli && bun run build:frontend
-	$(call deprecation_warning,build-frontend,cd cli && bun run build:frontend)
-	@echo "Building frontend..."
-	cd cli && bun run build
-
-build-shared: ## Build shared libraries
-	@echo "Building shared libraries..."
-	cd cli/packages/libs/shared && bun run build
-	cd cli/packages/libs/components && bun run build
-
-# ============================================================================
-# Cleanup
+# Cleanup Commands
 # ============================================================================
 
 clean: ## Clean build artifacts
-	@echo "Cleaning build artifacts..."
-	cd backend && cargo clean
-	cd cli && rm -rf node_modules/.cache
-	rm -rf cli/packages/*/dist
-	rm -rf cli/packages/*/.turbo
+	@cd cli && bun run clean
 
-clean-docker: ## [DEPRECATED] Use: cd cli && bun run docker:clean
-	$(call deprecation_warning,clean-docker,cd cli && bun run docker:clean)
-	@echo "Cleaning Docker resources..."
-	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
-	docker-compose -f docker-compose.test.yml down -v --remove-orphans
-	docker system prune -f
+clean-all: ## Clean everything including Docker
+	@cd cli && bun run clean:all
 
-clean-all: clean clean-docker ## Clean everything
-	@echo "Deep cleaning..."
-	rm -rf backend/target
-	rm -rf cli/node_modules
-	rm -rf cli/packages/*/node_modules
-	docker volume prune -f
+clean-node: ## Clean Node build artifacts
+	@cd cli && bun run clean:node
+
+clean-cargo: ## Clean Rust build artifacts
+	@cd cli && bun run clean:cargo
 
 # ============================================================================
-# Utility
+# Utility Commands
 # ============================================================================
 
 install: ## Install all dependencies
 	@echo "Installing dependencies..."
-	cd cli && bun install
-	cd backend && cargo fetch
-
-check: lint typecheck test-unit ## Run all checks (lint + typecheck + unit tests)
-
-ci: check test-backend ## Run CI checks
+	@cd cli && bun install
+	@cd backend && cargo fetch

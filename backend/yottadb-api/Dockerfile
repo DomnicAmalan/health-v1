@@ -4,8 +4,9 @@
 
 # ============================================
 # Stage 1: Chef base image
+# Use Debian 11 (bullseye) to match YottaDB runtime GLIBC 2.31
 # ============================================
-FROM lukemathwalker/cargo-chef:latest-rust-1.91 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.91-bullseye AS chef
 WORKDIR /app
 
 # Build arguments
@@ -61,14 +62,17 @@ RUN if [ "$SKIP_CHECKS" = "true" ]; then \
 
 # ============================================
 # Stage 4: Dev runner - for development with hot reload
+# Executes MUMPS commands in yottadb container via docker exec
 # ============================================
 FROM rust:1.91-slim AS runner-dev
 
+# Install dependencies including Docker CLI
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     ca-certificates \
     curl \
+    docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/backend/yottadb-api

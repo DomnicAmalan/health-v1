@@ -1,0 +1,118 @@
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@lazarus-life/ui-components";
+import { useNavigate } from "@tanstack/react-router";
+import { Accessibility, Keyboard, LogOut, MoreVertical, Settings, User } from "lucide-react";
+import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
+import { KeyboardShortcutsHelp } from "@/components/accessibility/KeyboardShortcutsHelp";
+import { useDisclosure } from "@/hooks/ui/useDisclosure";
+import { useAuthStore } from "@/stores/authStore";
+
+/**
+ * Header Component - Top bar with user menu
+ * Minimal header bar that doesn't take much vertical space
+ */
+export function Header() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+  const { onOpen: onOpenAccessibility } = useDisclosure("accessibility-panel");
+  const { onOpen: onOpenKeyboardHelp } = useDisclosure("keyboard-shortcuts-help");
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate({ to: "/login" });
+    } catch (_error) {
+      // Still navigate to login even if logout API call fails
+      navigate({ to: "/login" });
+    }
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    const userEmail = user?.email;
+    if (!userEmail) {
+      return "U";
+    }
+    const parts = userEmail.split("@")[0]?.split(".") ?? [];
+    return parts
+      .map((part: string) => part[0] ?? "")
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const displayName = user?.email?.split("@")[0] || "User";
+
+  return (
+    <header className="flex items-center justify-between px-4 py-2 border-b bg-background">
+      {/* Left side - App title/breadcrumbs (can be added later) */}
+      <div className="flex-1">
+        <h1 className="text-sm font-semibold text-muted-foreground">Lazarus Life HIMS</h1>
+      </div>
+
+      {/* Right side - User menu */}
+      <div className="flex items-center gap-2">
+        {/* User Menu Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild={true}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>
+              <div className="flex flex-col">
+                <span className="font-semibold">{displayName}</span>
+                {user?.email && <span className="text-xs text-muted-foreground">{user.email}</span>}
+                {user?.role && <span className="text-xs text-muted-foreground">{user.role}</span>}
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+              <User className="mr-2 h-4 w-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onOpenAccessibility}>
+              <Accessibility className="mr-2 h-4 w-4" />
+              Accessibility
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenKeyboardHelp}>
+              <Keyboard className="mr-2 h-4 w-4" />
+              Keyboard Shortcuts
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Avatar */}
+        <Avatar className="h-7 w-7">
+          <AvatarImage src={undefined} />
+          <AvatarFallback>{getUserInitials()}</AvatarFallback>
+        </Avatar>
+
+        {/* Hidden dialogs that can be triggered from menu */}
+        <AccessibilityPanel showTrigger={false} />
+        <KeyboardShortcutsHelp showTrigger={false} />
+      </div>
+    </header>
+  );
+}

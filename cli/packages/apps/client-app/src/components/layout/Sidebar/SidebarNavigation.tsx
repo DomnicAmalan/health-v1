@@ -1,21 +1,20 @@
 import { Stack } from "@lazarus-life/ui-components";
+import { type SidebarGroup, SidebarGroupComponent } from "./SidebarGroup";
 import { type SidebarItem, SidebarItemComponent } from "./SidebarItem";
 
-export type { SidebarItem };
+export type { SidebarItem, SidebarGroup };
 
 interface SidebarNavigationProps {
-  items: SidebarItem[];
+  items?: SidebarItem[];
+  groups?: SidebarGroup[];
   isCollapsed: boolean;
-  expandedItems: Set<string>;
-  onToggleExpand: (path: string) => void;
   onNavAction?: (actionId: string, navPath: string) => void;
 }
 
 export function SidebarNavigation({
   items,
+  groups,
   isCollapsed,
-  expandedItems,
-  onToggleExpand,
   onNavAction,
 }: SidebarNavigationProps) {
   return (
@@ -26,16 +25,29 @@ export function SidebarNavigation({
       }}
     >
       <Stack spacing="xs">
-        {items.map((item) => (
-          <SidebarItemComponent
-            key={item.path}
-            item={item}
-            isCollapsed={isCollapsed}
-            isExpanded={expandedItems.has(item.path)}
-            onToggleExpand={() => onToggleExpand(item.path)}
-            onNavAction={onNavAction}
-          />
-        ))}
+        {/* Render groups if provided */}
+        {groups &&
+          groups.map((group) => (
+            <SidebarGroupComponent
+              key={group.id}
+              group={group}
+              isCollapsed={isCollapsed}
+              onNavAction={onNavAction}
+            />
+          ))}
+
+        {/* Render flat items if provided (backward compatibility) */}
+        {items &&
+          items.map((item) => (
+            <SidebarItemComponent
+              key={item.path}
+              item={item}
+              isCollapsed={isCollapsed}
+              isExpanded={false}
+              onToggleExpand={() => {}}
+              onNavAction={onNavAction}
+            />
+          ))}
       </Stack>
     </nav>
   );

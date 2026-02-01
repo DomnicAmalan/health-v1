@@ -4,7 +4,6 @@ import { memo, useRef } from "react";
 import { useTabDrag } from "@/hooks/ui/useTabDrag";
 import { TabCloseButton } from "./TabCloseButton";
 import { TabDragHandle } from "./TabDragHandle";
-import { getModuleColor } from "./useTabColors";
 
 export interface TabItemProps {
   tab: {
@@ -20,6 +19,7 @@ export interface TabItemProps {
   isActive: boolean;
   isDragging?: boolean;
   isDragOver?: boolean;
+  tabWidth: number;
   onSelect: () => void;
   onClose: () => void;
   onDragStart: (e: React.MouseEvent) => void;
@@ -32,13 +32,14 @@ export const TabItem = memo(function TabItem({
   isActive,
   isDragging,
   isDragOver,
+  tabWidth,
   onSelect,
   onClose,
   onDragStart,
 }: TabItemProps) {
   const isDraggable = Boolean(tab.closable) && tab.id !== DASHBOARD_ID && tab.path !== "/";
   const tabRef = useRef<HTMLDivElement>(null);
-  const { handleMouseDown } = useTabDrag({ isDraggable, onDragStart, onSelect });
+  const { handleMouseDown, handleClick } = useTabDrag({ isDraggable, onDragStart, onSelect });
 
   return (
     <Box
@@ -85,8 +86,8 @@ export const TabItem = memo(function TabItem({
             tabIndex={isActive ? 0 : -1}
             className={cn(
               // Base styles - Microsoft Fluent UI tab design
-              "group flex items-center gap-1.5 h-[42px] px-4 py-2 border-b-4 transition-fluent w-[180px] shrink-0",
-              "text-[14px] font-medium tracking-[0.25px]",
+              "group flex items-center gap-1.5 h-[42px] px-4 py-2 border-b-4 transition-all duration-200 shrink-0",
+              "text-[14px] tracking-[0.25px]",
               "rounded-t-sm", // 4px top corners only (Fluent UI)
               isDraggable && !isDragging && "cursor-grab active:cursor-grabbing",
               !(isDraggable || tab.disabled) && "cursor-pointer",
@@ -94,41 +95,44 @@ export const TabItem = memo(function TabItem({
 
               // Default (Inactive) State - Fluent UI styling
               !(isActive || tab.disabled || tab.alert || tab.success) && [
-                "bg-[#F4F6F8] border-[#E1E4E8] text-[#4A4A4E]",
+                "bg-[#F4F6F8] border-[#E1E4E8] text-[#4A4A4E] font-medium",
                 "hover:bg-[#E9EEF3] hover:border-[#D0D6DB] hover:text-[#1C1C1E]",
               ],
 
-              // Active State - Microsoft Fluent style with 4px bottom border
+              // Active State - Microsoft Fluent style with 4px bottom border (consistent primary color)
               isActive &&
                 !tab.alert &&
-                !tab.success && ["bg-white border-primary text-primary shadow-fluent-1"],
+                !tab.success && ["bg-white border-primary text-primary shadow-fluent-1 font-semibold"],
 
               // Alert State
               tab.alert && [
                 isActive
-                  ? "bg-[#FFF5F2] border-warning text-warning shadow-fluent-1"
-                  : "bg-[#F4F6F8] border-transparent text-warning hover:bg-[#FFF5F2] hover:border-warning",
+                  ? "bg-[#FFF5F2] border-warning text-warning shadow-fluent-1 font-semibold"
+                  : "bg-[#F4F6F8] border-transparent text-warning hover:bg-[#FFF5F2] hover:border-warning font-medium",
               ],
 
               // Success State
               tab.success && [
                 isActive
-                  ? "bg-[#F0FAF4] border-accent text-accent shadow-fluent-1"
-                  : "bg-[#F4F6F8] border-transparent text-accent hover:bg-[#F0FAF4] hover:border-accent",
+                  ? "bg-[#F0FAF4] border-accent text-accent shadow-fluent-1 font-semibold"
+                  : "bg-[#F4F6F8] border-transparent text-accent hover:bg-[#F0FAF4] hover:border-accent font-medium",
               ],
 
               // Disabled State
-              tab.disabled && ["bg-[#F4F6F8] border-transparent text-[#A5A5A5]"]
+              tab.disabled && ["bg-[#F4F6F8] border-transparent text-[#A5A5A5] font-medium"]
             )}
-            style={
-              isActive && !tab.alert && !tab.success
-                ? {
-                    borderBottomColor: getModuleColor(tab.path).color,
-                  }
-                : undefined
-            }
+            style={{
+              width: `${tabWidth}px`,
+            }}
             onMouseDown={isDraggable ? handleMouseDown : undefined}
-            onClick={isDraggable || tab.disabled ? undefined : onSelect}
+            onClick={tab.disabled ? undefined : (isDraggable ? handleClick : onSelect)}
+            onAuxClick={(e) => {
+              if (e.button === 1 && tab.closable) {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }
+            }}
             onKeyDown={(e) => {
               if (!(isDraggable || tab.disabled) && (e.key === "Enter" || e.key === " ")) {
                 e.preventDefault();
@@ -141,6 +145,7 @@ export const TabItem = memo(function TabItem({
                 className={cn(
                   "shrink-0 transition-colors",
                   !(isActive || tab.alert || tab.success) && "text-[#4A4A4E]",
+                  isActive && !tab.alert && !tab.success && "text-primary",
                   tab.alert && "text-warning",
                   tab.success && "text-accent",
                   tab.disabled && "text-[#A5A5A5]"
@@ -148,11 +153,6 @@ export const TabItem = memo(function TabItem({
                 style={{
                   width: "18px",
                   height: "18px",
-                  ...(isActive && !tab.alert && !tab.success
-                    ? {
-                        color: getModuleColor(tab.path).color,
-                      }
-                    : {}),
                 }}
               >
                 {tab.icon}
@@ -162,17 +162,11 @@ export const TabItem = memo(function TabItem({
               className={cn(
                 "truncate flex-1 capitalize",
                 !(isActive || tab.alert || tab.success) && "text-[#4A4A4E]",
+                isActive && !tab.alert && !tab.success && "text-primary",
                 tab.alert && "text-warning",
                 tab.success && "text-accent",
                 tab.disabled && "text-[#A5A5A5]"
               )}
-              style={
-                isActive && !tab.alert && !tab.success
-                  ? {
-                      color: getModuleColor(tab.path).color,
-                    }
-                  : undefined
-              }
             >
               {tab.label}
             </span>

@@ -77,11 +77,105 @@ INSERT INTO permissions (id, name, resource, action, description) VALUES
     
     -- Settings permissions
     (gen_random_uuid(), 'settings:view', 'settings', 'view', 'View settings'),
-    (gen_random_uuid(), 'settings:update', 'settings', 'update', 'Update settings')
+    (gen_random_uuid(), 'settings:update', 'settings', 'update', 'Update settings'),
+
+    -- Billing permissions
+    (gen_random_uuid(), 'billing:view', 'billing', 'view', 'View billing information'),
+    (gen_random_uuid(), 'billing:create', 'billing', 'create', 'Create billing entries'),
+    (gen_random_uuid(), 'billing:update', 'billing', 'update', 'Update billing entries'),
+    (gen_random_uuid(), 'billing:delete', 'billing', 'delete', 'Delete billing entries'),
+    (gen_random_uuid(), 'billing:process_payment', 'billing', 'process_payment', 'Process payments'),
+    (gen_random_uuid(), 'billing:manage_invoices', 'billing', 'manage_invoices', 'Manage invoices'),
+
+    -- Insurance permissions
+    (gen_random_uuid(), 'insurance:view', 'insurance', 'view', 'View insurance information'),
+    (gen_random_uuid(), 'insurance:create', 'insurance', 'create', 'Create insurance entries'),
+    (gen_random_uuid(), 'insurance:update', 'insurance', 'update', 'Update insurance entries'),
+    (gen_random_uuid(), 'insurance:delete', 'insurance', 'delete', 'Delete insurance entries'),
+    (gen_random_uuid(), 'insurance:manage_claims', 'insurance', 'manage_claims', 'Manage insurance claims'),
+    (gen_random_uuid(), 'insurance:manage_preauth', 'insurance', 'manage_preauth', 'Manage pre-authorization'),
+
+    -- Department permissions - OPD
+    (gen_random_uuid(), 'departments:opd:view', 'departments', 'opd:view', 'View OPD information'),
+    (gen_random_uuid(), 'departments:opd:manage', 'departments', 'opd:manage', 'Manage OPD'),
+    (gen_random_uuid(), 'departments:opd:queue', 'departments', 'opd:queue', 'Manage OPD queue'),
+
+    -- Department permissions - IPD
+    (gen_random_uuid(), 'departments:ipd:view', 'departments', 'ipd:view', 'View IPD information'),
+    (gen_random_uuid(), 'departments:ipd:admit', 'departments', 'ipd:admit', 'Admit patients to IPD'),
+    (gen_random_uuid(), 'departments:ipd:discharge', 'departments', 'ipd:discharge', 'Discharge patients from IPD'),
+    (gen_random_uuid(), 'departments:ipd:transfer', 'departments', 'ipd:transfer', 'Transfer patients'),
+
+    -- Department permissions - Beds
+    (gen_random_uuid(), 'departments:beds:view', 'departments', 'beds:view', 'View bed information'),
+    (gen_random_uuid(), 'departments:beds:manage', 'departments', 'beds:manage', 'Manage beds'),
+    (gen_random_uuid(), 'departments:beds:allocate', 'departments', 'beds:allocate', 'Allocate beds'),
+
+    -- Department permissions - Wards
+    (gen_random_uuid(), 'departments:wards:view', 'departments', 'wards:view', 'View ward information'),
+    (gen_random_uuid(), 'departments:wards:manage', 'departments', 'wards:manage', 'Manage wards'),
+
+    -- Department permissions - OT
+    (gen_random_uuid(), 'departments:ot:view', 'departments', 'ot:view', 'View OT information'),
+    (gen_random_uuid(), 'departments:ot:schedule', 'departments', 'ot:schedule', 'Schedule surgeries'),
+    (gen_random_uuid(), 'departments:ot:manage', 'departments', 'ot:manage', 'Manage OT'),
+
+    -- Lab permissions
+    (gen_random_uuid(), 'lab:view', 'lab', 'view', 'View lab information'),
+    (gen_random_uuid(), 'lab:order', 'lab', 'order', 'Order lab tests'),
+    (gen_random_uuid(), 'lab:collect', 'lab', 'collect', 'Collect lab samples'),
+    (gen_random_uuid(), 'lab:process', 'lab', 'process', 'Process lab samples'),
+    (gen_random_uuid(), 'lab:result:entry', 'lab', 'result:entry', 'Enter lab results'),
+    (gen_random_uuid(), 'lab:result:verify', 'lab', 'result:verify', 'Verify lab results'),
+    (gen_random_uuid(), 'lab:result:amend', 'lab', 'result:amend', 'Amend lab results'),
+    (gen_random_uuid(), 'lab:report:sign', 'lab', 'report:sign', 'Sign lab reports'),
+    (gen_random_uuid(), 'lab:manage:tests', 'lab', 'manage:tests', 'Manage lab tests'),
+    (gen_random_uuid(), 'lab:manage:panels', 'lab', 'manage:panels', 'Manage lab panels'),
+    (gen_random_uuid(), 'lab:critical:notify', 'lab', 'critical:notify', 'Notify critical lab results'),
+
+    -- Radiology permissions
+    (gen_random_uuid(), 'radiology:view', 'radiology', 'view', 'View radiology information'),
+    (gen_random_uuid(), 'radiology:order', 'radiology', 'order', 'Order radiology exams'),
+    (gen_random_uuid(), 'radiology:schedule', 'radiology', 'schedule', 'Schedule radiology exams'),
+    (gen_random_uuid(), 'radiology:perform', 'radiology', 'perform', 'Perform radiology exams'),
+    (gen_random_uuid(), 'radiology:report:create', 'radiology', 'report:create', 'Create radiology reports'),
+    (gen_random_uuid(), 'radiology:report:sign', 'radiology', 'report:sign', 'Sign radiology reports'),
+    (gen_random_uuid(), 'radiology:report:addendum', 'radiology', 'report:addendum', 'Add radiology report addendum'),
+    (gen_random_uuid(), 'radiology:manage:exams', 'radiology', 'manage:exams', 'Manage radiology exams'),
+    (gen_random_uuid(), 'radiology:manage:rooms', 'radiology', 'manage:rooms', 'Manage radiology rooms'),
+    (gen_random_uuid(), 'radiology:critical:notify', 'radiology', 'critical:notify', 'Notify critical radiology findings'),
+
+    -- Workflow permissions
+    (gen_random_uuid(), 'workflows:view', 'workflows', 'view', 'View workflows'),
+    (gen_random_uuid(), 'workflows:create', 'workflows', 'create', 'Create workflows'),
+    (gen_random_uuid(), 'workflows:update', 'workflows', 'update', 'Update workflows'),
+    (gen_random_uuid(), 'workflows:delete', 'workflows', 'delete', 'Delete workflows'),
+
+    -- Compliance permissions
+    (gen_random_uuid(), 'compliance:view', 'compliance', 'view', 'View compliance information'),
+    (gen_random_uuid(), 'compliance:create', 'compliance', 'create', 'Create compliance entries'),
+    (gen_random_uuid(), 'compliance:update', 'compliance', 'update', 'Update compliance entries'),
+    (gen_random_uuid(), 'compliance:delete', 'compliance', 'delete', 'Delete compliance entries'),
+    (gen_random_uuid(), 'compliance:assess', 'compliance', 'assess', 'Perform compliance assessments'),
+    (gen_random_uuid(), 'compliance:remediate', 'compliance', 'remediate', 'Remediate compliance issues'),
+
+    -- Training permissions
+    (gen_random_uuid(), 'training:view', 'training', 'view', 'View training information'),
+    (gen_random_uuid(), 'training:enroll', 'training', 'enroll', 'Enroll in training'),
+    (gen_random_uuid(), 'training:complete', 'training', 'complete', 'Complete training'),
+    (gen_random_uuid(), 'training:manage', 'training', 'manage', 'Manage training'),
+    (gen_random_uuid(), 'training:assign', 'training', 'assign', 'Assign training')
 ON CONFLICT (name) DO NOTHING;
 
 -- Assign permissions to roles
--- Admin gets all permissions (we'll assign all permissions programmatically)
+-- Admin gets ALL permissions
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT
+    '00000000-0000-0000-0000-000000000001'::UUID, -- admin role
+    id
+FROM permissions
+ON CONFLICT (role_id, permission_id) DO NOTHING;
+
 -- Doctor permissions
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT 
@@ -124,14 +218,14 @@ WHERE name IN (
 )
 ON CONFLICT (role_id, permission_id) DO NOTHING;
 
--- Create initial super user (password: admin123 - must be changed!)
+-- Create initial super user (password: admin123 - CHANGE IN PRODUCTION!)
 -- Password hash generated with bcrypt (cost 10) for "admin123"
 INSERT INTO users (id, email, username, password_hash, is_active, is_verified, is_super_user)
 VALUES (
     '00000000-0000-0000-0000-000000000001'::UUID,
     'admin@example.com',
     'admin',
-    '$2b$10$rJh8QZJHJZNJHJZNJHJZNeHJHJZNJHJZNJHJZNJHJZNJHJZNJHJZNe', -- Placeholder - will be updated with actual hash
+    '$2b$10$8NgvXvHskesW5Egst41uO.bIdrTPjX9lPZTCMjaS1dSNbJRSiLKmu', -- bcrypt hash for "admin123"
     true,
     true,
     true
@@ -141,4 +235,12 @@ ON CONFLICT (email) DO NOTHING;
 -- Note: The super user password hash above is a placeholder.
 -- In production, generate a proper bcrypt hash and replace it.
 -- You can generate one using: cargo run --bin generate-password-hash
+
+-- Assign admin role to super user
+INSERT INTO user_roles (user_id, role_id)
+VALUES (
+    '00000000-0000-0000-0000-000000000001'::UUID, -- super user
+    '00000000-0000-0000-0000-000000000001'::UUID  -- admin role
+)
+ON CONFLICT (user_id, role_id) DO NOTHING;
 

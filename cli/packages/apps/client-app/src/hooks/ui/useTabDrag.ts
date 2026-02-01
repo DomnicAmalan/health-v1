@@ -7,8 +7,10 @@ interface UseTabDragOptions {
 }
 
 export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOptions) {
-  const mouseDownRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const mouseDownRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
+  const startEventRef = useRef<React.MouseEvent | null>(null);
+  const handledByMouseDownRef = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Ignore if clicking the close button
@@ -20,16 +22,16 @@ export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOpt
       return;
     }
 
-    const startEvent = e;
+    startEventRef.current = e;
     mouseDownRef.current = {
       x: e.clientX,
       y: e.clientY,
-      time: Date.now(),
     };
     isDraggingRef.current = false;
+    handledByMouseDownRef.current = false;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!mouseDownRef.current) {
+      if (!mouseDownRef.current || !startEventRef.current) {
         return;
       }
 
@@ -41,8 +43,9 @@ export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOpt
       if (deltaX > threshold || deltaY > threshold) {
         isDraggingRef.current = true;
         // Pass the original mouse down event for proper offset calculation
-        onDragStart(startEvent);
+        onDragStart(startEventRef.current);
         mouseDownRef.current = null;
+        startEventRef.current = null;
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
       }
@@ -51,21 +54,36 @@ export function useTabDrag({ isDraggable, onDragStart, onSelect }: UseTabDragOpt
     const handleMouseUp = () => {
       // If we didn't drag, treat it as a click
       if (!isDraggingRef.current && mouseDownRef.current) {
-        const timeDiff = Date.now() - mouseDownRef.current.time;
-        // Only select if it was a quick click (not a long press)
-        if (timeDiff < 200) {
-          onSelect();
-        }
+        // No time check - if mouse didn't move, it's a click
+        handledByMouseDownRef.current = true;
+        onSelect();
       }
       mouseDownRef.current = null;
+      startEventRef.current = null;
       isDraggingRef.current = false;
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+
+      // Reset the flag after a short delay (after onClick would have fired)
+      setTimeout(() => {
+        handledByMouseDownRef.current = false;
+      }, 0);
     };
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  return { handleMouseDown };
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent click if it was already handled by mouseDown logic
+    if (handledByMouseDownRef.current || isDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    // If not handled by mouseDown (shouldn't happen), call onSelect
+    onSelect();
+  };
+
+  return { handleMouseDown, handleClick };
 }

@@ -133,4 +133,24 @@ export const COMMON_SHORTCUTS = {
   // Navigation
   GO_BACK: { id: "go-back", keys: ["Alt", "ArrowLeft"], description: "Go back" },
   GO_FORWARD: { id: "go-forward", keys: ["Alt", "ArrowRight"], description: "Go forward" },
-};
+
+  // Tab management
+  CLOSE_TAB: {
+    id: "close-tab",
+    keys: ["Ctrl", "w"],
+    description: "Close active tab",
+    category: "Navigation",
+  },
+  NEXT_TAB: {
+    id: "next-tab",
+    keys: ["Ctrl", "Tab"],
+    description: "Switch to next tab",
+    category: "Navigation",
+  },
+  PREV_TAB: {
+    id: "prev-tab",
+    keys: ["Ctrl", "Shift", "Tab"],
+    description: "Switch to previous tab",
+    category: "Navigation",
+  },
+} as const;

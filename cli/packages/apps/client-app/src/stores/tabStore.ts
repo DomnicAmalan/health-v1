@@ -7,6 +7,7 @@
 import type { Permission } from "@lazarus-life/shared/constants/permissions";
 import type { Tab, TabActions, TabState, TabStore } from "@lazarus-life/shared/types/stores/tab";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { logAccessDenied } from "@/lib/api/audit";
 import { reorderTabsArray } from "@/lib/dragUtils";
@@ -31,11 +32,14 @@ const initialState: TabState = {
     },
   ],
   activeTabId: DASHBOARD_ID,
+  collapsedGroups: new Set<string>(),
+  groupingStrategy: "patient" as const,
 };
 
 export const useTabStore = create<TabStore>()(
-  immer((set, get) => ({
-    ...initialState,
+  persist(
+    immer((set, get) => ({
+      ...initialState,
 
     getTabById: (id: string) => {
       return get().tabs.find((tab) => tab.id === id);
@@ -274,7 +278,87 @@ export const useTabStore = create<TabStore>()(
         state.tabs = dashboard ? [dashboard, ...reordered] : reordered;
       });
     },
-  }))
+
+    toggleGroupCollapse: (groupId: string) => {
+      set((state) => {
+        if (state.collapsedGroups.has(groupId)) {
+          state.collapsedGroups.delete(groupId);
+        } else {
+          state.collapsedGroups.add(groupId);
+        }
+      });
+    },
+
+    setGroupingStrategy: (strategy: "patient" | "module" | "chronological") => {
+      set((state) => {
+        state.groupingStrategy = strategy;
+      });
+    },
+
+    closeGroupTabs: (groupId: string, navigate?: (path: string) => void) => {
+      set((state) => {
+        const groupTabs = state.tabs.filter((t) => t.groupId === groupId);
+        const newTabs = state.tabs.filter((t) => t.groupId !== groupId);
+
+        if (newTabs.length === 0) {
+          // If closing all tabs, reset to dashboard
+          const dashboard: Tab = {
+            id: DASHBOARD_ID,
+            label: "Dashboard",
+            path: "/",
+            closable: false,
+          };
+          state.tabs = [dashboard];
+          state.activeTabId = DASHBOARD_ID;
+          if (navigate) {
+            navigate("/");
+          }
+          return;
+        }
+
+        state.tabs = newTabs;
+
+        // If active tab was in the closed group, switch to first remaining tab
+        if (groupTabs.some((t) => t.id === state.activeTabId)) {
+          const newActiveTab = newTabs[0];
+          if (newActiveTab) {
+            state.activeTabId = newActiveTab.id;
+            if (navigate) {
+              navigate(newActiveTab.path);
+            }
+          }
+        }
+      });
+    },
+    })),
+    {
+      name: "tab-storage",
+      version: 1,
+      // Only persist tabs and activeTabId, not functions
+      partialize: (state) => ({
+        tabs: state.tabs.map(tab => ({
+          ...tab,
+          icon: undefined, // Don't persist React elements
+        })),
+        activeTabId: state.activeTabId,
+        collapsedGroups: Array.from(state.collapsedGroups), // Convert Set to Array for JSON
+        groupingStrategy: state.groupingStrategy,
+      }),
+      // Restore icons and convert collapsedGroups array back to Set
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state) {
+            // Convert collapsedGroups from array back to Set
+            if (Array.isArray(state.collapsedGroups)) {
+              state.collapsedGroups = new Set(state.collapsedGroups as unknown as string[]);
+            }
+            // Icons will be restored by the UI when tabs are rendered
+            // The getIconForPath function in __root.tsx handles this
+          }
+        };
+      },
+    }
+  )
 );
 
 // Atomic selectors
@@ -287,3 +371,10 @@ export const useCloseAllTabs = () => useTabStore((state) => state.closeAllTabs);
 export const useReorderTabs = () => useTabStore((state) => state.reorderTabs);
 export const useGetTabById = () => useTabStore((state) => state.getTabById);
 export const useGetTabByPath = () => useTabStore((state) => state.getTabByPath);
+
+// Group management selectors
+export const useCollapsedGroups = () => useTabStore((state) => state.collapsedGroups);
+export const useGroupingStrategy = () => useTabStore((state) => state.groupingStrategy);
+export const useToggleGroupCollapse = () => useTabStore((state) => state.toggleGroupCollapse);
+export const useSetGroupingStrategy = () => useTabStore((state) => state.setGroupingStrategy);
+export const useCloseGroupTabs = () => useTabStore((state) => state.closeGroupTabs);

@@ -12,7 +12,15 @@ export { LabResultsPanel } from "./LabResultsPanel";
 export { VisitList } from "./VisitList";
 export { OrderList } from "./OrderList";
 export { DocumentList } from "./DocumentList";
-export { AppointmentList } from "./AppointmentList";
+export { AppointmentsList } from "./AppointmentsList";
 
 // Clinical Notes
 export * from "./ClinicalNotes";
+
+// Add/Edit Dialogs
+export { VitalTrendDialog } from "./VitalTrendDialog";
+export { AddProblemDialog } from "./AddProblemDialog";
+export { AddMedicationDialog } from "./AddMedicationDialog";
+export { AddVitalsDialog } from "./AddVitalsDialog";
+export { AddAllergyDialog } from "./AddAllergyDialog";
+export { OrderLabDialog } from "./OrderLabDialog";

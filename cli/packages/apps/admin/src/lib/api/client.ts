@@ -8,6 +8,7 @@ import { env } from "../env";
 import { sanitizeErrorMessage } from "./masking";
 
 // Create admin client with session-based auth, custom headers, and error sanitization
+console.log('🔍 Admin API Base URL:', env.VITE_API_BASE_URL);
 export const apiClient = new BaseApiClient({
   baseUrl: env.VITE_API_BASE_URL,
   auth: { type: "cookie" },

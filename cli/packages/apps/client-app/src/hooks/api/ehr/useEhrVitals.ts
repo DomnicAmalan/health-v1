@@ -6,7 +6,7 @@
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
-import { apiClient } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/yottadb-client";
 import type {
   EhrVital,
   EhrLatestVitals,
@@ -39,7 +39,7 @@ export function useEhrPatientVitals(patientId: string, pagination?: EhrPaginatio
       if (pagination?.offset) queryParams.set("offset", String(pagination.offset));
 
       const url = `${API_ROUTES.EHR.VITALS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
-      const response = await apiClient.get<EhrPaginatedResponse<EhrVital>>(url);
+      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrVital>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -61,7 +61,7 @@ export function useEhrVisitVitals(visitId: string) {
   return useQuery({
     queryKey: EHR_VITAL_QUERY_KEYS.byVisit(visitId),
     queryFn: async () => {
-      const response = await apiClient.get<EhrVital[]>(API_ROUTES.EHR.VITALS.BY_VISIT(visitId));
+      const response = await yottadbApiClient.get<EhrVital[]>(API_ROUTES.EHR.VITALS.BY_VISIT(visitId));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -83,7 +83,7 @@ export function useEhrLatestVitals(patientId: string) {
   return useQuery({
     queryKey: EHR_VITAL_QUERY_KEYS.latest(patientId),
     queryFn: async () => {
-      const response = await apiClient.get<EhrLatestVitals>(
+      const response = await yottadbApiClient.get<EhrLatestVitals>(
         API_ROUTES.EHR.VITALS.LATEST(patientId)
       );
 
@@ -108,7 +108,7 @@ export function useEhrVitalTrend(patientId: string, vitalType: EhrVitalType, lim
     queryKey: EHR_VITAL_QUERY_KEYS.trend(patientId, vitalType),
     queryFn: async () => {
       const url = `${API_ROUTES.EHR.VITALS.TREND(patientId, vitalType)}?limit=${limit}`;
-      const response = await apiClient.get<EhrVital[]>(url);
+      const response = await yottadbApiClient.get<EhrVital[]>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -130,7 +130,7 @@ export function useCreateEhrVital() {
 
   return useMutation({
     mutationFn: async (vital: CreateEhrVitalRequest) => {
-      const response = await apiClient.post<EhrVital>(API_ROUTES.EHR.VITALS.CREATE, vital);
+      const response = await yottadbApiClient.post<EhrVital>(API_ROUTES.EHR.VITALS.CREATE, vital);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");

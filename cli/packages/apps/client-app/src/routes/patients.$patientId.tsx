@@ -43,6 +43,13 @@ import {
   VitalSignsPanel,
   LabResultsPanel,
   SOAPNoteForm,
+  VitalTrendDialog,
+  AppointmentsList,
+  AddProblemDialog,
+  AddMedicationDialog,
+  AddVitalsDialog,
+  AddAllergyDialog,
+  OrderLabDialog,
 } from "@/components/ehr";
 import { useEhrPatient, useEhrPatientAllergies } from "@/hooks/api/ehr";
 
@@ -63,7 +70,16 @@ function PatientChartInner() {
   const navigate = useNavigate();
   const { patientId } = Route.useParams();
   const [activeTab, setActiveTab] = useState("summary");
+
+  // Dialog states
   const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [showVitalTrendDialog, setShowVitalTrendDialog] = useState(false);
+  const [selectedVitalType, setSelectedVitalType] = useState<EhrVitalType | null>(null);
+  const [showAddProblemDialog, setShowAddProblemDialog] = useState(false);
+  const [showAddMedicationDialog, setShowAddMedicationDialog] = useState(false);
+  const [showAddVitalsDialog, setShowAddVitalsDialog] = useState(false);
+  const [showAddAllergyDialog, setShowAddAllergyDialog] = useState(false);
+  const [showOrderLabDialog, setShowOrderLabDialog] = useState(false);
 
   const { data: patient, isLoading: isLoadingPatient, error: patientError } = useEhrPatient(patientId);
   const { data: allergies } = useEhrPatientAllergies(patientId);
@@ -90,8 +106,8 @@ function PatientChartInner() {
   }, []);
 
   const handleViewVitalTrend = useCallback((vitalType: EhrVitalType) => {
-    // TODO: Open vital trend modal
-    console.log("View trend for:", vitalType);
+    setSelectedVitalType(vitalType);
+    setShowVitalTrendDialog(true);
   }, []);
 
   if (isLoadingPatient) {
@@ -186,7 +202,7 @@ function PatientChartInner() {
             <Box className="space-y-6">
               <VitalSignsPanel
                 patientId={patientId}
-                onAddVitals={() => {}}
+                onAddVitals={() => setShowAddVitalsDialog(true)}
                 onViewTrend={handleViewVitalTrend}
               />
               <LabResultsPanel patientId={patientId} compact />
@@ -199,7 +215,7 @@ function PatientChartInner() {
           <ProblemList
             patientId={patientId}
             showInactive
-            onAddProblem={() => {}}
+            onAddProblem={() => setShowAddProblemDialog(true)}
           />
         </TabsContent>
 
@@ -208,7 +224,7 @@ function PatientChartInner() {
           <MedicationList
             patientId={patientId}
             activeOnly={false}
-            onAddMedication={() => {}}
+            onAddMedication={() => setShowAddMedicationDialog(true)}
           />
         </TabsContent>
 
@@ -217,7 +233,7 @@ function PatientChartInner() {
           <AllergyList
             patientId={patientId}
             showActions
-            onAddAllergy={() => {}}
+            onAddAllergy={() => setShowAddAllergyDialog(true)}
           />
         </TabsContent>
 
@@ -225,7 +241,7 @@ function PatientChartInner() {
         <TabsContent value="vitals" className="mt-6">
           <VitalSignsPanel
             patientId={patientId}
-            onAddVitals={() => {}}
+            onAddVitals={() => setShowAddVitalsDialog(true)}
             onViewTrend={handleViewVitalTrend}
           />
         </TabsContent>
@@ -234,7 +250,7 @@ function PatientChartInner() {
         <TabsContent value="labs" className="mt-6">
           <LabResultsPanel
             patientId={patientId}
-            onOrderLab={() => {}}
+            onOrderLab={() => setShowOrderLabDialog(true)}
           />
         </TabsContent>
 
@@ -255,10 +271,7 @@ function PatientChartInner() {
 
         {/* Appointments Tab */}
         <TabsContent value="appointments" className="mt-6">
-          <Box className="text-center py-12 text-muted-foreground border rounded-lg">
-            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Patient appointments will be displayed here</p>
-          </Box>
+          <AppointmentsList patientId={patientId} />
         </TabsContent>
       </Tabs>
 
@@ -275,6 +288,49 @@ function PatientChartInner() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Vital Trend Dialog */}
+      <VitalTrendDialog
+        patientId={patientId}
+        vitalType={selectedVitalType}
+        open={showVitalTrendDialog}
+        onOpenChange={setShowVitalTrendDialog}
+      />
+
+      {/* Add Problem Dialog */}
+      <AddProblemDialog
+        patientId={patientId}
+        open={showAddProblemDialog}
+        onOpenChange={setShowAddProblemDialog}
+      />
+
+      {/* Add Medication Dialog */}
+      <AddMedicationDialog
+        patientId={patientId}
+        open={showAddMedicationDialog}
+        onOpenChange={setShowAddMedicationDialog}
+      />
+
+      {/* Add Vitals Dialog */}
+      <AddVitalsDialog
+        patientId={patientId}
+        open={showAddVitalsDialog}
+        onOpenChange={setShowAddVitalsDialog}
+      />
+
+      {/* Add Allergy Dialog */}
+      <AddAllergyDialog
+        patientId={patientId}
+        open={showAddAllergyDialog}
+        onOpenChange={setShowAddAllergyDialog}
+      />
+
+      {/* Order Lab Dialog */}
+      <OrderLabDialog
+        patientId={patientId}
+        open={showOrderLabDialog}
+        onOpenChange={setShowOrderLabDialog}
+      />
     </Box>
   );
 }

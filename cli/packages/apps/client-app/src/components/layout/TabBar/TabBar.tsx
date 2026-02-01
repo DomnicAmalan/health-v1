@@ -3,10 +3,22 @@ import { useNavigate } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { useTabBarDrag } from "@/hooks/ui/useTabBarDrag";
-import { useActiveTabId, useCloseTab, useSetActiveTab, useTabs } from "@/stores/tabStore";
+import {
+  useActiveTabId,
+  useCloseGroupTabs,
+  useCloseTab,
+  useCollapsedGroups,
+  useGroupingStrategy,
+  useSetActiveTab,
+  useTabs,
+  useToggleGroupCollapse,
+} from "@/stores/tabStore";
+import { useTabWidth } from "@/hooks/ui/useTabWidth";
+import { keyboardShortcutManager } from "@/lib/keyboard/shortcuts";
+import { groupTabs } from "@/lib/tabs/groupTabs";
 import { TabDragPreview } from "./TabDragPreview";
+import { TabGroup } from "./TabGroup";
 import { TabItem } from "./TabItem";
-import { TabUserMenu } from "./TabUserMenu";
 
 interface TabBarProps {
   onMobileMenuClick?: () => void;
@@ -22,6 +34,12 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
   const closeTab = useCloseTab();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tabBarRef = useRef<HTMLDivElement>(null);
+
+  // Grouping state
+  const groupingStrategy = useGroupingStrategy();
+  const collapsedGroups = useCollapsedGroups();
+  const toggleGroupCollapse = useToggleGroupCollapse();
+  const closeGroupTabs = useCloseGroupTabs();
 
   // Optimized tab sorting: Dashboard always first, all others in reverse order (newest first)
   // Uses efficient single-pass algorithm
@@ -59,9 +77,22 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
     return dashboard ? [dashboard, ...otherTabs] : otherTabs;
   }, [tabs]);
 
+  // Group tabs based on strategy
+  const tabGroups = useMemo(() => {
+    // Dashboard is always shown separately, not in groups
+    const dashboard = sortedTabs.find((t) => t && (t.path === "/" || t.id === DASHBOARD_ID));
+    const nonDashboardTabs = sortedTabs.filter(
+      (t) => t && t.path !== "/" && t.id !== DASHBOARD_ID
+    );
+
+    const groups = groupTabs(nonDashboardTabs, groupingStrategy);
+
+    return { dashboard, groups };
+  }, [sortedTabs, groupingStrategy]);
+
   const {
     draggedTabId,
-    dragOverIndex,
+    dragOverIndex: _dragOverIndex,
     dragPosition,
     isDraggingOutside,
     dragOffsetRef,
@@ -71,6 +102,46 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
     scrollContainerRef,
     tabBarRef,
   });
+
+  // Dynamic tab width calculation
+  const { tabWidth, hasOverflow, scrollLeft, showRightFade } = useTabWidth(
+    sortedTabs.length,
+    scrollContainerRef
+  );
+
+  // Auto-scroll active tab into view
+  useEffect(() => {
+    if (!activeTabId || !scrollContainerRef.current) return;
+    const activeTab = scrollContainerRef.current.querySelector(
+      `[data-tab-id="${activeTabId}"]`
+    );
+    activeTab?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeTabId]);
+
+  // Register Ctrl+W keyboard shortcut to close active tab
+  useEffect(() => {
+    const handleCloseTab = () => {
+      if (!activeTabId) return;
+      const activeTab = tabs.find((t) => t.id === activeTabId);
+      if (activeTab?.closable && tabs.length > 1) {
+        closeTab(activeTabId, (path) => navigate({ to: path as "/" | (string & {}) }));
+      }
+    };
+
+    keyboardShortcutManager.register({
+      id: "close-tab",
+      keys: ["Ctrl", "w"],
+      description: "Close active tab",
+      global: true,
+      action: handleCloseTab,
+    });
+
+    return () => keyboardShortcutManager.unregister("close-tab");
+  }, [activeTabId, tabs, closeTab, navigate]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -82,9 +153,9 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <Box
+      <Flex
         ref={tabBarRef}
-        className="border-b border-[#E1E4E8] bg-[#F4F6F8]"
+        className="border-t border-[#E1E4E8] bg-[#F4F6F8] items-center min-h-[48px]"
         role="tablist"
         aria-label="Application tabs"
         aria-orientation="horizontal"
@@ -101,87 +172,106 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
           </Button>
         )}
 
-        {/* Scrollable tabs area - always show dashboard */}
+        {/* Scrollable tabs area - dashboard + grouped tabs */}
         <Flex
           ref={scrollContainerRef}
-          className="items-center gap-1 px-2 py-1 overflow-x-auto scrollbar-hide flex-1 min-w-0"
+          className="items-center gap-0.5 px-2 py-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-1 min-w-0 relative"
         >
-          {sortedTabs.map((tab) => {
-            if (!tab) {
-              return null;
+          {/* Dashboard Tab - Always first, never grouped */}
+          {tabGroups.dashboard && (
+            <TabItem
+              tab={tabGroups.dashboard}
+              isActive={tabGroups.dashboard.id === activeTabId}
+              isDragging={false}
+              isDragOver={false}
+              tabWidth={tabWidth}
+              onSelect={() =>
+                setActiveTab(tabGroups.dashboard!.id, (path) =>
+                  navigate({ to: path as "/" | (string & {}) })
+                )
+              }
+              onClose={() =>
+                closeTab(tabGroups.dashboard!.id, (path) =>
+                  navigate({ to: path as "/" | (string & {}) })
+                )
+              }
+              onDragStart={(e) => handleDragStart(e, tabGroups.dashboard!.id)}
+            />
+          )}
+
+          {/* Grouped Tabs */}
+          {tabGroups.groups.map((group) => {
+            const isCollapsed = collapsedGroups.has(group.id);
+
+            // For chronological grouping (no visual groups), render tabs directly
+            if (groupingStrategy === "chronological") {
+              return group.tabs.map((tab) => (
+                <TabItem
+                  key={tab.id}
+                  tab={tab}
+                  isActive={tab.id === activeTabId}
+                  isDragging={draggedTabId === tab.id}
+                  isDragOver={false}
+                  tabWidth={tabWidth}
+                  onSelect={() =>
+                    setActiveTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) }))
+                  }
+                  onClose={() =>
+                    closeTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) }))
+                  }
+                  onDragStart={(e) => handleDragStart(e, tab.id)}
+                />
+              ));
             }
-            const isDashboard = tab.id === DASHBOARD_ID || tab.path === "/";
-            const isDragging = draggedTabId === tab.id;
 
-            // Calculate actual non-dashboard index for this tab
-            let nonDashboardIndex = -1;
-            if (!isDashboard) {
-              const nonDashboardTabs = sortedTabs.filter((t) => t && t.id !== DASHBOARD_ID);
-              nonDashboardIndex = nonDashboardTabs.findIndex((t) => t && t.id === tab.id);
-            }
-
-            // Show placeholder space before this tab if dragOverIndex matches
-            const showPlaceholderBefore =
-              dragOverIndex !== null && !isDashboard && dragOverIndex === nonDashboardIndex;
-
+            // For patient/module grouping, render TabGroup component
             return (
-              <Box key={tab.id} className="relative">
-                {/* Chrome-style placeholder: empty space where tab will be inserted */}
-                {showPlaceholderBefore && !isDragging && (
-                  <Box
-                    className="absolute left-0 top-0 bottom-0 w-[180px] bg-primary/10 border-2 border-dashed border-primary rounded transition-all duration-200 z-10 h-[42px]"
-                    style={{
-                      animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                    }}
-                  />
-                )}
-                {/* Hide the tab if it's being dragged */}
-                {!isDragging && (
-                  <TabItem
-                    tab={tab}
-                    isActive={tab.id === activeTabId}
-                    isDragging={false}
-                    isDragOver={false}
-                    onSelect={() =>
-                      setActiveTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) }))
-                    }
-                    onClose={() =>
-                      closeTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) }))
-                    }
-                    onDragStart={(e) => handleDragStart(e, tab.id)}
-                  />
-                )}
-                {/* Show invisible placeholder when dragging to maintain layout */}
-                {isDragging && (
-                  <Box className="invisible w-[180px] shrink-0 h-[42px]">
-                    <Flex className="items-center gap-2 px-4 py-2 h-full">
-                      {tab.icon && <span className="h-[18px] w-[18px] shrink-0">{tab.icon}</span>}
-                      <span className="text-[14px] font-medium tracking-[0.25px] truncate flex-1">
-                        {tab.label}
-                      </span>
-                    </Flex>
-                  </Box>
-                )}
-              </Box>
+              <TabGroup
+                key={group.id}
+                groupId={group.id}
+                groupLabel={group.label}
+                groupColor={group.color}
+                groupType={group.type}
+                patientAvatar={group.avatar}
+                isCollapsed={isCollapsed}
+                tabCount={group.tabs.length}
+                onToggleCollapse={() => toggleGroupCollapse(group.id)}
+                onCloseGroup={() =>
+                  closeGroupTabs(group.id, (path) => navigate({ to: path as "/" | (string & {}) }))
+                }
+              >
+                {!isCollapsed &&
+                  group.tabs.map((tab) => (
+                    <TabItem
+                      key={tab.id}
+                      tab={tab}
+                      isActive={tab.id === activeTabId}
+                      isDragging={draggedTabId === tab.id}
+                      isDragOver={false}
+                      tabWidth={tabWidth}
+                      onSelect={() =>
+                        setActiveTab(tab.id, (path) =>
+                          navigate({ to: path as "/" | (string & {}) })
+                        )
+                      }
+                      onClose={() =>
+                        closeTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) }))
+                      }
+                      onDragStart={(e) => handleDragStart(e, tab.id)}
+                    />
+                  ))}
+              </TabGroup>
             );
           })}
-          {/* Show placeholder at the end if dragging to last position */}
-          {dragOverIndex !== null &&
-            (() => {
-              const nonDashboardCount = sortedTabs.filter((t) => t && t.id !== DASHBOARD_ID).length;
-              return (
-                dragOverIndex === nonDashboardCount &&
-                draggedTabId && (
-                  <Box
-                    className="w-[180px] h-[42px] bg-primary/10 border-2 border-dashed border-primary rounded shrink-0 transition-all duration-200"
-                    style={{
-                      animation: "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                    }}
-                  />
-                )
-              );
-            })()}
         </Flex>
+
+        {/* Overflow fade indicators */}
+        {hasOverflow && scrollLeft > 0 && (
+          <Box className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F4F6F8] to-transparent pointer-events-none z-10" />
+        )}
+        {hasOverflow && showRightFade && (
+          <Box className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#F4F6F8] to-transparent pointer-events-none z-10" />
+        )}
 
         {/* Drag Preview - Floating tab name */}
         {draggedTabId &&
@@ -201,10 +291,7 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
               />
             );
           })()}
-
-        {/* Fixed User Menu & Avatar at End - Always visible */}
-        <TabUserMenu />
-      </Box>
+      </Flex>
     </TooltipProvider>
   );
 });

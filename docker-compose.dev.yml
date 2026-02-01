@@ -19,16 +19,16 @@ services:
     image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-auth_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auth_password}
-      POSTGRES_DB: ${POSTGRES_DB:-auth_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT:-4111}:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -48,44 +48,44 @@ services:
         CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
     container_name: health-api-service
     environment:
-      # Server
+      # Server (NO DEFAULTS - must be set in .env)
       SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
-      SERVER_PORT: ${SERVER_PORT:-4117}
-      
-      # CORS Configuration (comma-separated list of allowed origins)
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4111,http://localhost:3000,http://localhost:4115,http://localhost:4115}
-      
+      SERVER_PORT: ${SERVER_PORT}
+
+      # CORS Configuration (NO DEFAULTS - must be set in .env)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+
       # Session Configuration
-      SESSION_ADMIN_UI_TTL_HOURS: ${SESSION_ADMIN_UI_TTL_HOURS:-8}
-      SESSION_CLIENT_UI_TTL_HOURS: ${SESSION_CLIENT_UI_TTL_HOURS:-24}
-      SESSION_API_TTL_HOURS: ${SESSION_API_TTL_HOURS:-1}
-      CORS_ADMIN_UI_ORIGINS: ${CORS_ADMIN_UI_ORIGINS:-http://localhost:4111}
-      CORS_CLIENT_UI_ORIGINS: ${CORS_CLIENT_UI_ORIGINS:-http://localhost:4115}
-      
+      SESSION_ADMIN_UI_TTL_HOURS: ${SESSION_ADMIN_UI_TTL_HOURS}
+      SESSION_CLIENT_UI_TTL_HOURS: ${SESSION_CLIENT_UI_TTL_HOURS}
+      SESSION_API_TTL_HOURS: ${SESSION_API_TTL_HOURS}
+      CORS_ADMIN_UI_ORIGINS: ${CORS_ADMIN_UI_ORIGINS}
+      CORS_CLIENT_UI_ORIGINS: ${CORS_CLIENT_UI_ORIGINS}
+
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-5}
       DATABASE_MIN_CONNECTIONS: ${DATABASE_MIN_CONNECTIONS:-1}
       
       # Encryption/KMS - Using RustyVault
-      KMS_PROVIDER: ${KMS_PROVIDER:-rustyvault}
+      KMS_PROVIDER: ${KMS_PROVIDER}
       VAULT_ADDR: http://rustyvault-service:4117
-      VAULT_TOKEN: ${VAULT_TOKEN:-dev-root-token}
-      VAULT_MOUNT_PATH: ${VAULT_MOUNT_PATH:-secret}
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      VAULT_MOUNT_PATH: ${VAULT_MOUNT_PATH}
       VAULT_NAMESPACE: ${VAULT_NAMESPACE:-}
       ENABLE_RUSTYVAULT: ${ENABLE_RUSTYVAULT:-true}
       # Development master key (32 bytes hex-encoded) - DO NOT USE IN PRODUCTION
-      MASTER_KEY: ${MASTER_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
-      
+      MASTER_KEY: ${MASTER_KEY}
+
       # OIDC/JWT
-      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:4117}
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-default-client}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-default-secret}
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production-min-32-chars}
+      OIDC_ISSUER: ${OIDC_ISSUER}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
-      
+
       # Storage
-      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER}
       
       # Logging - Enable debug logging in dev mode
       LOG_LEVEL: ${LOG_LEVEL:-debug}
@@ -117,7 +117,7 @@ services:
       TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
       CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
     ports:
-      - "${API_SERVICE_PORT:-4117}:8080"
+      - "${API_SERVICE_PORT}:${SERVER_PORT}"
     volumes:
       - api_service_data:/app/data
       # Mount source code for hot reload in dev mode (ALL workspace members required)
@@ -169,6 +169,7 @@ services:
     environment:
       # Override for Docker (host access)
       VITE_HOST: 0.0.0.0
+      VITE_OPEN: false        # Never open browser in Docker
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/client-app:/app/packages/apps/client-app
@@ -182,7 +183,7 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${CLIENT_APP_PORT:-4115}:4115"
+      - "${CLIENT_APP_PORT}:5175"    # Maps to VITE_PORT inside container
     depends_on:
       - api-service
     healthcheck:
@@ -210,6 +211,7 @@ services:
     environment:
       # Override for Docker (host access)
       VITE_HOST: 0.0.0.0
+      VITE_OPEN: false        # Never open browser in Docker
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/admin:/app/packages/apps/admin
@@ -219,7 +221,7 @@ services:
       - ./cli/biome.json:/app/biome.json
       - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
     ports:
-      - "${ADMIN_UI_PORT:-4111}:4111"
+      - "${ADMIN_UI_PORT}:5174"    # Maps to VITE_PORT inside container
     depends_on:
       - api-service
     healthcheck:
@@ -246,13 +248,13 @@ services:
     environment:
       # Server
       VAULT_SERVER_HOST: ${VAULT_SERVER_HOST:-0.0.0.0}
-      VAULT_SERVER_PORT: ${VAULT_SERVER_PORT:-4117}
-      
+      VAULT_SERVER_PORT: ${VAULT_SERVER_PORT}
+
       # CORS Configuration
-      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS:-http://localhost:4115,http://localhost:3000,http://localhost:4111,http://localhost:4115}
-      
+      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS}
+
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-5}
       DATABASE_MIN_CONNECTIONS: ${DATABASE_MIN_CONNECTIONS:-1}
       
@@ -283,7 +285,7 @@ services:
       TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
       CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
     ports:
-      - "${VAULT_SERVICE_PORT:-4117}:4117"
+      - "${VAULT_SERVICE_PORT}:4117"
     volumes:
       - rustyvault_data:/app/vault-data
       - rustyvault_service_data:/app/data
@@ -335,6 +337,7 @@ services:
     environment:
       # Override for Docker (host access)
       VITE_HOST: 0.0.0.0
+      VITE_OPEN: false        # Never open browser in Docker
     volumes:
       # Mount source code for hot reload in dev mode
       - ./cli/packages/apps/rustyvault-ui:/app/packages/apps/rustyvault-ui
@@ -348,7 +351,7 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${VAULT_UI_PORT:-4115}:4115"
+      - "${VAULT_UI_PORT}:8215"    # Maps to VITE_PORT inside container
     depends_on:
       - rustyvault-service
     healthcheck:
@@ -402,6 +405,8 @@ services:
       - "${YOTTADB_API_PORT:-9091}:8080"
     volumes:
       - ./ydb-data:/data
+      # Mount Docker socket to allow docker exec to yottadb container
+      - /var/run/docker.sock:/var/run/docker.sock
       # Mount source code for hot reload in dev mode
       - ./backend/yottadb-api/src:/app/backend/yottadb-api/src
       - ./backend/yottadb-api/Cargo.toml:/app/backend/yottadb-api/Cargo.toml
@@ -418,6 +423,59 @@ services:
       - health-network
     restart: unless-stopped
 
+  # Cube.js - Analytics API & Semantic Layer
+  cube:
+    image: cubejs/cube:latest
+    container_name: health-cube
+    environment:
+      # Database connection
+      CUBEJS_DB_TYPE: postgres
+      CUBEJS_DB_HOST: postgres
+      CUBEJS_DB_NAME: ${POSTGRES_DB}
+      CUBEJS_DB_USER: ${POSTGRES_USER}
+      CUBEJS_DB_PASS: ${POSTGRES_PASSWORD}
+      CUBEJS_DB_PORT: 5432
+
+      # Dev mode - enables Playground UI
+      CUBEJS_DEV_MODE: true
+
+      # API Security
+      CUBEJS_API_SECRET: ${CUBE_API_SECRET:-dev-secret-change-in-production}
+
+      # Enable WebSockets for real-time updates
+      CUBEJS_WEB_SOCKETS: true
+
+      # Cache and Query Queue
+      CUBEJS_CACHE_AND_QUEUE_DRIVER: memory
+
+      # Logging
+      CUBEJS_LOG_LEVEL: ${CUBEJS_LOG_LEVEL:-info}
+
+      # Scheduler (for pre-aggregations refresh)
+      CUBEJS_SCHEDULED_REFRESH_TIMER: true
+      CUBEJS_REFRESH_WORKER: true
+
+      # Telemetry
+      CUBEJS_TELEMETRY: false
+    ports:
+      - "4000:4000"    # Cube.js API
+      - "15432:15432"  # Dev Playground
+    volumes:
+      - ./cube:/cube/conf
+      - cube_schema_cache:/cube/.cubestore
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - health-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local
@@ -426,6 +484,15 @@ volumes:
   rustyvault_data:
     driver: local
   rustyvault_service_data:
+    driver: local
+  cube_schema_cache:
+    driver: local
+  # Cargo caching volumes for faster Rust builds
+  cargo_registry:
+    driver: local
+  cargo_git:
+    driver: local
+  cargo_target:
     driver: local
 
 networks:

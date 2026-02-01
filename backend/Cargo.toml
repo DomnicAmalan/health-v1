@@ -119,10 +119,19 @@ missing_docs = "warn"
 # Reduce memory usage during development builds
 incremental = true
 codegen-units = 4  # More units = less memory per unit, faster compilation
+split-debuginfo = "unpacked"  # Faster debug builds (macOS/Linux)
 
 [profile.release]
 opt-level = "z"  # Optimize for size
-lto = true        # Link-time optimization
+lto = "thin"      # Thin LTO for faster builds with good optimization
 codegen-units = 1 # Better optimization
 strip = true      # Strip symbols
+incremental = false  # Disable incremental for clean release builds
+
+# Fast release profile for Docker builds (faster compile, still optimized)
+[profile.docker-release]
+inherits = "release"
+opt-level = 2      # Less aggressive optimization
+lto = "thin"       # Thin LTO
+incremental = true # Enable incremental for faster rebuilds
 

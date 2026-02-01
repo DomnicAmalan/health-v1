@@ -6,16 +6,16 @@ services:
     image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-auth_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auth_password}
-      POSTGRES_DB: ${POSTGRES_DB:-auth_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT:-4111}:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth_user} -d ${POSTGRES_DB:-auth_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -39,43 +39,43 @@ services:
     environment:
       # Server
       SERVER_HOST: ${SERVER_HOST:-0.0.0.0}
-      SERVER_PORT: ${SERVER_PORT:-4117}
-      
+      SERVER_PORT: ${SERVER_PORT}
+
       # CORS Configuration (comma-separated list of allowed origins)
       # Includes Vite dev server ports (5173-5175) for local development
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4111,http://localhost:3000,http://localhost:4115,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:8215}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
 
       # Session Configuration
-      SESSION_ADMIN_UI_TTL_HOURS: ${SESSION_ADMIN_UI_TTL_HOURS:-8}
-      SESSION_CLIENT_UI_TTL_HOURS: ${SESSION_CLIENT_UI_TTL_HOURS:-24}
-      SESSION_API_TTL_HOURS: ${SESSION_API_TTL_HOURS:-1}
-      CORS_ADMIN_UI_ORIGINS: ${CORS_ADMIN_UI_ORIGINS:-http://localhost:4111,http://localhost:5173,http://localhost:5174}
-      CORS_CLIENT_UI_ORIGINS: ${CORS_CLIENT_UI_ORIGINS:-http://localhost:4115,http://localhost:5175}
-      
+      SESSION_ADMIN_UI_TTL_HOURS: ${SESSION_ADMIN_UI_TTL_HOURS}
+      SESSION_CLIENT_UI_TTL_HOURS: ${SESSION_CLIENT_UI_TTL_HOURS}
+      SESSION_API_TTL_HOURS: ${SESSION_API_TTL_HOURS}
+      CORS_ADMIN_UI_ORIGINS: ${CORS_ADMIN_UI_ORIGINS}
+      CORS_CLIENT_UI_ORIGINS: ${CORS_CLIENT_UI_ORIGINS}
+
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-5}
       DATABASE_MIN_CONNECTIONS: ${DATABASE_MIN_CONNECTIONS:-1}
       
       # Encryption/KMS - Using RustyVault
-      KMS_PROVIDER: ${KMS_PROVIDER:-rustyvault}
+      KMS_PROVIDER: ${KMS_PROVIDER}
       VAULT_ADDR: http://rustyvault-service:4117
-      VAULT_TOKEN: ${VAULT_TOKEN:-dev-root-token}
-      VAULT_MOUNT_PATH: ${VAULT_MOUNT_PATH:-secret}
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      VAULT_MOUNT_PATH: ${VAULT_MOUNT_PATH}
       VAULT_NAMESPACE: ${VAULT_NAMESPACE:-}
       ENABLE_RUSTYVAULT: ${ENABLE_RUSTYVAULT:-true}
       # Master key for encryption - REQUIRED: Set via environment or .env file
-      MASTER_KEY: ${MASTER_KEY:-}
-      
+      MASTER_KEY: ${MASTER_KEY}
+
       # OIDC/JWT
-      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:4117}
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-default-client}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-default-secret}
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production-min-32-chars}
+      OIDC_ISSUER: ${OIDC_ISSUER}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
-      
+
       # Storage
-      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER}
       
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -102,7 +102,7 @@ services:
       SESSION_CACHE_MAX_ENTRIES: ${SESSION_CACHE_MAX_ENTRIES:-1000}
       TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
     ports:
-      - "${API_SERVICE_PORT:-4117}:8080"
+      - "${API_SERVICE_PORT}:8080"
     volumes:
       - api_service_data:/app/data
     depends_on:
@@ -133,7 +133,7 @@ services:
       VITE_OIDC_ISSUER: ${VITE_OIDC_ISSUER:-http://localhost:4117}
       VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-default-client}
     ports:
-      - "${CLIENT_APP_PORT:-4115}:80"
+      - "${CLIENT_APP_PORT}:80"
     depends_on:
       - api-service
     healthcheck:
@@ -162,7 +162,7 @@ services:
       VITE_ENABLE_NATS: ${VITE_ENABLE_NATS:-false}
       VITE_ENABLE_KAFKA: ${VITE_ENABLE_KAFKA:-false}
     ports:
-      - "${ADMIN_UI_PORT:-4111}:80"
+      - "${ADMIN_UI_PORT}:80"
     depends_on:
       - api-service
     healthcheck:
@@ -188,13 +188,13 @@ services:
     environment:
       # Server
       VAULT_SERVER_HOST: ${VAULT_SERVER_HOST:-0.0.0.0}
-      VAULT_SERVER_PORT: ${VAULT_SERVER_PORT:-4117}
-      
+      VAULT_SERVER_PORT: ${VAULT_SERVER_PORT}
+
       # CORS Configuration
-      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS:-http://localhost:4115,http://localhost:4111,http://localhost:4115}
-      
+      VAULT_CORS_ORIGINS: ${VAULT_CORS_ORIGINS}
+
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-auth_user}:${POSTGRES_PASSWORD:-auth_password}@postgres:5432/${POSTGRES_DB:-auth_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS:-5}
       DATABASE_MIN_CONNECTIONS: ${DATABASE_MIN_CONNECTIONS:-1}
       
@@ -220,7 +220,7 @@ services:
       # Memory optimization
       TOKIO_WORKER_THREADS: ${TOKIO_WORKER_THREADS:-2}
     ports:
-      - "${VAULT_SERVICE_PORT:-4117}:4117"
+      - "${VAULT_SERVICE_PORT}:4117"
     volumes:
       - rustyvault_data:/app/vault-data
       - rustyvault_service_data:/app/data
@@ -248,7 +248,7 @@ services:
     environment:
       VITE_API_BASE_URL: ${VAULT_UI_API_BASE_URL:-http://rustyvault-service:4117}
     ports:
-      - "${VAULT_UI_PORT:-4115}:80"
+      - "${VAULT_UI_PORT}:80"
     depends_on:
       - rustyvault-service
     healthcheck:
@@ -288,7 +288,7 @@ services:
     build:
       context: .
       dockerfile: backend/yottadb-api/Dockerfile
-      target: runner-prod
+      target: runner-dev
       args:
         BUILD_MODE: release
         SKIP_CHECKS: ${SKIP_CHECKS:-false}
@@ -301,6 +301,8 @@ services:
       - "${YOTTADB_API_PORT:-9091}:8080"
     volumes:
       - ./ydb-data:/data
+      # Mount Docker socket to allow docker exec to yottadb container
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       yottadb:
         condition: service_healthy

@@ -18,17 +18,17 @@ This document provides a comprehensive reference for all commands in the Health 
 
 ## Overview
 
-All commands in this monorepo follow a unified hierarchical naming convention. Commands are primarily executed via `bun run` from the `cli/` directory.
+**Make is the universal interface** for all commands in this monorepo. All commands work from the project root - no need to change directories.
 
 **Standard Usage:**
 ```bash
-cd cli && bun run <command>
+make <command>
 ```
 
-**Shorthand (from project root):**
-```bash
-cd cli && bun run <command>
-```
+**Architecture:**
+- **Make** = Primary interface (orchestrates everything)
+- **Bun** = Internal package manager (handles UI builds)
+- **Cargo** = Rust build system (called by Make)
 
 ## Command Naming Convention
 

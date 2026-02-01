@@ -4,7 +4,7 @@
  */
 
 import type { APIRequestContext } from "@playwright/test";
-import { test as base } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 
 type ApiFixtures = {
   apiContext: APIRequestContext;
@@ -13,7 +13,7 @@ type ApiFixtures = {
 };
 
 export const test = base.extend<ApiFixtures>({
-  apiURL: async (_fixtures, use) => {
+  apiURL: async ({}, use) => {
     const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
     await use(apiURL);
   },
@@ -67,3 +67,5 @@ export const test = base.extend<ApiFixtures>({
     await context.dispose();
   },
 });
+
+export { expect };

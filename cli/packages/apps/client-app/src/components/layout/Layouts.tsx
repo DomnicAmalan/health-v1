@@ -6,13 +6,16 @@
 import { Container, Flex } from "@lazarus-life/ui-components";
 import { Outlet } from "@tanstack/react-router";
 import { ActionRibbon } from "@/components/ActionRibbon";
+import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import type { SidebarGroup } from "@/components/layout/Sidebar/SidebarGroup";
 import type { SidebarItem } from "@/components/layout/Sidebar/SidebarItem";
 import { TabBar } from "@/components/layout/TabBar";
 import { SkipToMainContent } from "@/lib/accessibility";
 
 interface FullLayoutProps {
-  sidebarItems: SidebarItem[];
+  sidebarItems?: SidebarItem[];
+  sidebarGroups?: SidebarGroup[];
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   isMobileSidebarOpen: boolean;
@@ -22,11 +25,12 @@ interface FullLayoutProps {
 }
 
 /**
- * Full Layout - Sidebar + Tab Bar + Action Ribbon
+ * Full Layout - Sidebar + Header + Action Ribbon + Bottom Tab Bar
  * Used for main application pages
  */
 export function FullLayout({
   sidebarItems,
+  sidebarGroups,
   isSidebarCollapsed,
   onToggleSidebar,
   isMobileSidebarOpen,
@@ -39,7 +43,12 @@ export function FullLayout({
       <SkipToMainContent />
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block" aria-label="Main navigation">
-        <Sidebar isCollapsed={isSidebarCollapsed} onToggle={onToggleSidebar} items={sidebarItems} />
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggle={onToggleSidebar}
+          items={sidebarItems}
+          groups={sidebarGroups}
+        />
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -58,15 +67,20 @@ export function FullLayout({
             aria-label="Close sidebar"
           />
           <aside className="fixed left-0 top-0 h-screen z-50 lg:hidden">
-            <Sidebar isCollapsed={false} onToggle={onCloseMobileSidebar} items={sidebarItems} />
+            <Sidebar
+              isCollapsed={false}
+              onToggle={onCloseMobileSidebar}
+              items={sidebarItems}
+              groups={sidebarGroups}
+            />
           </aside>
         </>
       )}
 
       {/* Main Content Area */}
       <Flex direction="column" className="flex-1 overflow-hidden">
-        {/* Tab Bar */}
-        <TabBar onMobileMenuClick={onToggleMobileSidebar} />
+        {/* Header - Top bar with user menu */}
+        <Header />
 
         {/* Action Ribbon - shows actions for active tab */}
         <ActionRibbon onAction={onTabAction} />
@@ -77,6 +91,9 @@ export function FullLayout({
             <Outlet />
           </Container>
         </main>
+
+        {/* Tab Bar - Bottom (like Google Sheets) */}
+        <TabBar onMobileMenuClick={onToggleMobileSidebar} />
       </Flex>
     </Flex>
   );
@@ -91,7 +108,7 @@ const defaultMinimalLayoutProps: MinimalLayoutProps = {
 };
 
 /**
- * Minimal Layout - Tab Bar only, no sidebar
+ * Minimal Layout - Header + Bottom Tab Bar, no sidebar
  * Used for focused work pages
  */
 export function MinimalLayout({
@@ -100,8 +117,9 @@ export function MinimalLayout({
   return (
     <Flex className="h-screen overflow-hidden bg-background" direction="column">
       <SkipToMainContent />
-      {/* Tab Bar */}
-      <TabBar />
+
+      {/* Header - Top bar with user menu */}
+      <Header />
 
       {/* Action Ribbon - optional */}
       {onTabAction && <ActionRibbon onAction={onTabAction} />}
@@ -112,6 +130,9 @@ export function MinimalLayout({
           <Outlet />
         </Container>
       </main>
+
+      {/* Tab Bar - Bottom (like Google Sheets) */}
+      <TabBar />
     </Flex>
   );
 }

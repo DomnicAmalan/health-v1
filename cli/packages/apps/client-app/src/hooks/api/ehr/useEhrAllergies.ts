@@ -6,7 +6,7 @@
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
-import { apiClient } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/yottadb-client";
 import type {
   EhrAllergy,
   CreateEhrAllergyRequest,
@@ -28,7 +28,7 @@ export function useEhrPatientAllergies(patientId: string) {
   return useQuery({
     queryKey: EHR_ALLERGY_QUERY_KEYS.byPatient(patientId),
     queryFn: async () => {
-      const response = await apiClient.get<EhrAllergy[]>(
+      const response = await yottadbApiClient.get<EhrAllergy[]>(
         API_ROUTES.EHR.ALLERGIES.BY_PATIENT(patientId)
       );
 
@@ -52,7 +52,7 @@ export function useCreateEhrAllergy() {
 
   return useMutation({
     mutationFn: async (allergy: CreateEhrAllergyRequest) => {
-      const response = await apiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.CREATE, allergy);
+      const response = await yottadbApiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.CREATE, allergy);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -75,7 +75,7 @@ export function useVerifyEhrAllergy() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.VERIFY(id), {});
+      const response = await yottadbApiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.VERIFY(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -98,7 +98,7 @@ export function useDeleteEhrAllergy() {
 
   return useMutation({
     mutationFn: async ({ id, patientId }: { id: string; patientId: string }) => {
-      const response = await apiClient.delete(API_ROUTES.EHR.ALLERGIES.DELETE(id));
+      const response = await yottadbApiClient.delete(API_ROUTES.EHR.ALLERGIES.DELETE(id));
 
       if (response.error) throw new Error(response.error.message);
 

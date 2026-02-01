@@ -33,6 +33,7 @@ import {
   FinancialDashboard,
   OperationalDashboard,
   ComplianceDashboard,
+  ComprehensiveDashboard,
 } from "@/components/analytics";
 import {
   // Clinical hooks
@@ -193,7 +194,7 @@ function AnalyticsPageInner() {
 
       {/* Dashboard Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="clinical" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Clinical
@@ -209,6 +210,10 @@ function AnalyticsPageInner() {
           <TabsTrigger value="compliance" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             Compliance
+          </TabsTrigger>
+          <TabsTrigger value="cube" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Cube Analytics
           </TabsTrigger>
         </TabsList>
 
@@ -267,6 +272,11 @@ function AnalyticsPageInner() {
             onReviewPHIAlert={handleReviewPHIAlert}
             isLoading={auditLoading}
           />
+        </TabsContent>
+
+        {/* Cube.js Analytics Dashboard */}
+        <TabsContent value="cube">
+          <ComprehensiveDashboard />
         </TabsContent>
       </Tabs>
     </div>

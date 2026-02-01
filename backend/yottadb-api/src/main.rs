@@ -24,22 +24,34 @@ struct HealthResponse {
 
 #[derive(Debug, Serialize)]
 struct PatientResponse {
+    id: String,
     ien: i64,
     name: String,
     #[serde(rename = "firstName")]
     first_name: String,
     #[serde(rename = "lastName")]
     last_name: String,
+    #[serde(rename = "middleName", skip_serializing_if = "Option::is_none")]
+    middle_name: Option<String>,
     sex: String,
+    gender: String, // Map from sex for UI compatibility
     #[serde(rename = "dateOfBirth")]
     date_of_birth: String,
     ssn: Option<String>,
     mrn: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    city: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    state: Option<String>,
+    status: String, // Default to "active"
 }
 
 #[derive(Debug, Serialize)]
 struct PatientsResponse {
-    patients: Vec<PatientResponse>,
+    items: Vec<PatientResponse>,
+    total: usize,
+    limit: usize,
+    offset: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -651,21 +663,45 @@ struct CreateAppointmentRequest {
 // === MUMPS Execution ===
 
 fn run_mumps(code: &str) -> Result<String, String> {
+    // Execute MUMPS code in the yottadb container via docker exec
+    // This allows the API to run in a separate container while accessing YottaDB
     let script = format!(
-        r#"source /opt/yottadb/current/ydb_env_set && export ydb_routines="/data/r $ydb_routines" && echo '{}' | yottadb -direct 2>/dev/null | grep -v '^YDB>'"#,
+        r#". /opt/yottadb/current/ydb_env_set && export ydb_routines="/data/r $ydb_routines" && echo '{}' | yottadb -direct 2>/dev/null | grep -v '^YDB>'"#,
         code.replace("'", "'\"'\"'")
     );
 
-    let output = Command::new("bash")
+    let output = Command::new("docker")
+        .arg("exec")
+        .arg("health-yottadb")  // YottaDB container name
+        .arg("bash")
         .arg("-c")
         .arg(&script)
         .output()
-        .map_err(|e| format!("Failed to execute: {}", e))?;
+        .map_err(|e| format!("Failed to execute in YottaDB container: {}", e))?;
 
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     } else {
         Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+fn extract_json_from_http(response: &str) -> String {
+    // EHRAPI returns HTTP response format:
+    // HTTP/1.1 200 OK
+    // Content-Type: application/json
+    // ...
+    //
+    // {json body}
+
+    // Find the empty line that separates headers from body
+    if let Some(pos) = response.find("\n\n") {
+        response[pos + 2..].trim().to_string()
+    } else if let Some(pos) = response.find("\r\n\r\n") {
+        response[pos + 4..].trim().to_string()
+    } else {
+        // If no HTTP headers found, assume it's already just JSON
+        response.trim().to_string()
     }
 }
 
@@ -679,29 +715,85 @@ async fn health() -> impl IntoResponse {
 }
 
 async fn list_patients() -> impl IntoResponse {
-    // MUMPS code to output JSON-like format
-    let code = r#"
-N IEN,D0,NAME,SEX,DOB,SSN,MRN,FIRST
-W "["
-S FIRST=1,IEN=""
-F  S IEN=$O(^DPT(IEN)) Q:IEN=""  Q:'IEN  D
-. S D0=$G(^DPT(IEN,0)) Q:D0=""
-. I 'FIRST W ","
-. S FIRST=0
-. S NAME=$P(D0,"^",1),SEX=$P(D0,"^",2),DOB=$P(D0,"^",3),SSN=$P(D0,"^",4)
-. S MRN=$G(^DPT(IEN,991))
-. W "{""ien"":"_IEN_",""name"":"""_NAME_""",""sex"":"""_SEX_""",""dob"":"""_DOB_""""
-. I SSN'="" W ",""ssn"":"""_SSN_""""
-. I MRN'="" W ",""mrn"":"""_MRN_""""
-. W "}"
-W "]"
-"#;
+    // Call EHRAPI routine to get patient list
+    let code = r#"W $$LISTPAT^EHRAPI()"#;
 
     match run_mumps(code) {
         Ok(output) => {
-            // Parse the simple JSON array output
-            let patients: Vec<PatientResponse> = parse_patients(&output);
-            (StatusCode::OK, Json(PatientsResponse { patients })).into_response()
+            // EHRAPI returns HTTP response, extract JSON body
+            let json_body = extract_json_from_http(&output);
+
+            // Parse using serde_json for proper JSON handling
+            match serde_json::from_str::<serde_json::Value>(&json_body) {
+                Ok(json) => {
+                    if let Some(patients_array) = json.get("patients").and_then(|p| p.as_array()) {
+                        let patients: Vec<PatientResponse> = patients_array
+                            .iter()
+                            .filter_map(|p| {
+                                let ien = p.get("ien")?.as_i64()?;
+                                // Filter out invalid IENs (0, negative, or string indices like "B")
+                                if ien <= 0 {
+                                    return None;
+                                }
+
+                                let name = p.get("name")?.as_str().unwrap_or("").to_string();
+                                let sex = p.get("sex").and_then(|s| s.as_str()).unwrap_or("").to_string();
+                                let dob = p.get("dateOfBirth").and_then(|d| d.as_str()).unwrap_or("").to_string();
+                                let ssn = p.get("ssn").and_then(|s| s.as_str()).map(|s| s.to_string());
+                                let mrn = p.get("mrn").and_then(|m| m.as_str()).map(|s| s.to_string());
+
+                                let (last, first) = if let Some(pos) = name.find(',') {
+                                    (name[..pos].trim().to_string(), name[pos + 1..].trim().to_string())
+                                } else {
+                                    (name.clone(), String::new())
+                                };
+
+                                let gender = match sex.to_uppercase().as_str() {
+                                    "M" => "male",
+                                    "F" => "female",
+                                    _ => "unknown",
+                                }.to_string();
+
+                                Some(PatientResponse {
+                                    id: ien.to_string(),
+                                    ien,
+                                    name,
+                                    first_name: first,
+                                    last_name: last,
+                                    middle_name: None,
+                                    sex,
+                                    gender,
+                                    date_of_birth: dob,
+                                    ssn,
+                                    mrn,
+                                    city: None,
+                                    state: None,
+                                    status: "active".to_string(),
+                                })
+                            })
+                            .collect();
+
+                        let total = patients.len();
+                        (StatusCode::OK, Json(PatientsResponse {
+                            items: patients,
+                            total,
+                            limit: 100, // Default limit
+                            offset: 0,  // Default offset
+                        })).into_response()
+                    } else {
+                        (StatusCode::OK, Json(PatientsResponse {
+                            items: vec![],
+                            total: 0,
+                            limit: 100,
+                            offset: 0,
+                        })).into_response()
+                    }
+                }
+                Err(e) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse { error: format!("JSON parse error: {}", e) }),
+                ).into_response(),
+            }
         }
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -711,102 +803,71 @@ W "]"
     }
 }
 
-fn parse_patients(json: &str) -> Vec<PatientResponse> {
-    // Simple JSON parsing for patient array
-    let mut patients = Vec::new();
-
-    // Remove brackets
-    let content = json.trim().trim_start_matches('[').trim_end_matches(']');
-    if content.is_empty() {
-        return patients;
-    }
-
-    // Split by },{ pattern
-    for obj in content.split("},{") {
-        let obj = obj.trim_start_matches('{').trim_end_matches('}');
-        let mut ien = 0i64;
-        let mut name = String::new();
-        let mut sex = String::new();
-        let mut dob = String::new();
-        let mut ssn = None;
-        let mut mrn = None;
-
-        for pair in obj.split(',') {
-            let parts: Vec<&str> = pair.splitn(2, ':').collect();
-            if parts.len() == 2 {
-                let key = parts[0].trim().trim_matches('"');
-                let val = parts[1].trim().trim_matches('"');
-                match key {
-                    "ien" => ien = val.parse().unwrap_or(0),
-                    "name" => name = val.to_string(),
-                    "sex" => sex = val.to_string(),
-                    "dob" => dob = val.to_string(),
-                    "ssn" => ssn = Some(val.to_string()),
-                    "mrn" => mrn = Some(val.to_string()),
-                    _ => {}
-                }
-            }
-        }
-
-        let (last, first) = if let Some(pos) = name.find(',') {
-            (name[..pos].to_string(), name[pos + 1..].to_string())
-        } else {
-            (name.clone(), String::new())
-        };
-
-        patients.push(PatientResponse {
-            ien,
-            name: name.clone(),
-            first_name: first,
-            last_name: last,
-            sex,
-            date_of_birth: dob,
-            ssn,
-            mrn,
-        });
-    }
-
-    patients
-}
-
 async fn get_patient(Path(ien): Path<i64>) -> impl IntoResponse {
-    let code = format!(
-        r#"
-S D0=$G(^DPT({},0))
-I D0="" W "{{}}" Q
-S NAME=$P(D0,"^",1),SEX=$P(D0,"^",2),DOB=$P(D0,"^",3),SSN=$P(D0,"^",4)
-S MRN=$G(^DPT({},991))
-W "{{""ien"":{},""name"":"""_NAME_""",""sex"":"""_SEX_""",""dob"":"""_DOB_""""
-I SSN'="" W ",""ssn"":"""_SSN_""""
-I MRN'="" W ",""mrn"":"""_MRN_""""
-W "}}"
-"#,
-        ien, ien, ien
-    );
+    // Call EHRAPI routine to get single patient
+    let code = format!(r#"W $$GETPAT^EHRAPI({})"#, ien);
 
     match run_mumps(&code) {
         Ok(output) => {
-            if output == "{}" || output.is_empty() {
-                (
+            // Extract JSON from HTTP response
+            let json_body = extract_json_from_http(&output);
+
+            // Check for error response from EHRAPI
+            if json_body.contains("\"error\"") {
+                return (
                     StatusCode::NOT_FOUND,
                     Json(ErrorResponse {
                         error: "Patient not found".to_string(),
                     }),
                 )
-                    .into_response()
-            } else {
-                let patients = parse_patients(&format!("[{}]", output));
-                if let Some(patient) = patients.into_iter().next() {
+                    .into_response();
+            }
+
+            // Parse the patient JSON
+            match serde_json::from_str::<serde_json::Value>(&json_body) {
+                Ok(json) => {
+                    let ien = json.get("ien").and_then(|i| i.as_i64()).unwrap_or(0);
+                    let name = json.get("name").and_then(|n| n.as_str()).unwrap_or("").to_string();
+                    let sex = json.get("sex").and_then(|s| s.as_str()).unwrap_or("").to_string();
+                    let dob = json.get("dateOfBirth").and_then(|d| d.as_str()).unwrap_or("").to_string();
+                    let ssn = json.get("ssn").and_then(|s| s.as_str()).map(|s| s.to_string());
+                    let mrn = json.get("mrn").and_then(|m| m.as_str()).map(|s| s.to_string());
+
+                    let (last, first) = if let Some(pos) = name.find(',') {
+                        (name[..pos].trim().to_string(), name[pos + 1..].trim().to_string())
+                    } else {
+                        (name.clone(), String::new())
+                    };
+
+                    let gender = match sex.to_uppercase().as_str() {
+                        "M" => "male",
+                        "F" => "female",
+                        _ => "unknown",
+                    }.to_string();
+
+                    let patient = PatientResponse {
+                        id: ien.to_string(),
+                        ien,
+                        name,
+                        first_name: first,
+                        last_name: last,
+                        middle_name: None,
+                        sex,
+                        gender,
+                        date_of_birth: dob,
+                        ssn,
+                        mrn,
+                        city: None,
+                        state: None,
+                        status: "active".to_string(),
+                    };
+
                     (StatusCode::OK, Json(patient)).into_response()
-                } else {
-                    (
-                        StatusCode::NOT_FOUND,
-                        Json(ErrorResponse {
-                            error: "Patient not found".to_string(),
-                        }),
-                    )
-                        .into_response()
                 }
+                Err(e) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse { error: format!("JSON parse error: {}", e) }),
+                ).into_response(),
             }
         }
         Err(e) => (
@@ -822,7 +883,7 @@ async fn get_patient_problems(Path(patient_ien): Path<i64>) -> impl IntoResponse
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^AUPNPROB("C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^AUPNPROB(IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -897,7 +958,7 @@ async fn get_patient_allergies(Path(patient_ien): Path<i64>) -> impl IntoRespons
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^GMRA("C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^GMRA(IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1018,7 +1079,7 @@ async fn get_patient_visits(Path(patient_ien): Path<i64>) -> impl IntoResponse {
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^AUPNVSIT("C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^AUPNVSIT(IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1154,7 +1215,7 @@ async fn get_patient_vitals(Path(patient_ien): Path<i64>) -> impl IntoResponse {
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^GMR(120.5,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^GMR(120.5,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1276,7 +1337,7 @@ async fn get_patient_medications(Path(patient_ien): Path<i64>) -> impl IntoRespo
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PS(52,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^PS(52,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1416,7 +1477,7 @@ async fn get_patient_labs(Path(patient_ien): Path<i64>) -> impl IntoResponse {
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^LR(63,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^LR(63,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1561,7 +1622,7 @@ async fn get_patient_documents(Path(patient_ien): Path<i64>) -> impl IntoRespons
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^TIU(8925,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^TIU(8925,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1703,7 +1764,7 @@ async fn get_patient_orders(Path(patient_ien): Path<i64>) -> impl IntoResponse {
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^OR(100,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^OR(100,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1848,7 +1909,7 @@ async fn get_patient_appointments(Path(patient_ien): Path<i64>) -> impl IntoResp
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^SD(44,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^SD(44,IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -1994,7 +2055,7 @@ async fn get_patient_prescriptions(Path(patient_ien): Path<i64>) -> impl IntoRes
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSO(52,"C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^PSO(52,IEN,0)) Q:D0=""
 . S D1=$G(^PSO(52,IEN,1))
@@ -2138,7 +2199,7 @@ async fn get_pending_prescriptions() -> impl IntoResponse {
     let code = r#"
 N IEN,D0,D1,FIRST,DST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSO(52,IEN)) Q:IEN=""  Q:'IEN  D
 . S D0=$G(^PSO(52,IEN,0)) Q:D0=""
 . S D1=$G(^PSO(52,IEN,1))
@@ -2428,7 +2489,7 @@ S MATCH=0
 W "{{"
 W """hasAllergyConflict"":false,"
 W """allergies"":["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^GMRA("C",{},IEN)) Q:IEN=""  D
 . S D0=$G(^GMRA(IEN,0)) Q:D0=""
 . S ST=$P(D0,"^",6) Q:ST'="A"
@@ -2483,7 +2544,7 @@ async fn list_inventory() -> impl IntoResponse {
 N IEN,D0,FIRST,NOW
 S NOW=$H
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSD(IEN)) Q:IEN=""  Q:'IEN  D
 . S D0=$G(^PSD(IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -2732,7 +2793,7 @@ async fn get_low_stock_items() -> impl IntoResponse {
 N IEN,D0,FIRST,CNT
 S CNT=0
 W "{""items"":["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSD(IEN)) Q:IEN=""  Q:'IEN  D
 . S D0=$G(^PSD(IEN,0)) Q:D0=""
 . S QTY=$P(D0,"^",5),ROP=$P(D0,"^",6)
@@ -2920,7 +2981,7 @@ async fn get_inventory_by_location(Path(location_code): Path<String>) -> impl In
         r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSD("L","{}",IEN)) Q:IEN=""  D
 . S D0=$G(^PSD(IEN,0)) Q:D0=""
 . I 'FIRST W ","
@@ -2960,7 +3021,7 @@ async fn get_controlled_substances() -> impl IntoResponse {
     let code = r#"
 N IEN,D0,FIRST
 W "["
-S FIRST=1,IEN=""
+S FIRST=1,IEN=0
 F  S IEN=$O(^PSD(IEN)) Q:IEN=""  Q:'IEN  D
 . S D0=$G(^PSD(IEN,0)) Q:D0=""
 . S CTRL=$P(D0,"^",10) Q:'CTRL

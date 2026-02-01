@@ -4,12 +4,13 @@ import { useSidebarExpandedItems, useToggleSidebarExpand } from "@/stores/uiStor
 import { SidebarCollapseButton } from "./SidebarCollapseButton";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
-import { type SidebarItem, SidebarNavigation } from "./SidebarNavigation";
+import { type SidebarGroup, type SidebarItem, SidebarNavigation } from "./SidebarNavigation";
 
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  items: SidebarItem[];
+  items?: SidebarItem[];
+  groups?: SidebarGroup[];
   onNavAction?: (actionId: string, navPath: string) => void;
 }
 
@@ -17,11 +18,9 @@ export const Sidebar = memo(function Sidebar({
   isCollapsed,
   onToggle,
   items,
+  groups,
   onNavAction,
 }: SidebarProps) {
-  const expandedItems = useSidebarExpandedItems();
-  const toggleExpand = useToggleSidebarExpand();
-
   const handleNavAction = (actionId: string, navPath: string) => {
     if (onNavAction) {
       onNavAction(actionId, navPath);
@@ -43,9 +42,8 @@ export const Sidebar = memo(function Sidebar({
 
       <SidebarNavigation
         items={items}
+        groups={groups}
         isCollapsed={isCollapsed}
-        expandedItems={expandedItems}
-        onToggleExpand={toggleExpand}
         onNavAction={handleNavAction}
       />
 

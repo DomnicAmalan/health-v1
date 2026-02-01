@@ -62,6 +62,7 @@ LISTPAT() ; List all patients
  S FIRST=1
  S IEN=""
  F  S IEN=$O(^DPT(IEN)) Q:IEN=""  D
+ . I +IEN'>0 Q  ; Skip non-numeric IENs (like "B" index)
  . I $G(^DPT(IEN,"deleted"))'="" Q  ; Skip deleted
  . I 'FIRST S JSON=JSON_","
  . S FIRST=0

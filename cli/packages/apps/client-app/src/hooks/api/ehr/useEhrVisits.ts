@@ -6,7 +6,7 @@
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
-import { apiClient } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/yottadb-client";
 import type {
   EhrVisit,
   EhrVisitSearchCriteria,
@@ -42,7 +42,7 @@ export function useEhrPatientVisits(patientId: string, pagination?: EhrPaginatio
       if (pagination?.offset) queryParams.set("offset", String(pagination.offset));
 
       const url = `${API_ROUTES.EHR.VISITS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
-      const response = await apiClient.get<EhrPaginatedResponse<EhrVisit>>(url);
+      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrVisit>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -64,7 +64,7 @@ export function useEhrVisit(id: string) {
   return useQuery({
     queryKey: EHR_VISIT_QUERY_KEYS.detail(id),
     queryFn: async () => {
-      const response = await apiClient.get<EhrVisit>(API_ROUTES.EHR.VISITS.GET(id));
+      const response = await yottadbApiClient.get<EhrVisit>(API_ROUTES.EHR.VISITS.GET(id));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -86,7 +86,7 @@ export function useEhrTodayVisits() {
   return useQuery({
     queryKey: EHR_VISIT_QUERY_KEYS.today(),
     queryFn: async () => {
-      const response = await apiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.TODAY);
+      const response = await yottadbApiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.TODAY);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -108,7 +108,7 @@ export function useEhrActiveVisits() {
   return useQuery({
     queryKey: EHR_VISIT_QUERY_KEYS.active(),
     queryFn: async () => {
-      const response = await apiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.ACTIVE);
+      const response = await yottadbApiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.ACTIVE);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -130,7 +130,7 @@ export function useCreateEhrVisit() {
 
   return useMutation({
     mutationFn: async (visit: CreateEhrVisitRequest) => {
-      const response = await apiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CREATE, visit);
+      const response = await yottadbApiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CREATE, visit);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -156,7 +156,7 @@ export function useUpdateEhrVisit() {
   return useMutation({
     mutationFn: async (visit: UpdateEhrVisitRequest) => {
       const { id, ...updates } = visit;
-      const response = await apiClient.put<EhrVisit>(API_ROUTES.EHR.VISITS.UPDATE(id), updates);
+      const response = await yottadbApiClient.put<EhrVisit>(API_ROUTES.EHR.VISITS.UPDATE(id), updates);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -182,7 +182,7 @@ export function useEhrVisitCheckIn() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CHECK_IN(id), {});
+      const response = await yottadbApiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CHECK_IN(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -207,7 +207,7 @@ export function useEhrVisitCheckOut() {
 
   return useMutation({
     mutationFn: async ({ id, disposition }: { id: string; disposition?: string }) => {
-      const response = await apiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CHECK_OUT(id), {
+      const response = await yottadbApiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CHECK_OUT(id), {
         disposition,
       });
 

@@ -272,7 +272,7 @@ export const API_ROUTES = {
 
   // EHR (Electronic Health Record) routes
   EHR: {
-    /** Patient management */
+    /** Patient management (YottaDB API - no /api prefix needed) */
     PATIENTS: {
       LIST: "/v1/ehr/patients",
       GET: (id: string) => `/v1/ehr/patients/${id}`,

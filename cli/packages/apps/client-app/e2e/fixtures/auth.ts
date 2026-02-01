@@ -14,7 +14,7 @@ type AuthFixtures = {
 };
 
 export const test = base.extend<AuthFixtures>({
-  apiURL: async (_fixtures, use) => {
+  apiURL: async ({}, use) => {
     const apiURL = process.env.PLAYWRIGHT_API_URL || "http://localhost:4117";
     await use(apiURL);
   },
