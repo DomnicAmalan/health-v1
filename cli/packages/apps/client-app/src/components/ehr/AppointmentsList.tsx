@@ -51,6 +51,9 @@ const STATUS_CONFIG = {
 export function AppointmentsList({ patientId }: AppointmentsListProps) {
   const { data: appointments, isLoading } = useEhrPatientAppointments(patientId);
 
+  // Extract array from response (handle both array and paginated format)
+  const appointmentList = Array.isArray(appointments) ? appointments : (appointments?.items || []);
+
   if (isLoading) {
     return (
       <Box className="text-center py-12 text-muted-foreground">
@@ -60,7 +63,7 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
     );
   }
 
-  if (!appointments || appointments.length === 0) {
+  if (appointmentList.length === 0) {
     return (
       <Box className="text-center py-12 text-muted-foreground border rounded-lg">
         <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -71,11 +74,11 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
   }
 
   // Group appointments by time period
-  const upcomingAppointments = appointments.filter(
+  const upcomingAppointments = appointmentList.filter(
     (apt) => (apt.status === "SCHEDULED" || apt.status === "CHECKED_IN") && isFuture(new Date(apt.appointmentDate))
   );
-  const todayAppointments = appointments.filter((apt) => isToday(new Date(apt.appointmentDate)));
-  const pastAppointments = appointments.filter((apt) => isPast(new Date(apt.appointmentDate)) && apt.status === "COMPLETED");
+  const todayAppointments = appointmentList.filter((apt) => isToday(new Date(apt.appointmentDate)));
+  const pastAppointments = appointmentList.filter((apt) => isPast(new Date(apt.appointmentDate)) && apt.status === "COMPLETED");
 
   return (
     <Box className="space-y-6">

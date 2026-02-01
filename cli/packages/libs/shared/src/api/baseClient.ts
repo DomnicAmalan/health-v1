@@ -4,7 +4,7 @@
  * Supports all authentication methods, interceptors, retry logic, and transformations
  */
 
-import { API_CONFIG, getApiUrl } from "./config";
+import { API_CONFIG } from "./config";
 
 // ============================================================================
 // Types & Interfaces
@@ -363,19 +363,20 @@ export class BaseApiClient {
   // ==========================================================================
 
   protected buildUrl(endpoint: string): string {
+    // Already a full URL
     if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
       return endpoint;
     }
 
-    // Use shared getApiUrl for consistent path handling
-    if (this.baseUrl === API_CONFIG.BASE_URL) {
-      return getApiUrl(endpoint);
-    }
-
-    // Custom base URL
+    // Simple concatenation - BASE_URL from env already has /api if needed
     const base = this.baseUrl.replace(/\/$/, "");
     const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-    return `${base}${path}`;
+    const finalUrl = `${base}${path}`;
+
+    // DEBUG - remove this after fixing
+    console.log('[buildUrl] endpoint:', endpoint, '| baseUrl:', this.baseUrl, '| result:', finalUrl);
+
+    return finalUrl;
   }
 
   // ==========================================================================

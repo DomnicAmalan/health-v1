@@ -261,8 +261,11 @@ export const AllergyList = memo(function AllergyList({
     );
   }
 
+  // Extract array from response (handle both array and paginated format)
+  const allergyList = Array.isArray(allergies) ? allergies : (allergies?.items || []);
+
   // Sort by severity (most severe first)
-  const sortedAllergies = [...(allergies ?? [])].sort((a, b) => {
+  const sortedAllergies = [...allergyList].sort((a, b) => {
     const severityOrder = { life_threatening: 0, severe: 1, moderate: 2, mild: 3 };
     return severityOrder[a.severity] - severityOrder[b.severity];
   });

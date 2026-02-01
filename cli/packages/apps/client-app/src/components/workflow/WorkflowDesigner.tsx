@@ -38,6 +38,7 @@ import type {
 import { NODE_TEMPLATES } from "@lazarus-life/shared";
 import { WorkflowNodeComponent } from "./WorkflowNode";
 import { WorkflowToolbar } from "./WorkflowToolbar";
+import { ConnectorConfig } from "./ConnectorConfig";
 import { cn } from "@lazarus-life/ui-components/utils";
 
 interface WorkflowDesignerProps {
@@ -709,6 +710,16 @@ export const WorkflowDesigner = memo(function WorkflowDesigner({
                       }
                       placeholder="decision_rule_123"
                       disabled={readOnly}
+                    />
+                  </div>
+                )}
+
+                {/* Action/Connector Config */}
+                {selectedNode.nodeType === "action" && (
+                  <div className="-mx-3">
+                    <ConnectorConfig
+                      value={selectedNode.config}
+                      onChange={(config) => updateNodeConfig(config)}
                     />
                   </div>
                 )}

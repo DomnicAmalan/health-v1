@@ -213,8 +213,11 @@ export const MedicationList = memo(function MedicationList({
     );
   }
 
-  const activeMeds = medications?.filter((m) => m.status === "active") ?? [];
-  const otherMeds = medications?.filter((m) => m.status !== "active") ?? [];
+  // Extract array from response (handle both array and paginated format)
+  const medicationList = Array.isArray(medications) ? medications : (medications?.items || []);
+
+  const activeMeds = medicationList.filter((m) => m.status === "active");
+  const otherMeds = medicationList.filter((m) => m.status !== "active");
 
   return (
     <Card className={className}>
@@ -236,7 +239,7 @@ export const MedicationList = memo(function MedicationList({
         </Flex>
       </CardHeader>
       <CardContent>
-        {medications?.length === 0 ? (
+        {medicationList.length === 0 ? (
           <Box className="text-center text-muted-foreground py-8">
             <Pill className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>No medications documented</p>

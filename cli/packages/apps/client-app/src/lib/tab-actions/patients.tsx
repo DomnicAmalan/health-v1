@@ -1,6 +1,7 @@
 import {
   Activity,
   Calendar,
+  ChevronLeft,
   Download,
   Edit,
   Eye,
@@ -28,8 +29,18 @@ export function getPatientsTabActions(
       {
         actions: [
           {
+            id: "back",
+            label: "Back",
+            icon: <ChevronLeft className="h-4 w-4" />,
+            onClick: () => onAction("back", path),
+          },
+        ],
+      },
+      {
+        actions: [
+          {
             id: "view-details",
-            label: "View Full Details",
+            label: "View Details",
             icon: <Eye className="h-4 w-4" />,
             onClick: () => onAction("view-details", path),
           },

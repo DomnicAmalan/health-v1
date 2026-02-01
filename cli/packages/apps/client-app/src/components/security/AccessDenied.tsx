@@ -40,7 +40,7 @@ export function AccessDenied({
         </Box>
 
         <Stack spacing="sm" align="center">
-          <h3 className="text-lg font-semibold">{t("security.accessDenied")}</h3>
+          <h2 className="text-lg font-semibold">{t("security.accessDenied")}</h2>
           <p className="text-sm text-muted-foreground text-center">
             {t("security.noPermission", {
               type: type === "route" ? "page" : type === "tab" ? "tab" : "resource",

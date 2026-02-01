@@ -31,6 +31,7 @@ import {
   useCreatePrescription,
   useCheckPatientDrugInteractions,
 } from "@/hooks/api/pharmacy";
+import { useEmitWorkflowEvent } from "@/hooks/api/workflows/useWorkflows";
 import { DrugSearchSelect } from "./DrugSearchSelect";
 import { InteractionAlert } from "./InteractionAlert";
 
@@ -93,6 +94,7 @@ export const PrescriptionForm = memo(function PrescriptionForm({
   const [showInteractionWarning, setShowInteractionWarning] = useState(false);
 
   const createMutation = useCreatePrescription();
+  const emitEvent = useEmitWorkflowEvent();
 
   // Check interactions when drug is selected
   const drugIds = selectedDrug ? [selectedDrug.id] : [];
@@ -150,6 +152,20 @@ export const PrescriptionForm = memo(function PrescriptionForm({
 
       try {
         const result = await createMutation.mutateAsync(request);
+
+        // Emit workflow event for automation (n8n-style)
+        emitEvent.mutate({
+          eventType: "prescription_created",
+          payload: {
+            prescriptionId: result.ien.toString(),
+            patientId: patientIen.toString(),
+            drugId: selectedDrug.ien,
+            drugName: selectedDrug.name,
+            prescriberId: prescriberIen?.toString(),
+            createdAt: new Date().toISOString(),
+          },
+        });
+
         onSuccess?.(result.ien);
       } catch (error) {
         console.error("Failed to create prescription:", error);

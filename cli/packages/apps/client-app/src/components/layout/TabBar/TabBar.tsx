@@ -239,6 +239,13 @@ export const TabBar = memo(function TabBar({ onMobileMenuClick }: TabBarProps) {
                 onCloseGroup={() =>
                   closeGroupTabs(group.id, (path) => navigate({ to: path as "/" | (string & {}) }))
                 }
+                tabs={group.tabs.map((tab) => ({
+                  id: tab.id,
+                  label: tab.label,
+                  isActive: tab.id === activeTabId,
+                  onSelect: () => setActiveTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) })),
+                  onClose: () => closeTab(tab.id, (path) => navigate({ to: path as "/" | (string & {}) })),
+                }))}
               >
                 {!isCollapsed &&
                   group.tabs.map((tab) => (

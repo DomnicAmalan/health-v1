@@ -86,12 +86,34 @@ pub fn create_router() -> Router<Arc<super::AppState>> {
         // Patient Billing
         .route("/v1/billing/patients/:id/balance", get(payment_handlers::get_patient_balance));
 
+    // Workflow routes (protected) - n8n-style orchestration
+    let workflow_routes = Router::new()
+        // Workflow definitions
+        .route("/v1/workflows", get(workflow_handlers::list_workflows))
+        .route("/v1/workflows", post(workflow_handlers::create_workflow))
+        .route("/v1/workflows/:workflow_id", get(workflow_handlers::get_workflow))
+        .route("/v1/workflows/:workflow_id", put(workflow_handlers::update_workflow))
+        .route("/v1/workflows/:workflow_id", delete(workflow_handlers::delete_workflow))
+        // Workflow instances
+        .route("/v1/workflows/:workflow_id/instances", post(workflow_handlers::start_workflow_instance))
+        .route("/v1/workflow-instances", get(workflow_handlers::list_workflow_instances))
+        .route("/v1/workflow-instances/:instance_id", get(workflow_handlers::get_workflow_instance))
+        // Human tasks
+        .route("/v1/workflow-tasks", get(workflow_handlers::list_tasks))
+        .route("/v1/workflow-tasks/:task_id/claim", post(workflow_handlers::claim_task))
+        .route("/v1/workflow-tasks/:task_id/complete", post(workflow_handlers::complete_task))
+        // Events (n8n-style webhooks for module integration)
+        .route("/v1/workflows/events/:event_type", post(workflow_handlers::emit_event))
+        // Connectors
+        .route("/v1/connectors", get(workflow_handlers::list_connectors));
+
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
         .merge(ehr_routes)
         .merge(pharmacy_routes)
         .merge(billing_routes)
+        .merge(workflow_routes)
 }
 
 #[allow(dead_code)]

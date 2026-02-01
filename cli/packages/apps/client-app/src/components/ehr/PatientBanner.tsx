@@ -42,9 +42,12 @@ interface PatientBannerProps {
   className?: string;
 }
 
-function calculateAge(dateOfBirth: string): number {
-  const today = new Date();
+function calculateAge(dateOfBirth: string | undefined): number | null {
+  if (!dateOfBirth) return null;
   const birth = new Date(dateOfBirth);
+  if (isNaN(birth.getTime())) return null;
+
+  const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
@@ -53,8 +56,12 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return "Unknown";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid Date";
+
+  return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -95,8 +102,9 @@ export const PatientBanner = memo(function PatientBanner({
     );
   }
 
-  const hasAllergies = allergies.length > 0;
-  const severeAllergies = allergies.filter((a) => a.severity === "severe" || a.severity === "life_threatening");
+  const allergyList = Array.isArray(allergies) ? allergies : (allergies?.items || []);
+  const hasAllergies = allergyList.length > 0;
+  const severeAllergies = allergyList.filter((a) => a.severity === "severe" || a.severity === "life_threatening");
   const age = calculateAge(patient.dateOfBirth);
 
   return (
@@ -122,7 +130,7 @@ export const PatientBanner = memo(function PatientBanner({
           <span className="font-medium text-sm">
             {severeAllergies.length > 0
               ? `${severeAllergies.length} SEVERE ALLERG${severeAllergies.length === 1 ? "Y" : "IES"}`
-              : `${allergies.length} Allerg${allergies.length === 1 ? "y" : "ies"}`}
+              : `${allergyList.length} Allerg${allergyList.length === 1 ? "y" : "ies"}`}
           </span>
           {onViewAllergies && (
             <Button
@@ -161,7 +169,7 @@ export const PatientBanner = memo(function PatientBanner({
             <Badge variant={patient.gender === "male" ? "default" : "secondary"}>
               {patient.gender === "male" ? "Male" : patient.gender === "female" ? "Female" : patient.gender}
             </Badge>
-            <Badge variant="outline">{age} yo</Badge>
+            {age !== null && <Badge variant="outline">{age} yo</Badge>}
           </Flex>
 
           {/* DOB and MRN */}

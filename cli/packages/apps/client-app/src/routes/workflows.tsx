@@ -47,6 +47,17 @@ import {
 } from "lucide-react";
 import { WorkflowDesigner } from "@/components/workflow";
 import type { WorkflowDefinition, WorkflowInstance, HumanTask } from "@lazarus-life/shared";
+import {
+  useWorkflows,
+  useCreateWorkflow,
+  useUpdateWorkflow,
+  useDeleteWorkflow,
+  useWorkflowInstances,
+  useStartWorkflow,
+  useWorkflowTasks,
+  useClaimTask,
+  useCompleteTask
+} from "@/hooks/api/workflows/useWorkflows";
 
 export const Route = createFileRoute("/workflows")({
   component: WorkflowsPage,
@@ -171,6 +182,19 @@ function WorkflowsPageInner() {
   const [designerOpen, setDesignerOpen] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowDefinition | null>(null);
 
+  // API hooks
+  const { data: workflowsData, isLoading: workflowsLoading } = useWorkflows();
+  const { data: instancesData, isLoading: instancesLoading } = useWorkflowInstances();
+  const { data: tasksData, isLoading: tasksLoading } = useWorkflowTasks();
+  const createWorkflow = useCreateWorkflow();
+  const updateWorkflow = useUpdateWorkflow();
+  const deleteWorkflow = useDeleteWorkflow();
+
+  // Safely extract arrays from API responses
+  const workflows = Array.isArray(workflowsData) ? workflowsData : [];
+  const instances = Array.isArray(instancesData) ? instancesData : [];
+  const tasks = Array.isArray(tasksData) ? tasksData : [];
+
   const handleCreateWorkflow = useCallback(() => {
     setSelectedWorkflow(null);
     setDesignerOpen(true);
@@ -182,11 +206,23 @@ function WorkflowsPageInner() {
   }, []);
 
   const handleSaveWorkflow = useCallback((workflow: WorkflowDefinition) => {
-    console.log("Saving workflow:", workflow);
+    if (selectedWorkflow?.id) {
+      // Update existing workflow
+      updateWorkflow.mutate({ id: selectedWorkflow.id, workflow });
+    } else {
+      // Create new workflow
+      createWorkflow.mutate(workflow);
+    }
     setDesignerOpen(false);
-  }, []);
+  }, [selectedWorkflow, createWorkflow, updateWorkflow]);
 
-  const filteredWorkflows = MOCK_WORKFLOWS.filter(
+  const handleDeleteWorkflow = useCallback((workflowId: string) => {
+    if (confirm("Are you sure you want to delete this workflow?")) {
+      deleteWorkflow.mutate(workflowId);
+    }
+  }, [deleteWorkflow]);
+
+  const filteredWorkflows = workflows.filter(
     (w) =>
       w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       w.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -246,9 +282,9 @@ function WorkflowsPageInner() {
           <TabsTrigger value="tasks" className="flex items-center gap-2">
             <ListTodo className="h-4 w-4" />
             Tasks
-            {MOCK_TASKS.filter((t) => t.status === "pending").length > 0 && (
+            {tasks.filter((t) => t.status === "pending").length > 0 && (
               <Badge variant="destructive" className="ml-1">
-                {MOCK_TASKS.filter((t) => t.status === "pending").length}
+                {tasks.filter((t) => t.status === "pending").length}
               </Badge>
             )}
           </TabsTrigger>
@@ -256,8 +292,12 @@ function WorkflowsPageInner() {
 
         {/* Workflow Definitions */}
         <TabsContent value="definitions" className="space-y-4">
-          {/* Search */}
-          <div className="flex items-center gap-4">
+          {workflowsLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading workflows...</div>
+          ) : (
+            <>
+              {/* Search */}
+              <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -304,7 +344,10 @@ function WorkflowsPageInner() {
                           <Play className="mr-2 h-4 w-4" />
                           Start Instance
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDeleteWorkflow(workflow.id)}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
@@ -331,12 +374,19 @@ function WorkflowsPageInner() {
               </Card>
             ))}
           </div>
+            </>
+          )}
         </TabsContent>
 
         {/* Workflow Instances */}
         <TabsContent value="instances" className="space-y-4">
-          <div className="space-y-3">
-            {MOCK_INSTANCES.map((instance) => (
+          {instancesLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading instances...</div>
+          ) : instances.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No workflow instances yet</div>
+          ) : (
+            <div className="space-y-3">
+              {instances.map((instance) => (
               <Card key={instance.id}>
                 <CardContent className="flex items-center justify-between p-4">
                   <div className="flex items-center gap-4">
@@ -370,14 +420,20 @@ function WorkflowsPageInner() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* Human Tasks */}
         <TabsContent value="tasks" className="space-y-4">
-          <div className="space-y-3">
-            {MOCK_TASKS.map((task) => (
+          {tasksLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading tasks...</div>
+          ) : tasks.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No pending tasks</div>
+          ) : (
+            <div className="space-y-3">
+              {tasks.map((task) => (
               <Card key={task.id}>
                 <CardContent className="flex items-center justify-between p-4">
                   <div className="flex-1">
@@ -422,8 +478,9 @@ function WorkflowsPageInner() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

@@ -59,7 +59,7 @@ export function groupTabs(
     } else {
       // Ungrouped tabs
       groupId = "ungrouped";
-      groupLabel = "Other";
+      groupLabel = "Main";
       groupColor = "#6B7280";
       groupType = "other";
     }

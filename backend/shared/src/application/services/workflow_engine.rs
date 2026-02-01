@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 use crate::shared::{AppError, AppResult};
 use super::rules_engine::{RulesEngine, RuleContext, SharedRulesEngine};
+use super::connectors::ConnectorRegistry;
 
 /// Node types in a workflow
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -368,6 +369,8 @@ pub struct WorkflowEngine {
     tasks: Arc<RwLock<HashMap<String, HumanTask>>>,
     /// Rules engine for decision nodes
     rules_engine: Option<SharedRulesEngine>,
+    /// Connector registry for Action nodes (MuleSoft-style)
+    connectors: Arc<ConnectorRegistry>,
 }
 
 impl WorkflowEngine {
@@ -378,6 +381,7 @@ impl WorkflowEngine {
             instances: Arc::new(RwLock::new(HashMap::new())),
             tasks: Arc::new(RwLock::new(HashMap::new())),
             rules_engine: None,
+            connectors: Arc::new(super::connectors::create_connector_registry("http://localhost:8080/api")),
         }
     }
 
@@ -388,6 +392,7 @@ impl WorkflowEngine {
             instances: Arc::new(RwLock::new(HashMap::new())),
             tasks: Arc::new(RwLock::new(HashMap::new())),
             rules_engine: Some(rules_engine),
+            connectors: Arc::new(super::connectors::create_connector_registry("http://localhost:8080/api")),
         }
     }
 
@@ -450,8 +455,8 @@ impl WorkflowEngine {
         let mut instances = self.instances.write().await;
         instances.insert(instance.id.clone(), instance.clone());
 
-        // Start execution (would normally be async)
-        // self.execute_instance(&instance.id).await?;
+        // Start execution
+        self.execute_instance(&instance.id).await?;
 
         Ok(instance)
     }
@@ -483,7 +488,242 @@ impl WorkflowEngine {
         task.result = Some(result);
 
         // Resume workflow execution
-        // self.resume_instance(&task.instance_id).await?;
+        self.resume_instance(&task.instance_id).await?;
+
+        Ok(())
+    }
+
+    /// Execute a workflow instance (process current nodes)
+    pub async fn execute_instance(&self, instance_id: &str) -> AppResult<()> {
+        let mut instances = self.instances.write().await;
+        let instance = instances.get_mut(instance_id)
+            .ok_or_else(|| AppError::NotFound(format!("Instance not found: {}", instance_id)))?;
+
+        // Get workflow definition
+        let definition = self.get_workflow(&instance.workflow_id).await
+            .ok_or_else(|| AppError::NotFound(format!("Workflow not found: {}", instance.workflow_id)))?;
+
+        // Process current nodes
+        let current_nodes = instance.current_nodes.clone();
+        let mut next_nodes = Vec::new();
+
+        for node_id in &current_nodes {
+            let node = definition.nodes.iter()
+                .find(|n| &n.id == node_id)
+                .ok_or_else(|| AppError::Internal(format!("Node not found: {}", node_id)))?;
+
+            let step_id = Uuid::new_v4().to_string();
+            let started_at = Utc::now();
+
+            match node.node_type {
+                NodeType::Start => {
+                    // Start node: move to next nodes
+                    let edges: Vec<_> = definition.edges.iter()
+                        .filter(|e| &e.source == node_id)
+                        .collect();
+
+                    for edge in edges {
+                        next_nodes.push(edge.target.clone());
+                    }
+
+                    // Record step
+                    instance.history.push(ExecutionStep {
+                        id: step_id,
+                        node_id: node_id.clone(),
+                        node_name: node.name.clone(),
+                        started_at,
+                        ended_at: Some(Utc::now()),
+                        duration_ms: Some(0),
+                        input: None,
+                        output: None,
+                        error: None,
+                        decision: None,
+                    });
+                }
+
+                NodeType::End => {
+                    // End node: complete workflow
+                    instance.status = WorkflowStatus::Completed;
+                    instance.completed_at = Some(Utc::now());
+
+                    instance.history.push(ExecutionStep {
+                        id: step_id,
+                        node_id: node_id.clone(),
+                        node_name: node.name.clone(),
+                        started_at,
+                        ended_at: Some(Utc::now()),
+                        duration_ms: Some(0),
+                        input: None,
+                        output: None,
+                        error: None,
+                        decision: None,
+                    });
+                }
+
+                NodeType::Action => {
+                    // Action node: execute action (placeholder for now)
+                    // TODO: Call module connectors based on action config
+                    let edges: Vec<_> = definition.edges.iter()
+                        .filter(|e| &e.source == node_id)
+                        .collect();
+
+                    for edge in edges {
+                        next_nodes.push(edge.target.clone());
+                    }
+
+                    instance.history.push(ExecutionStep {
+                        id: step_id,
+                        node_id: node_id.clone(),
+                        node_name: node.name.clone(),
+                        started_at,
+                        ended_at: Some(Utc::now()),
+                        duration_ms: Some(10),
+                        input: None,
+                        output: Some(serde_json::json!({"status": "executed"})),
+                        error: None,
+                        decision: None,
+                    });
+                }
+
+                NodeType::Decision => {
+                    // Decision node: evaluate condition and choose branch
+                    // For now, take the first edge (simplified)
+                    let edges: Vec<_> = definition.edges.iter()
+                        .filter(|e| &e.source == node_id)
+                        .collect();
+
+                    if let Some(edge) = edges.first() {
+                        next_nodes.push(edge.target.clone());
+                    }
+
+                    instance.history.push(ExecutionStep {
+                        id: step_id,
+                        node_id: node_id.clone(),
+                        node_name: node.name.clone(),
+                        started_at,
+                        ended_at: Some(Utc::now()),
+                        duration_ms: Some(5),
+                        input: None,
+                        output: None,
+                        error: None,
+                        decision: Some("default".to_string()),
+                    });
+                }
+
+                NodeType::HumanTask => {
+                    // Human task: create task and pause workflow
+                    let task_id = Uuid::new_v4().to_string();
+
+                    let task = HumanTask {
+                        id: task_id.clone(),
+                        instance_id: instance_id.to_string(),
+                        node_id: node_id.clone(),
+                        name: node.name.clone(),
+                        description: node.description.clone(),
+                        assignee: node.config.assignee.clone().unwrap_or_else(|| "unassigned".to_string()),
+                        form_schema: node.config.form_schema.clone(),
+                        form_data: None,
+                        status: TaskStatus::Pending,
+                        due_date: None,
+                        priority: None,
+                        created_at: Utc::now(),
+                        claimed_by: None,
+                        completed_at: None,
+                        result: None,
+                    };
+
+                    let mut tasks = self.tasks.write().await;
+                    tasks.insert(task_id, task);
+
+                    // Set workflow to waiting
+                    instance.status = WorkflowStatus::Waiting;
+
+                    instance.history.push(ExecutionStep {
+                        id: step_id,
+                        node_id: node_id.clone(),
+                        node_name: node.name.clone(),
+                        started_at,
+                        ended_at: Some(Utc::now()),
+                        duration_ms: Some(1),
+                        input: None,
+                        output: Some(serde_json::json!({"task_created": true})),
+                        error: None,
+                        decision: None,
+                    });
+
+                    // Don't move to next nodes yet - wait for task completion
+                    return Ok(());
+                }
+
+                _ => {
+                    // Other node types: skip for now
+                    let edges: Vec<_> = definition.edges.iter()
+                        .filter(|e| &e.source == node_id)
+                        .collect();
+
+                    for edge in edges {
+                        next_nodes.push(edge.target.clone());
+                    }
+                }
+            }
+        }
+
+        // Update current nodes
+        instance.current_nodes = next_nodes.clone();
+
+        // Continue execution if there are next nodes
+        if !next_nodes.is_empty() && instance.status == WorkflowStatus::Running {
+            drop(instances); // Release lock before recursive call
+            Box::pin(self.execute_instance(instance_id)).await?;
+        }
+
+        Ok(())
+    }
+
+    /// Resume a paused workflow instance
+    pub async fn resume_instance(&self, instance_id: &str) -> AppResult<()> {
+        let mut instances = self.instances.write().await;
+        let instance = instances.get_mut(instance_id)
+            .ok_or_else(|| AppError::NotFound(format!("Instance not found: {}", instance_id)))?;
+
+        // Only resume if waiting
+        if instance.status != WorkflowStatus::Waiting {
+            return Ok(());
+        }
+
+        // Get workflow definition
+        let definition = self.get_workflow(&instance.workflow_id).await
+            .ok_or_else(|| AppError::NotFound(format!("Workflow not found: {}", instance.workflow_id)))?;
+
+        // Find completed tasks for current nodes
+        let current_nodes = instance.current_nodes.clone();
+        let mut next_nodes = Vec::new();
+
+        for node_id in &current_nodes {
+            let node = definition.nodes.iter()
+                .find(|n| &n.id == node_id)
+                .ok_or_else(|| AppError::Internal(format!("Node not found: {}", node_id)))?;
+
+            // If human task node, find edges and move to next
+            if node.node_type == NodeType::HumanTask {
+                let edges: Vec<_> = definition.edges.iter()
+                    .filter(|e| &e.source == node_id)
+                    .collect();
+
+                for edge in edges {
+                    next_nodes.push(edge.target.clone());
+                }
+            }
+        }
+
+        // Update status and current nodes
+        instance.status = WorkflowStatus::Running;
+        instance.current_nodes = next_nodes;
+
+        drop(instances); // Release lock before execution
+
+        // Continue execution
+        Box::pin(self.execute_instance(instance_id)).await?;
 
         Ok(())
     }
@@ -545,6 +785,11 @@ impl WorkflowEngine {
         }
 
         Ok(())
+    }
+
+    /// Get all available connector metadata
+    pub fn get_connector_metadata(&self) -> Vec<super::connectors::ConnectorMetadata> {
+        self.connectors.get_all_metadata()
     }
 
     /// Create a simple approval workflow template

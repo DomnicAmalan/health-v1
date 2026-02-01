@@ -32,7 +32,7 @@ export function useEhrPatientProblems(patientId: string, includeInactive = false
     queryKey: [...EHR_PROBLEM_QUERY_KEYS.byPatient(patientId), { includeInactive }],
     queryFn: async () => {
       const url = `${API_ROUTES.EHR.PROBLEMS.BY_PATIENT(patientId)}?includeInactive=${includeInactive}`;
-      const response = await yottadbApiClient.get<EhrProblem[]>(url);
+      const response = await apiClient.get<EhrProblem[]>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -54,7 +54,7 @@ export function useEhrProblem(id: string) {
   return useQuery({
     queryKey: EHR_PROBLEM_QUERY_KEYS.detail(id),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrProblem>(API_ROUTES.EHR.PROBLEMS.GET(id));
+      const response = await apiClient.get<EhrProblem>(API_ROUTES.EHR.PROBLEMS.GET(id));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -76,7 +76,7 @@ export function useCreateEhrProblem() {
 
   return useMutation({
     mutationFn: async (problem: CreateEhrProblemRequest) => {
-      const response = await yottadbApiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.CREATE, problem);
+      const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.CREATE, problem);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -100,7 +100,7 @@ export function useUpdateEhrProblem() {
   return useMutation({
     mutationFn: async (problem: UpdateEhrProblemRequest) => {
       const { id, ...updates } = problem;
-      const response = await yottadbApiClient.put<EhrProblem>(API_ROUTES.EHR.PROBLEMS.UPDATE(id), updates);
+      const response = await apiClient.put<EhrProblem>(API_ROUTES.EHR.PROBLEMS.UPDATE(id), updates);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -124,7 +124,7 @@ export function useResolveEhrProblem() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.RESOLVE(id), {});
+      const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.RESOLVE(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -148,7 +148,7 @@ export function useReactivateEhrProblem() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.REACTIVATE(id), {});
+      const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.REACTIVATE(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -172,7 +172,7 @@ export function useDeleteEhrProblem() {
 
   return useMutation({
     mutationFn: async ({ id, patientId }: { id: string; patientId: string }) => {
-      const response = await yottadbApiClient.delete(API_ROUTES.EHR.PROBLEMS.DELETE(id));
+      const response = await apiClient.delete(API_ROUTES.EHR.PROBLEMS.DELETE(id));
 
       if (response.error) throw new Error(response.error.message);
 

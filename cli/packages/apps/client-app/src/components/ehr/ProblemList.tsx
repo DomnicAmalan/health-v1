@@ -195,8 +195,11 @@ export const ProblemList = memo(function ProblemList({
     );
   }
 
-  const activeProblems = problems?.filter((p) => p.status === "active") ?? [];
-  const inactiveProblems = problems?.filter((p) => p.status !== "active") ?? [];
+  // Extract array from response (handle both array and paginated format)
+  const problemList = Array.isArray(problems) ? problems : (problems?.items || []);
+
+  const activeProblems = problemList.filter((p) => p.status === "active");
+  const inactiveProblems = problemList.filter((p) => p.status !== "active");
 
   return (
     <Card className={className}>
@@ -218,7 +221,7 @@ export const ProblemList = memo(function ProblemList({
         </Flex>
       </CardHeader>
       <CardContent>
-        {problems?.length === 0 ? (
+        {problemList.length === 0 ? (
           <Box className="text-center text-muted-foreground py-8">
             <Stethoscope className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>No problems documented</p>

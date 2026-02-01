@@ -3,6 +3,7 @@
  */
 
 export { PatientBanner } from "./PatientBanner";
+export { PatientActions } from "./PatientActions";
 export { PatientSearch, PatientSearchDialog } from "./PatientSearch";
 export { ProblemList } from "./ProblemList";
 export { MedicationList } from "./MedicationList";

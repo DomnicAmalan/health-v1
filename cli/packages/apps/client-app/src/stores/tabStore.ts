@@ -33,7 +33,7 @@ const initialState: TabState = {
   ],
   activeTabId: DASHBOARD_ID,
   collapsedGroups: new Set<string>(),
-  groupingStrategy: "patient" as const,
+  groupingStrategy: "module" as const,
 };
 
 export const useTabStore = create<TabStore>()(
@@ -352,6 +352,22 @@ export const useTabStore = create<TabStore>()(
             if (Array.isArray(state.collapsedGroups)) {
               state.collapsedGroups = new Set(state.collapsedGroups as unknown as string[]);
             }
+
+            // Migrate old tabs to have correct groupType for patients
+            state.tabs = state.tabs.map(tab => {
+              // Fix any patient tabs (with or without existing groupId)
+              if (tab.path.startsWith('/patients/') && tab.path !== '/patients') {
+                return {
+                  ...tab,
+                  groupId: 'patients',
+                  groupType: 'module',
+                  groupLabel: 'Patients',
+                  groupColor: '#3B82F6',
+                };
+              }
+              return tab;
+            });
+
             // Icons will be restored by the UI when tabs are rendered
             // The getIconForPath function in __root.tsx handles this
           }

@@ -45,6 +45,7 @@ class ClientApiClient extends BaseApiClient {
    * Override request to use existing interceptors for full compatibility
    */
   override async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+    console.log(endpoint, config, 'api client request');
     const url = this.buildUrl(endpoint);
     const timeout = config.timeout || this.timeout;
 
@@ -115,7 +116,6 @@ export class ApiClient extends ClientApiClient {
 
 // Export singleton instance
 export const apiClient = new ApiClient();
-
 /**
  * Hook to access the API client
  * Returns the singleton apiClient instance

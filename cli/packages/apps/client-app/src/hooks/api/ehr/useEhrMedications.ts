@@ -30,7 +30,7 @@ export function useEhrPatientMedications(patientId: string, activeOnly = true) {
     queryKey: [...EHR_MEDICATION_QUERY_KEYS.byPatient(patientId), { activeOnly }],
     queryFn: async () => {
       const url = `${API_ROUTES.EHR.MEDICATIONS.BY_PATIENT(patientId)}?activeOnly=${activeOnly}`;
-      const response = await yottadbApiClient.get<EhrMedication[]>(url);
+      const response = await apiClient.get<EhrMedication[]>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -52,7 +52,7 @@ export function useCreateEhrMedication() {
 
   return useMutation({
     mutationFn: async (medication: CreateEhrMedicationRequest) => {
-      const response = await yottadbApiClient.post<EhrMedication>(
+      const response = await apiClient.post<EhrMedication>(
         API_ROUTES.EHR.MEDICATIONS.CREATE,
         medication
       );
@@ -80,7 +80,7 @@ export function useDiscontinueEhrMedication() {
 
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const response = await yottadbApiClient.post<EhrMedication>(
+      const response = await apiClient.post<EhrMedication>(
         API_ROUTES.EHR.MEDICATIONS.DISCONTINUE(id),
         { reason }
       );

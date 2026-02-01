@@ -43,6 +43,8 @@ export interface WorkflowNode {
 /** Node configuration */
 export interface NodeConfig {
   // Action node
+  /** Connector ID (e.g., "opd", "pharmacy", "billing", "http") */
+  connector?: string;
   /** Action to perform */
   action?: string;
   /** Parameters for the action */

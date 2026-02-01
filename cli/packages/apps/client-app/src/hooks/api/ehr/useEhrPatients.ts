@@ -6,7 +6,7 @@
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
-import { yottadbApiClient } from "@/lib/api/yottadb-client";
+import { apiClient } from "@/lib/api/yottadb-client";
 import type {
   EhrPatient,
   EhrPatientBanner,
@@ -45,10 +45,14 @@ export function useEhrPatients(params?: EhrPagination & EhrPatientSearchCriteria
       if (params?.status) queryParams.set("status", params.status);
 
       const url = `${API_ROUTES.EHR.PATIENTS.LIST}?${queryParams.toString()}`;
-      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrPatient>>(url);
+      const response = await apiClient.get<EhrPaginatedResponse<EhrPatient>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
+
+      // Debug logging
+      console.log('API Response:', response.data);
+      console.log('First patient from API:', response.data.items?.[0]);
 
       logPHI("ehr_patients", undefined, { action: "list", count: response.data.items.length });
       return response.data;
@@ -66,7 +70,7 @@ export function useEhrPatientSearch(criteria: EhrPatientSearchCriteria, enabled 
   return useQuery({
     queryKey: [...EHR_PATIENT_QUERY_KEYS.all, "search", criteria],
     queryFn: async () => {
-      const response = await yottadbApiClient.post<EhrPaginatedResponse<EhrPatient>>(
+      const response = await apiClient.post<EhrPaginatedResponse<EhrPatient>>(
         API_ROUTES.EHR.PATIENTS.SEARCH,
         criteria
       );
@@ -91,11 +95,17 @@ export function useEhrPatient(id: string) {
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.detail(id),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET(id));
+      console.log('Fetching patient with ID:', id);
+      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET(id));
 
-      if (response.error) throw new Error(response.error.message);
+      console.log('Patient detail response:', response);
+      if (response.error) {
+        console.error('Patient fetch error:', response.error);
+        throw new Error(response.error.message);
+      }
       if (!response.data) throw new Error("No data returned");
 
+      console.log('Patient data:', response.data);
       logPHI("ehr_patients", id, { action: "view" });
       return response.data;
     },
@@ -113,7 +123,7 @@ export function useEhrPatientByMrn(mrn: string) {
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.byMrn(mrn),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET_BY_MRN(mrn));
+      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET_BY_MRN(mrn));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -135,7 +145,7 @@ export function useEhrPatientBanner(id: string) {
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.banner(id),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrPatientBanner>(API_ROUTES.EHR.PATIENTS.BANNER(id));
+      const response = await apiClient.get<EhrPatientBanner>(API_ROUTES.EHR.PATIENTS.BANNER(id));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -157,7 +167,7 @@ export function useCreateEhrPatient() {
 
   return useMutation({
     mutationFn: async (patient: CreateEhrPatientRequest) => {
-      const response = await yottadbApiClient.post<EhrPatient>(API_ROUTES.EHR.PATIENTS.CREATE, patient);
+      const response = await apiClient.post<EhrPatient>(API_ROUTES.EHR.PATIENTS.CREATE, patient);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -181,7 +191,7 @@ export function useUpdateEhrPatient() {
   return useMutation({
     mutationFn: async (patient: UpdateEhrPatientRequest) => {
       const { id, ...updates } = patient;
-      const response = await yottadbApiClient.put<EhrPatient>(API_ROUTES.EHR.PATIENTS.UPDATE(id), updates);
+      const response = await apiClient.put<EhrPatient>(API_ROUTES.EHR.PATIENTS.UPDATE(id), updates);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -206,7 +216,7 @@ export function useDeleteEhrPatient() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.delete(API_ROUTES.EHR.PATIENTS.DELETE(id));
+      const response = await apiClient.delete(API_ROUTES.EHR.PATIENTS.DELETE(id));
 
       if (response.error) throw new Error(response.error.message);
 

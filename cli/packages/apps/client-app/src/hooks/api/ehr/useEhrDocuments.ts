@@ -37,7 +37,7 @@ export function useEhrPatientDocuments(patientId: string, pagination?: EhrPagina
       if (pagination?.offset) queryParams.set("offset", String(pagination.offset));
 
       const url = `${API_ROUTES.EHR.DOCUMENTS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
-      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrDocument>>(url);
+      const response = await apiClient.get<EhrPaginatedResponse<EhrDocument>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -59,7 +59,7 @@ export function useEhrVisitDocuments(visitId: string) {
   return useQuery({
     queryKey: EHR_DOCUMENT_QUERY_KEYS.byVisit(visitId),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.BY_VISIT(visitId));
+      const response = await apiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.BY_VISIT(visitId));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -81,7 +81,7 @@ export function useEhrDocument(id: string) {
   return useQuery({
     queryKey: EHR_DOCUMENT_QUERY_KEYS.detail(id),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.GET(id));
+      const response = await apiClient.get<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.GET(id));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -103,7 +103,7 @@ export function useEhrUnsignedDocuments() {
   return useQuery({
     queryKey: EHR_DOCUMENT_QUERY_KEYS.unsigned(),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.UNSIGNED);
+      const response = await apiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.UNSIGNED);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -125,7 +125,7 @@ export function useCreateEhrDocument() {
 
   return useMutation({
     mutationFn: async (document: CreateEhrDocumentRequest) => {
-      const response = await yottadbApiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.CREATE, document);
+      const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.CREATE, document);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -153,7 +153,7 @@ export function useUpdateEhrDocument() {
   return useMutation({
     mutationFn: async (document: UpdateEhrDocumentRequest) => {
       const { id, ...updates } = document;
-      const response = await yottadbApiClient.put<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.UPDATE(id), updates);
+      const response = await apiClient.put<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.UPDATE(id), updates);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -180,7 +180,7 @@ export function useSignEhrDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.SIGN(id), {});
+      const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.SIGN(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -205,7 +205,7 @@ export function useCosignEhrDocument() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.COSIGN(id), {});
+      const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.COSIGN(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -229,7 +229,7 @@ export function useCreateEhrAddendum() {
 
   return useMutation({
     mutationFn: async ({ parentDocumentId, content }: { parentDocumentId: string; content: string }) => {
-      const response = await yottadbApiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.ADDENDUM(parentDocumentId), {
+      const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.ADDENDUM(parentDocumentId), {
         content,
       });
 
@@ -258,7 +258,7 @@ export function useDeleteEhrDocument() {
 
   return useMutation({
     mutationFn: async ({ id, patientId }: { id: string; patientId: string }) => {
-      const response = await yottadbApiClient.delete(API_ROUTES.EHR.DOCUMENTS.DELETE(id));
+      const response = await apiClient.delete(API_ROUTES.EHR.DOCUMENTS.DELETE(id));
 
       if (response.error) throw new Error(response.error.message);
 

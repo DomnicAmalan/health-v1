@@ -33,7 +33,7 @@ import {
   Pill,
   Stethoscope,
 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import {
   PatientBanner,
@@ -69,7 +69,30 @@ function PatientChartInner() {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
   const { patientId } = Route.useParams();
-  const [activeTab, setActiveTab] = useState("summary");
+
+  // Initialize activeTab from URL hash
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || "summary";
+  });
+
+  // Update URL hash when tab changes
+  useEffect(() => {
+    window.location.hash = activeTab;
+  }, [activeTab]);
+
+  // Listen to hash changes (browser back/forward)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        setActiveTab(hash);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Dialog states
   const [showNoteDialog, setShowNoteDialog] = useState(false);
@@ -136,23 +159,17 @@ function PatientChartInner() {
   }
 
   return (
-    <Box className="space-y-6" role="main" aria-label={`Patient chart for ${patient.firstName} ${patient.lastName}`}>
-      {/* Back Button */}
-      <Button variant="ghost" size="sm" onClick={handleBack}>
-        <ChevronLeft className="h-4 w-4 mr-1" />
-        Back to Patients
-      </Button>
+    <Box className="space-y-6 p-6" role="main" aria-label={`Patient chart for ${patient.firstName} ${patient.lastName}`}>
+        {/* Patient Banner */}
+        <PatientBanner
+          patient={patient}
+          allergies={allergies}
+          onViewChart={handleViewChart}
+          onViewAllergies={handleViewAllergies}
+        />
 
-      {/* Patient Banner */}
-      <PatientBanner
-        patient={patient}
-        allergies={allergies}
-        onViewChart={handleViewChart}
-        onViewAllergies={handleViewAllergies}
-      />
-
-      {/* Chart Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Chart Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start">
           <TabsTrigger value="summary" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />

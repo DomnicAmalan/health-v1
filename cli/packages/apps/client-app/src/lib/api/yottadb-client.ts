@@ -92,6 +92,9 @@ class YottaDBApiClient extends BaseApiClient {
 // Export singleton instance
 export const yottadbApiClient = new YottaDBApiClient();
 
+// Alias for cleaner imports
+export const apiClient = yottadbApiClient;
+
 /**
  * Hook to access the YottaDB API client
  * Returns the singleton yottadbApiClient instance

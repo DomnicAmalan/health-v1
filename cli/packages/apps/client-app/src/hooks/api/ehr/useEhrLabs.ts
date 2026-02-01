@@ -37,7 +37,7 @@ export function useEhrPatientLabs(patientId: string, pagination?: EhrPagination)
       if (pagination?.offset) queryParams.set("offset", String(pagination.offset));
 
       const url = `${API_ROUTES.EHR.LABS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
-      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrLabResult>>(url);
+      const response = await apiClient.get<EhrPaginatedResponse<EhrLabResult>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -59,7 +59,7 @@ export function useEhrVisitLabs(visitId: string) {
   return useQuery({
     queryKey: EHR_LAB_QUERY_KEYS.byVisit(visitId),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.BY_VISIT(visitId));
+      const response = await apiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.BY_VISIT(visitId));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -81,7 +81,7 @@ export function useEhrActionableLabs() {
   return useQuery({
     queryKey: EHR_LAB_QUERY_KEYS.actionable(),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.ACTIONABLE);
+      const response = await apiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.ACTIONABLE);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -103,7 +103,7 @@ export function useCreateEhrLabResult() {
 
   return useMutation({
     mutationFn: async (labResult: CreateEhrLabResultRequest) => {
-      const response = await yottadbApiClient.post<EhrLabResult>(API_ROUTES.EHR.LABS.CREATE, labResult);
+      const response = await apiClient.post<EhrLabResult>(API_ROUTES.EHR.LABS.CREATE, labResult);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");

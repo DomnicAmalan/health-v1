@@ -321,6 +321,12 @@ function RootComponentInner() {
   const handleTabAction = (actionId: string, tabPath: string) => {
     // Handle different actions
     switch (actionId) {
+      case "back":
+        // Navigate back to parent route
+        if (tabPath.startsWith("/patients/")) {
+          navigate({ to: "/patients" });
+        }
+        break;
       case "refresh":
         // Reload the current tab
         window.location.reload();
@@ -341,6 +347,14 @@ function RootComponentInner() {
         }
         break;
       }
+      case "print":
+        // Print current page
+        window.print();
+        break;
+      case "export":
+        // Export to PDF - placeholder
+        console.log("Export to PDF:", tabPath);
+        break;
       case "view-details":
       case "edit-patient":
       case "new-note":
@@ -350,13 +364,14 @@ function RootComponentInner() {
       case "new-patient":
       case "new-order":
       case "view-pending":
-      case "export":
-      case "print":
       case "link-actions":
       case "view-templates":
-        // Example: You could dispatch an event or call a callback here
+        // These actions require page-specific context
+        // They should be handled by the page component
+        console.log("Action requires page context:", actionId);
         break;
       default:
+        console.log("Unhandled action:", actionId);
     }
   };
 

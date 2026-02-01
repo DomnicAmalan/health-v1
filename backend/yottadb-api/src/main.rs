@@ -3056,6 +3056,36 @@ W "]"
     }
 }
 
+// === Stub Handlers ===
+
+// Stub handler for latest vitals
+async fn get_patient_latest_vitals(Path(patient_ien): Path<i64>) -> impl IntoResponse {
+    // TODO: Implement latest vitals query based on patient_ien
+    // For now, return empty vitals object
+    let _ = patient_ien; // Suppress unused variable warning
+
+    Json(serde_json::json!({
+        "bloodPressure": null,
+        "heartRate": null,
+        "temperature": null,
+        "respiratoryRate": null,
+        "oxygenSaturation": null,
+        "weight": null,
+        "height": null,
+        "bmi": null
+    }))
+}
+
+// Stub handler for actionable labs
+async fn get_actionable_labs() -> impl IntoResponse {
+    // TODO: Implement actionable labs query
+    // For now, return empty items array
+    Json(serde_json::json!({
+        "items": [],
+        "total": 0
+    }))
+}
+
 // === Main ===
 
 #[tokio::main]
@@ -3086,6 +3116,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/v1/ehr/visits", post(create_visit))
         // Vitals
         .route("/api/v1/ehr/patients/{ien}/vitals", get(get_patient_vitals))
+        .route("/api/v1/ehr/patients/{ien}/vitals/latest", get(get_patient_latest_vitals))
         .route("/api/v1/ehr/vitals", post(create_vital))
         // Medications
         .route("/api/v1/ehr/patients/{ien}/medications", get(get_patient_medications))
@@ -3093,6 +3124,7 @@ async fn main() -> anyhow::Result<()> {
         // Lab Results
         .route("/api/v1/ehr/patients/{ien}/labs", get(get_patient_labs))
         .route("/api/v1/ehr/labs", post(create_lab_result))
+        .route("/api/v1/ehr/labs/actionable", get(get_actionable_labs))
         // Documents
         .route("/api/v1/ehr/patients/{ien}/documents", get(get_patient_documents))
         .route("/api/v1/ehr/documents", post(create_document))

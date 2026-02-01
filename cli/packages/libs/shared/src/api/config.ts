@@ -8,58 +8,20 @@ export const API_CONFIG = {
     typeof window !== "undefined"
       ? import.meta.env.VITE_API_BASE_URL || "http://localhost:4117"
       : "http://localhost:4117",
-  API_PREFIX: import.meta.env?.VITE_API_PREFIX || "/api",
+  API_PREFIX: import.meta.env?.VITE_API_PREFIX || "",
   TIMEOUT: Number(import.meta.env?.VITE_API_TIMEOUT) || 30000, // 30 seconds
   RETRY_ATTEMPTS: Number(import.meta.env?.VITE_API_RETRY_ATTEMPTS) || 3,
   RETRY_DELAY: Number(import.meta.env?.VITE_API_RETRY_DELAY) || 1000, // 1 second
 } as const;
 
-/**
- * Paths that should NOT have the API prefix automatically added
- * These are typically system-level endpoints or routes that don't use the /api prefix on backend
- * Health check and Vault direct API routes are excluded (Vault UI connects directly to vault service)
- */
-const EXCLUDED_PATHS = [
-  "/health",
-  "/v1/sys", // Vault system routes (e.g., /v1/sys/realm, /v1/sys/policies/acl) - direct to vault service
-  "/v1/realm", // Vault realm routes (e.g., /v1/realm/{id}/sys/apps) - direct to vault service
-  "/v1/secret", // Vault secret routes (e.g., /v1/secret/data/{path}) - direct to vault service
-  "/v1/auth", // Vault auth routes (e.g., /v1/auth/userpass/login) - direct to vault service
-  "/sys", // Unversioned vault routes (if any)
-  "/secret", // Unversioned vault secret routes
-  "/auth", // Unversioned vault auth routes
-];
+
 
 /**
- * Check if a path should have the API prefix added
- */
-function shouldAddApiPrefix(path: string): boolean {
-  // If path already starts with /api, don't add it again
-  if (path.startsWith("/api")) {
-    return false;
-  }
-
-  // If path is in excluded list, don't add prefix
-  // Check for exact match or if path starts with excluded path followed by /
-  if (EXCLUDED_PATHS.some((excluded) => path === excluded || path.startsWith(`${excluded}/`))) {
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Create full API URL with automatic prefix handling
+ * Create full API URL - just concatenate BASE_URL + path
+ * BASE_URL from env should already include /api if needed
  */
 export function getApiUrl(path: string): string {
   const baseUrl = API_CONFIG.BASE_URL.replace(/\/$/, "");
-  let apiPath = path.startsWith("/") ? path : `/${path}`;
-
-  // Automatically add API prefix if needed
-  if (shouldAddApiPrefix(apiPath)) {
-    const prefix = API_CONFIG.API_PREFIX.replace(/\/$/, "");
-    apiPath = `${prefix}${apiPath}`;
-  }
-
+  const apiPath = path.startsWith("/") ? path : `/${path}`;
   return `${baseUrl}${apiPath}`;
 }

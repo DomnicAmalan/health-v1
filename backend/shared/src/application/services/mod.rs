@@ -3,6 +3,7 @@
 pub mod ehr_service;
 pub mod rules_engine;
 pub mod workflow_engine;
+pub mod connectors;
 
 pub use ehr_service::{
     EhrService, SharedEhrService,

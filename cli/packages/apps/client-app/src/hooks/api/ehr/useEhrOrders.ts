@@ -39,7 +39,7 @@ export function useEhrPatientOrders(patientId: string, pagination?: EhrPaginatio
       if (pagination?.offset) queryParams.set("offset", String(pagination.offset));
 
       const url = `${API_ROUTES.EHR.ORDERS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
-      const response = await yottadbApiClient.get<EhrPaginatedResponse<EhrOrder>>(url);
+      const response = await apiClient.get<EhrPaginatedResponse<EhrOrder>>(url);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -61,7 +61,7 @@ export function useEhrVisitOrders(visitId: string) {
   return useQuery({
     queryKey: EHR_ORDER_QUERY_KEYS.byVisit(visitId),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.BY_VISIT(visitId));
+      const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.BY_VISIT(visitId));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -83,7 +83,7 @@ export function useEhrOrder(id: string) {
   return useQuery({
     queryKey: EHR_ORDER_QUERY_KEYS.detail(id),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrOrder>(API_ROUTES.EHR.ORDERS.GET(id));
+      const response = await apiClient.get<EhrOrder>(API_ROUTES.EHR.ORDERS.GET(id));
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -105,7 +105,7 @@ export function useEhrUnsignedOrders() {
   return useQuery({
     queryKey: EHR_ORDER_QUERY_KEYS.unsigned(),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.UNSIGNED);
+      const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.UNSIGNED);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -127,7 +127,7 @@ export function useEhrStatOrders() {
   return useQuery({
     queryKey: EHR_ORDER_QUERY_KEYS.stat(),
     queryFn: async () => {
-      const response = await yottadbApiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.STAT);
+      const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.STAT);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -149,7 +149,7 @@ export function useCreateEhrOrder() {
 
   return useMutation({
     mutationFn: async (order: CreateEhrOrderRequest) => {
-      const response = await yottadbApiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.CREATE, order);
+      const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.CREATE, order);
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -179,7 +179,7 @@ export function useSignEhrOrder() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.SIGN(id), {});
+      const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.SIGN(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -204,7 +204,7 @@ export function useDiscontinueEhrOrder() {
 
   return useMutation({
     mutationFn: async ({ id, reason }: DiscontinueEhrOrderRequest) => {
-      const response = await yottadbApiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.DISCONTINUE(id), { reason });
+      const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.DISCONTINUE(id), { reason });
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -231,7 +231,7 @@ export function useHoldEhrOrder() {
 
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const response = await yottadbApiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.HOLD(id), { reason });
+      const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.HOLD(id), { reason });
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");
@@ -255,7 +255,7 @@ export function useReleaseEhrOrder() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await yottadbApiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.RELEASE(id), {});
+      const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.RELEASE(id), {});
 
       if (response.error) throw new Error(response.error.message);
       if (!response.data) throw new Error("No data returned");

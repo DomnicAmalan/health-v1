@@ -80,8 +80,7 @@ function detectDeviceType(): string {
 }
 
 /**
- * Request interceptor - adds request ID, timestamp, and app headers
- * Session-based auth: No token injection needed, session is in cookie
+ * Request interceptor - adds request ID, timestamp, app headers, and auth token
  */
 export async function requestInterceptor(
   _url: string,
@@ -91,6 +90,12 @@ export async function requestInterceptor(
     "Content-Type": "application/json",
     ...config.headers,
   };
+
+  // Add Authorization header with Bearer token if available
+  const token = getAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   // Add request ID for audit trail
   const requestId = crypto.randomUUID();

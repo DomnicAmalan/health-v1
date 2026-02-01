@@ -27,7 +27,7 @@ const Spinner = () => (
   <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
 );
 import { cn } from "@lazarus-life/ui-components/utils";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Outlet, useMatches } from "@tanstack/react-router";
 import {
   ChevronLeft,
   ChevronRight,
@@ -40,15 +40,20 @@ import { useState, useCallback } from "react";
 import { ProtectedRoute } from "@/components/security/ProtectedRoute";
 import { useEhrPatients, useEhrPatientSearch } from "@/hooks/api/ehr";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useOpenTab, useTabStore } from "@/stores/tabStore";
 
 export const Route = createFileRoute("/patients")({
   component: PatientsRouteComponent,
 });
 
 function PatientsRouteComponent() {
+  const matches = useMatches();
+  const hasChildRoute = matches.some(match => match.id.includes('/$patientId'));
+
   return (
     <ProtectedRoute requiredPermission={PERMISSIONS.PATIENTS.VIEW} resource="patients">
-      <PatientsPage />
+      {!hasChildRoute && <PatientsPage />}
+      <Outlet />
     </ProtectedRoute>
   );
 }
@@ -56,6 +61,7 @@ function PatientsRouteComponent() {
 function PatientsPage() {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
+  const openTab = useOpenTab();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(0);
   const pageSize = 20;
@@ -78,11 +84,33 @@ function PatientsPage() {
   const patients = isSearchMode ? searchResults?.items : listResults?.items;
   const totalPatients = isSearchMode ? searchResults?.total : listResults?.total;
 
+  // Debug logging
+  console.log('Patients data:', patients);
+  if (patients && patients.length > 0) {
+    console.log('First patient:', patients[0]);
+    console.log('First patient ID:', patients[0]?.id);
+  }
+
   const handleSelectPatient = useCallback(
-    (patientId: string) => {
-      navigate({ to: "/patients/$patientId", params: { patientId } });
+    (patientId: string, patientName: string, patientMrn: string) => {
+      console.log('Patient clicked! ID:', patientId);
+      console.log('Opening patient tab:', patientName);
+
+      openTab({
+        label: `${patientName} | Patient (${patientMrn})`,
+        path: `/patients/${patientId}`,
+        icon: <User className="h-4 w-4" />,
+        closable: true,
+        groupId: "patients",
+        groupType: "module",
+        groupLabel: "Patients",
+        groupColor: "#3B82F6", // Blue for patients
+        patientId: patientId,
+        patientName: patientName,
+        requiredPermission: PERMISSIONS.PATIENTS.VIEW,
+      }, (path) => navigate({ to: path as "/" | (string & {}) }));
     },
-    [navigate]
+    [openTab, navigate]
   );
 
   const calculateAge = (dateOfBirth: string): number => {
@@ -218,7 +246,7 @@ function PatientsPage() {
                     <TableRow
                       key={patient.id}
                       className="cursor-pointer hover:bg-accent/50"
-                      onClick={() => handleSelectPatient(patient.id)}
+                      onClick={() => handleSelectPatient(patient.id, `${patient.lastName}, ${patient.firstName}`, patient.mrn || patient.id)}
                     >
                       <TableCell>
                         <Flex align="center" gap="sm">
