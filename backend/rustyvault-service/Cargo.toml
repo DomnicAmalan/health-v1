@@ -55,7 +55,7 @@ bcrypt.workspace = true
 # RustyVault-specific dependencies
 zeroize = { version = "1.7", features = ["zeroize_derive"] }
 arc-swap = "1"
-radix_trie = "0.2"
+radix_trie = "0.3"
 dashmap = "6.1"
 blake3 = "1.8"
 base64.workspace = true
