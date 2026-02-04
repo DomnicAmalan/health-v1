@@ -6,4 +6,7 @@ pub mod routes;
 pub mod handlers;
 pub mod middleware;
 
+#[macro_use]
+pub mod macros;
+
 

@@ -1,38 +1,17 @@
-import path from "node:path";
+/**
+ * Vite Configuration for RustyVault UI
+ * ✨ DRY: Using createViteConfig factory (was 38 lines, now 9)
+ */
+
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { createViteConfig } from "../../config/vite-base.config";
 
-export default defineConfig({
+export default createViteConfig({
+  port: 8215,
+  appName: "rustyvault-ui",
   plugins: [TanStackRouterVite(), react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+  manualChunks: {
+    "ui-vendor": ["@lazarus-life/ui-components"],
   },
-  server: {
-    port: Number(process.env.VITE_PORT) || 4115,
-    host: process.env.VITE_HOST || "localhost",
-  },
-  build: {
-    outDir: "dist",
-    sourcemap: false,
-    minify: "esbuild",
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom"],
-          "query-vendor": ["@tanstack/react-query"],
-          "ui-vendor": ["@lazarus-life/ui-components"],
-          shared: ["@lazarus-life/shared"],
-        },
-      },
-    },
-  },
-  // Optimize dependencies to ensure CSS is processed
-  optimizeDeps: {
-    entries: ["src/main.tsx"],
-    include: ["react", "react-dom", "@tanstack/react-query"],
-  },
-  envPrefix: ["VITE_"],
 });

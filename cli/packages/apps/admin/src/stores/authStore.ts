@@ -1,177 +1,36 @@
 /**
- * Auth Store
- * Authentication state management with Zustand and Immer
+ * Auth Store - Admin App
+ * Session-based authentication using shared auth factory
  */
 
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { login as apiLogin, logout as apiLogout, getUserInfo } from "@/lib/api/auth";
+import { createAuthStore, type SessionAuthConfig } from "@lazarus-life/shared";
 import type { UserInfoWithOrg } from "@/lib/api/types";
+import { login as apiLogin, logout as apiLogout, getUserInfo } from "@/lib/api/auth";
 
-const USER_STORAGE_KEY = "admin_auth_user";
+// Configure session-based auth
+const config: SessionAuthConfig<UserInfoWithOrg> = {
+  strategy: "session",
+  storageKey: "admin_auth_user",
+  api: {
+    login: async (email: string, password: string) => {
+      const response = await apiLogin({ email, password });
 
-/**
- * Load user from sessionStorage
- */
-function loadUserFromStorage(): UserInfoWithOrg | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
+      // Session is automatically set via cookie, we just store user info
+      const userInfo: UserInfoWithOrg = {
+        id: response.user.id,
+        email: response.user.email,
+        username: response.user.username || response.user.email,
+        name: response.user.username || response.user.email,
+        role: response.user.role,
+        permissions: response.user.permissions || [],
+      };
 
-  const userStr = sessionStorage.getItem(USER_STORAGE_KEY);
-  if (!userStr) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(userStr) as UserInfoWithOrg;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Save user to sessionStorage
- */
-function saveUserToStorage(user: UserInfoWithOrg | null): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (user) {
-    sessionStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-  } else {
-    sessionStorage.removeItem(USER_STORAGE_KEY);
-  }
-}
-
-interface AuthState {
-  user: UserInfoWithOrg | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-}
-
-interface AuthActions {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  setUser: (user: UserInfoWithOrg) => void;
-  clearError: () => void;
-  checkAuth: () => Promise<void>;
-}
-
-type AuthStore = AuthState & AuthActions;
-
-// Initialize state from sessionStorage if available
-const storedUser = loadUserFromStorage();
-
-const initialState: AuthState = {
-  user: storedUser,
-  isAuthenticated: !!storedUser,
-  isLoading: false,
-  error: null,
+      return { user: userInfo };
+    },
+    logout: apiLogout,
+    getUserInfo,
+  },
 };
 
-export const useAuthStore = create<AuthStore>()(
-  immer((set) => ({
-    ...initialState,
-
-    login: async (email: string, password: string) => {
-      set((state) => {
-        state.isLoading = true;
-        state.error = null;
-      });
-
-      try {
-        const response = await apiLogin({ email, password });
-
-        // Session is automatically set via cookie, we just store user info
-        const userInfo: UserInfoWithOrg = {
-          id: response.user.id,
-          email: response.user.email,
-          username: response.user.username || response.user.email,
-          name: response.user.username || response.user.email,
-          role: response.user.role,
-          permissions: response.user.permissions || [],
-        };
-
-        set((state) => {
-          state.user = userInfo;
-          state.isAuthenticated = true;
-          state.isLoading = false;
-          state.error = null;
-        });
-
-        // Persist user info to sessionStorage (for UI state, not auth)
-        saveUserToStorage(userInfo);
-      } catch (error) {
-        set((state) => {
-          state.error = error instanceof Error ? error.message : "Login failed";
-          state.isLoading = false;
-          state.isAuthenticated = false;
-        });
-        throw error;
-      }
-    },
-
-    logout: async () => {
-      try {
-        // Session cookie will be cleared by the backend
-        await apiLogout();
-      } catch (_error) {
-      } finally {
-        // Clear state and storage
-        set((state) => {
-          state.user = null;
-          state.isAuthenticated = false;
-          state.error = null;
-        });
-
-        saveUserToStorage(null);
-        // Clear all session storage
-        sessionStorage.clear();
-      }
-    },
-
-    setUser: (user: UserInfoWithOrg) => {
-      set((state) => {
-        state.user = user;
-        state.isAuthenticated = true;
-        state.error = null;
-      });
-      saveUserToStorage(user);
-    },
-
-    clearError: () => {
-      set((state) => {
-        state.error = null;
-      });
-    },
-
-    checkAuth: async () => {
-      set((state) => {
-        state.isLoading = true;
-      });
-
-      try {
-        // Check authentication via session cookie
-        // Session is automatically sent by browser
-        const userInfo = await getUserInfo();
-        set((state) => {
-          state.user = userInfo;
-          state.isAuthenticated = true;
-          state.isLoading = false;
-        });
-        saveUserToStorage(userInfo);
-      } catch (_error) {
-        // If session is invalid, clear auth state
-        set((state) => {
-          state.user = null;
-          state.isAuthenticated = false;
-          state.isLoading = false;
-        });
-        saveUserToStorage(null);
-      }
-    },
-  }))
-);
+// Create store with shared implementation
+export const useAuthStore = createAuthStore(config);

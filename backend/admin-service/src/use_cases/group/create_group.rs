@@ -1,5 +1,6 @@
 use shared::domain::entities::Group;
 use shared::domain::repositories::GroupRepository;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::infrastructure::zanzibar::RelationshipStore;
 use shared::AppResult;
 use uuid::Uuid;
@@ -27,12 +28,8 @@ impl CreateGroupUseCase {
         description: Option<String>,
         organization_id: Option<Uuid>,
     ) -> AppResult<Group> {
-        // Validate inputs
-        if name.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Group name cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(name, "Group name")?;
 
         // Check if group already exists
         if let Some(_existing) = self.group_repository

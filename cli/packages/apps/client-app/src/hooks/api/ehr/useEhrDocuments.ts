@@ -15,6 +15,8 @@ import type {
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_DOCUMENT_QUERY_KEYS = {
   all: ["ehr", "documents"] as const,
   byPatient: (patientId: string) => [...EHR_DOCUMENT_QUERY_KEYS.all, "patient", patientId] as const,
@@ -39,8 +41,7 @@ export function useEhrPatientDocuments(patientId: string, pagination?: EhrPagina
       const url = `${API_ROUTES.EHR.DOCUMENTS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
       const response = await apiClient.get<EhrPaginatedResponse<EhrDocument>>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_documents", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -61,8 +62,7 @@ export function useEhrVisitDocuments(visitId: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.BY_VISIT(visitId));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_documents", undefined, { action: "list_by_visit", visitId });
       return response.data;
@@ -83,8 +83,7 @@ export function useEhrDocument(id: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.GET(id));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_documents", id, { action: "view" });
       return response.data;
@@ -105,8 +104,7 @@ export function useEhrUnsignedDocuments() {
     queryFn: async () => {
       const response = await apiClient.get<EhrDocument[]>(API_ROUTES.EHR.DOCUMENTS.UNSIGNED);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_documents", undefined, { action: "list_unsigned" });
       return response.data;
@@ -127,8 +125,7 @@ export function useCreateEhrDocument() {
     mutationFn: async (document: CreateEhrDocumentRequest) => {
       const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.CREATE, document);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_documents", response.data.id, { action: "create" });
       return response.data;
@@ -155,8 +152,7 @@ export function useUpdateEhrDocument() {
       const { id, ...updates } = document;
       const response = await apiClient.put<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.UPDATE(id), updates);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_documents", id, { action: "update" });
       return response.data;
@@ -182,8 +178,7 @@ export function useSignEhrDocument() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.SIGN(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_documents", id, { action: "sign" });
       return response.data;
@@ -207,8 +202,7 @@ export function useCosignEhrDocument() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrDocument>(API_ROUTES.EHR.DOCUMENTS.COSIGN(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_documents", id, { action: "cosign" });
       return response.data;
@@ -233,8 +227,7 @@ export function useCreateEhrAddendum() {
         content,
       });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_documents", response.data.id, { action: "addendum", parentDocumentId });
       return response.data;

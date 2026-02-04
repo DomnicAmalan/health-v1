@@ -16,6 +16,8 @@ import type {
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_VITAL_QUERY_KEYS = {
   all: ["ehr", "vitals"] as const,
   byPatient: (patientId: string) => [...EHR_VITAL_QUERY_KEYS.all, "patient", patientId] as const,
@@ -41,8 +43,7 @@ export function useEhrPatientVitals(patientId: string, pagination?: EhrPaginatio
       const url = `${API_ROUTES.EHR.VITALS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
       const response = await apiClient.get<EhrPaginatedResponse<EhrVital>>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_vitals", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -63,8 +64,7 @@ export function useEhrVisitVitals(visitId: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrVital[]>(API_ROUTES.EHR.VITALS.BY_VISIT(visitId));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_vitals", undefined, { action: "list_by_visit", visitId });
       return response.data;
@@ -87,8 +87,7 @@ export function useEhrLatestVitals(patientId: string) {
         API_ROUTES.EHR.VITALS.LATEST(patientId)
       );
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_vitals", undefined, { action: "view_latest", patientId });
       return response.data;
@@ -110,8 +109,7 @@ export function useEhrVitalTrend(patientId: string, vitalType: EhrVitalType, lim
       const url = `${API_ROUTES.EHR.VITALS.TREND(patientId, vitalType)}?limit=${limit}`;
       const response = await apiClient.get<EhrVital[]>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_vitals", undefined, { action: "view_trend", patientId, vitalType });
       return response.data;
@@ -132,8 +130,7 @@ export function useCreateEhrVital() {
     mutationFn: async (vital: CreateEhrVitalRequest) => {
       const response = await apiClient.post<EhrVital>(API_ROUTES.EHR.VITALS.CREATE, vital);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_vitals", response.data.id, { action: "create" });
       return response.data;

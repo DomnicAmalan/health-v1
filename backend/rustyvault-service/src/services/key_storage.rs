@@ -118,14 +118,21 @@ impl KeyStorage {
     }
 
     /// Start background cleanup task
+    /// SECURITY: Runs every 30 seconds to minimize window of expired key access
+    /// Previous 5-minute interval created a vulnerability window
     fn start_cleanup_task(&self) {
         let keys = self.keys.clone();
         tokio::spawn(async move {
-            let mut interval = tokio::time::interval(Duration::from_secs(300)); // Every 5 minutes
+            let mut interval = tokio::time::interval(Duration::from_secs(30)); // Every 30 seconds
             loop {
                 interval.tick().await;
                 let mut keys_guard = keys.lock().await;
+                let before_count = keys_guard.len();
                 keys_guard.retain(|_, stored| !stored.is_expired());
+                let removed = before_count - keys_guard.len();
+                if removed > 0 {
+                    tracing::debug!("Cleaned up {} expired key entries", removed);
+                }
             }
         });
     }

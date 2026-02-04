@@ -3,12 +3,10 @@
  * Immutable append-only audit log with encryption support
  */
 
-import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
-import type { AuditEntry } from "@lazarus-life/shared/types/audit";
+import { SECURITY_CONFIG, maskObject, type AuditEntry } from "@lazarus-life/shared";
 import type { AuditActions, AuditState, AuditStore } from "@lazarus-life/shared/types/stores/audit";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { maskObject } from "@/lib/api/masking";
 
 // Re-export types
 export type { AuditState, AuditActions, AuditStore };

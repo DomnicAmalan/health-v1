@@ -113,16 +113,18 @@ pub struct AppRoleBackend {
     pool: PgPool,
     token_store: TokenStore,
     mount_path: String,
+    bcrypt_cost: u32,
 }
 
 impl AppRoleBackend {
     /// Create a new AppRole backend
-    pub fn new(pool: PgPool, mount_path: &str) -> Self {
+    pub fn new(pool: PgPool, mount_path: &str, bcrypt_cost: u32) -> Self {
         let token_store = TokenStore::new(pool.clone());
         AppRoleBackend {
             pool,
             token_store,
             mount_path: mount_path.to_string(),
+            bcrypt_cost,
         }
     }
 
@@ -425,7 +427,7 @@ impl AppRoleBackend {
 
         // Generate secret ID
         let secret_id = Uuid::new_v4().to_string();
-        let secret_id_hash = hash(&secret_id, DEFAULT_COST)
+        let secret_id_hash = hash(&secret_id, self.bcrypt_cost)
             .map_err(|e| VaultError::Vault(format!("failed to hash secret_id: {}", e)))?;
         
         let accessor = Uuid::new_v4();
@@ -534,6 +536,7 @@ impl AppRoleBackend {
     }
 
     /// Validate a secret_id
+    /// SECURITY: Uses constant-time comparison to prevent timing attacks
     async fn validate_secret_id(&self, approle_id: Uuid, secret_id: &str) -> VaultResult<()> {
         // Get all active secret IDs for this role
         let rows: Vec<(Uuid, String, i32, Option<DateTime<Utc>>)> = sqlx::query_as(
@@ -549,60 +552,85 @@ impl AppRoleBackend {
         .map_err(|e| VaultError::Vault(format!("failed to lookup secret_id: {}", e)))?;
 
         let now = Utc::now();
-        
+        let mut found_valid_id: Option<Uuid> = None;
+        let mut found_exhausted = false;
+
+        // SECURITY: Always verify ALL hashes to maintain constant timing
+        // This prevents timing attacks that could distinguish between:
+        // - Invalid hash format (fast error)
+        // - Valid hash, wrong secret (slow bcrypt comparison)
         for (id, hash, num_uses, expires_at) in rows {
-            // Check expiration
-            if let Some(exp) = expires_at {
-                if now > exp {
-                    continue;
-                }
-            }
+            // Check expiration (but still verify hash for constant time)
+            let is_expired = if let Some(exp) = expires_at {
+                now > exp
+            } else {
+                false
+            };
 
-            // Verify hash
-            if verify(secret_id, &hash).unwrap_or(false) {
-                // Valid secret_id found
-                
-                // Check uses
+            // ALWAYS perform bcrypt verification regardless of expiration
+            // This maintains constant-time behavior
+            let hash_valid = verify(secret_id, &hash).unwrap_or_else(|_e| {
+                // Even on error, maintain consistent timing
+                // Log internally but don't expose timing difference
+                tracing::debug!("Bcrypt verification error for secret_id");
+                false
+            });
+
+            // Only consider this secret_id if hash matches AND not expired
+            if hash_valid && !is_expired {
                 if num_uses == 0 {
-                    // Mark as inactive (one-time use expired)
-                    sqlx::query(
-                        "UPDATE vault_approle_secret_ids SET is_active = false WHERE id = $1"
-                    )
-                    .bind(id)
-                    .execute(&self.pool)
-                    .await
-                    .ok();
-                    return Err(VaultError::Vault("secret_id has no remaining uses".to_string()));
+                    // Mark as exhausted but continue checking other hashes
+                    found_exhausted = true;
+                } else if found_valid_id.is_none() {
+                    // Found first valid, non-exhausted secret_id
+                    found_valid_id = Some(id);
                 }
-
-                // Decrement uses if limited
-                if num_uses > 0 {
-                    sqlx::query(
-                        r#"
-                        UPDATE vault_approle_secret_ids 
-                        SET num_uses_remaining = num_uses_remaining - 1, last_used_at = NOW()
-                        WHERE id = $1
-                        "#
-                    )
-                    .bind(id)
-                    .execute(&self.pool)
-                    .await
-                    .ok();
-                } else {
-                    // Just update last_used_at
-                    sqlx::query(
-                        "UPDATE vault_approle_secret_ids SET last_used_at = NOW() WHERE id = $1"
-                    )
-                    .bind(id)
-                    .execute(&self.pool)
-                    .await
-                    .ok();
-                }
-
-                return Ok(());
             }
         }
 
+        // After checking all hashes (constant time complete), process result
+        if let Some(valid_id) = found_valid_id {
+            // Decrement uses atomically
+            let result: Option<(i32,)> = sqlx::query_as(
+                r#"
+                UPDATE vault_approle_secret_ids
+                SET num_uses_remaining = CASE
+                        WHEN num_uses_remaining > 0 THEN num_uses_remaining - 1
+                        ELSE num_uses_remaining
+                    END,
+                    last_used_at = NOW()
+                WHERE id = $1 AND (num_uses_remaining > 0 OR num_uses_remaining = -1)
+                RETURNING num_uses_remaining
+                "#
+            )
+            .bind(valid_id)
+            .fetch_optional(&self.pool)
+            .await
+            .ok()
+            .flatten();
+
+            match result {
+                Some((remaining,)) => {
+                    if remaining == 0 {
+                        // Secret ID exhausted, mark inactive
+                        sqlx::query("UPDATE vault_approle_secret_ids SET is_active = false WHERE id = $1")
+                            .bind(valid_id)
+                            .execute(&self.pool)
+                            .await
+                            .ok();
+                    }
+                    return Ok(());
+                }
+                None => {
+                    // Race condition or invalid state
+                    return Err(VaultError::Vault("secret_id validation failed".to_string()));
+                }
+            }
+        } else if found_exhausted {
+            return Err(VaultError::Vault("secret_id has no remaining uses".to_string()));
+        }
+
+        // Generic error message - don't reveal whether secret_id exists
         Err(VaultError::Vault("invalid secret_id".to_string()))
     }
 

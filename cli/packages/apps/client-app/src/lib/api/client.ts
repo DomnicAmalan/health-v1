@@ -1,9 +1,9 @@
 /**
  * Client App API Client
- * Token-based authentication with interceptors using the shared base client
+ * Token-based authentication using shared API client factory
  */
 
-import { type ApiResponse, BaseApiClient, type RequestConfig } from "@lazarus-life/shared/api";
+import { createApiClient, type ApiClient } from "@lazarus-life/shared";
 import {
   errorInterceptor,
   getAccessToken,
@@ -16,92 +16,28 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4117
 const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
 
 /**
- * Client-specific API client with interceptor support
+ * Client API Client - Token-based authentication
  */
-class ClientApiClient extends BaseApiClient {
-  constructor() {
-    super({
-      baseUrl: API_BASE_URL,
-      timeout: API_TIMEOUT,
-      credentials: "include",
-      retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
-      retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
-      auth: {
-        type: "bearer",
-        getToken: () => getAccessToken(),
-      },
-      requestInterceptors: [
-        async (url, config) => {
-          // Apply the existing request interceptor
-          const intercepted = await requestInterceptor(url, config);
-          return { ...config, headers: intercepted.headers || config.headers };
-        },
-      ],
-      debug: import.meta.env.DEV,
-    });
-  }
-
-  /**
-   * Override request to use existing interceptors for full compatibility
-   */
-  override async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    console.log(endpoint, config, 'api client request');
-    const url = this.buildUrl(endpoint);
-    const timeout = config.timeout || this.timeout;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    try {
-      // Apply request interceptor
-      const interceptedConfig = await requestInterceptor(url, {
-        ...config,
-        signal: config.signal || controller.signal,
-      });
-
-      const response = await fetch(url, {
-        method: config.method || "GET",
-        headers: interceptedConfig.headers,
-        body: config.body ? JSON.stringify(config.body) : undefined,
-        signal: interceptedConfig.signal,
-        credentials: "include",
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const error = errorInterceptor(response, url);
-        return { error };
-      }
-
-      return await responseInterceptor<T>(response, url);
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof Error && error.name === "AbortError") {
-        return {
-          error: {
-            message: "Request timeout",
-            code: "TIMEOUT",
-          },
-        };
-      }
-
-      const apiError = errorInterceptor(error, url);
-      return { error: apiError };
-    }
-  }
-
-  /**
-   * Set authentication tokens
-   */
-  setAuthTokens(accessToken: string | null, refreshToken: string | null): void {
-    setTokens(accessToken, refreshToken);
-  }
-}
+const clientApiClient = createApiClient({
+  strategy: "token",
+  baseUrl: API_BASE_URL,
+  getAccessToken,
+  setTokens,
+  tokenPrefix: "Bearer",
+  requestInterceptor,
+  responseInterceptor,
+  errorInterceptor,
+  options: {
+    timeout: API_TIMEOUT,
+    credentials: "include",
+    retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
+    retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
+    debug: import.meta.env.DEV,
+  },
+}) as ApiClient & { setAuthTokens: (accessToken: string | null, refreshToken: string | null) => void };
 
 // Legacy ApiClient class for backward compatibility
-export class ApiClient extends ClientApiClient {
+export class ApiClient {
   constructor(
     _baseUrl: string = API_BASE_URL,
     _timeout: number = API_TIMEOUT,
@@ -109,17 +45,26 @@ export class ApiClient extends ClientApiClient {
     _retryDelay: number = Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000
   ) {
     // Parameters are unused - kept for backward compatibility
-    // The actual configuration is set in ClientApiClient parent
-    super();
+    // The actual client is the singleton clientApiClient
   }
+
+  // Delegate all methods to clientApiClient
+  request = clientApiClient.request.bind(clientApiClient);
+  get = clientApiClient.get.bind(clientApiClient);
+  post = clientApiClient.post.bind(clientApiClient);
+  put = clientApiClient.put.bind(clientApiClient);
+  patch = clientApiClient.patch.bind(clientApiClient);
+  delete = clientApiClient.delete.bind(clientApiClient);
+  setAuthTokens = clientApiClient.setAuthTokens.bind(clientApiClient);
 }
 
 // Export singleton instance
-export const apiClient = new ApiClient();
+export const apiClient = clientApiClient;
+
 /**
  * Hook to access the API client
  * Returns the singleton apiClient instance
  */
-export function useApiClient(): ApiClient {
-  return apiClient;
+export function useApiClient(): typeof clientApiClient {
+  return clientApiClient;
 }

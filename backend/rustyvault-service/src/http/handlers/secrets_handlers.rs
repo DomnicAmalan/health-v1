@@ -1,6 +1,7 @@
 //! Secrets operation handlers
-//! 
+//!
 //! Supports both global secrets and realm-scoped secrets.
+//! ✨ DRY: Using validation macros for UUID parsing
 
 use axum::{
     extract::{Path, State},
@@ -12,6 +13,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 use crate::http::routes::AppState;
 use crate::logical::{Request as LogicalRequest, Operation};
+use crate::parse_uuid;
 
 /// Handle secret operations by routing through core
 async fn handle_secret_request(
@@ -216,12 +218,8 @@ pub async fn read_realm_secret(
     realm_id: String,
     path: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": "Invalid realm ID"})),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_id = parse_uuid!(realm_id, "realm ID");
     
     handle_realm_secret_request(state, realm_id, Method::GET, format!("secret/{}", path), None).await
 }
@@ -233,12 +231,8 @@ pub async fn write_realm_secret(
     path: String,
     payload: axum::extract::Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": "Invalid realm ID"})),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_id = parse_uuid!(realm_id, "realm ID");
     
     let data = payload.as_object().cloned();
     handle_realm_secret_request(state, realm_id, Method::POST, format!("secret/{}", path), data).await
@@ -250,12 +244,8 @@ pub async fn delete_realm_secret(
     realm_id: String,
     path: String,
 ) -> Result<StatusCode, (StatusCode, Json<Value>)> {
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": "Invalid realm ID"})),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_id = parse_uuid!(realm_id, "realm ID");
     
     match handle_realm_secret_request(state, realm_id, Method::DELETE, format!("secret/{}", path), None).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
@@ -269,12 +259,8 @@ pub async fn list_realm_secrets(
     realm_id: String,
     prefix: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": "Invalid realm ID"})),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_id = parse_uuid!(realm_id, "realm ID");
     
     // For list, ensure path ends with /
     let list_path = if prefix.is_empty() {

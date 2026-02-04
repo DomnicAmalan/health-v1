@@ -105,15 +105,17 @@ async fn async_main() -> Result<(), String> {
     let userpass_backend = Arc::new(modules::auth::UserPassBackend::new(
         pool.clone(),
         "auth/userpass",
+        settings.auth.bcrypt_cost,
     ));
-    info!("UserPass backend initialized");
+    info!("UserPass backend initialized with bcrypt cost {}", settings.auth.bcrypt_cost);
 
     // Initialize AppRole backend
     let approle_backend = Arc::new(modules::auth::AppRoleBackend::new(
         pool.clone(),
         "auth/approle",
+        settings.auth.bcrypt_cost,
     ));
-    info!("AppRole backend initialized");
+    info!("AppRole backend initialized with bcrypt cost {}", settings.auth.bcrypt_cost);
 
     // Initialize Realm store
     let realm_store = Arc::new(modules::realm::RealmStore::new(pool.clone()));
@@ -128,6 +130,17 @@ async fn async_main() -> Result<(), String> {
     info!("Key storage service initialized");
 
     // Create app state
+    // Initialize audit logger (HIPAA compliance)
+    let audit_logger = Arc::new(services::audit_logger::AuditLogger::new(pool.clone()));
+    info!("Audit logger initialized (HIPAA 7-year retention)");
+
+    // Initialize rate limiter (brute force protection)
+    let rate_limiter = Arc::new(http::middleware::RateLimiter::new(
+        5,  // 5 attempts
+        60, // per 60 seconds
+    ));
+    info!("Rate limiter initialized (5 attempts/min, 15min lockout)");
+
     let app_state = Arc::new(http::routes::AppState {
         core: vault_core,
         policy_store: Some(policy_store),
@@ -137,6 +150,8 @@ async fn async_main() -> Result<(), String> {
         realm_store: Some(realm_store),
         app_store: Some(app_store),
         key_storage,
+        audit_logger,
+        rate_limiter,
     });
 
     // Create router - using closures to capture state

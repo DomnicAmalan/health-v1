@@ -3,9 +3,8 @@
  * Request and response interceptors for security, audit logging, and error handling
  */
 
-import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
+import { SECURITY_CONFIG, maskObject } from "@lazarus-life/shared";
 import type { ApiError } from "@lazarus-life/shared/api/baseClient";
-import { maskObject } from "./masking";
 import type { ApiResponse, RequestConfig } from "./types";
 
 const TOKEN_STORAGE_KEY_ACCESS = "auth_access_token";

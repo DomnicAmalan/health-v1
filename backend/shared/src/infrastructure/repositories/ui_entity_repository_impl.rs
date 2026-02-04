@@ -5,6 +5,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 pub struct UiEntityRepositoryImpl {
     pool: PgPool,
@@ -37,7 +38,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(page.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_page_by_id(&self, id: Uuid) -> AppResult<Option<UiPage>> {
@@ -45,7 +46,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_page_by_name(&self, name: &str) -> AppResult<Option<UiPage>> {
@@ -53,7 +54,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(name)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_page_by_path(&self, path: &str) -> AppResult<Option<UiPage>> {
@@ -61,14 +62,14 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(path)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn list_pages(&self) -> AppResult<Vec<UiPage>> {
         sqlx::query_as::<_, UiPage>(UI_PAGE_LIST)
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn update_page(&self, page: UiPage) -> AppResult<UiPage> {
@@ -87,7 +88,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(page.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn soft_delete_page(&self, id: Uuid, deleted_by: Option<Uuid>) -> AppResult<()> {
@@ -96,7 +97,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(deleted_by)
             .execute(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))?;
+            .map_db_error("query", "record")?;
         Ok(())
     }
 
@@ -120,7 +121,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(button.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_button_by_id(&self, id: Uuid) -> AppResult<Option<UiButton>> {
@@ -128,7 +129,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_button_by_page_and_id(&self, page_id: Uuid, button_id: &str) -> AppResult<Option<UiButton>> {
@@ -137,7 +138,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(button_id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn list_buttons_for_page(&self, page_id: Uuid) -> AppResult<Vec<UiButton>> {
@@ -145,7 +146,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(page_id)
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn update_button(&self, button: UiButton) -> AppResult<UiButton> {
@@ -165,7 +166,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(button.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn soft_delete_button(&self, id: Uuid, deleted_by: Option<Uuid>) -> AppResult<()> {
@@ -174,7 +175,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(deleted_by)
             .execute(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))?;
+            .map_db_error("query", "record")?;
         Ok(())
     }
 
@@ -198,7 +199,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(field.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_field_by_id(&self, id: Uuid) -> AppResult<Option<UiField>> {
@@ -206,7 +207,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_field_by_page_and_id(&self, page_id: Uuid, field_id: &str) -> AppResult<Option<UiField>> {
@@ -215,7 +216,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(field_id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn list_fields_for_page(&self, page_id: Uuid) -> AppResult<Vec<UiField>> {
@@ -223,7 +224,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(page_id)
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn update_field(&self, field: UiField) -> AppResult<UiField> {
@@ -243,7 +244,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(field.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn soft_delete_field(&self, id: Uuid, deleted_by: Option<Uuid>) -> AppResult<()> {
@@ -252,7 +253,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(deleted_by)
             .execute(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))?;
+            .map_db_error("query", "record")?;
         Ok(())
     }
 
@@ -275,7 +276,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(api.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_api_by_id(&self, id: Uuid) -> AppResult<Option<UiApiEndpoint>> {
@@ -283,7 +284,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn find_api_by_endpoint_and_method(&self, endpoint: &str, method: &str) -> AppResult<Option<UiApiEndpoint>> {
@@ -292,14 +293,14 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(method)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn list_apis(&self) -> AppResult<Vec<UiApiEndpoint>> {
         sqlx::query_as::<_, UiApiEndpoint>(UI_API_LIST)
             .fetch_all(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn update_api(&self, api: UiApiEndpoint) -> AppResult<UiApiEndpoint> {
@@ -318,7 +319,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(api.version)
             .fetch_one(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
     }
 
     async fn soft_delete_api(&self, id: Uuid, deleted_by: Option<Uuid>) -> AppResult<()> {
@@ -327,7 +328,7 @@ impl UiEntityRepository for UiEntityRepositoryImpl {
             .bind(deleted_by)
             .execute(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))?;
+            .map_db_error("query", "record")?;
         Ok(())
     }
 }

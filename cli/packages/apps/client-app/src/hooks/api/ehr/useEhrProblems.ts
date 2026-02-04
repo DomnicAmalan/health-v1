@@ -14,6 +14,8 @@ import type {
   EhrPaginatedResponse,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_PROBLEM_QUERY_KEYS = {
   all: ["ehr", "problems"] as const,
   lists: () => [...EHR_PROBLEM_QUERY_KEYS.all, "list"] as const,
@@ -34,8 +36,7 @@ export function useEhrPatientProblems(patientId: string, includeInactive = false
       const url = `${API_ROUTES.EHR.PROBLEMS.BY_PATIENT(patientId)}?includeInactive=${includeInactive}`;
       const response = await apiClient.get<EhrProblem[]>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_problems", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -56,8 +57,7 @@ export function useEhrProblem(id: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrProblem>(API_ROUTES.EHR.PROBLEMS.GET(id));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_problems", id, { action: "view" });
       return response.data;
@@ -78,8 +78,7 @@ export function useCreateEhrProblem() {
     mutationFn: async (problem: CreateEhrProblemRequest) => {
       const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.CREATE, problem);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_problems", response.data.id, { action: "create" });
       return response.data;
@@ -102,8 +101,7 @@ export function useUpdateEhrProblem() {
       const { id, ...updates } = problem;
       const response = await apiClient.put<EhrProblem>(API_ROUTES.EHR.PROBLEMS.UPDATE(id), updates);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_problems", id, { action: "update" });
       return response.data;
@@ -126,8 +124,7 @@ export function useResolveEhrProblem() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.RESOLVE(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_problems", id, { action: "resolve" });
       return response.data;
@@ -150,8 +147,7 @@ export function useReactivateEhrProblem() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrProblem>(API_ROUTES.EHR.PROBLEMS.REACTIVATE(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_problems", id, { action: "reactivate" });
       return response.data;

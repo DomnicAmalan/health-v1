@@ -27,14 +27,13 @@ services:
   api-service:
     build:
       context: .
-      dockerfile: backend/api-service/Dockerfile
-      # Build args for dev mode
+      dockerfile: backend/Dockerfile
+      target: api-service-prod
       args:
         - BUILD_MODE=${BUILD_MODE:-release}
         - SKIP_CHECKS=${SKIP_CHECKS:-false}
-        - CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
-      # Uncomment to skip build and use existing image:
-      # target: builder
+        - CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-4}
+        - SQLX_OFFLINE=${SQLX_OFFLINE:-true}
     container_name: health-api-service
     environment:
       # Server
@@ -179,11 +178,13 @@ services:
   rustyvault-service:
     build:
       context: .
-      dockerfile: backend/rustyvault-service/Dockerfile
+      dockerfile: backend/Dockerfile
+      target: rustyvault-service-prod
       args:
         BUILD_MODE: ${BUILD_MODE:-release}
         SKIP_CHECKS: ${SKIP_CHECKS:-false}
-        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-4}
+        SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
     container_name: health-rustyvault-service
     environment:
       # Server
@@ -287,12 +288,13 @@ services:
   yottadb-api:
     build:
       context: .
-      dockerfile: backend/yottadb-api/Dockerfile
-      target: runner-dev
+      dockerfile: backend/Dockerfile
+      target: yottadb-api-prod
       args:
         BUILD_MODE: release
         SKIP_CHECKS: ${SKIP_CHECKS:-false}
-        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-4}
+        SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
     container_name: health-yottadb-api
     environment:
       PORT: 8080
@@ -324,6 +326,13 @@ volumes:
   rustyvault_data:
     driver: local
   rustyvault_service_data:
+    driver: local
+  # Cargo caching volumes for faster Rust builds
+  cargo_registry:
+    driver: local
+  cargo_git:
+    driver: local
+  cargo_target:
     driver: local
 
 networks:

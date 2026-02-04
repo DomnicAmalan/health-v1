@@ -14,6 +14,8 @@ use crate::modules::policy::PolicyStore;
 use crate::modules::realm::{RealmStore, RealmApplicationStore};
 use crate::config::VaultSettings;
 use crate::services::key_storage::KeyStorage;
+use crate::services::audit_logger::AuditLogger;
+use crate::http::middleware::RateLimiter;
 
 /// App state for routes
 pub struct AppState {
@@ -25,6 +27,8 @@ pub struct AppState {
     pub realm_store: Option<Arc<RealmStore>>,
     pub app_store: Option<Arc<RealmApplicationStore>>,
     pub key_storage: Arc<KeyStorage>,
+    pub audit_logger: Arc<AuditLogger>,
+    pub rate_limiter: Arc<RateLimiter>,
 }
 
 /// Create the vault API router

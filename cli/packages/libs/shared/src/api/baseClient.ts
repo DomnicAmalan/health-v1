@@ -4,6 +4,7 @@
  * Supports all authentication methods, interceptors, retry logic, and transformations
  */
 
+import type { z } from "zod";
 import { API_CONFIG } from "./config";
 
 // ============================================================================
@@ -43,6 +44,14 @@ export interface RequestConfig {
   mode?: RequestMode;
   redirect?: RequestRedirect;
   referrerPolicy?: ReferrerPolicy;
+
+  // ✨ Zod Validation Support
+  /** Zod schema to validate request body before sending */
+  validateRequest?: z.ZodType<unknown>;
+  /** Zod schema to validate response data after receiving */
+  validateResponse?: z.ZodType<unknown>;
+  /** Throw error on validation failure (default: false in prod, true in dev) */
+  throwOnValidationError?: boolean;
 }
 
 export type RequestInterceptor = (
@@ -71,7 +80,7 @@ export type AuthErrorHandler = (response: Response, url: string) => Promise<bool
 
 export type AuthType = "none" | "bearer" | "basic" | "apiKey" | "cookie" | "custom";
 
-export interface AuthConfig {
+export interface ApiAuthConfig {
   type: AuthType;
 
   // Bearer token auth
@@ -121,7 +130,7 @@ export interface BaseClientConfig {
   retryMethods?: HttpMethod[]; // Methods to retry (default: ["GET", "HEAD", "OPTIONS"])
 
   // Authentication
-  auth?: AuthConfig;
+  auth?: ApiAuthConfig;
 
   // Interceptors
   requestInterceptors?: RequestInterceptor[];
@@ -179,7 +188,7 @@ export class BaseApiClient {
   protected readonly retryMethods: HttpMethod[];
 
   // Authentication
-  protected readonly auth?: AuthConfig;
+  protected readonly auth?: ApiAuthConfig;
 
   // Interceptors
   protected readonly requestInterceptors: RequestInterceptor[];
@@ -390,6 +399,24 @@ export class BaseApiClient {
   }
 
   // ==========================================================================
+  // Validation Helpers
+  // ==========================================================================
+
+  /**
+   * Format Zod validation errors into human-readable messages
+   * @param error - ZodError from failed validation
+   * @returns Formatted error message string
+   */
+  protected formatZodError(error: z.ZodError): string {
+    const issues = error.issues.map(issue => {
+      const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+      return `${path}${issue.message}`;
+    });
+
+    return issues.join('; ');
+  }
+
+  // ==========================================================================
   // Core Request Method
   // ==========================================================================
 
@@ -402,6 +429,30 @@ export class BaseApiClient {
     const timeout = config.timeout || this.timeout;
 
     this.log(`${method} ${url}`, { config });
+
+    // ✨ Validate request body if schema provided
+    if (config.validateRequest && config.body) {
+      const result = config.validateRequest.safeParse(config.body);
+      if (!result.success) {
+        const errorMessage = this.formatZodError(result.error);
+        this.log(`Request validation failed: ${errorMessage}`);
+
+        const shouldThrow = config.throwOnValidationError ?? this.debug;
+        if (shouldThrow) {
+          throw new Error(`Request validation failed: ${errorMessage}`);
+        }
+
+        return {
+          error: {
+            message: "Invalid request body",
+            code: "VALIDATION_ERROR",
+            details: result.error.flatten(),
+          },
+        };
+      }
+      // Use validated data
+      config.body = result.data;
+    }
 
     // Create abort controller for timeout
     const controller = new AbortController();
@@ -519,6 +570,26 @@ export class BaseApiClient {
       // Transform response if configured
       if (this.transformResponse) {
         data = this.transformResponse(data);
+      }
+
+      // ✨ Validate response data if schema provided
+      if (config.validateResponse && data !== undefined) {
+        const result = config.validateResponse.safeParse(data);
+        if (!result.success) {
+          const errorMessage = this.formatZodError(result.error);
+          this.log(`Response validation failed: ${errorMessage}`);
+
+          const shouldThrow = config.throwOnValidationError ?? this.debug;
+          if (shouldThrow) {
+            throw new Error(`Response validation failed: ${errorMessage}`);
+          }
+
+          // Production: log warning, allow through (graceful degradation)
+          // Dev: logged above, continue
+        } else {
+          // Use validated data
+          data = result.data;
+        }
       }
 
       return { data: data as T, status: response.status, headers: response.headers };

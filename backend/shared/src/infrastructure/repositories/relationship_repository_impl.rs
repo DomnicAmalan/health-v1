@@ -4,6 +4,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 pub struct RelationshipRepositoryImpl {
     pool: PgPool,
@@ -58,7 +59,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_id(&self, id: Uuid) -> AppResult<Option<Relationship>> {
@@ -75,7 +76,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_user(&self, user: &str) -> AppResult<Vec<Relationship>> {
@@ -93,7 +94,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_object(&self, object: &str) -> AppResult<Vec<Relationship>> {
@@ -111,7 +112,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_user_and_relation(&self, user: &str, relation: &str) -> AppResult<Vec<Relationship>> {
@@ -130,7 +131,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_user_object_relation(&self, user: &str, object: &str, relation: &str) -> AppResult<Option<Relationship>> {
@@ -150,7 +151,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn delete(&self, id: Uuid) -> AppResult<()> {
@@ -163,7 +164,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -204,7 +205,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn delete_by_tuple(&self, user: &str, relation: &str, object: &str) -> AppResult<()> {
@@ -224,7 +225,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -245,7 +246,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -264,7 +265,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
     
     async fn find_by_user_and_org(&self, user: &str, organization_id: Uuid) -> AppResult<Vec<Relationship>> {
@@ -283,7 +284,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
     
     async fn find_by_organization(&self, organization_id: Uuid) -> AppResult<Vec<Relationship>> {
@@ -302,7 +303,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
     
     async fn find_by_user_object_relation_org(
@@ -330,7 +331,7 @@ impl RelationshipRepository for RelationshipRepositoryImpl {
             )
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| crate::shared::AppError::Database(e))
+            .map_db_error("query", "record")
         } else {
             self.find_by_user_object_relation(user, object, relation).await
         }

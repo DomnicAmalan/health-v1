@@ -3,13 +3,13 @@
  * All API request and response types used across the application
  */
 
-import type { User } from "../types/user";
+import type { User } from "../schemas/user";
 
 // Re-export base client types for convenience
 export type {
   ApiError,
   ApiResponse,
-  AuthConfig,
+  ApiAuthConfig,
   AuthErrorHandler,
   AuthProvider,
   AuthType,

@@ -5,7 +5,7 @@
  */
 
 import { SECURITY_CONFIG } from "@lazarus-life/shared/constants/security";
-import type { AuditEntry } from "@lazarus-life/shared/types/audit";
+import type { AuditEntry } from "@lazarus-life/shared/schemas/audit";
 import type {
   AuditActions,
   AuditState,

@@ -3,8 +3,7 @@
  * Hook for contextual masking based on user role
  */
 
-import type { MaskingLevel } from "@lazarus-life/shared/constants/security";
-import { useCallback } from "react";
+import type { MaskingLevel } from "@lazarus-life/shared";
 import {
   contextualMask,
   maskCreditCard,
@@ -12,7 +11,8 @@ import {
   maskMRN,
   maskPhone,
   maskSSN,
-} from "@/lib/api/masking";
+} from "@lazarus-life/shared";
+import { useCallback } from "react";
 import { useAuth } from "@/stores/authStore";
 
 /**

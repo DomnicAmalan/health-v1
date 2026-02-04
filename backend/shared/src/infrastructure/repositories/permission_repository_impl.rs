@@ -4,6 +4,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 pub struct PermissionRepositoryImpl {
     pool: PgPool,
@@ -34,7 +35,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_id(&self, id: Uuid) -> AppResult<Option<Permission>> {
@@ -49,7 +50,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_name(&self, name: &str) -> AppResult<Option<Permission>> {
@@ -64,7 +65,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_resource_and_action(&self, resource: &str, action: &str) -> AppResult<Option<Permission>> {
@@ -80,7 +81,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn list(&self) -> AppResult<Vec<Permission>> {
@@ -94,7 +95,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn list_by_resource(&self, resource: &str) -> AppResult<Vec<Permission>> {
@@ -110,7 +111,7 @@ impl PermissionRepository for PermissionRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 }
 

@@ -1,0 +1,17 @@
+{
+  "name": "@lazarus-life/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./vite-base": "./vite-base.config.ts"
+  },
+  "peerDependencies": {
+    "vite": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

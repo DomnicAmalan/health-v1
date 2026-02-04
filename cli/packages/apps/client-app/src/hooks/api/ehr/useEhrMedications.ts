@@ -13,6 +13,8 @@ import type {
   UpdateEhrMedicationRequest,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_MEDICATION_QUERY_KEYS = {
   all: ["ehr", "medications"] as const,
   byPatient: (patientId: string) =>
@@ -32,8 +34,7 @@ export function useEhrPatientMedications(patientId: string, activeOnly = true) {
       const url = `${API_ROUTES.EHR.MEDICATIONS.BY_PATIENT(patientId)}?activeOnly=${activeOnly}`;
       const response = await apiClient.get<EhrMedication[]>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_medications", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -57,8 +58,7 @@ export function useCreateEhrMedication() {
         medication
       );
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_medications", response.data.id, { action: "create" });
       return response.data;
@@ -85,8 +85,7 @@ export function useDiscontinueEhrMedication() {
         { reason }
       );
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_medications", id, { action: "discontinue" });
       return response.data;

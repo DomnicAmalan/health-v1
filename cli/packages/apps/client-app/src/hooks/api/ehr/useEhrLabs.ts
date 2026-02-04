@@ -14,6 +14,8 @@ import type {
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_LAB_QUERY_KEYS = {
   all: ["ehr", "labs"] as const,
   byPatient: (patientId: string) => [...EHR_LAB_QUERY_KEYS.all, "patient", patientId] as const,
@@ -39,8 +41,7 @@ export function useEhrPatientLabs(patientId: string, pagination?: EhrPagination)
       const url = `${API_ROUTES.EHR.LABS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
       const response = await apiClient.get<EhrPaginatedResponse<EhrLabResult>>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_labs", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -61,8 +62,7 @@ export function useEhrVisitLabs(visitId: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.BY_VISIT(visitId));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_labs", undefined, { action: "list_by_visit", visitId });
       return response.data;
@@ -83,8 +83,7 @@ export function useEhrActionableLabs() {
     queryFn: async () => {
       const response = await apiClient.get<EhrLabResult[]>(API_ROUTES.EHR.LABS.ACTIONABLE);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_labs", undefined, { action: "list_actionable" });
       return response.data;
@@ -105,8 +104,7 @@ export function useCreateEhrLabResult() {
     mutationFn: async (labResult: CreateEhrLabResultRequest) => {
       const response = await apiClient.post<EhrLabResult>(API_ROUTES.EHR.LABS.CREATE, labResult);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_labs", response.data.id, { action: "create" });
       return response.data;

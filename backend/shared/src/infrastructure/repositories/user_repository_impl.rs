@@ -1,6 +1,6 @@
 use crate::domain::entities::User;
 use crate::domain::repositories::UserRepository;
-use crate::infrastructure::database::DatabaseService;
+use crate::infrastructure::database::{DatabaseService, RepositoryErrorExt};
 use crate::shared::AppResult;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
@@ -169,7 +169,7 @@ impl UserRepository for UserRepositoryImpl {
         )
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         Ok(row.map(|r| r.into()))
     }
 
@@ -209,7 +209,8 @@ impl UserRepository for UserRepositoryImpl {
         )
         .fetch_one(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
+use crate::infrastructure::database::RepositoryErrorExt;
         Ok(row.into())
     }
 
@@ -223,7 +224,7 @@ impl UserRepository for UserRepositoryImpl {
         )
         .execute(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -247,7 +248,7 @@ impl UserRepository for UserRepositoryImpl {
         )
         .fetch_all(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         Ok(rows.into_iter().map(|r| r.into()).collect())
     }
 }

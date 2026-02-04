@@ -1,7 +1,11 @@
 use shared::domain::entities::UiField;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::domain::repositories::UiEntityRepository;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::infrastructure::zanzibar::RelationshipStore;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
+use shared::infrastructure::validation::validate_non_empty;
 use uuid::Uuid;
 use std::sync::Arc;
 
@@ -29,24 +33,10 @@ impl RegisterFieldUseCase {
         label: &str,
         field_type: &str,
     ) -> AppResult<UiField> {
-        // Validate inputs
-        if field_id.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Field ID cannot be empty".to_string(),
-            ));
-        }
-
-        if label.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Field label cannot be empty".to_string(),
-            ));
-        }
-
-        if field_type.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Field type cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(field_id, "Field ID")?;
+        validate_non_empty(label, "Field label")?;
+        validate_non_empty(field_type, "Field type")?;
 
         // Verify page exists
         let _page = self.ui_entity_repository

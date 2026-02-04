@@ -13,6 +13,8 @@ import type {
   UpdateEhrAllergyRequest,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_ALLERGY_QUERY_KEYS = {
   all: ["ehr", "allergies"] as const,
   byPatient: (patientId: string) => [...EHR_ALLERGY_QUERY_KEYS.all, "patient", patientId] as const,
@@ -32,8 +34,7 @@ export function useEhrPatientAllergies(patientId: string) {
         API_ROUTES.EHR.ALLERGIES.BY_PATIENT(patientId)
       );
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_allergies", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -54,8 +55,7 @@ export function useCreateEhrAllergy() {
     mutationFn: async (allergy: CreateEhrAllergyRequest) => {
       const response = await apiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.CREATE, allergy);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_allergies", response.data.id, { action: "create" });
       return response.data;
@@ -77,8 +77,7 @@ export function useVerifyEhrAllergy() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrAllergy>(API_ROUTES.EHR.ALLERGIES.VERIFY(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_allergies", id, { action: "verify" });
       return response.data;

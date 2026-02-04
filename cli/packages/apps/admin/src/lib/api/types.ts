@@ -16,7 +16,7 @@ export type {
   SetupStatusResponse,
 } from "@lazarus-life/shared/api/types";
 
-import type { UserInfo as SharedUserInfo } from "@lazarus-life/shared/types/user";
+import type { UserInfo as SharedUserInfo } from "@lazarus-life/shared/schemas/user";
 
 // Note: Admin app uses snake_case for LoginResponse, but shared uses camelCase
 // This is a compatibility layer - consider migrating admin to camelCase

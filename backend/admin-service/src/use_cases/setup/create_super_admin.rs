@@ -1,6 +1,9 @@
 use shared::domain::entities::User;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::domain::repositories::{SetupRepository, UserRepository};
+use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
+use shared::infrastructure::validation::validate_non_empty;
 use bcrypt::{hash, DEFAULT_COST};
 use uuid::Uuid;
 
@@ -35,18 +38,15 @@ impl CreateSuperAdminUseCase {
             ));
         }
 
-        // Validate inputs
+        // Validate inputs (email has additional validation beyond emptiness)
         if email.trim().is_empty() || !email.contains('@') {
             return Err(shared::AppError::Validation(
                 "Invalid email address".to_string(),
             ));
         }
 
-        if username.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Username cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(username, "Username")?;
 
         if password.len() < 8 {
             return Err(shared::AppError::Validation(

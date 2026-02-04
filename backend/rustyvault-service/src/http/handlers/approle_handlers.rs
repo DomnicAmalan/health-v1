@@ -1,4 +1,5 @@
 //! HTTP handlers for AppRole authentication
+//! ✨ DRY: Using validation macros for context and UUID parsing
 
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ use uuid::Uuid;
 
 use crate::http::routes::AppState;
 use crate::modules::auth::CreateAppRoleRequest;
+use crate::{require_context, parse_uuid, require_field};
 
 // ============================================================================
 // Realm-Scoped AppRole Handlers
@@ -21,19 +23,9 @@ pub async fn list_realm_approles(
     state: Arc<AppState>,
     realm_id: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match approle_backend.list_roles(Some(realm_uuid)).await {
         Ok(roles) => Ok(Json(json!({
@@ -53,19 +45,9 @@ pub async fn create_realm_approle(
     role_name: String,
     payload: Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     let policies: Vec<String> = payload
         .get("policies")
@@ -133,19 +115,9 @@ pub async fn read_realm_approle(
     realm_id: String,
     role_name: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match approle_backend.get_role(&role_name, Some(realm_uuid)).await {
         Ok(Some(role)) => Ok(Json(json!({
@@ -178,19 +150,9 @@ pub async fn delete_realm_approle(
     realm_id: String,
     role_name: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match approle_backend.delete_role(&role_name, Some(realm_uuid)).await {
         Ok(_) => Ok(Json(json!({}))),
@@ -207,19 +169,9 @@ pub async fn get_realm_approle_role_id(
     realm_id: String,
     role_name: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match approle_backend.get_role_id(&role_name, Some(realm_uuid)).await {
         Ok(role_id) => Ok(Json(json!({
@@ -241,19 +193,9 @@ pub async fn generate_realm_approle_secret_id(
     role_name: String,
     payload: Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
-    let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     let metadata = payload.get("metadata").cloned();
 
@@ -279,12 +221,7 @@ pub async fn realm_approle_login(
     realm_id: String,
     payload: Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let approle_backend = state.approle_backend.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "approle auth not enabled" })),
-        )
-    })?;
+    let approle_backend = require_context!(state, approle_backend, "approle auth not enabled");
 
     let _realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
         (
@@ -303,12 +240,7 @@ pub async fn realm_approle_login(
             )
         })?;
 
-    let role_id = Uuid::parse_str(role_id_str).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid role_id format" })),
-        )
-    })?;
+    let role_id = parse_uuid!(role_id_str, "role ID");
 
     let secret_id = payload
         .get("secret_id")

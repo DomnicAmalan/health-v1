@@ -6,6 +6,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use std::sync::Arc;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 pub struct RoleRepositoryImpl {
     database_service: Arc<DatabaseService>,
@@ -54,7 +55,7 @@ impl RoleRepository for RoleRepositoryImpl {
         )
         .execute(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         // Insert permissions into Zanzibar
         // Get permission details to create Zanzibar relationships
@@ -87,7 +88,7 @@ impl RoleRepository for RoleRepositoryImpl {
         )
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         if let Some(row) = row {
             let permissions = self.get_role_permissions(row.id).await?;
@@ -121,7 +122,7 @@ impl RoleRepository for RoleRepositoryImpl {
         )
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         if let Some(row) = row {
             let permissions = self.get_role_permissions(row.id).await?;
@@ -154,7 +155,7 @@ impl RoleRepository for RoleRepositoryImpl {
         )
         .fetch_all(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         let mut roles = Vec::new();
         for row in rows {
@@ -236,7 +237,7 @@ impl RoleRepository for RoleRepositoryImpl {
         )
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         let role_name = if let Some(row) = row {
             row.name

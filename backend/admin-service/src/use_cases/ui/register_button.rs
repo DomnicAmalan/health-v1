@@ -1,7 +1,11 @@
 use shared::domain::entities::UiButton;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::domain::repositories::UiEntityRepository;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::infrastructure::zanzibar::RelationshipStore;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
+use shared::infrastructure::validation::validate_non_empty;
 use uuid::Uuid;
 use std::sync::Arc;
 
@@ -29,18 +33,9 @@ impl RegisterButtonUseCase {
         label: &str,
         action: Option<String>,
     ) -> AppResult<UiButton> {
-        // Validate inputs
-        if button_id.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Button ID cannot be empty".to_string(),
-            ));
-        }
-
-        if label.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Button label cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(button_id, "Button ID")?;
+        validate_non_empty(label, "Button label")?;
 
         // Verify page exists
         let _page = self.ui_entity_repository

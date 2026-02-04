@@ -6,6 +6,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use std::sync::Arc;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 /// Temporary struct for database deserialization (with ip_address as String)
 #[derive(Debug)]

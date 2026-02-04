@@ -1,9 +1,9 @@
 /**
- * Protected Route Component
- * Wraps TanStack Router routes to check page access before rendering
+ * Protected Route Component - Admin App
+ * Relationship-based route protection using shared component
  */
 
-import { Navigate } from "@tanstack/react-router";
+import { ProtectedRoute as SharedProtectedRoute } from "@lazarus-life/shared";
 import { useCanAccess } from "./context";
 
 interface ProtectedRouteProps {
@@ -14,7 +14,8 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Protected Route - checks page access before rendering
+ * Admin App Protected Route
+ * Wraps shared ProtectedRoute with relationship-based strategy (Zanzibar)
  */
 export function ProtectedRoute({
   children,
@@ -25,11 +26,17 @@ export function ProtectedRoute({
   const object = `page:${pageName}`;
   const canAccess = useCanAccess(relation, object, false);
 
-  if (!canAccess) {
-    return <Navigate to={fallbackPath} />;
-  }
-
-  return <>{children}</>;
+  return (
+    <SharedProtectedRoute
+      strategy="relationship"
+      relation={relation}
+      object={object}
+      canAccess={() => canAccess}
+      redirectTo={fallbackPath}
+    >
+      {children}
+    </SharedProtectedRoute>
+  );
 }
 
 /**

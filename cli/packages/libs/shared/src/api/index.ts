@@ -5,6 +5,7 @@
 // Export base client first (defines core types)
 export * from "./baseClient";
 export * from "./config";
+export * from "./createApiClient";
 // Export routes and config
 export * from "./routes";
 

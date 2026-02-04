@@ -1,7 +1,11 @@
 use shared::domain::entities::UiApiEndpoint;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::domain::repositories::UiEntityRepository;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::infrastructure::zanzibar::RelationshipStore;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
+use shared::infrastructure::validation::validate_non_empty;
 use std::sync::Arc;
 
 pub struct RegisterApiUseCase {
@@ -27,18 +31,9 @@ impl RegisterApiUseCase {
         method: &str,
         description: Option<String>,
     ) -> AppResult<UiApiEndpoint> {
-        // Validate inputs
-        if endpoint.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "API endpoint cannot be empty".to_string(),
-            ));
-        }
-
-        if method.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "HTTP method cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(endpoint, "API endpoint")?;
+        validate_non_empty(method, "HTTP method")?;
 
         // Validate HTTP method
         let method_upper = method.to_uppercase();

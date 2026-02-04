@@ -7,9 +7,9 @@
   "scripts": {
     "// === Development Commands ===": "",
     "dev": "node scripts/dev-interactive.js",
-    "dev:vault": "bun run build:libs && bun --filter=lazarus-life-vault run dev",
-    "dev:admin": "bun run build:libs && bun --filter=lazarus-life-admin run dev",
-    "dev:client": "bun run build:libs && bun --filter=lazarus-life-hims run dev",
+    "dev:vault": "./scripts/dev-app.sh lazarus-life-vault",
+    "dev:admin": "./scripts/dev-app.sh lazarus-life-admin",
+    "dev:client": "./scripts/dev-app.sh lazarus-life-hims",
     "dev:all": "echo '⚠️  Use make dev-vault, make dev-admin, or make dev-client to run individual apps'",
     "dev:libs": "bun --filter=@lazarus-life/shared --filter=@lazarus-life/ui-components run dev",
     "dev:shared": "bun --filter=@lazarus-life/shared run dev",
@@ -25,9 +25,9 @@
     "build": "bun run build:libs && bun run build:apps",
     "build:libs": "bun --filter=@lazarus-life/shared run build && bun --filter=@lazarus-life/ui-components run build",
     "build:apps": "bun --filter='packages/apps/*' run build",
-    "build:vault": "bun run build:libs && bun --filter=lazarus-life-vault run build",
-    "build:admin": "bun run build:libs && bun --filter=lazarus-life-admin run build",
-    "build:client": "bun run build:libs && bun --filter=lazarus-life-hims run build",
+    "build:vault": "./scripts/build-app.sh lazarus-life-vault",
+    "build:admin": "./scripts/build-app.sh lazarus-life-admin",
+    "build:client": "./scripts/build-app.sh lazarus-life-hims",
     "build:desktop": "bun run build:libs && bun --filter='packages/apps/*' run tauri build",
     "rebuild:libs": "bun --filter='packages/libs/*' run clean && bun run build:libs",
     "// === Linting & Quality Commands (UI only) ===": "",
@@ -79,6 +79,7 @@
     "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
+    "zod": "^4.3.6",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

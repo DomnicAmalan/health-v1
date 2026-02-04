@@ -1,4 +1,5 @@
 //! HTTP handlers for realm application management
+//! ✨ DRY: Using validation macros
 
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ use uuid::Uuid;
 
 use crate::http::routes::AppState;
 use crate::modules::realm::{CreateAppRequest, UpdateAppRequest};
+use crate::parse_uuid;
 
 /// List all applications in a realm
 pub async fn list_apps(
@@ -25,12 +27,7 @@ pub async fn list_apps(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     match app_store.list(realm_id).await {
         Ok(apps) => {
@@ -81,12 +78,7 @@ pub async fn create_app(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     // Parse request
     let app_name = payload
@@ -177,12 +169,7 @@ pub async fn get_app(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     match app_store.get_by_name(realm_id, &app_name).await {
         Ok(Some(app)) => Ok(Json(json!({
@@ -226,12 +213,7 @@ pub async fn update_app(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     // Get existing app
     let existing_app = app_store.get_by_name(realm_id, &app_name).await.map_err(|e| {
@@ -301,12 +283,7 @@ pub async fn delete_app(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     match app_store.delete_by_name(realm_id, &app_name).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
@@ -337,12 +314,7 @@ pub async fn register_default_apps(
     })?;
 
     // Parse realm ID
-    let realm_id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let realm_id = parse_uuid!(realm_id, "realm ID");
 
     match app_store.register_default_apps(realm_id).await {
         Ok(apps) => {

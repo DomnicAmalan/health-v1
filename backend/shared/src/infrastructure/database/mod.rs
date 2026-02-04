@@ -6,8 +6,10 @@ pub mod rls;
 pub mod migrations;
 pub mod db_service;
 pub mod queries;
+pub mod repository_ext;
 
 pub use local_db::LocalDb;
 pub use live_db::LiveDb;
 pub use db_service::{DatabaseService, create_pool, create_pool_with_options, create_pool_from_config};
+pub use repository_ext::RepositoryErrorExt;
 

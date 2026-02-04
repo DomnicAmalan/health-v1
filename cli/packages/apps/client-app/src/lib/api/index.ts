@@ -7,6 +7,6 @@ export * from "./audit";
 export * from "./auth";
 export * from "./client";
 export * from "./interceptors";
-export * from "./masking";
+// Masking utilities now exported from @lazarus-life/shared
 export * from "./setup";
 export * from "./types";

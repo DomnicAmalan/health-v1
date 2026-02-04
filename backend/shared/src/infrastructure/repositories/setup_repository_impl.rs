@@ -3,6 +3,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 /// Temporary struct for database deserialization
 #[derive(Debug)]
@@ -44,7 +45,7 @@ impl SetupRepository for SetupRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(result.unwrap_or(false))
     }
@@ -63,7 +64,7 @@ impl SetupRepository for SetupRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(())
     }
@@ -88,7 +89,7 @@ impl SetupRepository for SetupRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(org_id)
     }
@@ -105,7 +106,7 @@ impl SetupRepository for SetupRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(result.map(|r| r.into()))
     }
@@ -122,7 +123,7 @@ impl SetupRepository for SetupRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(result.map(|r| r.into()))
     }

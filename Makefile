@@ -10,6 +10,14 @@
         strict strict-all strict-frontend strict-backend
 
 # ============================================================================
+# Variables - DRY Configuration
+# ============================================================================
+
+CLI_DIR := cli
+BACKEND_DIR := backend
+BUN_RUN := cd $(CLI_DIR) && bun run
+
+# ============================================================================
 # Help
 # ============================================================================
 
@@ -66,16 +74,16 @@ help: ## Show this help message
 # ============================================================================
 
 dev: ## Interactive app selector
-	@cd cli && node scripts/dev-interactive.js
+	@cd $(CLI_DIR) && node scripts/dev-interactive.js
 
 dev-vault: ## Start RustyVault UI + libs (port 8215)
-	@cd cli && bun run dev:vault
+	@$(BUN_RUN) dev:vault
 
 dev-admin: ## Start Admin dashboard + libs (port 4111)
-	@cd cli && bun run dev:admin
+	@$(BUN_RUN) dev:admin
 
 dev-client: ## Start Client app + libs (port 4115)
-	@cd cli && bun run dev:client
+	@$(BUN_RUN) dev:client
 
 dev-all: ## Start all apps in parallel
 	@echo "Starting all apps (vault, admin, client)..."
@@ -87,7 +95,7 @@ dev-all: ## Start all apps in parallel
 	@echo "Or use the interactive selector: make dev"
 
 dev-libs: ## Watch shared libraries only
-	@cd cli && bun run dev:libs
+	@$(BUN_RUN) dev:libs
 
 # ============================================================================
 # Docker Commands
@@ -124,97 +132,97 @@ docker-clean: ## Clean Docker resources
 # ============================================================================
 
 test: ## Run unit + backend tests
-	@cd cli && bun run test
+	@$(BUN_RUN) test
 
 test-all: ## Run full test suite (unit + backend + E2E)
-	@cd cli && bun run test:all
+	@$(BUN_RUN) test:all
 
 test-unit: ## Run frontend unit tests
-	@cd cli && bun run test:unit
+	@$(BUN_RUN) test:unit
 
 test-backend: ## Run backend Rust tests
-	@cd backend && cargo test --workspace
+	@cd $(BACKEND_DIR) && cargo test --workspace
 
 test-e2e: ## Run Playwright E2E tests
-	@cd cli && bun run test:e2e
+	@$(BUN_RUN) test:e2e
 
 test-e2e-ui: ## Run E2E tests with Playwright UI
-	@cd cli && bun run test:e2e:ui
+	@$(BUN_RUN) test:e2e:ui
 
 test-watch: ## Run tests in watch mode
-	@cd cli && bun run test:watch
+	@$(BUN_RUN) test:watch
 
 test-coverage: ## Run tests with coverage
-	@cd cli && bun run test:coverage
+	@$(BUN_RUN) test:coverage
 
 # ============================================================================
 # Build Commands
 # ============================================================================
 
 build: ## Build all (libs + apps)
-	@cd cli && bun run build
+	@$(BUN_RUN) build
 
 build-all: build ## Alias for build
 
 build-backend: ## Build Rust backend
-	@cd backend && cargo build --release --workspace
+	@cd $(BACKEND_DIR) && cargo build --release --workspace
 
 build-frontend: ## Build all frontend apps
-	@cd cli && bun run build:frontend
+	@$(BUN_RUN) build:frontend
 
 build-libs: ## Build shared libraries
-	@cd cli && bun run build:libs
+	@$(BUN_RUN) build:libs
 
 build-release: ## Production release build
-	@cd cli && bun run build:release
+	@$(BUN_RUN) build:release
 
 # ============================================================================
 # Database Commands
 # ============================================================================
 
 db-migrate: ## Run database migrations
-	@cd cli && bun run db:migrate
+	@$(BUN_RUN) db:migrate
 
 db-migrate-test: ## Run migrations on test database
-	@cd cli && bun run db:migrate:test
+	@$(BUN_RUN) db:migrate:test
 
 db-reset: ## Reset database (drop + recreate + migrate)
-	@cd cli && bun run db:reset
+	@$(BUN_RUN) db:reset
 
 db-reset-test: ## Reset test database
-	@cd cli && bun run db:reset:test
+	@$(BUN_RUN) db:reset:test
 
 db-seed: ## Seed database with sample data
-	@cd cli && bun run db:seed
+	@$(BUN_RUN) db:seed
 
 # ============================================================================
 # Linting & Quality Commands
 # ============================================================================
 
 lint: ## Run all linters
-	@cd cli && bun run lint
+	@$(BUN_RUN) lint
 
 lint-fix: ## Auto-fix linting issues
-	@cd cli && bun run lint:fix
+	@$(BUN_RUN) lint:fix
 
 lint-backend: ## Lint Rust code only
-	@cd cli && bun run lint:backend
+	@$(BUN_RUN) lint:backend
 
 lint-frontend: ## Lint TypeScript code only
-	@cd cli && bun run lint:frontend
+	@$(BUN_RUN) lint:frontend
 
 lint-all: ## Run all linters including Oxlint
-	@cd cli && bun run lint:all
+	@$(BUN_RUN) lint:all
 
 # ============================================================================
 # Check Commands
 # ============================================================================
 
 check: ## Lint + typecheck + unit tests
-	@cd cli && bun run check
+	@$(BUN_RUN) check
 
 check-types: ## TypeScript type checking
-	@cd cli && bun run check:types
+	@$(BUN_RUN) check:types
 
 check-strict: ## All strict checks → strict-errors.txt
 	@$(MAKE) strict
@@ -251,48 +259,48 @@ strict-typescript: ## Run strict TypeScript checks
 	@echo "TYPESCRIPT STRICT CHECKS" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "[1/4] Checking shared library..." >> $(STRICT_REPORT_FILE)
-	-@cd cli/packages/libs/shared && bun run typecheck >> ../../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR)/packages/libs/shared && bun run typecheck >> ../../$(STRICT_REPORT_FILE) 2>&1
 	@echo "[2/4] Checking components library..." >> $(STRICT_REPORT_FILE)
-	-@cd cli/packages/libs/components && bun run typecheck >> ../../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR)/packages/libs/components && bun run typecheck >> ../../$(STRICT_REPORT_FILE) 2>&1
 	@echo "[3/4] Checking rustyvault-ui..." >> $(STRICT_REPORT_FILE)
-	-@cd cli/packages/apps/rustyvault-ui && bun run typecheck >> ../../../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR)/packages/apps/rustyvault-ui && bun run typecheck >> ../../../$(STRICT_REPORT_FILE) 2>&1
 	@echo "[4/4] Checking admin app..." >> $(STRICT_REPORT_FILE)
-	-@cd cli/packages/apps/admin && bun run typecheck >> ../../../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR)/packages/apps/admin && bun run typecheck >> ../../../$(STRICT_REPORT_FILE) 2>&1
 
 strict-biome: ## Run strict Biome linting
 	@echo "" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "BIOME STRICT LINTING" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
-	-@cd cli && bunx biome check . >> ../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR) && bunx biome check . >> ../$(STRICT_REPORT_FILE) 2>&1
 
 strict-oxlint: ## Run strict Oxlint checks
 	@echo "" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "OXLINT STRICT CHECKS" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
-	-@cd cli && bunx oxlint . >> ../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR) && bunx oxlint . >> ../$(STRICT_REPORT_FILE) 2>&1
 
 strict-oxfmt: ## Run strict Oxfmt format check
 	@echo "" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "OXFMT FORMAT CHECK" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
-	-@cd cli && bunx oxfmt --check . >> ../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(CLI_DIR) && bunx oxfmt --check . >> ../$(STRICT_REPORT_FILE) 2>&1
 
 strict-clippy: ## Run strict Rust Clippy checks
 	@echo "" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "RUST CLIPPY STRICT CHECKS" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
-	-@cd backend && cargo clippy --workspace -- -D warnings >> ../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(BACKEND_DIR) && cargo clippy --workspace -- -D warnings >> ../$(STRICT_REPORT_FILE) 2>&1
 
 strict-deny: ## Run cargo-deny security checks
 	@echo "" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
 	@echo "CARGO-DENY SECURITY CHECKS" >> $(STRICT_REPORT_FILE)
 	@echo "--------------------------------------------------------------------------------" >> $(STRICT_REPORT_FILE)
-	-@cd backend && cargo deny check >> ../$(STRICT_REPORT_FILE) 2>&1
+	-@cd $(BACKEND_DIR) && cargo deny check >> ../$(STRICT_REPORT_FILE) 2>&1
 
 strict-frontend: ## Run all frontend strict checks only
 	@echo "================================================================================" > $(STRICT_REPORT_FILE)
@@ -318,16 +326,16 @@ strict-backend: ## Run all backend strict checks only
 # ============================================================================
 
 clean: ## Clean build artifacts
-	@cd cli && bun run clean
+	@$(BUN_RUN) clean
 
 clean-all: ## Clean everything including Docker
-	@cd cli && bun run clean:all
+	@$(BUN_RUN) clean:all
 
 clean-node: ## Clean Node build artifacts
-	@cd cli && bun run clean:node
+	@$(BUN_RUN) clean:node
 
 clean-cargo: ## Clean Rust build artifacts
-	@cd cli && bun run clean:cargo
+	@$(BUN_RUN) clean:cargo
 
 # ============================================================================
 # Utility Commands
@@ -335,5 +343,5 @@ clean-cargo: ## Clean Rust build artifacts
 
 install: ## Install all dependencies
 	@echo "Installing dependencies..."
-	@cd cli && bun install
-	@cd backend && cargo fetch
+	@cd $(CLI_DIR) && bun install
+	@cd $(BACKEND_DIR) && cargo fetch

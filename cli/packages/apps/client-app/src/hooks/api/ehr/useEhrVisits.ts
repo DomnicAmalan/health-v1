@@ -16,6 +16,8 @@ import type {
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_VISIT_QUERY_KEYS = {
   all: ["ehr", "visits"] as const,
   lists: () => [...EHR_VISIT_QUERY_KEYS.all, "list"] as const,
@@ -44,8 +46,7 @@ export function useEhrPatientVisits(patientId: string, pagination?: EhrPaginatio
       const url = `${API_ROUTES.EHR.VISITS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
       const response = await apiClient.get<EhrPaginatedResponse<EhrVisit>>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_visits", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -66,8 +67,7 @@ export function useEhrVisit(id: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrVisit>(API_ROUTES.EHR.VISITS.GET(id));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_visits", id, { action: "view" });
       return response.data;
@@ -88,8 +88,7 @@ export function useEhrTodayVisits() {
     queryFn: async () => {
       const response = await apiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.TODAY);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_visits", undefined, { action: "list_today" });
       return response.data;
@@ -110,8 +109,7 @@ export function useEhrActiveVisits() {
     queryFn: async () => {
       const response = await apiClient.get<EhrVisit[]>(API_ROUTES.EHR.VISITS.ACTIVE);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_visits", undefined, { action: "list_active" });
       return response.data;
@@ -132,8 +130,7 @@ export function useCreateEhrVisit() {
     mutationFn: async (visit: CreateEhrVisitRequest) => {
       const response = await apiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CREATE, visit);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_visits", response.data.id, { action: "create" });
       return response.data;
@@ -158,8 +155,7 @@ export function useUpdateEhrVisit() {
       const { id, ...updates } = visit;
       const response = await apiClient.put<EhrVisit>(API_ROUTES.EHR.VISITS.UPDATE(id), updates);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_visits", id, { action: "update" });
       return response.data;
@@ -184,8 +180,7 @@ export function useEhrVisitCheckIn() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrVisit>(API_ROUTES.EHR.VISITS.CHECK_IN(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_visits", id, { action: "check_in" });
       return response.data;
@@ -211,8 +206,7 @@ export function useEhrVisitCheckOut() {
         disposition,
       });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_visits", id, { action: "check_out" });
       return response.data;

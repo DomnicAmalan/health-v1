@@ -1,10 +1,18 @@
 /**
  * Auth API
- * Authentication-related API calls
+ * Authentication-related API calls with Zod runtime validation
  */
 
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { OIDC_CONFIG } from "@lazarus-life/shared/constants/oidc";
+import {
+  LoginRequestSchema,
+  LoginResponseSchema,
+  RefreshTokenRequestSchema,
+  RefreshTokenResponseSchema,
+  UserInfoSchema as AuthUserInfoSchema,
+  type UserInfo,
+} from "@lazarus-life/shared/schemas";
 import { apiClient } from "./client";
 import type {
   LoginRequest,
@@ -12,13 +20,21 @@ import type {
   RefreshTokenRequest,
   RefreshTokenResponse,
 } from "./types";
-import type { UserInfo } from "@lazarus-life/shared/types/user";
 
 /**
  * Login with email and password
+ * ✨ Now with Zod validation for request and response
  */
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-  const response = await apiClient.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, credentials);
+  const response = await apiClient.post<LoginResponse>(
+    API_ROUTES.AUTH.LOGIN,
+    {
+      body: credentials,
+      validateRequest: LoginRequestSchema,    // ✅ Validate request before sending
+      validateResponse: LoginResponseSchema,  // ✅ Validate response after receiving
+      throwOnValidationError: true,           // ✅ Throw on validation failure
+    }
+  );
 
   if (response.error) {
     throw new Error(response.error.message);
@@ -48,11 +64,18 @@ export async function logout(): Promise<void> {
 
 /**
  * Refresh access token using refresh token
+ * ✨ Now with Zod validation
  */
 export async function refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
-  const response = await apiClient.post<RefreshTokenResponse>(API_ROUTES.AUTH.REFRESH, {
-    refreshToken,
-  } as RefreshTokenRequest);
+  const response = await apiClient.post<RefreshTokenResponse>(
+    API_ROUTES.AUTH.REFRESH,
+    {
+      body: { refreshToken } as RefreshTokenRequest,
+      validateRequest: RefreshTokenRequestSchema,    // ✅ Validate request
+      validateResponse: RefreshTokenResponseSchema,  // ✅ Validate response
+      throwOnValidationError: true,
+    }
+  );
 
   if (response.error) {
     throw new Error(response.error.message);
@@ -70,9 +93,16 @@ export async function refreshAccessToken(refreshToken: string): Promise<RefreshT
 
 /**
  * Get user info from OIDC userinfo endpoint
+ * ✨ Now with Zod validation
  */
 export async function getUserInfo(): Promise<UserInfo> {
-  const response = await apiClient.get<UserInfo>(API_ROUTES.AUTH.USERINFO);
+  const response = await apiClient.get<UserInfo>(
+    API_ROUTES.AUTH.USERINFO,
+    {
+      validateResponse: AuthUserInfoSchema,  // ✅ Validate user info response
+      throwOnValidationError: true,
+    }
+  );
 
   if (response.error) {
     throw new Error(response.error.message);

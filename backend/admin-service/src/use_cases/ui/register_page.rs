@@ -1,5 +1,6 @@
 use shared::domain::entities::UiPage;
 use shared::domain::repositories::UiEntityRepository;
+use shared::infrastructure::validation::validate_non_empty;
 use shared::infrastructure::zanzibar::RelationshipStore;
 use shared::AppResult;
 use std::sync::Arc;
@@ -27,18 +28,9 @@ impl RegisterPageUseCase {
         path: &str,
         description: Option<String>,
     ) -> AppResult<UiPage> {
-        // Validate inputs
-        if name.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Page name cannot be empty".to_string(),
-            ));
-        }
-
-        if path.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Page path cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(name, "Page name")?;
+        validate_non_empty(path, "Page path")?;
 
         // Check if page already exists
         if let Some(_existing) = self.ui_entity_repository

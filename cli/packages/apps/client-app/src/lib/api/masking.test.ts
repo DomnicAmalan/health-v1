@@ -13,7 +13,7 @@ import {
   maskObject,
   maskPhone,
   maskSSN,
-} from "./masking";
+} from "@lazarus-life/shared";
 
 describe("maskField", () => {
   it("should mask a field with specified visible characters", () => {

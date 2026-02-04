@@ -16,6 +16,8 @@ import type {
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
 
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
+
 export const EHR_ORDER_QUERY_KEYS = {
   all: ["ehr", "orders"] as const,
   byPatient: (patientId: string) => [...EHR_ORDER_QUERY_KEYS.all, "patient", patientId] as const,
@@ -41,8 +43,7 @@ export function useEhrPatientOrders(patientId: string, pagination?: EhrPaginatio
       const url = `${API_ROUTES.EHR.ORDERS.BY_PATIENT(patientId)}?${queryParams.toString()}`;
       const response = await apiClient.get<EhrPaginatedResponse<EhrOrder>>(url);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_orders", undefined, { action: "list_by_patient", patientId });
       return response.data;
@@ -63,8 +64,7 @@ export function useEhrVisitOrders(visitId: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.BY_VISIT(visitId));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_orders", undefined, { action: "list_by_visit", visitId });
       return response.data;
@@ -85,8 +85,7 @@ export function useEhrOrder(id: string) {
     queryFn: async () => {
       const response = await apiClient.get<EhrOrder>(API_ROUTES.EHR.ORDERS.GET(id));
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_orders", id, { action: "view" });
       return response.data;
@@ -107,8 +106,7 @@ export function useEhrUnsignedOrders() {
     queryFn: async () => {
       const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.UNSIGNED);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_orders", undefined, { action: "list_unsigned" });
       return response.data;
@@ -129,8 +127,7 @@ export function useEhrStatOrders() {
     queryFn: async () => {
       const response = await apiClient.get<EhrOrder[]>(API_ROUTES.EHR.ORDERS.STAT);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logPHI("ehr_orders", undefined, { action: "list_stat" });
       return response.data;
@@ -151,8 +148,7 @@ export function useCreateEhrOrder() {
     mutationFn: async (order: CreateEhrOrderRequest) => {
       const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.CREATE, order);
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("CREATE", "ehr_orders", response.data.id, { action: "create" });
       return response.data;
@@ -181,8 +177,7 @@ export function useSignEhrOrder() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.SIGN(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_orders", id, { action: "sign" });
       return response.data;
@@ -206,8 +201,7 @@ export function useDiscontinueEhrOrder() {
     mutationFn: async ({ id, reason }: DiscontinueEhrOrderRequest) => {
       const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.DISCONTINUE(id), { reason });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_orders", id, { action: "discontinue" });
       return response.data;
@@ -233,8 +227,7 @@ export function useHoldEhrOrder() {
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
       const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.HOLD(id), { reason });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_orders", id, { action: "hold" });
       return response.data;
@@ -257,8 +250,7 @@ export function useReleaseEhrOrder() {
     mutationFn: async (id: string) => {
       const response = await apiClient.post<EhrOrder>(API_ROUTES.EHR.ORDERS.RELEASE(id), {});
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      const data = unwrapApiResponse(response);
 
       logState("UPDATE", "ehr_orders", id, { action: "release" });
       return response.data;

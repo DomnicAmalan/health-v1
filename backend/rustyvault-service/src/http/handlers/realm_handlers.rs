@@ -1,4 +1,5 @@
 //! HTTP handlers for realm management
+//! ✨ DRY: Using validation macros
 
 use std::sync::Arc;
 
@@ -11,17 +12,13 @@ use uuid::Uuid;
 
 use crate::http::routes::AppState;
 use crate::modules::realm::{CreateRealmRequest, UpdateRealmRequest};
+use crate::{require_context, parse_uuid};
 
 /// List all realms
 pub async fn list_realms(
     state: Arc<AppState>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     match realm_store.list().await {
         Ok(realms) => {
@@ -62,12 +59,7 @@ pub async fn create_realm(
     state: Arc<AppState>,
     payload: Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     // Parse request
     let name = payload
@@ -145,12 +137,7 @@ pub async fn get_realm(
     state: Arc<AppState>,
     realm_id: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     // Try to parse as UUID first, then as name
     let realm = if let Ok(id) = Uuid::parse_str(&realm_id) {
@@ -192,20 +179,10 @@ pub async fn update_realm(
     realm_id: String,
     payload: Json<Value>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     // Parse realm ID
-    let id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let id = parse_uuid!(realm_id, "realm ID");
 
     // Parse update request
     let request = UpdateRealmRequest {
@@ -253,20 +230,10 @@ pub async fn delete_realm(
     state: Arc<AppState>,
     realm_id: String,
 ) -> Result<StatusCode, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     // Parse realm ID
-    let id = Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    let id = parse_uuid!(realm_id, "realm ID");
 
     match realm_store.delete(id).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
@@ -289,20 +256,10 @@ pub async fn get_realms_by_organization(
     state: Arc<AppState>,
     organization_id: String,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    let realm_store = state.realm_store.as_ref().ok_or_else(|| {
-        (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "realm store not initialized" })),
-        )
-    })?;
+    let realm_store = require_context!(state, realm_store, "realm store not initialized");
 
     // Parse organization ID
-    let org_id = Uuid::parse_str(&organization_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid organization ID" })),
-        )
-    })?;
+    let org_id = parse_uuid!(organization_id, "organization ID");
 
     match realm_store.list_by_organization(org_id).await {
         Ok(realms) => {

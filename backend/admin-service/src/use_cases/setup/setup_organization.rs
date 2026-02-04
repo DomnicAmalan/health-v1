@@ -1,5 +1,7 @@
 use shared::domain::repositories::{SetupRepository, UserRepository};
+use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
+use shared::infrastructure::validation::validate_non_empty;
 use uuid::Uuid;
 
 pub struct SetupOrganizationUseCase {
@@ -36,18 +38,9 @@ impl SetupOrganizationUseCase {
             }
         }
 
-        // Validate inputs
-        if name.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Organization name cannot be empty".to_string(),
-            ));
-        }
-
-        if slug.trim().is_empty() {
-            return Err(shared::AppError::Validation(
-                "Organization slug cannot be empty".to_string(),
-            ));
-        }
+        // ✨ DRY: Using validate_non_empty utility
+        validate_non_empty(name, "Organization name")?;
+        validate_non_empty(slug, "Organization slug")?;
 
         // Validate slug format (alphanumeric and hyphens only)
         if !slug.chars().all(|c| c.is_alphanumeric() || c == '-') {

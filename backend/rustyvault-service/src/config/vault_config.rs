@@ -17,6 +17,7 @@ pub struct VaultSettings {
     pub seal: SealConfig,
     pub storage: StorageConfig,
     pub mounts: MountsConfig,
+    pub auth: AuthConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -55,6 +56,14 @@ pub struct StorageConfig {
 pub struct MountsConfig {
     pub default_lease_ttl: u64,
     pub max_lease_ttl: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuthConfig {
+    /// Bcrypt cost factor (4-31, recommended: 14 for healthcare)
+    /// Higher values = more secure but slower
+    /// Cost 12 = ~181ms, Cost 14 = ~724ms per hash
+    pub bcrypt_cost: u32,
 }
 
 impl VaultSettings {
@@ -131,6 +140,22 @@ impl VaultSettings {
                 .unwrap_or(2764800),
         };
 
+        let bcrypt_cost = env::var("VAULT_BCRYPT_COST")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(14); // Healthcare-grade default
+
+        // Validate bcrypt cost range (bcrypt supports 4-31)
+        if bcrypt_cost < 10 || bcrypt_cost > 31 {
+            return Err(config::ConfigError::Message(
+                format!("VAULT_BCRYPT_COST must be between 10 and 31, got {}", bcrypt_cost)
+            ));
+        }
+
+        let auth = AuthConfig {
+            bcrypt_cost,
+        };
+
         Ok(VaultSettings {
             server,
             database,
@@ -140,6 +165,7 @@ impl VaultSettings {
             seal,
             storage,
             mounts,
+            auth,
         })
     }
 }

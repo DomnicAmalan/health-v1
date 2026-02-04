@@ -40,12 +40,13 @@ services:
   api-service:
     build:
       context: .
-      dockerfile: backend/api-service/Dockerfile
-      target: runner-dev
+      dockerfile: backend/Dockerfile
+      target: api-service-dev
       args:
         BUILD_MODE: dev
         SKIP_CHECKS: "true"
-        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-4}
+        SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
     container_name: health-api-service
     environment:
       # Server (NO DEFAULTS - must be set in .env)
@@ -120,6 +121,10 @@ services:
       - "${API_SERVICE_PORT}:${SERVER_PORT}"
     volumes:
       - api_service_data:/app/data
+      # Cargo cache volumes for faster builds
+      - cargo_registry:/root/.cargo/registry
+      - cargo_git:/root/.cargo/git
+      - cargo_target:/app/target
       # Mount source code for hot reload in dev mode (ALL workspace members required)
       - ./backend/api-service/src:/app/backend/api-service/src
       - ./backend/shared/src:/app/backend/shared/src
@@ -238,12 +243,13 @@ services:
   rustyvault-service:
     build:
       context: .
-      dockerfile: backend/rustyvault-service/Dockerfile
-      target: runner-dev
+      dockerfile: backend/Dockerfile
+      target: rustyvault-service-dev
       args:
         BUILD_MODE: dev
         SKIP_CHECKS: "true"
-        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-4}
+        SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
     container_name: health-rustyvault-service
     environment:
       # Server
@@ -289,6 +295,10 @@ services:
     volumes:
       - rustyvault_data:/app/vault-data
       - rustyvault_service_data:/app/data
+      # Cargo cache volumes for faster builds
+      - cargo_registry:/root/.cargo/registry
+      - cargo_git:/root/.cargo/git
+      - cargo_target:/app/target
       # Mount source code for hot reload in dev mode
       - ./backend/rustyvault-service/src:/app/backend/rustyvault-service/src
       - ./backend/shared/src:/app/backend/shared/src
@@ -390,12 +400,13 @@ services:
   yottadb-api:
     build:
       context: .
-      dockerfile: backend/yottadb-api/Dockerfile
-      target: runner-dev
+      dockerfile: backend/Dockerfile
+      target: yottadb-api-dev
       args:
         BUILD_MODE: dev
         SKIP_CHECKS: "true"
-        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-2}
+        CARGO_BUILD_JOBS: ${CARGO_BUILD_JOBS:-4}
+        SQLX_OFFLINE: ${SQLX_OFFLINE:-true}
     container_name: health-yottadb-api
     environment:
       PORT: 8080
@@ -407,6 +418,10 @@ services:
       - ./ydb-data:/data
       # Mount Docker socket to allow docker exec to yottadb container
       - /var/run/docker.sock:/var/run/docker.sock
+      # Cargo cache volumes for faster builds
+      - cargo_registry:/root/.cargo/registry
+      - cargo_git:/root/.cargo/git
+      - cargo_target:/app/target
       # Mount source code for hot reload in dev mode
       - ./backend/yottadb-api/src:/app/backend/yottadb-api/src
       - ./backend/yottadb-api/Cargo.toml:/app/backend/yottadb-api/Cargo.toml

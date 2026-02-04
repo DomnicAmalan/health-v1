@@ -10,7 +10,7 @@ use crate::domain::entities::ehr::{EhrPatient, Gender, PatientStatus};
 use crate::domain::repositories::ehr::patient_repository::{
     EhrPatientRepository, PaginatedResult, Pagination, PatientSearchCriteria,
 };
-use crate::infrastructure::database::DatabaseService;
+use crate::infrastructure::database::{DatabaseService, RepositoryErrorExt};
 use crate::shared::{AppError, AppResult};
 
 /// Database row for EHR patient
@@ -211,7 +211,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(&patient.system_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(row.into())
     }
@@ -227,7 +227,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(row.map(Into::into))
     }
@@ -243,7 +243,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(row.map(Into::into))
     }
@@ -259,7 +259,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(row.map(Into::into))
     }
@@ -321,7 +321,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(patient.updated_by)
         .fetch_one(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(row.into())
     }
@@ -337,7 +337,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .execute(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(())
     }
@@ -372,6 +372,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         }
 
         let where_clause = conditions.join(" AND ");
+use crate::infrastructure::database::RepositoryErrorExt;
 
         // Count query
         let count_sql = format!(
@@ -398,7 +399,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         let total: i64 = count_query
             .fetch_one(self.database_service.pool())
             .await
-            .map_err(AppError::Database)?;
+            .map_db_error("query", "record")?;
 
         // Data query
         let data_sql = format!(
@@ -425,7 +426,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         let rows: Vec<EhrPatientRow> = data_query
             .fetch_all(self.database_service.pool())
             .await
-            .map_err(AppError::Database)?;
+            .map_db_error("query", "record")?;
 
         Ok(PaginatedResult {
             items: rows.into_iter().map(Into::into).collect(),
@@ -450,7 +451,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(count.0)
     }
@@ -465,7 +466,7 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         .bind(organization_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_err(AppError::Database)?;
+        .map_db_error("query", "record")?;
 
         Ok(result.0)
     }

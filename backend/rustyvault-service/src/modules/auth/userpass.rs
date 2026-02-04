@@ -111,16 +111,18 @@ pub struct UserPassBackend {
     pool: PgPool,
     token_store: TokenStore,
     mount_path: String,
+    bcrypt_cost: u32,
 }
 
 impl UserPassBackend {
     /// Create a new UserPass backend
-    pub fn new(pool: PgPool, mount_path: &str) -> Self {
+    pub fn new(pool: PgPool, mount_path: &str, bcrypt_cost: u32) -> Self {
         let token_store = TokenStore::new(pool.clone());
         UserPassBackend {
             pool,
             token_store,
             mount_path: mount_path.to_string(),
+            bcrypt_cost,
         }
     }
 
@@ -141,8 +143,8 @@ impl UserPassBackend {
             return Err(VaultError::Vault("password cannot be empty".to_string()));
         }
 
-        // Hash the password
-        let password_hash = hash(&request.password, DEFAULT_COST)
+        // Hash the password with configured cost
+        let password_hash = hash(&request.password, self.bcrypt_cost)
             .map_err(|e| VaultError::Vault(format!("failed to hash password: {}", e)))?;
 
         let id = Uuid::new_v4();
@@ -414,7 +416,7 @@ impl UserPassBackend {
             return Err(VaultError::Vault("password cannot be empty".to_string()));
         }
 
-        let password_hash = hash(new_password, DEFAULT_COST)
+        let password_hash = hash(new_password, self.bcrypt_cost)
             .map_err(|e| VaultError::Vault(format!("failed to hash password: {}", e)))?;
 
         let result = if let Some(realm_id) = realm_id {

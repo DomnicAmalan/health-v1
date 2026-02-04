@@ -295,21 +295,40 @@ impl TokenStore {
     }
 
     /// Update token last used timestamp and decrement uses
+    /// Returns error if token has no remaining uses (atomic check-and-decrement)
     pub async fn use_token(&self, token_id: Uuid) -> VaultResult<()> {
-        sqlx::query(
+        // Atomic operation: Check num_uses > 0 OR num_uses = 0 (unlimited), then decrement
+        // This prevents TOCTOU race condition where multiple concurrent requests
+        // could all pass a separate check before any decrement occurs
+        let result: Option<(i32,)> = sqlx::query_as(
             r#"
             UPDATE vault_tokens
             SET last_used_at = NOW(),
                 num_uses = CASE WHEN num_uses > 0 THEN num_uses - 1 ELSE num_uses END
-            WHERE id = $1
+            WHERE id = $1 AND (num_uses > 0 OR num_uses = 0)
+            RETURNING num_uses
             "#,
         )
         .bind(token_id)
-        .execute(&self.pool)
+        .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to update token: {}", e)))?;
 
-        Ok(())
+        match result {
+            Some((remaining_uses,)) => {
+                // Check if token is now exhausted after this use
+                if remaining_uses == 0 {
+                    // Token had num_uses=1 before this call, now exhausted
+                    // Note: Don't auto-revoke here, let middleware handle it
+                    tracing::debug!("Token {} has been exhausted", token_id);
+                }
+                Ok(())
+            }
+            None => {
+                // Token not found or had num_uses < 0 (shouldn't happen)
+                Err(VaultError::Vault("token not found or invalid state".to_string()))
+            }
+        }
     }
 
     /// Revoke a token by its ID

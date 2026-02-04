@@ -1,12 +1,14 @@
 /**
  * useEhrPatients Hook
  * TanStack Query hooks for EHR patient data with PHI audit logging
+ * ✨ Now with Zod runtime validation for data integrity
  */
 
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuditLog } from "@/hooks/security/useAuditLog";
 import { apiClient } from "@/lib/api/yottadb-client";
+import { z } from "zod";
 import type {
   EhrPatient,
   EhrPatientBanner,
@@ -16,16 +18,21 @@ import type {
   EhrPaginatedResponse,
   EhrPagination,
 } from "@lazarus-life/shared/types/ehr";
+import {
+  EhrPatientSchema,
+  EhrPatientBannerSchema,
+  CreateEhrPatientRequestSchema,
+  UpdateEhrPatientRequestSchema,
+  EhrPatientSearchCriteriaSchema,
+} from "@lazarus-life/shared/schemas/ehr/patient";
+import { createQueryKeyFactory, unwrapApiResponse, buildQueryParams } from "@lazarus-life/shared";
 
+// ✨ DRY: Using query key factory instead of 8-10 lines of boilerplate
 export const EHR_PATIENT_QUERY_KEYS = {
-  all: ["ehr", "patients"] as const,
-  lists: () => [...EHR_PATIENT_QUERY_KEYS.all, "list"] as const,
-  list: (params?: EhrPagination & EhrPatientSearchCriteria) =>
-    [...EHR_PATIENT_QUERY_KEYS.lists(), params] as const,
-  details: () => [...EHR_PATIENT_QUERY_KEYS.all, "detail"] as const,
-  detail: (id: string) => [...EHR_PATIENT_QUERY_KEYS.details(), id] as const,
-  banner: (id: string) => [...EHR_PATIENT_QUERY_KEYS.all, "banner", id] as const,
-  byMrn: (mrn: string) => [...EHR_PATIENT_QUERY_KEYS.all, "mrn", mrn] as const,
+  ...createQueryKeyFactory("ehr", "patients"),
+  // Custom keys specific to patients
+  banner: (id: string) => ["ehr", "patients", "banner", id] as const,
+  byMrn: (mrn: string) => ["ehr", "patients", "mrn", mrn] as const,
 };
 
 /**
@@ -37,25 +44,35 @@ export function useEhrPatients(params?: EhrPagination & EhrPatientSearchCriteria
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.list(params),
     queryFn: async () => {
-      const queryParams = new URLSearchParams();
-      if (params?.limit) queryParams.set("limit", String(params.limit));
-      if (params?.offset) queryParams.set("offset", String(params.offset));
-      if (params?.name) queryParams.set("name", params.name);
-      if (params?.mrn) queryParams.set("mrn", params.mrn);
-      if (params?.status) queryParams.set("status", params.status);
+      // ✨ DRY: Using buildQueryParams instead of manual URLSearchParams construction
+      const queryString = buildQueryParams({
+        limit: params?.limit,
+        offset: params?.offset,
+        name: params?.name,
+        mrn: params?.mrn,
+        status: params?.status,
+      });
 
-      const url = `${API_ROUTES.EHR.PATIENTS.LIST}?${queryParams.toString()}`;
-      const response = await apiClient.get<EhrPaginatedResponse<EhrPatient>>(url);
+      const url = `${API_ROUTES.EHR.PATIENTS.LIST}${queryString}`;
+      const response = await apiClient.get<EhrPaginatedResponse<EhrPatient>>(url, {
+        validateResponse: z.object({
+          items: z.array(EhrPatientSchema),
+          total: z.number(),
+          limit: z.number().optional(),
+          offset: z.number().optional(),
+        }),
+        throwOnValidationError: true,
+      });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
+      // ✨ DRY: Using unwrapApiResponse instead of repeated error handling
+      const data = unwrapApiResponse(response);
 
       // Debug logging
-      console.log('API Response:', response.data);
-      console.log('First patient from API:', response.data.items?.[0]);
+      console.log('API Response:', data);
+      console.log('First patient from API:', data.items?.[0]);
 
-      logPHI("ehr_patients", undefined, { action: "list", count: response.data.items.length });
-      return response.data;
+      logPHI("ehr_patients", undefined, { action: "list", count: data.items.length });
+      return data;
     },
     staleTime: 30 * 1000,
   });
@@ -68,18 +85,26 @@ export function useEhrPatientSearch(criteria: EhrPatientSearchCriteria, enabled 
   const { logPHI } = useAuditLog();
 
   return useQuery({
-    queryKey: [...EHR_PATIENT_QUERY_KEYS.all, "search", criteria],
+    queryKey: EHR_PATIENT_QUERY_KEYS.custom("search", criteria),
     queryFn: async () => {
       const response = await apiClient.post<EhrPaginatedResponse<EhrPatient>>(
         API_ROUTES.EHR.PATIENTS.SEARCH,
-        criteria
+        {
+          body: criteria,
+          validateRequest: EhrPatientSearchCriteriaSchema,
+          validateResponse: z.object({
+            items: z.array(EhrPatientSchema),
+            total: z.number(),
+            limit: z.number().optional(),
+            offset: z.number().optional(),
+          }),
+          throwOnValidationError: true,
+        }
       );
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
-
+      const data = unwrapApiResponse(response);
       logPHI("ehr_patients", undefined, { action: "search", criteria });
-      return response.data;
+      return data;
     },
     enabled,
     staleTime: 30 * 1000,
@@ -88,6 +113,7 @@ export function useEhrPatientSearch(criteria: EhrPatientSearchCriteria, enabled 
 
 /**
  * Get single EHR patient by ID
+ * ✨ With Zod validation
  */
 export function useEhrPatient(id: string) {
   const { logPHI } = useAuditLog();
@@ -96,18 +122,16 @@ export function useEhrPatient(id: string) {
     queryKey: EHR_PATIENT_QUERY_KEYS.detail(id),
     queryFn: async () => {
       console.log('Fetching patient with ID:', id);
-      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET(id));
+      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET(id), {
+        validateResponse: EhrPatientSchema,
+        throwOnValidationError: true,
+      });
 
       console.log('Patient detail response:', response);
-      if (response.error) {
-        console.error('Patient fetch error:', response.error);
-        throw new Error(response.error.message);
-      }
-      if (!response.data) throw new Error("No data returned");
-
-      console.log('Patient data:', response.data);
+      const data = unwrapApiResponse(response);
+      console.log('Patient data:', data);
       logPHI("ehr_patients", id, { action: "view" });
-      return response.data;
+      return data;
     },
     enabled: !!id,
     staleTime: 30 * 1000,
@@ -123,13 +147,14 @@ export function useEhrPatientByMrn(mrn: string) {
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.byMrn(mrn),
     queryFn: async () => {
-      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET_BY_MRN(mrn));
+      const response = await apiClient.get<EhrPatient>(API_ROUTES.EHR.PATIENTS.GET_BY_MRN(mrn), {
+        validateResponse: EhrPatientSchema,
+        throwOnValidationError: true,
+      });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
-
-      logPHI("ehr_patients", response.data.id, { action: "view_by_mrn", mrn });
-      return response.data;
+      const data = unwrapApiResponse(response);
+      logPHI("ehr_patients", data.id, { action: "view_by_mrn", mrn });
+      return data;
     },
     enabled: !!mrn,
     staleTime: 30 * 1000,
@@ -138,6 +163,7 @@ export function useEhrPatientByMrn(mrn: string) {
 
 /**
  * Get patient banner data (summary for display)
+ * ✨ With Zod validation
  */
 export function useEhrPatientBanner(id: string) {
   const { logPHI } = useAuditLog();
@@ -145,13 +171,14 @@ export function useEhrPatientBanner(id: string) {
   return useQuery({
     queryKey: EHR_PATIENT_QUERY_KEYS.banner(id),
     queryFn: async () => {
-      const response = await apiClient.get<EhrPatientBanner>(API_ROUTES.EHR.PATIENTS.BANNER(id));
+      const response = await apiClient.get<EhrPatientBanner>(API_ROUTES.EHR.PATIENTS.BANNER(id), {
+        validateResponse: EhrPatientBannerSchema,
+        throwOnValidationError: true,
+      });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
-
+      const data = unwrapApiResponse(response);
       logPHI("ehr_patients", id, { action: "view_banner" });
-      return response.data;
+      return data;
     },
     enabled: !!id,
     staleTime: 60 * 1000,
@@ -160,6 +187,7 @@ export function useEhrPatientBanner(id: string) {
 
 /**
  * Create EHR patient mutation
+ * ✨ With Zod validation
  */
 export function useCreateEhrPatient() {
   const queryClient = useQueryClient();
@@ -167,13 +195,16 @@ export function useCreateEhrPatient() {
 
   return useMutation({
     mutationFn: async (patient: CreateEhrPatientRequest) => {
-      const response = await apiClient.post<EhrPatient>(API_ROUTES.EHR.PATIENTS.CREATE, patient);
+      const response = await apiClient.post<EhrPatient>(API_ROUTES.EHR.PATIENTS.CREATE, {
+        body: patient,
+        validateRequest: CreateEhrPatientRequestSchema,
+        validateResponse: EhrPatientSchema,
+        throwOnValidationError: true,
+      });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
-
-      logState("CREATE", "ehr_patients", response.data.id, { action: "create" });
-      return response.data;
+      const data = unwrapApiResponse(response);
+      logState("CREATE", "ehr_patients", data.id, { action: "create" });
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.lists() });
@@ -183,6 +214,7 @@ export function useCreateEhrPatient() {
 
 /**
  * Update EHR patient mutation
+ * ✨ With Zod validation
  */
 export function useUpdateEhrPatient() {
   const queryClient = useQueryClient();
@@ -191,13 +223,16 @@ export function useUpdateEhrPatient() {
   return useMutation({
     mutationFn: async (patient: UpdateEhrPatientRequest) => {
       const { id, ...updates } = patient;
-      const response = await apiClient.put<EhrPatient>(API_ROUTES.EHR.PATIENTS.UPDATE(id), updates);
+      const response = await apiClient.put<EhrPatient>(API_ROUTES.EHR.PATIENTS.UPDATE(id), {
+        body: updates,
+        validateRequest: UpdateEhrPatientRequestSchema,
+        validateResponse: EhrPatientSchema,
+        throwOnValidationError: true,
+      });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data) throw new Error("No data returned");
-
+      const data = unwrapApiResponse(response);
       logState("UPDATE", "ehr_patients", id, { action: "update" });
-      return response.data;
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.detail(data.id) });

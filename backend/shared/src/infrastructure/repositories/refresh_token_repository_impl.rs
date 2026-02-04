@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 /// Temporary struct for database deserialization
 #[derive(Debug)]
@@ -59,7 +60,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(token)
     }
@@ -76,7 +77,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(row.map(|r| r.into()))
     }
@@ -94,7 +95,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
 
         Ok(rows.into_iter().map(|r| r.into()).collect())
     }
@@ -110,7 +111,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -126,7 +127,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }
@@ -140,7 +141,7 @@ impl RefreshTokenRepository for RefreshTokenRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(result.rows_affected())
     }

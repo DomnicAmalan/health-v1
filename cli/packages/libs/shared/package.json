@@ -105,6 +105,22 @@
       "types": "./dist/types/components/registry.d.ts",
       "import": "./dist/types/components/registry.js"
     },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "import": "./dist/schemas/index.js"
+    },
+    "./schemas/*": {
+      "types": "./dist/schemas/*.d.ts",
+      "import": "./dist/schemas/*.js"
+    },
+    "./schemas/ehr": {
+      "types": "./dist/schemas/ehr/index.d.ts",
+      "import": "./dist/schemas/ehr/index.js"
+    },
+    "./schemas/api": {
+      "types": "./dist/schemas/api/index.d.ts",
+      "import": "./dist/schemas/api/index.js"
+    },
     "./i18n": {
       "types": "./dist/i18n/index.d.ts",
       "import": "./dist/i18n/index.js"
@@ -157,6 +173,10 @@
       "types/workflow": ["./dist/types/workflow/index.d.ts"],
       "types/stores": ["./dist/types/stores/index.d.ts"],
       "types/components": ["./dist/types/components/index.d.ts"],
+      "schemas": ["./dist/schemas/index.d.ts"],
+      "schemas/*": ["./dist/schemas/*.d.ts"],
+      "schemas/ehr": ["./dist/schemas/ehr/index.d.ts"],
+      "schemas/api": ["./dist/schemas/api/index.d.ts"],
       "i18n": ["./dist/i18n/index.d.ts"],
       "i18n/*": ["./dist/i18n/*.d.ts"],
       "vault": ["./dist/vault/index.d.ts"],
@@ -178,6 +198,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "zod": "^4.3.6",
     "zustand": "^5.0.9"
   },
   "peerDependencies": {

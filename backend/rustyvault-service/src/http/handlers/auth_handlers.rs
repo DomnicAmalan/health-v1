@@ -1,4 +1,5 @@
 //! HTTP handlers for authentication
+//! ✨ DRY: Using validation macros
 
 use std::sync::Arc;
 
@@ -7,9 +8,11 @@ use axum::{
     Json,
 };
 use serde_json::{json, Value};
+use uuid::Uuid;
 
 use crate::http::routes::AppState;
 use crate::modules::auth::{CreateTokenRequest, CreateUserRequest};
+use crate::parse_uuid;
 
 // ============================================================================
 // Token Handlers
@@ -446,12 +449,8 @@ pub async fn list_realm_userpass_users(
         )
     })?;
 
-    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match userpass.list_users_in_realm(Some(realm_uuid)).await {
         Ok(users) => Ok(Json(json!({
@@ -478,12 +477,8 @@ pub async fn create_realm_userpass_user(
         )
     })?;
 
-    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     let password = payload
         .get("password")
@@ -546,12 +541,8 @@ pub async fn read_realm_userpass_user(
         )
     })?;
 
-    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match userpass.get_user_in_realm(&username, Some(realm_uuid)).await {
         Ok(Some(user)) => Ok(Json(json!({
@@ -587,12 +578,8 @@ pub async fn delete_realm_userpass_user(
         )
     })?;
 
-    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     match userpass.delete_user_in_realm(&username, Some(realm_uuid)).await {
         Ok(_) => Ok(Json(json!({}))),
@@ -617,12 +604,8 @@ pub async fn realm_userpass_login(
         )
     })?;
 
-    let realm_uuid = uuid::Uuid::parse_str(&realm_id).map_err(|_| {
-        (
-            StatusCode::BAD_REQUEST,
-            Json(json!({ "error": "invalid realm ID" })),
-        )
-    })?;
+    // ✨ DRY: Using parse_uuid! macro
+    let realm_uuid = parse_uuid!(realm_id, "realm ID");
 
     let password = payload
         .get("password")

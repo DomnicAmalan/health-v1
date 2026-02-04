@@ -1,5 +1,6 @@
 use crate::domain::entities::Group;
 use crate::domain::repositories::GroupRepository;
+use crate::infrastructure::database::RepositoryErrorExt;
 use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
@@ -18,6 +19,7 @@ impl GroupRepositoryImpl {
 #[async_trait]
 impl GroupRepository for GroupRepositoryImpl {
     async fn create(&self, group: Group) -> AppResult<Group> {
+        // ✨ DRY: Using map_db_error trait extension
         sqlx::query_as!(
             Group,
             r#"
@@ -46,10 +48,11 @@ impl GroupRepository for GroupRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("create", "group")
     }
 
     async fn update(&self, group: Group) -> AppResult<Group> {
+        // ✨ DRY: Using map_db_error trait extension
         sqlx::query_as!(
             Group,
             r#"
@@ -80,10 +83,11 @@ impl GroupRepository for GroupRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("update", "group")
     }
 
     async fn find_by_id(&self, id: Uuid) -> AppResult<Option<Group>> {
+        // ✨ DRY: Using map_db_error trait extension
         sqlx::query_as!(
             Group,
             r#"
@@ -96,7 +100,7 @@ impl GroupRepository for GroupRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("fetch", "group")
     }
 
     async fn find_by_name(&self, name: &str, organization_id: Option<Uuid>) -> AppResult<Option<Group>> {

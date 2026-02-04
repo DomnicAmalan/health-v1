@@ -4,6 +4,7 @@ use crate::shared::AppResult;
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
+use crate::infrastructure::database::RepositoryErrorExt;
 
 pub struct KeyRepositoryImpl {
     pool: PgPool,
@@ -43,7 +44,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_id(&self, id: Uuid) -> AppResult<Option<EncryptionKey>> {
@@ -58,7 +59,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_by_entity(&self, entity_id: Uuid, entity_type: &str) -> AppResult<Option<EncryptionKey>> {
@@ -76,7 +77,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn find_active_by_entity(&self, entity_id: Uuid, entity_type: &str) -> AppResult<Option<EncryptionKey>> {
@@ -94,7 +95,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn update(&self, key: EncryptionKey) -> AppResult<EncryptionKey> {
@@ -120,7 +121,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))
+        .map_db_error("query", "record")
     }
 
     async fn deactivate_all_for_entity(&self, entity_id: Uuid, entity_type: &str) -> AppResult<()> {
@@ -135,7 +136,7 @@ impl KeyRepository for KeyRepositoryImpl {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| crate::shared::AppError::Database(e))?;
+        .map_db_error("query", "record")?;
         
         Ok(())
     }

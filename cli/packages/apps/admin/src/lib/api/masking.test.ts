@@ -11,7 +11,7 @@ import {
   maskSSN,
   maskObject,
   sanitizeErrorMessage,
-} from "./masking";
+} from "@lazarus-life/shared";
 
 describe("Masking Utilities", () => {
   describe("maskField", () => {
