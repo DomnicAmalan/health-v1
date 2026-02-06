@@ -13,7 +13,7 @@ use tracing::error;
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// use shared::infrastructure::database::RepositoryErrorExt;
 ///
 /// // Before: 3-6 lines per query
@@ -52,7 +52,7 @@ pub trait RepositoryErrorExt<T> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust,ignore
     /// // Fetch operation
     /// let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
     ///     .bind(user_id)
@@ -92,7 +92,7 @@ pub trait RepositoryErrorExt<T> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust,ignore
     /// let count = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM users")
     ///     .fetch_one(&pool)
     ///     .await

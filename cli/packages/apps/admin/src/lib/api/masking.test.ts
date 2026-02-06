@@ -61,7 +61,8 @@ describe("Masking Utilities", () => {
 
     it("should mask long email addresses", () => {
       const result = maskEmail("verylongemail@example.com", "partial");
-      expect(result).toBe("*************il@example.com");
+      // "verylongemail" = 13 chars, last 2 visible = "il", 11 stars
+      expect(result).toBe("***********il@example.com");
     });
 
     it("should completely mask email", () => {
@@ -71,7 +72,8 @@ describe("Masking Utilities", () => {
 
     it("should handle email without @ symbol", () => {
       const result = maskEmail("notanemail", "partial");
-      expect(result).toBe("******em**");
+      // No @ symbol, falls back to maskField(value, 2) = last 2 chars visible
+      expect(result).toBe("********il");
     });
 
     it("should handle empty email", () => {

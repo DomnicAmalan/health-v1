@@ -1,3 +1,4 @@
+import type * as React from "react";
 import type {
   ActionItem,
   ActionStructure,
@@ -10,8 +11,7 @@ import type {
   SectionStructure,
   ComponentConfig as SharedComponentConfig,
   ValidationRules,
-} from "@lazarus-life/shared/types/components/registry";
-import type * as React from "react";
+} from "../types/registry";
 import { cn } from "../lib/utils";
 import { HelpButton, type HelpButtonProps } from "./help-button";
 

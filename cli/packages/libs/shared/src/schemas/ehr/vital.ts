@@ -107,7 +107,7 @@ export const EhrVitalSchema = z.object({
   updatedBy: z.string().optional(),
 
   // MUMPS data
-  mumpsData: z.record(z.unknown()).optional(),
+  mumpsData: z.record(z.string(), z.unknown()).optional(),
 }).refine(
   // Business rule: Blood pressure must have value2 (diastolic)
   data => {

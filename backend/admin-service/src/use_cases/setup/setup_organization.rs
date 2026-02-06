@@ -1,7 +1,6 @@
 use shared::domain::repositories::{SetupRepository, UserRepository};
 use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
-use shared::infrastructure::validation::validate_non_empty;
 use uuid::Uuid;
 
 pub struct SetupOrganizationUseCase {

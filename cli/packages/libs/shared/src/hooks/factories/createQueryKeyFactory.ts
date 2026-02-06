@@ -22,7 +22,7 @@
  * @param resource - The resource name (e.g., "patients", "appointments", "users")
  * @returns A query key factory with standardized methods
  */
-export function createQueryKeyFactory<T extends string>(
+export function createQueryKeyFactory(
   domain: string,
   resource: string
 ) {
@@ -69,6 +69,4 @@ export function createQueryKeyFactory<T extends string>(
 /**
  * Type helper to extract the query key factory type
  */
-export type QueryKeyFactory<T extends string = string> = ReturnType<
-  typeof createQueryKeyFactory<T>
->;
+export type QueryKeyFactory = ReturnType<typeof createQueryKeyFactory>;

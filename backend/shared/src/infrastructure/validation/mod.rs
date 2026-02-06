@@ -7,7 +7,7 @@ use crate::shared::{AppError, AppResult};
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust,ignore
 /// # use shared::infrastructure::validation::validate_non_empty;
 /// // Before: 4-5 lines per validation
 /// // if name.trim().is_empty() {

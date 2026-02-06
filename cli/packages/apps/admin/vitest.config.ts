@@ -11,15 +11,22 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/dist/**"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      all: true,
+      include: ["src/**/*.ts", "src/**/*.tsx"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",
         "**/*.config.*",
         "**/test/**",
         "**/*.d.ts",
+        "src/**/*.test.{ts,tsx}",
+        "**/coverage/**",
+        "**/e2e/**",
       ],
+      reporter: ["text", "text-summary", "json", "html", "lcov"],
+      reportsDirectory: "./coverage",
     },
+    passWithNoTests: true,
   },
   resolve: {
     alias: {

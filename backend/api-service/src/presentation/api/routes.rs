@@ -3,7 +3,7 @@ use axum::{
     routing::{get, post, put, delete},
 };
 use crate::presentation::api::handlers::*;
-use crate::presentation::api::handlers::ehr::{patient_handlers, pharmacy_handlers};
+use crate::presentation::api::handlers::ehr::{anatomy_findings_handlers, appointment_handlers, body_system_handlers, clinical_note_handlers, encounter_handlers, imaging_orders_handlers, patient_handlers, pharmacy_handlers, problem_list_handlers, vital_signs_handlers};
 use crate::presentation::api::handlers::billing::{service_catalog_handlers, invoice_handlers, payment_handlers};
 use admin_service::handlers::*;
 use std::sync::Arc;
@@ -44,8 +44,84 @@ pub fn create_router() -> Router<Arc<super::AppState>> {
         .route("/v1/ehr/patients/:id", delete(patient_handlers::delete_patient))
         .route("/v1/ehr/patients/:id/banner", get(patient_handlers::get_patient_banner))
         .route("/v1/ehr/patients/mrn/:mrn", get(patient_handlers::get_patient_by_mrn))
-        .route("/v1/ehr/patients/ien/:ien", get(patient_handlers::get_patient_by_ien));
-        // Note: Visits, Vitals, Labs, etc. are handled by yottadb-api service
+        .route("/v1/ehr/patients/ien/:ien", get(patient_handlers::get_patient_by_ien))
+        // Appointment routes
+        .route("/v1/ehr/appointments", get(appointment_handlers::list_appointments))
+        .route("/v1/ehr/appointments", post(appointment_handlers::create_appointment))
+        .route("/v1/ehr/appointments/availability", get(appointment_handlers::check_availability))
+        .route("/v1/ehr/appointments/:id", get(appointment_handlers::get_appointment))
+        .route("/v1/ehr/appointments/:id", put(appointment_handlers::update_appointment))
+        .route("/v1/ehr/appointments/:id", delete(appointment_handlers::delete_appointment))
+        .route("/v1/ehr/appointments/:id/check-in", post(appointment_handlers::check_in_appointment))
+        .route("/v1/ehr/appointments/:id/cancel", post(appointment_handlers::cancel_appointment))
+        // Clinical notes routes
+        .route("/v1/ehr/clinical-notes", get(clinical_note_handlers::list_clinical_notes))
+        .route("/v1/ehr/clinical-notes", post(clinical_note_handlers::create_clinical_note))
+        .route("/v1/ehr/clinical-notes/templates", get(clinical_note_handlers::list_note_templates))
+        .route("/v1/ehr/clinical-notes/:id", get(clinical_note_handlers::get_clinical_note))
+        .route("/v1/ehr/clinical-notes/:id", put(clinical_note_handlers::update_clinical_note))
+        .route("/v1/ehr/clinical-notes/:id", delete(clinical_note_handlers::delete_clinical_note))
+        .route("/v1/ehr/clinical-notes/:id/sign", post(clinical_note_handlers::sign_clinical_note))
+        // Vital signs routes
+        .route("/v1/ehr/vital-signs", get(vital_signs_handlers::list_vital_signs))
+        .route("/v1/ehr/vital-signs", post(vital_signs_handlers::create_vital_signs))
+        .route("/v1/ehr/vital-signs/:id", get(vital_signs_handlers::get_vital_signs))
+        .route("/v1/ehr/vital-signs/:id", put(vital_signs_handlers::update_vital_signs))
+        .route("/v1/ehr/vital-signs/:id", delete(vital_signs_handlers::delete_vital_signs))
+        .route("/v1/ehr/vital-signs/patient/:patient_id/trends", get(vital_signs_handlers::get_patient_vital_trends))
+        // Encounter routes
+        .route("/v1/ehr/encounters", get(encounter_handlers::list_encounters))
+        .route("/v1/ehr/encounters", post(encounter_handlers::create_encounter))
+        .route("/v1/ehr/encounters/:id", get(encounter_handlers::get_encounter))
+        .route("/v1/ehr/encounters/:id", put(encounter_handlers::update_encounter))
+        .route("/v1/ehr/encounters/:id", delete(encounter_handlers::delete_encounter))
+        .route("/v1/ehr/encounters/:id/start", post(encounter_handlers::start_encounter))
+        .route("/v1/ehr/encounters/:id/finish", post(encounter_handlers::finish_encounter))
+        .route("/v1/ehr/encounters/:id/diagnoses", post(encounter_handlers::add_diagnosis))
+        .route("/v1/ehr/encounters/:id/procedures", post(encounter_handlers::add_procedure))
+        // Lab test catalog routes
+        .route("/v1/ehr/lab-tests", get(lab_tests_handlers::list_lab_tests))
+        .route("/v1/ehr/lab-tests/categories", get(lab_tests_handlers::list_test_categories))
+        .route("/v1/ehr/lab-tests/:id", get(lab_tests_handlers::get_lab_test))
+        .route("/v1/ehr/lab-tests/:id/reference-ranges", get(lab_tests_handlers::get_test_reference_ranges))
+        .route("/v1/ehr/lab-panels", get(lab_tests_handlers::list_lab_panels))
+        // Lab order routes
+        .route("/v1/ehr/lab-orders", get(lab_orders_handlers::list_lab_orders))
+        .route("/v1/ehr/lab-orders", post(lab_orders_handlers::create_lab_order))
+        .route("/v1/ehr/lab-orders/:id", get(lab_orders_handlers::get_lab_order))
+        .route("/v1/ehr/lab-orders/:id/collect", post(lab_orders_handlers::collect_specimen).patch(lab_orders_handlers::collect_specimen))
+        .route("/v1/ehr/lab-orders/:id/receive", post(lab_orders_handlers::receive_specimen).patch(lab_orders_handlers::receive_specimen))
+        .route("/v1/ehr/lab-orders/:id/cancel", post(lab_orders_handlers::cancel_lab_order))
+        // Lab results routes
+        .route("/v1/ehr/lab-orders/:id/results", post(lab_results_handlers::enter_results))
+        .route("/v1/ehr/lab-orders/:id/verify", post(lab_results_handlers::verify_results))
+        // Anatomy findings routes (3D anatomy-based documentation)
+        .route("/v1/ehr/encounters/:encounter_id/anatomy-findings", get(anatomy_findings_handlers::list_anatomy_findings))
+        .route("/v1/ehr/encounters/:encounter_id/anatomy-findings", post(anatomy_findings_handlers::create_anatomy_finding))
+        .route("/v1/ehr/encounters/:encounter_id/anatomy-findings/:finding_id", put(anatomy_findings_handlers::update_anatomy_finding))
+        .route("/v1/ehr/encounters/:encounter_id/anatomy-findings/:finding_id", delete(anatomy_findings_handlers::delete_anatomy_finding))
+        // Body systems taxonomy routes
+        .route("/v1/ehr/body-systems", get(body_system_handlers::list_body_systems))
+        .route("/v1/ehr/body-systems/:id", get(body_system_handlers::get_body_system))
+        .route("/v1/ehr/body-systems/:id/lab-recommendations", get(body_system_handlers::get_lab_recommendations))
+        // Problem list routes
+        .route("/v1/ehr/problems", get(problem_list_handlers::list_problems))
+        .route("/v1/ehr/problems", post(problem_list_handlers::create_problem))
+        .route("/v1/ehr/problems/:id", get(problem_list_handlers::get_problem))
+        .route("/v1/ehr/problems/:id", put(problem_list_handlers::update_problem))
+        .route("/v1/ehr/problems/:id", delete(problem_list_handlers::delete_problem))
+        .route("/v1/ehr/problems/:id/resolve", post(problem_list_handlers::resolve_problem))
+        .route("/v1/ehr/problems/:id/comments", post(problem_list_handlers::add_problem_comment))
+        .route("/v1/ehr/problems/:id/history", get(problem_list_handlers::list_problem_history))
+        // Imaging/radiology orders routes
+        .route("/v1/ehr/imaging-orders", get(imaging_orders_handlers::list_imaging_orders))
+        .route("/v1/ehr/imaging-orders", post(imaging_orders_handlers::create_imaging_order))
+        .route("/v1/ehr/imaging-orders/:id", get(imaging_orders_handlers::get_imaging_order))
+        .route("/v1/ehr/imaging-orders/:id", put(imaging_orders_handlers::update_imaging_order))
+        .route("/v1/ehr/imaging-orders/:id", delete(imaging_orders_handlers::delete_imaging_order))
+        .route("/v1/ehr/imaging-orders/:id/perform", post(imaging_orders_handlers::perform_study))
+        .route("/v1/ehr/imaging-orders/:id/report", post(imaging_orders_handlers::enter_report))
+        .route("/v1/ehr/imaging-orders/:id/cancel", post(imaging_orders_handlers::cancel_imaging_order));
 
     // Pharmacy routes (protected)
     let pharmacy_routes = Router::new()
@@ -107,6 +183,45 @@ pub fn create_router() -> Router<Arc<super::AppState>> {
         // Connectors
         .route("/v1/connectors", get(workflow_handlers::list_connectors));
 
+    // Worklist routes (protected) - Universal task queue
+    let worklist_routes = Router::new()
+        .route("/v1/worklist", get(worklist_handlers::list_worklist))
+        .route("/v1/worklist/summary", get(worklist_handlers::get_worklist_summary))
+        .route("/v1/worklist", post(worklist_handlers::create_task))
+        .route("/v1/worklist/:id/claim", post(worklist_handlers::claim_task).patch(worklist_handlers::claim_task))
+        .route("/v1/worklist/:id/complete", post(worklist_handlers::complete_task).patch(worklist_handlers::complete_task))
+        .route("/v1/worklist/:id/cancel", post(worklist_handlers::cancel_task).patch(worklist_handlers::cancel_task));
+
+    // CDS routes (protected) - Clinical decision support
+    let cds_routes = Router::new()
+        .route("/v1/cds/alerts", get(cds_handlers::list_alerts))
+        .route("/v1/cds/alerts/:patient_id", get(cds_handlers::get_patient_alerts))
+        .route("/v1/cds/alerts/:alert_id/acknowledge", post(cds_handlers::acknowledge_alert))
+        .route("/v1/cds/check-medication", post(cds_handlers::check_medication))
+        .route("/v1/cds/rules", get(cds_handlers::list_cds_rules));
+
+    // OPD routes (protected) - Outpatient department queue management
+    let opd_routes = Router::new()
+        .route("/v1/opd/queue", get(opd_handlers::list_opd_queue))
+        .route("/v1/opd/queue", post(opd_handlers::create_queue_entry))
+        .route("/v1/opd/queue/summary", get(opd_handlers::get_queue_summary))
+        .route("/v1/opd/queue/:id/status", post(opd_handlers::update_queue_status).patch(opd_handlers::update_queue_status))
+        .route("/v1/opd/queue/:id/start-consultation", post(opd_handlers::start_consultation))
+        .route("/v1/opd/queue/:id/complete-consultation", post(opd_handlers::complete_consultation))
+        .route("/v1/opd/queue/:id/cancel", post(opd_handlers::cancel_queue_entry));
+
+    // Communications routes (protected) - Messages and notifications
+    let communications_routes = Router::new()
+        // Internal messages
+        .route("/v1/messages", post(communications_handlers::send_message))
+        .route("/v1/messages", get(communications_handlers::list_messages))
+        .route("/v1/messages/:id/read", post(communications_handlers::mark_message_read).patch(communications_handlers::mark_message_read))
+        // Notifications
+        .route("/v1/notifications", get(communications_handlers::list_notifications))
+        .route("/v1/notifications", post(communications_handlers::create_notification))
+        .route("/v1/notifications/:id/read", post(communications_handlers::mark_notification_read).patch(communications_handlers::mark_notification_read))
+        .route("/v1/notifications/read-all", post(communications_handlers::mark_all_notifications_read).patch(communications_handlers::mark_all_notifications_read));
+
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
@@ -114,6 +229,10 @@ pub fn create_router() -> Router<Arc<super::AppState>> {
         .merge(pharmacy_routes)
         .merge(billing_routes)
         .merge(workflow_routes)
+        .merge(worklist_routes)
+        .merge(cds_routes)
+        .merge(opd_routes)
+        .merge(communications_routes)
 }
 
 #[allow(dead_code)]

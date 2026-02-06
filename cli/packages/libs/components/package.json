@@ -1,6 +1,6 @@
 {
   "name": "@lazarus-life/ui-components",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "sideEffects": false,
@@ -174,13 +174,20 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist coverage",
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "@lazarus-life/shared": "workspace:*",
     "@base-ui/react": "^1.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.15",
+    "jsdom": "^26.1.0",
+    "vitest": "^4.0.15"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

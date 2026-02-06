@@ -1,0 +1,28 @@
+# Tarpaulin Configuration for Rust Coverage
+# Ensures all source files are included in coverage reports
+
+[default]
+# Include all workspace members
+all = true
+
+# Output formats
+out = ["Lcov", "Html"]
+output-dir = "coverage"
+
+# Include all targets (bins, libs, tests, examples)
+all-targets = true
+
+# Timeout for tests (seconds)
+timeout = "300s"
+
+# Skip clean to speed up subsequent runs (CACHE BUILDS)
+skip-clean = true
+
+# Use locked Cargo.lock for faster dependency resolution
+locked = true
+
+# Exclude test files from coverage percentage
+exclude-files = ["**/tests/*", "**/*_test.rs"]
+
+# Use auto engine (llvm on macOS, ptrace on Linux)
+# engine = "auto"

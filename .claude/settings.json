@@ -31,6 +31,18 @@
     "de-identify": {
       "description": "De-identify PHI for research or testing using HIPAA Safe Harbor",
       "path": ".claude/skills/de-identify.md"
+    },
+    "sonar-learn-fix": {
+      "description": "Analyze SonarQube findings, learn from issues, and apply fixes",
+      "path": ".claude/skills/sonar-learn-fix.md"
+    },
+    "rfc-feature": {
+      "description": "Build features using RFC design process with research-first approach",
+      "path": ".claude/skills/rfc-feature.md"
+    },
+    "version-release": {
+      "description": "Manage version bumps, releases, and changelog generation",
+      "path": ".claude/skills/version-release.md"
     }
   }
 }

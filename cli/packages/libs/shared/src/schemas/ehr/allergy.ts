@@ -77,7 +77,7 @@ export const EhrAllergySchema = z.object({
   updatedBy: z.string().optional(),
 
   // MUMPS data
-  mumpsData: z.record(z.unknown()).optional(),
+  mumpsData: z.record(z.string(), z.unknown()).optional(),
 }).refine(
   // Business rule: If verified, must have verifiedBy and verifiedAt
   data => {

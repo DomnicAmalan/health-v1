@@ -231,3 +231,4 @@ cube/dist/
 
 # Cube.js logs
 cube/*.log
+coverage-summary.md

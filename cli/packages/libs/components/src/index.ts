@@ -28,6 +28,7 @@ export * from "./components/help-button";
 export * from "./components/hover-help";
 export * from "./components/input";
 export * from "./components/label";
+export * from "./components/login-form";
 export * from "./components/progress";
 export * from "./components/scroll-area";
 export * from "./components/security";

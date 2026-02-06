@@ -100,7 +100,7 @@ export const EhrOrderSchema = z.object({
   diagnosisCode: z.string().optional(),
 
   // Extended details
-  orderDetails: z.record(z.unknown()).optional(),
+  orderDetails: z.record(z.string(), z.unknown()).optional(),
 
   // Audit fields
   createdAt: DateTimeSchema.optional(),
@@ -109,7 +109,7 @@ export const EhrOrderSchema = z.object({
   updatedBy: z.string().optional(),
 
   // MUMPS data
-  mumpsData: z.record(z.unknown()).optional(),
+  mumpsData: z.record(z.string(), z.unknown()).optional(),
 }).refine(
   // Business rule: If discontinued, must have reason
   data => {
@@ -158,7 +158,7 @@ export const CreateEhrOrderRequestSchema = z.object({
   instructions: z.string().max(2000).optional(),
   indication: z.string().max(500).optional(),
   diagnosisCode: z.string().optional(),
-  orderDetails: z.record(z.unknown()).optional(),
+  orderDetails: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateEhrOrderRequest = z.infer<typeof CreateEhrOrderRequestSchema>;

@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { createTypeGuard, createAssertion } from "../guards";
+import { createTypeGuard } from "../guards";
 
 // ============================================================================
 // API Response Schemas
@@ -88,9 +88,9 @@ export function createPaginatedApiResponseSchema<T extends z.ZodTypeAny>(
  */
 export const RequestConfigSchema = z.object({
   method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   body: z.unknown().optional(),
-  params: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   validateRequest: z.any().optional(), // ZodType
   validateResponse: z.any().optional(), // ZodType
   throwOnValidationError: z.boolean().optional(),

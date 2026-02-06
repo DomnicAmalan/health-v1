@@ -1,6 +1,6 @@
 {
   "name": "lazarus-life-monorepo",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "workspaces": ["packages/apps/*", "packages/libs/*"],
@@ -23,7 +23,7 @@
     "test:coverage": "bun --filter='*' run test:coverage",
     "// === Build Commands (UI only) ===": "",
     "build": "bun run build:libs && bun run build:apps",
-    "build:libs": "bun --filter=@lazarus-life/shared run build && bun --filter=@lazarus-life/ui-components run build",
+    "build:libs": "bun --filter=@lazarus-life/ui-components run build && bun --filter=@lazarus-life/shared run build",
     "build:apps": "bun --filter='packages/apps/*' run build",
     "build:vault": "./scripts/build-app.sh lazarus-life-vault",
     "build:admin": "./scripts/build-app.sh lazarus-life-admin",
@@ -49,7 +49,6 @@
     "clean": "bun --filter='*' run clean && rm -rf node_modules",
     "clean:cache": "rm -rf node_modules/.cache packages/*/dist packages/*/.turbo",
     "// === Utility Commands ===": "",
-    "prepare": "husky",
     "commit": "git-cz",
     "audit": "bun audit",
     "security:semgrep": "semgrep --config .semgrep.yml",
@@ -84,25 +83,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
     "@tauri-apps/api": "^2.9.1",
     "@tauri-apps/cli": "^2.9.6",
     "@types/node": "^20.19.27",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "baseline-browser-mapping": "^2.9.19",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "oxfmt": "^0.11.0",
     "oxlint": "^1.33.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vite": "^7.2.7"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,md}": ["biome check --write"]
   }
 }

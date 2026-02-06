@@ -6,7 +6,7 @@
  */
 
 import { z } from "zod";
-import { createAssertion, formatZodError } from "./guards";
+import { formatZodError } from "./guards";
 
 // ============================================================================
 // Environment Schemas
@@ -29,25 +29,25 @@ export const ViteEnvSchema = z.object({
   // Feature Flags
   VITE_ENABLE_AUDIT_LOGGING: z
     .enum(['true', 'false'])
-    .transform(val => val === 'true')
-    .default('true'),
+    .default('true')
+    .transform(val => val === 'true'),
 
   VITE_ENABLE_PHI_MASKING: z
     .enum(['true', 'false'])
-    .transform(val => val === 'true')
-    .default('true'),
+    .default('true')
+    .transform(val => val === 'true'),
 
   VITE_ENABLE_DEBUG: z
     .enum(['true', 'false'])
-    .transform(val => val === 'true')
-    .default('false'),
+    .default('false')
+    .transform(val => val === 'true'),
 
   // Session Configuration
   VITE_SESSION_TIMEOUT_MS: z
     .string()
     .regex(/^\d+$/, { message: "VITE_SESSION_TIMEOUT_MS must be a number" })
-    .transform(val => parseInt(val, 10))
-    .default('900000'), // 15 minutes
+    .default('900000') // 15 minutes
+    .transform(val => parseInt(val, 10)),
 
   // Environment
   MODE: z.enum(['development', 'production', 'test']).default('development'),

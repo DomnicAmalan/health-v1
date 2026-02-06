@@ -198,6 +198,208 @@ make dev-vault       # Vault UI
 - Use `useAuditLog` hook and `logPHI()` for any PHI access
 - Run `bun run lint:fix` before committing
 
+## Mission-Critical Engineering Principles (Tiger Style)
+
+**Healthcare systems require the highest reliability standards. These principles from TigerBeetle (https://tigerstyle.dev) are MANDATORY for all production code.**
+
+### 1. Error Handling is Non-Negotiable
+> "92% of catastrophic system failures result from incorrect handling of non-fatal errors."
+
+- **NEVER use `unwrap()` or `expect()` in production code**
+- Every `Result<T, E>` must be handled with `?` or explicit matching
+- All errors must be logged with context before propagation
+- Functions should return `Result` types, not panic
+
+```rust
+// GOOD
+pub async fn create_appointment(payload: CreateAppointmentRequest) -> Result<Appointment, AppError> {
+    let patient = db.get_patient(payload.patient_id).await?
+        .ok_or(AppError::NotFound("Patient not found".into()))?;
+    // ... continue
+}
+
+// BAD
+pub async fn create_appointment(payload: CreateAppointmentRequest) -> Appointment {
+    let patient = db.get_patient(payload.patient_id).await.unwrap();  // ❌ NEVER
+}
+```
+
+### 2. Assertion Density: Minimum 2 Per Function
+- Every function MUST have at least 2 assertions checking invariants
+- Use **paired assertions**: assert before write AND after read
+- Assertions catch bugs early and multiply fuzzing effectiveness
+
+```rust
+pub async fn update_status(id: Uuid, new_status: Status) -> Result<()> {
+    // Assertion 1: Valid state transition
+    let current = get_appointment(id).await?;
+    assert!(is_valid_transition(current.status, new_status),
+        "Invalid transition from {:?} to {:?}", current.status, new_status);
+
+    // Update
+    db.update_status(id, new_status).await?;
+
+    // Assertion 2: Verify write succeeded
+    let updated = get_appointment(id).await?;
+    assert_eq!(updated.status, new_status, "Status verification failed");
+
+    Ok(())
+}
+```
+
+### 3. Function Complexity Limits
+- **Hard limit: 70 lines maximum per function** (must fit on one screen)
+- **Push ifs up**: Keep branching logic in parent functions
+- **Push fors down**: Move non-branching loops to helper functions
+- **State mutations in parent**: Helpers compute, parents apply changes
+
+```rust
+// Parent: orchestrates with branching
+pub async fn create_order(payload: CreateOrderRequest) -> Result<Order> {
+    if payload.priority == Priority::Stat {
+        validate_stat_authorization(&payload).await?;
+    }
+
+    let order_number = generate_order_number(&payload);  // Helper: no branching
+    let order = insert_order(payload, order_number).await?;
+    Ok(order)
+}
+```
+
+### 4. Explicit Resource Limits
+- All queues must have bounded capacity (catch infinite loops)
+- All queries must have timeouts (5s default, 30s max)
+- All pagination must have max page size (1000 records max)
+- Use `u32` instead of `usize` for counts (fixed size, portable)
+
+```rust
+// Bounded query
+const MAX_PAGE_SIZE: i64 = 1000;
+const QUERY_TIMEOUT: Duration = Duration::from_secs(5);
+
+pub async fn list_appointments(limit: i64) -> Result<Vec<Appointment>> {
+    let query = sqlx::query_as!(
+        Appointment,
+        "SELECT * FROM appointments LIMIT $1",
+        limit.min(MAX_PAGE_SIZE)  // Enforce limit
+    );
+
+    tokio::time::timeout(QUERY_TIMEOUT, query.fetch_all(&db))
+        .await
+        .map_err(|_| AppError::Timeout)?
+        .map_err(AppError::from)
+}
+```
+
+### 5. Testing: Valid/Invalid Boundaries
+- Tests MUST cover both positive (valid) and negative (invalid) cases
+- Focus on **boundaries** where data transitions between valid/invalid
+- Test state transitions, value ranges, and edge cases
+
+```rust
+#[tokio::test]
+async fn test_appointment_duration_boundaries() {
+    // Valid boundaries
+    assert!(validate_duration(1).is_ok());      // Min valid
+    assert!(validate_duration(480).is_ok());    // Max valid (8 hours)
+
+    // Invalid boundaries
+    assert!(validate_duration(0).is_err());     // Zero invalid
+    assert!(validate_duration(481).is_err());   // Over max
+}
+```
+
+### 6. Batching Over Direct Event Response
+- Don't respond to events immediately—process in bounded batches
+- Run on your own schedule, not external event timing
+- Improves performance and maintains control flow
+
+```rust
+// GOOD: Batch processing
+pub async fn process_notifications_batch() {
+    loop {
+        tokio::time::sleep(Duration::from_secs(5)).await;  // Fixed interval
+        let batch = fetch_pending_notifications(100).await?;  // Bounded batch
+
+        for notif in batch {
+            send_notification(notif).await.ok();  // Continue on error
+        }
+    }
+}
+
+// BAD: Direct response
+pub async fn on_result_ready(result: LabResult) {
+    send_notification(result).await;  // Unpredictable timing
+}
+```
+
+### 7. Financial System Requirements
+Healthcare billing is a financial system. Apply financial transaction safety:
+- **No lost transactions**: Every charge must be tracked
+- **Audit trail**: All state changes logged permanently
+- **Reconciliation**: Periodic verification of balances
+- **Idempotency**: Operations can be retried safely with idempotency keys
+
+```rust
+pub async fn create_charge(
+    patient_id: Uuid,
+    amount: Decimal,
+    idempotency_key: String,
+) -> Result<Charge> {
+    // Check idempotency
+    if let Some(existing) = get_by_idempotency_key(&idempotency_key).await? {
+        return Ok(existing);
+    }
+
+    let mut tx = db.begin().await?;
+
+    // Create charge
+    let charge = insert_charge(&mut tx, patient_id, amount, idempotency_key).await?;
+
+    // Audit trail (MUST succeed)
+    insert_audit_log(&mut tx, "charge", charge.id, "created").await?;
+
+    // Verify
+    assert_eq!(count_charges(&mut tx, charge.id).await?, 1);
+
+    tx.commit().await?;
+    Ok(charge)
+}
+```
+
+### 8. Naming Conventions (Big-Endian)
+Most significant qualifier first for visual scanning:
+
+```rust
+// Database columns
+scheduled_datetime
+scheduled_end_datetime
+ordering_datetime
+ordering_provider_id
+
+// Constants
+const APPOINTMENT_DURATION_DEFAULT_MINUTES: i32 = 30;
+const LAB_ORDER_TIMEOUT_SECONDS: u64 = 5;
+const TASK_QUEUE_CAPACITY_MAX: usize = 10000;
+
+// Functions
+pub async fn appointment_create(...) -> Result<Appointment>
+pub async fn appointment_check_in(...) -> Result<()>
+pub async fn lab_order_create(...) -> Result<LabOrder>
+```
+
+### Implementation Checklist
+Before committing any code, verify:
+- [ ] All error cases handled (no unwrap/expect)
+- [ ] Minimum 2 assertions per function
+- [ ] Function < 70 lines
+- [ ] All queries have timeouts
+- [ ] All queues/lists have bounded capacity
+- [ ] Tests cover valid/invalid boundaries
+- [ ] Idempotency for financial operations
+- [ ] Audit trail for state changes
+- [ ] Big-endian naming convention used
+
 ### General
 - Use conventional commits
 - Never commit `.env` files

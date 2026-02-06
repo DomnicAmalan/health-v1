@@ -15,6 +15,18 @@ pub enum AppError {
     #[error("Authorization error: {0}")]
     Authorization(String),
 
+    #[error("Unauthorized: {0}")]
+    Unauthorized(String),
+
+    #[error("Forbidden: {0}")]
+    Forbidden(String),
+
+    #[error("Conflict: {0}")]
+    Conflict(String),
+
+    #[error("Invalid state: {0}")]
+    InvalidState(String),
+
     #[error("Configuration error: {0}")]
     Configuration(String),
 
@@ -29,6 +41,9 @@ pub enum AppError {
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error("Request timeout: {0}")]
+    Timeout(String),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,11 +52,16 @@ pub enum ErrorKind {
     Encryption,
     Authentication,
     Authorization,
+    Unauthorized,
+    Forbidden,
+    Conflict,
+    InvalidState,
     Configuration,
     Storage,
     Validation,
     NotFound,
     Internal,
+    Timeout,
 }
 
 impl From<AppError> for ErrorKind {
@@ -51,11 +71,16 @@ impl From<AppError> for ErrorKind {
             AppError::Encryption(_) => ErrorKind::Encryption,
             AppError::Authentication(_) => ErrorKind::Authentication,
             AppError::Authorization(_) => ErrorKind::Authorization,
+            AppError::Unauthorized(_) => ErrorKind::Unauthorized,
+            AppError::Forbidden(_) => ErrorKind::Forbidden,
+            AppError::Conflict(_) => ErrorKind::Conflict,
+            AppError::InvalidState(_) => ErrorKind::InvalidState,
             AppError::Configuration(_) => ErrorKind::Configuration,
             AppError::Storage(_) => ErrorKind::Storage,
             AppError::Validation(_) => ErrorKind::Validation,
             AppError::NotFound(_) => ErrorKind::NotFound,
             AppError::Internal(_) => ErrorKind::Internal,
+            AppError::Timeout(_) => ErrorKind::Timeout,
         }
     }
 }
@@ -67,11 +92,16 @@ impl From<&AppError> for ErrorKind {
             AppError::Encryption(_) => ErrorKind::Encryption,
             AppError::Authentication(_) => ErrorKind::Authentication,
             AppError::Authorization(_) => ErrorKind::Authorization,
+            AppError::Unauthorized(_) => ErrorKind::Unauthorized,
+            AppError::Forbidden(_) => ErrorKind::Forbidden,
+            AppError::Conflict(_) => ErrorKind::Conflict,
+            AppError::InvalidState(_) => ErrorKind::InvalidState,
             AppError::Configuration(_) => ErrorKind::Configuration,
             AppError::Storage(_) => ErrorKind::Storage,
             AppError::Validation(_) => ErrorKind::Validation,
             AppError::NotFound(_) => ErrorKind::NotFound,
             AppError::Internal(_) => ErrorKind::Internal,
+            AppError::Timeout(_) => ErrorKind::Timeout,
         }
     }
 }

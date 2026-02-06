@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
   component: DashboardPage,
 });
 
-function DashboardPage() {
+export function DashboardPage() {
   const { data: sealStatus, isLoading: isLoadingSeal } = useQuery({
     queryKey: ["sealStatus"],
     queryFn: () => systemApi.getSealStatus(),

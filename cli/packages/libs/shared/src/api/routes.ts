@@ -428,6 +428,32 @@ export const API_ROUTES = {
       RXNORM_SEARCH: "/v1/ehr/codes/rxnorm",
       SNOMED_SEARCH: "/v1/ehr/codes/snomed",
     },
+
+    /** Encounter management */
+    ENCOUNTERS: {
+      LIST: "/v1/ehr/encounters",
+      GET: (id: string) => `/v1/ehr/encounters/${id}`,
+      CREATE: "/v1/ehr/encounters",
+      UPDATE: (id: string) => `/v1/ehr/encounters/${id}`,
+      COMPLETE: (id: string) => `/v1/ehr/encounters/${id}/complete`,
+      BY_PATIENT: (patientId: string) => `/v1/ehr/patients/${patientId}/encounters`,
+    },
+
+    /** 3D Anatomy-based clinical documentation */
+    ANATOMY_FINDINGS: {
+      LIST: (encounterId: string) => `/v1/ehr/encounters/${encounterId}/anatomy-findings`,
+      GET: (encounterId: string, findingId: string) => `/v1/ehr/encounters/${encounterId}/anatomy-findings/${findingId}`,
+      CREATE: (encounterId: string) => `/v1/ehr/encounters/${encounterId}/anatomy-findings`,
+      UPDATE: (encounterId: string, findingId: string) => `/v1/ehr/encounters/${encounterId}/anatomy-findings/${findingId}`,
+      DELETE: (encounterId: string, findingId: string) => `/v1/ehr/encounters/${encounterId}/anatomy-findings/${findingId}`,
+    },
+
+    /** Body systems taxonomy for 3D anatomy */
+    BODY_SYSTEMS: {
+      LIST: "/v1/ehr/body-systems",
+      GET: (id: string) => `/v1/ehr/body-systems/${id}`,
+      LAB_RECOMMENDATIONS: (id: string) => `/v1/ehr/body-systems/${id}/lab-recommendations`,
+    },
   },
 
   // Pharmacy routes (Drug catalog and interaction checking)

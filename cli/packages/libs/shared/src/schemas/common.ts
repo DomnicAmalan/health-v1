@@ -256,7 +256,7 @@ export const JsonValueSchema: z.ZodType<
     z.number(),
     z.boolean(),
     z.null(),
-    z.record(JsonValueSchema),
+    z.record(z.string(), JsonValueSchema),
     z.array(JsonValueSchema),
   ])
 );

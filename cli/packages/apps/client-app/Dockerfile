@@ -21,6 +21,7 @@ WORKDIR /app
 # Only copy package files for dependency installation
 COPY package.json bun.lock* ./
 COPY tsconfig.strict.json* ./
+COPY packages/config ./packages/config/
 COPY packages/apps/client-app/package.json ./packages/apps/client-app/
 COPY packages/libs/components/package.json ./packages/libs/components/
 COPY packages/libs/shared/package.json ./packages/libs/shared/
@@ -94,6 +95,7 @@ COPY biome.json* ./
 COPY tsconfig.strict.json* ./
 
 # Copy all source files for libs and app
+COPY packages/config ./packages/config
 COPY packages/libs/shared ./packages/libs/shared
 COPY packages/libs/components ./packages/libs/components
 COPY packages/apps/client-app ./packages/apps/client-app

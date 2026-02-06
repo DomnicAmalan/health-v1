@@ -5,6 +5,9 @@ pub mod domain;
 pub mod i18n;
 pub mod infrastructure;
 
+#[cfg(test)]
+pub mod testing;
+
 pub use application::*;
 pub use shared::*;
 pub use config::Settings;

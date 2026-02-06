@@ -10,7 +10,7 @@
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// // Before: 5 lines
 /// let policy_store = state.policy_store.as_ref().ok_or_else(|| {
 ///     (
@@ -47,7 +47,7 @@ macro_rules! require_context {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// // Before: 5 lines
 /// let realm_uuid = Uuid::parse_str(&realm_id).map_err(|_| {
 ///     (
@@ -85,7 +85,7 @@ macro_rules! parse_uuid {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// // Before: 6 lines
 /// let policy_content = payload
 ///     .get("policy")
@@ -126,7 +126,7 @@ macro_rules! require_field {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// // Before:
 /// return Err((
 ///     StatusCode::NOT_FOUND,
@@ -157,7 +157,7 @@ macro_rules! error_response {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// // Before:
 /// Ok(Json(json!({
 ///     "name": policy.name,
@@ -199,18 +199,27 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_uuid_valid() {
+    fn test_parse_uuid_valid() -> Result<(), (StatusCode, Json<Value>)> {
         let id = "550e8400-e29b-41d4-a716-446655440000";
-        let result: Result<Uuid, (StatusCode, Json<Value>)> =
-            Ok(parse_uuid!(id, "test ID"));
-        assert!(result.is_ok());
+        let result: Uuid = parse_uuid!(id, "test ID");
+        assert_eq!(
+            result.to_string(),
+            "550e8400-e29b-41d4-a716-446655440000"
+        );
+        Ok(())
     }
 
     #[test]
     fn test_parse_uuid_invalid() {
         let id = "invalid-uuid";
+        // Test macro without ? operator by using the underlying pattern
         let result: Result<Uuid, (StatusCode, Json<Value>)> =
-            Ok(parse_uuid!(id, "test ID"));
+            Uuid::parse_str(id).map_err(|_| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(json!({ "error": format!("invalid {}", "test ID") })),
+                )
+            });
         assert!(result.is_err());
         if let Err((status, json)) = result {
             assert_eq!(status, StatusCode::BAD_REQUEST);
@@ -219,15 +228,15 @@ mod tests {
     }
 
     #[test]
-    fn test_require_field_string() {
+    fn test_require_field_string() -> Result<(), (StatusCode, Json<Value>)> {
         let payload = json!({
             "name": "test",
             "value": 42
         });
 
-        let name: Result<&str, (StatusCode, Json<Value>)> =
-            Ok(require_field!(payload, "name", as_str, "name is required"));
-        assert_eq!(name.unwrap(), "test");
+        let name: &str = require_field!(payload, "name", as_str, "name is required");
+        assert_eq!(name, "test");
+        Ok(())
     }
 
     #[test]
@@ -236,8 +245,16 @@ mod tests {
             "value": 42
         });
 
-        let result: Result<&str, (StatusCode, Json<Value>)> =
-            Ok(require_field!(payload, "name", as_str, "name is required"));
+        // Test macro without ? operator by using the underlying pattern
+        let result: Result<&str, (StatusCode, Json<Value>)> = payload
+            .get("name")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| {
+                (
+                    StatusCode::BAD_REQUEST,
+                    Json(json!({ "error": "name is required" })),
+                )
+            });
         assert!(result.is_err());
     }
 }

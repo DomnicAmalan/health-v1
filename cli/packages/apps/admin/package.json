@@ -1,6 +1,6 @@
 {
   "name": "lazarus-life-admin",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -28,6 +28,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
+    "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "jsdom": "^27.3.0",
     "vitest": "^4.0.15"

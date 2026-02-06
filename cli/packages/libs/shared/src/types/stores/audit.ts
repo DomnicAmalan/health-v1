@@ -2,7 +2,7 @@
  * Audit store types
  */
 
-import type { AuditEntry } from "../audit";
+import type { AuditEntry } from "../../schemas/audit";
 
 export interface AuditState {
   entries: readonly AuditEntry[];

@@ -2,7 +2,7 @@
  * Auth store types
  */
 
-import type { User } from "../user";
+import type { User } from "../../schemas/user";
 
 export interface AuthState {
   user: User | null;

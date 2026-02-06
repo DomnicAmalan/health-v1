@@ -1,13 +1,16 @@
 .PHONY: help \
         dev dev-vault dev-admin dev-client dev-all dev-libs \
         test test-all test-unit test-backend test-e2e test-e2e-ui test-watch test-coverage \
+        sonar sonar-up sonar-scan sonar-status \
         build build-all build-backend build-frontend build-libs build-release \
-        docker-dev docker-dev-down docker-dev-logs docker-prod docker-test docker-clean \
+        docker-dev docker-dev-build docker-dev-down docker-dev-logs \
+        docker-prod docker-prod-build docker-prod-down docker-prod-logs docker-clean \
         db-migrate db-migrate-test db-reset db-reset-test db-seed \
         lint lint-fix lint-backend lint-frontend lint-all \
         check check-types check-strict \
         clean clean-all clean-node clean-cargo \
-        strict strict-all strict-frontend strict-backend
+        strict strict-all strict-frontend strict-backend \
+        release-patch release-minor release-major release-dry-run version-check version-sync
 
 # ============================================================================
 # Variables - DRY Configuration
@@ -29,8 +32,8 @@ help: ## Show this help message
 	@echo 'Development Commands:'
 	@echo '  make dev             - Interactive app selector'
 	@echo '  make dev-vault       - RustyVault UI + libs (port 8215)'
-	@echo '  make dev-admin       - Admin dashboard + libs (port 4111)'
-	@echo '  make dev-client      - Client app + libs (port 4115)'
+	@echo '  make dev-admin       - Admin dashboard + libs (port 5174)'
+	@echo '  make dev-client      - Client app + libs (port 5175)'
 	@echo '  make dev-all         - All apps in parallel'
 	@echo ''
 	@echo 'Testing Commands:'
@@ -41,6 +44,12 @@ help: ## Show this help message
 	@echo '  make test-e2e        - Playwright E2E tests'
 	@echo '  make test-e2e-ui     - E2E with interactive UI'
 	@echo ''
+	@echo 'SonarQube Commands:'
+	@echo '  make sonar           - Full analysis (tests + coverage + scan)'
+	@echo '  make sonar-up        - Start SonarQube server'
+	@echo '  make sonar-scan      - Run scan only (skip tests)'
+	@echo '  make sonar-status    - Check server status'
+	@echo ''
 	@echo 'Build Commands:'
 	@echo '  make build           - Build all (libs + apps)'
 	@echo '  make build-backend   - Build Rust backend'
@@ -48,7 +57,8 @@ help: ## Show this help message
 	@echo '  make build-release   - Production release build'
 	@echo ''
 	@echo 'Docker Commands:'
-	@echo '  make docker-dev      - Start dev environment'
+	@echo '  make docker-dev      - Start dev environment (+ SonarQube)'
+	@echo '  make docker-prod     - Start production environment'
 	@echo '  make docker-dev-down - Stop dev environment'
 	@echo '  make docker-dev-logs - View dev logs'
 	@echo ''
@@ -66,6 +76,13 @@ help: ## Show this help message
 	@echo 'Cleanup Commands:'
 	@echo '  make clean           - Clean build artifacts'
 	@echo '  make clean-all       - Clean everything'
+	@echo ''
+	@echo 'Release Commands:'
+	@echo '  make release-patch   - Release patch version (1.2.0 -> 1.2.1)'
+	@echo '  make release-minor   - Release minor version (1.2.0 -> 1.3.0)'
+	@echo '  make release-major   - Release major version (1.2.0 -> 2.0.0)'
+	@echo '  make version-check   - Verify all versions match VERSION file'
+	@echo '  make version-sync    - Sync versions from VERSION file'
 	@echo ''
 	@echo 'For detailed documentation, see: COMMANDS.md'
 
@@ -98,33 +115,36 @@ dev-libs: ## Watch shared libraries only
 	@$(BUN_RUN) dev:libs
 
 # ============================================================================
-# Docker Commands
+# Docker Commands (using profiles: dev, prod)
 # ============================================================================
 
-docker-dev: ## Start dev environment
-	@./scripts/docker-compose-with-profiles.sh docker-compose.dev.yml up -d --build --force-recreate --remove-orphans
+docker-dev: ## Start dev environment (includes SonarQube + test DB)
+	docker compose --profile dev up -d
+
+docker-dev-build: ## Build and start dev environment
+	docker compose --profile dev up -d --build
 
 docker-dev-down: ## Stop dev environment
-	docker-compose -f docker-compose.dev.yml down
+	docker compose --profile dev down
 
 docker-dev-logs: ## View dev environment logs
-	docker-compose -f docker-compose.dev.yml logs -f
+	docker compose --profile dev logs -f
 
-docker-prod: ## Start production environment
-	docker-compose -f docker-compose.yml up -d --build
+docker-prod: ## Start production environment (core services only)
+	docker compose --profile prod up -d
+
+docker-prod-build: ## Build and start production environment
+	docker compose --profile prod up -d --build
 
 docker-prod-down: ## Stop production environment
-	docker-compose -f docker-compose.yml down
+	docker compose --profile prod down
 
-docker-test: ## Start test environment
-	docker-compose -f docker-compose.test.yml up -d --build
-
-docker-test-down: ## Stop test environment
-	docker-compose -f docker-compose.test.yml down
+docker-prod-logs: ## View production logs
+	docker compose --profile prod logs -f
 
 docker-clean: ## Clean Docker resources
-	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
-	docker-compose -f docker-compose.test.yml down -v --remove-orphans
+	docker compose --profile dev down -v --remove-orphans
+	docker compose --profile prod down -v --remove-orphans
 	docker system prune -f
 
 # ============================================================================
@@ -152,8 +172,47 @@ test-e2e-ui: ## Run E2E tests with Playwright UI
 test-watch: ## Run tests in watch mode
 	@$(BUN_RUN) test:watch
 
-test-coverage: ## Run tests with coverage
+test-coverage: ## Run frontend tests with coverage
 	@$(BUN_RUN) test:coverage
+
+test-coverage-backend: ## Run backend Rust tests with coverage (requires cargo-tarpaulin)
+	@cd $(BACKEND_DIR) && mkdir -p coverage && cargo tarpaulin --config .tarpaulin.toml
+
+test-coverage-all: ## Run all tests with coverage (frontend + backend)
+	@echo "Running frontend coverage..."
+	@$(BUN_RUN) test:coverage || true
+	@echo ""
+	@echo "Running backend coverage..."
+	@cd $(BACKEND_DIR) && mkdir -p coverage && cargo tarpaulin --workspace --out Lcov --output-dir coverage --timeout 300 || true
+	@echo ""
+	@./scripts/coverage-summary.sh
+
+coverage-summary: ## Show codebase vs test coverage summary
+	@./scripts/coverage-summary.sh
+
+# ============================================================================
+# SonarQube Commands
+# ============================================================================
+
+sonar: ## Run full SonarQube analysis (tests + coverage + scan)
+	@./scripts/sonar-scan.sh
+
+sonar-up: ## Start SonarQube server only
+	@docker compose up -d sonarqube
+	@echo "SonarQube starting at http://localhost:9000"
+	@echo "Wait ~2 minutes for initialization..."
+
+sonar-scan: ## Run SonarQube scan only (skip tests)
+	@echo "Running SonarQube scanner..."
+	@rm -rf .scannerwork
+	@if command -v sonar-scanner &> /dev/null; then \
+		sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.token=$$SONAR_TOKEN; \
+	else \
+		echo "sonar-scanner not found. Install: brew install sonar-scanner"; \
+	fi
+
+sonar-status: ## Check SonarQube server status
+	@curl -s "http://localhost:9000/api/system/status" | jq . 2>/dev/null || echo "SonarQube not running"
 
 # ============================================================================
 # Build Commands
@@ -180,20 +239,40 @@ build-release: ## Production release build
 # Database Commands
 # ============================================================================
 
-db-migrate: ## Run database migrations
-	@$(BUN_RUN) db:migrate
+db-migrate: ## Run database migrations (restart api-service)
+	@echo "🔄 Restarting api-service to run migrations..."
+	@docker compose --profile dev restart api-service
+	@echo "✅ Migrations completed. Check logs: make docker-dev-logs"
 
 db-migrate-test: ## Run migrations on test database
-	@$(BUN_RUN) db:migrate:test
+	@echo "🔄 Running migrations on test database..."
+	@cd $(BACKEND_DIR) && sqlx migrate run --database-url "$$TEST_DATABASE_URL"
+	@echo "✅ Test migrations completed"
 
 db-reset: ## Reset database (drop + recreate + migrate)
-	@$(BUN_RUN) db:reset
+	@echo "⚠️  WARNING: This will DELETE all data in the database!"
+	@echo "Press Ctrl+C to cancel, or Enter to continue..."
+	@read confirm
+	@echo "🗑️  Dropping database..."
+	@docker compose --profile dev exec -T postgres psql -U postgres -c "DROP DATABASE IF EXISTS health_v1;"
+	@echo "🔨 Creating database..."
+	@docker compose --profile dev exec -T postgres psql -U postgres -c "CREATE DATABASE health_v1;"
+	@echo "🔄 Restarting api-service to run migrations..."
+	@docker compose --profile dev restart api-service
+	@sleep 3
+	@echo "✅ Database reset complete. Migrations ran automatically."
 
 db-reset-test: ## Reset test database
-	@$(BUN_RUN) db:reset:test
+	@echo "🗑️  Dropping test database..."
+	@docker compose --profile dev exec -T postgres-test psql -U test_user -c "DROP DATABASE IF EXISTS health_test_db;"
+	@echo "🔨 Creating test database..."
+	@docker compose --profile dev exec -T postgres-test psql -U test_user -c "CREATE DATABASE health_test_db;"
+	@echo "✅ Test database reset complete"
 
 db-seed: ## Seed database with sample data
-	@$(BUN_RUN) db:seed
+	@echo "🌱 Seeding database with sample data..."
+	@./scripts/seed-db.sh
+	@echo "✅ Database seeding complete"
 
 # ============================================================================
 # Linting & Quality Commands
@@ -345,3 +424,25 @@ install: ## Install all dependencies
 	@echo "Installing dependencies..."
 	@cd $(CLI_DIR) && bun install
 	@cd $(BACKEND_DIR) && cargo fetch
+
+# ============================================================================
+# Release Commands
+# ============================================================================
+
+release-patch: ## Release patch version (1.2.0 -> 1.2.1)
+	@./scripts/release.sh patch
+
+release-minor: ## Release minor version (1.2.0 -> 1.3.0)
+	@./scripts/release.sh minor
+
+release-major: ## Release major version (1.2.0 -> 2.0.0)
+	@./scripts/release.sh major
+
+release-dry-run: ## Preview release changes (requires: make release-dry-run TYPE=patch)
+	@./scripts/release.sh --dry-run $(TYPE)
+
+version-check: ## Verify all package versions match VERSION file
+	@./scripts/bump-version.sh --check
+
+version-sync: ## Sync all package versions from VERSION file
+	@./scripts/bump-version.sh

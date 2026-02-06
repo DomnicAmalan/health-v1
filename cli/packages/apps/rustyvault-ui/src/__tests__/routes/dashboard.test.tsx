@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DashboardPage } from "../index";
+import { DashboardPage } from "@/routes/index";
 
 // Mock the API with default resolved values
 vi.mock("@/lib/api", () => ({

@@ -4,10 +4,26 @@
  * Provides consistent UX for permission failures
  */
 
-import { useTranslation } from "@lazarus-life/shared/i18n";
 import { Lock, ShieldAlert } from "lucide-react";
 import { Card, CardContent } from "../card";
 import { Button } from "../button";
+
+/** Default translations for AccessDenied component */
+const defaultTranslations = {
+  accessDenied: "Access Denied",
+  noPermissionToAccess: (resource: string) => `You don't have permission to access this ${resource}`,
+  reason: "Reason",
+  requiredPermissions: "Required permissions",
+  retry: "Retry",
+};
+
+export interface AccessDeniedTranslations {
+  accessDenied?: string;
+  noPermissionToAccess?: string | ((resource: string) => string);
+  reason?: string;
+  requiredPermissions?: string;
+  retry?: string;
+}
 
 export interface AccessDeniedProps {
   /** Type of resource being protected */
@@ -26,6 +42,8 @@ export interface AccessDeniedProps {
   variant?: "card" | "inline" | "full-page";
   /** Additional className */
   className?: string;
+  /** Custom translations (optional) */
+  translations?: AccessDeniedTranslations;
 }
 
 /**
@@ -50,8 +68,21 @@ export function AccessDenied({
   onRetry,
   variant = "card",
   className = "",
+  translations = {},
 }: AccessDeniedProps) {
-  const { t } = useTranslation();
+  // Merge provided translations with defaults
+  const t = {
+    accessDenied: translations.accessDenied ?? defaultTranslations.accessDenied,
+    noPermissionToAccess:
+      typeof translations.noPermissionToAccess === "function"
+        ? translations.noPermissionToAccess
+        : typeof translations.noPermissionToAccess === "string"
+          ? () => translations.noPermissionToAccess as string
+          : defaultTranslations.noPermissionToAccess,
+    reason: translations.reason ?? defaultTranslations.reason,
+    requiredPermissions: translations.requiredPermissions ?? defaultTranslations.requiredPermissions,
+    retry: translations.retry ?? defaultTranslations.retry,
+  };
 
   // Select icon based on type
   const Icon = type === "page" || type === "route" ? ShieldAlert : Lock;
@@ -67,18 +98,16 @@ export function AccessDenied({
           <CardContent className="flex flex-col items-center gap-4 py-8">
             <Icon className="h-12 w-12 text-destructive" aria-hidden="true" />
             <div className="text-center space-y-2">
-              <h1 className="text-2xl font-semibold">{t("security.accessDenied")}</h1>
-              <p className="text-muted-foreground">
-                {t("security.noPermissionToAccess", { resource: typeLabel.toLowerCase() })}
-              </p>
+              <h1 className="text-2xl font-semibold">{t.accessDenied}</h1>
+              <p className="text-muted-foreground">{t.noPermissionToAccess(typeLabel.toLowerCase())}</p>
               {reason && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  <strong>{t("security.reason")}:</strong> {reason}
+                  <strong>{t.reason}:</strong> {reason}
                 </p>
               )}
               {requiredPermissions && requiredPermissions.length > 0 && (
                 <div className="mt-4 p-3 bg-muted rounded-md text-left">
-                  <p className="text-xs font-medium mb-2">{t("security.requiredPermissions")}:</p>
+                  <p className="text-xs font-medium mb-2">{t.requiredPermissions}:</p>
                   <ul className="text-xs space-y-1">
                     {requiredPermissions.map((perm, idx) => (
                       <li key={idx} className="font-mono">
@@ -91,7 +120,7 @@ export function AccessDenied({
             </div>
             {showRetry && onRetry && (
               <Button onClick={onRetry} variant="outline" className="mt-2">
-                {t("common.retry")}
+                {t.retry}
               </Button>
             )}
           </CardContent>
@@ -105,7 +134,7 @@ export function AccessDenied({
     return (
       <div className={`flex items-center gap-2 text-sm text-destructive ${className}`}>
         <Lock className="h-4 w-4" aria-hidden="true" />
-        <span>{t("security.accessDenied")}</span>
+        <span>{t.accessDenied}</span>
         {reason && <span className="text-muted-foreground">- {reason}</span>}
       </div>
     );
@@ -119,21 +148,19 @@ export function AccessDenied({
           <Icon className="h-5 w-5 text-destructive mt-0.5" aria-hidden="true" />
           <div className="flex-1 space-y-2">
             <div>
-              <p className="font-medium text-destructive">{t("security.accessDenied")}</p>
-              <p className="text-sm text-muted-foreground">
-                {t("security.noPermissionToAccess", { resource: typeLabel.toLowerCase() })}
-              </p>
+              <p className="font-medium text-destructive">{t.accessDenied}</p>
+              <p className="text-sm text-muted-foreground">{t.noPermissionToAccess(typeLabel.toLowerCase())}</p>
             </div>
 
             {reason && (
               <p className="text-sm text-muted-foreground">
-                <strong>{t("security.reason")}:</strong> {reason}
+                <strong>{t.reason}:</strong> {reason}
               </p>
             )}
 
             {requiredPermissions && requiredPermissions.length > 0 && (
               <div className="mt-2 p-2 bg-muted rounded text-xs">
-                <p className="font-medium mb-1">{t("security.requiredPermissions")}:</p>
+                <p className="font-medium mb-1">{t.requiredPermissions}:</p>
                 <ul className="space-y-0.5">
                   {requiredPermissions.map((perm, idx) => (
                     <li key={idx} className="font-mono">
@@ -146,7 +173,7 @@ export function AccessDenied({
 
             {showRetry && onRetry && (
               <Button onClick={onRetry} variant="outline" size="sm" className="mt-2">
-                {t("common.retry")}
+                {t.retry}
               </Button>
             )}
           </div>

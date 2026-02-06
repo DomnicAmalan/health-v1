@@ -116,8 +116,8 @@ export function parseQueryParams(queryString: string): Record<string, string> {
  * ```
  */
 export function mergeQueryParams(...paramObjects: (QueryParams | undefined)[]): QueryParams {
-  return paramObjects.reduce((acc, params) => {
+  return paramObjects.reduce<QueryParams>((acc, params) => {
     if (!params) return acc;
     return { ...acc, ...params };
-  }, {} as QueryParams);
+  }, {});
 }

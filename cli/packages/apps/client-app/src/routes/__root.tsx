@@ -52,7 +52,7 @@ import { useSetSidebarCollapsed, useSidebarCollapsed } from "@/stores/uiStore";
 export const Route = createRootRoute({
   beforeLoad: async ({ location }) => {
     // Public routes that don't require authentication or setup
-    const publicRoutes = ["/login", "/access-denied", "/setup"];
+    const publicRoutes = ["/login", "/access-denied", "/setup", "/physics-demo"];
     const isPublicRoute = publicRoutes.includes(location.pathname);
 
     // Check setup status first (before authentication check)

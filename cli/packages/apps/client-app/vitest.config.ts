@@ -9,6 +9,25 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     exclude: ["**/node_modules/**", "**/e2e/**", "**/dist/**"],
+    passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      all: true,
+      include: ["src/**/*.ts", "src/**/*.tsx"],
+      exclude: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/*.config.*",
+        "**/test/**",
+        "**/*.d.ts",
+        "src/**/*.test.{ts,tsx}",
+        "**/coverage/**",
+        "**/e2e/**",
+        "src/routeTree.gen.ts",
+      ],
+      reporter: ["text", "text-summary", "json", "html", "lcov"],
+      reportsDirectory: "./coverage",
+    },
   },
   resolve: {
     alias: {

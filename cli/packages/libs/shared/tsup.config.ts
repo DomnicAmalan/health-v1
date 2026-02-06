@@ -27,9 +27,6 @@ export default defineConfig({
     "middleware/persistenceMiddleware": "src/middleware/persistenceMiddleware.ts",
     // Types - main index
     "types/index": "src/types/index.ts",
-    "types/user": "src/types/user.ts",
-    "types/patient": "src/types/patient.ts",
-    "types/audit": "src/types/audit.ts",
     "types/common": "src/types/common.ts",
     "types/compliance": "src/types/compliance.ts",
     "types/i18n": "src/types/i18n.ts",
@@ -59,6 +56,25 @@ export default defineConfig({
     "types/dashboard/index": "src/types/dashboard/index.ts",
     // Types - Workflow
     "types/workflow/index": "src/types/workflow/index.ts",
+    // Schemas
+    "schemas/index": "src/schemas/index.ts",
+    "schemas/audit": "src/schemas/audit.ts",
+    "schemas/user": "src/schemas/user.ts",
+    "schemas/common": "src/schemas/common.ts",
+    "schemas/env": "src/schemas/env.ts",
+    "schemas/guards": "src/schemas/guards.ts",
+    "schemas/api/index": "src/schemas/api/index.ts",
+    "schemas/ehr/index": "src/schemas/ehr/index.ts",
+    "schemas/ehr/appointment": "src/schemas/ehr/appointment.ts",
+    "schemas/ehr/patient": "src/schemas/ehr/patient.ts",
+    "schemas/ehr/vital": "src/schemas/ehr/vital.ts",
+    "schemas/ehr/allergy": "src/schemas/ehr/allergy.ts",
+    "schemas/ehr/problem": "src/schemas/ehr/problem.ts",
+    "schemas/ehr/medication": "src/schemas/ehr/medication.ts",
+    "schemas/ehr/lab-result": "src/schemas/ehr/lab-result.ts",
+    "schemas/ehr/order": "src/schemas/ehr/order.ts",
+    "schemas/ehr/visit": "src/schemas/ehr/visit.ts",
+    "schemas/billing/index": "src/schemas/billing/index.ts",
     // i18n
     "i18n/index": "src/i18n/index.ts",
     "i18n/types": "src/i18n/types.ts",
@@ -95,7 +111,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   outDir: "dist",
-  external: ["react", "react-dom"],
+  external: ["react", "react-dom", "@lazarus-life/ui-components"],
   esbuildOptions(options) {
     options.jsx = "automatic";
   },

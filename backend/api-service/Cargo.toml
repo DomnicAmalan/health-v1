@@ -58,6 +58,9 @@ uuid.workspace = true
 # Time
 chrono.workspace = true
 
+# Decimal arithmetic
+bigdecimal.workspace = true
+
 # Password hashing
 bcrypt.workspace = true
 

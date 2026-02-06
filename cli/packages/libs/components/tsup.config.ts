@@ -23,6 +23,7 @@ export default defineConfig({
     "components/hover-help": "src/components/hover-help.tsx",
     "components/input": "src/components/input.tsx",
     "components/label": "src/components/label.tsx",
+    "components/login-form": "src/components/login-form.tsx",
     "components/progress": "src/components/progress.tsx",
     "components/scroll-area": "src/components/scroll-area.tsx",
     "components/select": "src/components/select.tsx",
@@ -47,7 +48,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   outDir: "dist",
-  external: ["react", "react-dom", "@lazarus-life/shared"],
+  external: ["react", "react-dom"],
   esbuildOptions(options) {
     options.jsx = "automatic";
   },

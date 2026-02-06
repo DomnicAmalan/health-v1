@@ -1,9 +1,7 @@
 use shared::domain::entities::User;
-use shared::infrastructure::validation::validate_non_empty;
 use shared::domain::repositories::{SetupRepository, UserRepository};
 use shared::infrastructure::validation::validate_non_empty;
 use shared::AppResult;
-use shared::infrastructure::validation::validate_non_empty;
 use bcrypt::{hash, DEFAULT_COST};
 use uuid::Uuid;
 

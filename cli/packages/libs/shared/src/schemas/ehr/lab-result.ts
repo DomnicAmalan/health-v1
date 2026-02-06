@@ -94,7 +94,7 @@ export const EhrLabResultSchema = z.object({
   updatedBy: z.string().optional(),
 
   // MUMPS data
-  mumpsData: z.record(z.unknown()).optional(),
+  mumpsData: z.record(z.string(), z.unknown()).optional(),
 }).refine(
   // Business rule: If numeric value exists and reference ranges exist, calculate abnormal flag
   data => {

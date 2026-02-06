@@ -17,6 +17,7 @@ import { Route as SchedulingRouteImport } from './routes/scheduling'
 import { Route as RevenueRouteImport } from './routes/revenue'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as RadiologyRouteImport } from './routes/radiology'
+import { Route as PhysicsDemoRouteImport } from './routes/physics-demo'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
 import { Route as PatientsRouteImport } from './routes/patients'
 import { Route as OtRouteImport } from './routes/ot'
@@ -74,6 +75,11 @@ const ResultsRoute = ResultsRouteImport.update({
 const RadiologyRoute = RadiologyRouteImport.update({
   id: '/radiology',
   path: '/radiology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhysicsDemoRoute = PhysicsDemoRouteImport.update({
+  id: '/physics-demo',
+  path: '/physics-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PharmacyRoute = PharmacyRouteImport.update({
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/physics-demo': typeof PhysicsDemoRoute
   '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/physics-demo': typeof PhysicsDemoRoute
   '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/ot': typeof OtRoute
   '/patients': typeof PatientsRouteWithChildren
   '/pharmacy': typeof PharmacyRoute
+  '/physics-demo': typeof PhysicsDemoRoute
   '/radiology': typeof RadiologyRoute
   '/results': typeof ResultsRoute
   '/revenue': typeof RevenueRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/physics-demo'
     | '/radiology'
     | '/results'
     | '/revenue'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/physics-demo'
     | '/radiology'
     | '/results'
     | '/revenue'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/ot'
     | '/patients'
     | '/pharmacy'
+    | '/physics-demo'
     | '/radiology'
     | '/results'
     | '/revenue'
@@ -357,6 +369,7 @@ export interface RootRouteChildren {
   OtRoute: typeof OtRoute
   PatientsRoute: typeof PatientsRouteWithChildren
   PharmacyRoute: typeof PharmacyRoute
+  PhysicsDemoRoute: typeof PhysicsDemoRoute
   RadiologyRoute: typeof RadiologyRoute
   ResultsRoute: typeof ResultsRoute
   RevenueRoute: typeof RevenueRoute
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/radiology'
       fullPath: '/radiology'
       preLoaderRoute: typeof RadiologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/physics-demo': {
+      id: '/physics-demo'
+      path: '/physics-demo'
+      fullPath: '/physics-demo'
+      preLoaderRoute: typeof PhysicsDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pharmacy': {
@@ -584,6 +604,7 @@ const rootRouteChildren: RootRouteChildren = {
   OtRoute: OtRoute,
   PatientsRoute: PatientsRouteWithChildren,
   PharmacyRoute: PharmacyRoute,
+  PhysicsDemoRoute: PhysicsDemoRoute,
   RadiologyRoute: RadiologyRoute,
   ResultsRoute: ResultsRoute,
   RevenueRoute: RevenueRoute,

@@ -96,7 +96,7 @@ export const UserInfoSchema = z.object({
   lastName: z.string(),
   role: z.string(),
   permissions: z.array(z.string()).optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type UserInfo = z.infer<typeof UserInfoSchema>;
@@ -123,6 +123,9 @@ export type LogoutResponse = z.infer<typeof LogoutResponseSchema>;
 
 // Type guards
 export const isLogoutResponse = createTypeGuard(LogoutResponseSchema);
+
+// Assertions
+export const assertLogoutResponse = createAssertion(LogoutResponseSchema, 'LogoutResponse');
 
 // ============================================================================
 // Password Reset Schemas

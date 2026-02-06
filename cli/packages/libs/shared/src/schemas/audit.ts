@@ -22,7 +22,7 @@ export const AuditEntrySchema = z.object({
   resource: z.string().min(1, { message: "Resource is required" }),
   resourceId: z.string().optional(),
   timestamp: z.string().datetime(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   masked: z.boolean(),
 });
 
@@ -93,7 +93,7 @@ export const CreateAuditEntryRequestSchema = z.object({
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
   masked: z.boolean().default(false),
 });
 
