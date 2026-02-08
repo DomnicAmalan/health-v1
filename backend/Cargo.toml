@@ -67,7 +67,7 @@ uuid = { version = "1.19", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 # Password hashing
-bcrypt = "0.17"
+bcrypt = "0.18"
 sha2 = "0.10"
 
 # HTTP client (for vault/storage providers)
