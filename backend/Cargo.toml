@@ -71,7 +71,7 @@ bcrypt = "0.17"
 sha2 = "0.10"
 
 # HTTP client (for vault/storage providers)
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.13", features = ["json"] }
 
 # AWS SDK (for AWS providers)
 aws-sdk-s3 = "1.115"
