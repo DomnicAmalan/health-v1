@@ -18,6 +18,7 @@ pub mod geographic_region;
 pub mod regulation;
 pub mod compliance_rule;
 pub mod training_course;
+pub mod visual_workflow;
 pub mod ehr;
 
 pub use user::User;
@@ -40,4 +41,10 @@ pub use geographic_region::{GeographicRegion, GeographicLevel};
 pub use regulation::{Regulation, RegulationVersion, RegulationSection, RegulationChange, RegulationCategory, RegulationStatus, ChangeType};
 pub use compliance_rule::{ComplianceRule, ComplianceAssessment, ComplianceGap, EntityType};
 pub use training_course::{TrainingCourse, CourseContent, RegulationTrainingRequirement, UserTrainingProgress, Certificate, ContentType, TrainingStatus, TrainingFrequency};
+pub use visual_workflow::{
+    VisualWorkflow, VisualWorkflowSummary, CreateVisualWorkflow, UpdateVisualWorkflow,
+    WorkflowInstance, StartWorkflowInstance, WorkflowStatus,
+    HumanTask, CreateHumanTask, CompleteTaskRequest, TaskStatus, TaskPriority,
+    WorkflowExecutionLog, NodeType,
+};
 

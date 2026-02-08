@@ -5,14 +5,7 @@
 
 import { API_ROUTES } from "@lazarus-life/shared/api/routes";
 import { OIDC_CONFIG } from "@lazarus-life/shared/constants/oidc";
-import {
-  LoginRequestSchema,
-  LoginResponseSchema,
-  RefreshTokenRequestSchema,
-  RefreshTokenResponseSchema,
-  UserInfoSchema as AuthUserInfoSchema,
-  type UserInfo,
-} from "@lazarus-life/shared/schemas";
+import type { UserInfo } from "@lazarus-life/shared/schemas";
 import { apiClient } from "./client";
 import type {
   LoginRequest,
@@ -28,12 +21,7 @@ import type {
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   const response = await apiClient.post<LoginResponse>(
     API_ROUTES.AUTH.LOGIN,
-    {
-      body: credentials,
-      validateRequest: LoginRequestSchema,    // ✅ Validate request before sending
-      validateResponse: LoginResponseSchema,  // ✅ Validate response after receiving
-      throwOnValidationError: true,           // ✅ Throw on validation failure
-    }
+    credentials
   );
 
   if (response.error) {
@@ -69,12 +57,7 @@ export async function logout(): Promise<void> {
 export async function refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
   const response = await apiClient.post<RefreshTokenResponse>(
     API_ROUTES.AUTH.REFRESH,
-    {
-      body: { refreshToken } as RefreshTokenRequest,
-      validateRequest: RefreshTokenRequestSchema,    // ✅ Validate request
-      validateResponse: RefreshTokenResponseSchema,  // ✅ Validate response
-      throwOnValidationError: true,
-    }
+    { refreshToken } as RefreshTokenRequest
   );
 
   if (response.error) {
@@ -97,11 +80,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<RefreshT
  */
 export async function getUserInfo(): Promise<UserInfo> {
   const response = await apiClient.get<UserInfo>(
-    API_ROUTES.AUTH.USERINFO,
-    {
-      validateResponse: AuthUserInfoSchema,  // ✅ Validate user info response
-      throwOnValidationError: true,
-    }
+    API_ROUTES.AUTH.USERINFO
   );
 
   if (response.error) {

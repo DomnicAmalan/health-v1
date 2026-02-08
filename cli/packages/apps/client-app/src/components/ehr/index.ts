@@ -25,3 +25,8 @@ export { AddMedicationDialog } from "./AddMedicationDialog";
 export { AddVitalsDialog } from "./AddVitalsDialog";
 export { AddAllergyDialog } from "./AddAllergyDialog";
 export { OrderLabDialog } from "./OrderLabDialog";
+export { PatientFormDialog } from "./PatientFormDialog";
+
+// Patient Management (RFC 0002)
+export { PatientMergeDialog } from "./PatientMergeDialog";
+export { PatientDuplicateCheckDialog } from "./PatientDuplicateCheckDialog";

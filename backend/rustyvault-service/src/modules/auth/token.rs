@@ -186,7 +186,7 @@ impl TokenStore {
         };
 
         // Store in database
-        sqlx::query(
+        sqlx::query!(
             r#"
             INSERT INTO vault_tokens (
                 id, token_hash, display_name, policies, parent_id,
@@ -194,19 +194,19 @@ impl TokenStore {
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             "#,
+            entry.id,
+            &entry.token_hash,
+            &entry.display_name,
+            &entry.policies,
+            entry.parent,
+            entry.ttl,
+            entry.expires_at,
+            entry.created_at,
+            entry.num_uses,
+            &entry.path,
+            entry.meta.as_ref(),
+            entry.renewable
         )
-        .bind(entry.id)
-        .bind(&entry.token_hash)
-        .bind(&entry.display_name)
-        .bind(&entry.policies)
-        .bind(entry.parent)
-        .bind(entry.ttl)
-        .bind(entry.expires_at)
-        .bind(entry.created_at)
-        .bind(entry.num_uses)
-        .bind(&entry.path)
-        .bind(&entry.meta)
-        .bind(entry.renewable)
         .execute(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to create token: {}", e)))?;
@@ -218,67 +218,47 @@ impl TokenStore {
     pub async fn lookup_token(&self, raw_token: &str) -> VaultResult<Option<TokenEntry>> {
         let token_hash = hash_token(raw_token);
 
-        let row: Option<(
-            Uuid,
-            String,
-            String,
-            Vec<String>,
-            Option<Uuid>,
-            i64,
-            Option<DateTime<Utc>>,
-            DateTime<Utc>,
-            Option<DateTime<Utc>>,
-            i32,
-            String,
-            Option<serde_json::Value>,
-            bool,
-            Option<Uuid>,
-        )> = sqlx::query_as(
+        let row = sqlx::query!(
             r#"
-            SELECT id, token_hash, display_name, policies, parent_id,
-                   ttl, expires_at, created_at, last_used_at, num_uses,
-                   path, meta, renewable, entity_id
+            SELECT id, token_hash,
+                   display_name as "display_name!",
+                   policies as "policies!",
+                   parent_id,
+                   ttl as "ttl!",
+                   expires_at,
+                   created_at as "created_at!",
+                   last_used_at,
+                   num_uses as "num_uses!",
+                   path as "path!",
+                   meta,
+                   renewable as "renewable!",
+                   entity_id
             FROM vault_tokens
             WHERE token_hash = $1
             "#,
+            &token_hash
         )
-        .bind(&token_hash)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to lookup token: {}", e)))?;
 
         match row {
-            Some((
-                id,
-                hash,
-                display_name,
-                policies,
-                parent,
-                ttl,
-                expires_at,
-                created_at,
-                last_used_at,
-                num_uses,
-                path,
-                meta,
-                renewable,
-                entity_id,
-            )) => {
+            Some(row) => {
                 let entry = TokenEntry {
-                    id,
-                    token_hash: hash,
-                    display_name,
-                    policies,
-                    parent,
-                    ttl,
-                    expires_at,
-                    created_at,
-                    last_used_at,
-                    num_uses,
-                    path,
-                    meta,
-                    renewable,
-                    entity_id,
+                    id: row.id,
+                    token_hash: row.token_hash,
+                    display_name: row.display_name,
+                    policies: row.policies,
+                    parent: row.parent_id,
+                    ttl: row.ttl,
+                    expires_at: row.expires_at,
+                    created_at: row.created_at,
+                    last_used_at: row.last_used_at,
+                    num_uses: row.num_uses,
+                    path: row.path,
+                    meta: row.meta,
+                    renewable: row.renewable,
+                    entity_id: row.entity_id,
                 };
 
                 // Check if token is expired
@@ -300,22 +280,22 @@ impl TokenStore {
         // Atomic operation: Check num_uses > 0 OR num_uses = 0 (unlimited), then decrement
         // This prevents TOCTOU race condition where multiple concurrent requests
         // could all pass a separate check before any decrement occurs
-        let result: Option<(i32,)> = sqlx::query_as(
+        let result: Option<i32> = sqlx::query_scalar!(
             r#"
             UPDATE vault_tokens
             SET last_used_at = NOW(),
                 num_uses = CASE WHEN num_uses > 0 THEN num_uses - 1 ELSE num_uses END
             WHERE id = $1 AND (num_uses > 0 OR num_uses = 0)
-            RETURNING num_uses
+            RETURNING num_uses as "num_uses!"
             "#,
+            token_id
         )
-        .bind(token_id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to update token: {}", e)))?;
 
         match result {
-            Some((remaining_uses,)) => {
+            Some(remaining_uses) => {
                 // Check if token is now exhausted after this use
                 if remaining_uses == 0 {
                     // Token had num_uses=1 before this call, now exhausted
@@ -334,8 +314,7 @@ impl TokenStore {
     /// Revoke a token by its ID
     pub async fn revoke_token_by_id(&self, token_id: Uuid) -> VaultResult<()> {
         // Also revoke all child tokens
-        sqlx::query("DELETE FROM vault_tokens WHERE id = $1 OR parent_id = $1")
-            .bind(token_id)
+        sqlx::query!("DELETE FROM vault_tokens WHERE id = $1 OR parent_id = $1", token_id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to revoke token: {}", e)))?;
@@ -365,16 +344,16 @@ impl TokenStore {
         let ttl = increment.unwrap_or(entry.ttl);
         let new_expires_at = Utc::now() + chrono::Duration::seconds(ttl);
 
-        sqlx::query(
+        sqlx::query!(
             r#"
             UPDATE vault_tokens
             SET expires_at = $1, ttl = $2
             WHERE id = $3
             "#,
+            new_expires_at,
+            ttl,
+            entry.id
         )
-        .bind(new_expires_at)
-        .bind(ttl)
-        .bind(entry.id)
         .execute(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to renew token: {}", e)))?;
@@ -403,7 +382,7 @@ impl TokenStore {
 
     /// Clean up expired tokens
     pub async fn cleanup_expired_tokens(&self) -> VaultResult<u64> {
-        let result = sqlx::query("DELETE FROM vault_tokens WHERE expires_at < NOW()")
+        let result = sqlx::query!("DELETE FROM vault_tokens WHERE expires_at < NOW()")
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to cleanup tokens: {}", e)))?;

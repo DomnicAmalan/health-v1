@@ -10,7 +10,8 @@
         check check-types check-strict \
         clean clean-all clean-node clean-cargo \
         strict strict-all strict-frontend strict-backend \
-        release-patch release-minor release-major release-dry-run version-check version-sync
+        release-patch release-minor release-major release-dry-run version-check version-sync \
+        docs-dev docs-build docs-serve docs-docker docs-docker-prod docs-clean
 
 # ============================================================================
 # Variables - DRY Configuration
@@ -57,8 +58,8 @@ help: ## Show this help message
 	@echo '  make build-release   - Production release build'
 	@echo ''
 	@echo 'Docker Commands:'
-	@echo '  make docker-dev      - Start dev environment (+ SonarQube)'
-	@echo '  make docker-prod     - Start production environment'
+	@echo '  make docker-dev      - Start dev (Vite on native ports, hot reload)'
+	@echo '  make docker-prod     - Start prod (Caddy on port 80)'
 	@echo '  make docker-dev-down - Stop dev environment'
 	@echo '  make docker-dev-logs - View dev logs'
 	@echo ''
@@ -76,6 +77,13 @@ help: ## Show this help message
 	@echo 'Cleanup Commands:'
 	@echo '  make clean           - Clean build artifacts'
 	@echo '  make clean-all       - Clean everything'
+	@echo ''
+	@echo 'Documentation Commands:'
+	@echo '  make docs-dev        - Start docs dev server (port 3000)'
+	@echo '  make docs-build      - Build static documentation site'
+	@echo '  make docs-serve      - Serve built docs locally'
+	@echo '  make docs-docker     - Start docs in Docker (port 3001)'
+	@echo '  make docs-clean      - Clean docs build artifacts'
 	@echo ''
 	@echo 'Release Commands:'
 	@echo '  make release-patch   - Release patch version (1.2.0 -> 1.2.1)'
@@ -115,22 +123,25 @@ dev-libs: ## Watch shared libraries only
 	@$(BUN_RUN) dev:libs
 
 # ============================================================================
-# Docker Commands (using profiles: dev, prod)
+# Docker Commands
+# Two profiles:
+#   dev  = docker-compose.dev.yml (Vite dev servers on native ports, hot reload)
+#   prod = docker-compose.yml --profile prod (Caddy on port 80, production builds)
 # ============================================================================
 
-docker-dev: ## Start dev environment (includes SonarQube + test DB)
-	docker compose --profile dev up -d
+docker-dev: ## Start dev environment (Vite dev servers + hot reload)
+	docker compose -f docker-compose.dev.yml up -d
 
 docker-dev-build: ## Build and start dev environment
-	docker compose --profile dev up -d --build
+	docker compose -f docker-compose.dev.yml up -d --build
 
 docker-dev-down: ## Stop dev environment
-	docker compose --profile dev down
+	docker compose -f docker-compose.dev.yml down
 
 docker-dev-logs: ## View dev environment logs
-	docker compose --profile dev logs -f
+	docker compose -f docker-compose.dev.yml logs -f
 
-docker-prod: ## Start production environment (core services only)
+docker-prod: ## Start production environment (Caddy on port 80)
 	docker compose --profile prod up -d
 
 docker-prod-build: ## Build and start production environment
@@ -143,7 +154,7 @@ docker-prod-logs: ## View production logs
 	docker compose --profile prod logs -f
 
 docker-clean: ## Clean Docker resources
-	docker compose --profile dev down -v --remove-orphans
+	docker compose -f docker-compose.dev.yml down -v --remove-orphans
 	docker compose --profile prod down -v --remove-orphans
 	docker system prune -f
 
@@ -241,7 +252,7 @@ build-release: ## Production release build
 
 db-migrate: ## Run database migrations (restart api-service)
 	@echo "🔄 Restarting api-service to run migrations..."
-	@docker compose --profile dev restart api-service
+	@docker compose -f docker-compose.dev.yml restart api-service
 	@echo "✅ Migrations completed. Check logs: make docker-dev-logs"
 
 db-migrate-test: ## Run migrations on test database
@@ -254,19 +265,19 @@ db-reset: ## Reset database (drop + recreate + migrate)
 	@echo "Press Ctrl+C to cancel, or Enter to continue..."
 	@read confirm
 	@echo "🗑️  Dropping database..."
-	@docker compose --profile dev exec -T postgres psql -U postgres -c "DROP DATABASE IF EXISTS health_v1;"
+	@docker compose -f docker-compose.dev.yml exec -T postgres psql -U health_user -d postgres -c "DROP DATABASE IF EXISTS health_db;"
 	@echo "🔨 Creating database..."
-	@docker compose --profile dev exec -T postgres psql -U postgres -c "CREATE DATABASE health_v1;"
+	@docker compose -f docker-compose.dev.yml exec -T postgres psql -U health_user -d postgres -c "CREATE DATABASE health_db;"
 	@echo "🔄 Restarting api-service to run migrations..."
-	@docker compose --profile dev restart api-service
+	@docker compose -f docker-compose.dev.yml restart api-service
 	@sleep 3
 	@echo "✅ Database reset complete. Migrations ran automatically."
 
 db-reset-test: ## Reset test database
 	@echo "🗑️  Dropping test database..."
-	@docker compose --profile dev exec -T postgres-test psql -U test_user -c "DROP DATABASE IF EXISTS health_test_db;"
+	@docker compose -f docker-compose.dev.yml exec -T postgres-test psql -U test_user -d postgres -c "DROP DATABASE IF EXISTS health_test_db;"
 	@echo "🔨 Creating test database..."
-	@docker compose --profile dev exec -T postgres-test psql -U test_user -c "CREATE DATABASE health_test_db;"
+	@docker compose -f docker-compose.dev.yml exec -T postgres-test psql -U test_user -d postgres -c "CREATE DATABASE health_test_db;"
 	@echo "✅ Test database reset complete"
 
 db-seed: ## Seed database with sample data
@@ -415,6 +426,28 @@ clean-node: ## Clean Node build artifacts
 
 clean-cargo: ## Clean Rust build artifacts
 	@$(BUN_RUN) clean:cargo
+
+# ============================================================================
+# Documentation Commands
+# ============================================================================
+
+docs-dev: ## Start docs dev server (port 3000)
+	@cd docs && bun run start
+
+docs-build: ## Build static documentation site
+	@cd docs && bun run build
+
+docs-serve: ## Serve built docs locally
+	@cd docs && bun run serve
+
+docs-docker: ## Start docs in Docker (port 3001)
+	docker compose -f docker-compose.dev.yml up -d docs
+
+docs-docker-prod: ## Build and start docs production container (port 3001)
+	docker compose --profile prod up -d docs
+
+docs-clean: ## Clean docs build artifacts
+	@rm -rf docs/build docs/.docusaurus
 
 # ============================================================================
 # Utility Commands

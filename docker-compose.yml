@@ -4,6 +4,7 @@
 services:
   # PostgreSQL Database with PostGIS support
   postgres:
+    platform: linux/amd64
     image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
@@ -29,6 +30,7 @@ services:
 
   # PostgreSQL Test Database (for running tests)
   postgres-test:
+    platform: linux/amd64
     image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres-test
     environment:
@@ -291,6 +293,28 @@ services:
       - "${VAULT_UI_PORT}:80"
     depends_on:
       - rustyvault-service
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - health-network
+    restart: unless-stopped
+    profiles:
+      - dev
+      - prod
+
+  # Documentation Site (Docusaurus)
+  docs:
+    build:
+      context: ./docs
+      dockerfile: Dockerfile
+      target: runner-prod
+    container_name: health-docs
+    ports:
+      - "${DOCS_PORT:-3001}:80"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s

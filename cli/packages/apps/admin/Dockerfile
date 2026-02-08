@@ -30,7 +30,7 @@ COPY packages/libs/shared/package.json ./packages/libs/shared/
 RUN bun install --frozen-lockfile || bun install
 
 # Expose Vite dev server port (matches local dev port)
-EXPOSE 4111
+EXPOSE 5174
 
 # Set working directory to admin app
 WORKDIR /app/packages/apps/admin

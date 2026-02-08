@@ -16,7 +16,7 @@ use shared::shared::api_response::{ApiError, ApiResponse};
 use shared::shared::error::AppError;
 
 // ============================================================================
-// Database Row Types (for sqlx::query_as::<_, T>())
+// Database Row Types (for sqlx::query_as!())
 // ============================================================================
 
 /// Database row structure matching the ehr_patients table exactly.
@@ -237,6 +237,58 @@ pub struct IdRow {
     pub id: Uuid,
 }
 
+/// Request for finding duplicate patients
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FindDuplicatesRequest {
+    pub first_name: String,
+    pub last_name: String,
+    pub date_of_birth: chrono::NaiveDate,
+    pub ssn_last_four: Option<String>,
+}
+
+/// Response for duplicate patient match
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DuplicateMatchResponse {
+    pub patient_id: Uuid,
+    pub mrn: String,
+    pub full_name: String,
+    pub date_of_birth: Option<chrono::NaiveDate>,
+    pub match_score: i32,
+    pub match_reasons: Vec<String>,
+}
+
+/// Request to merge two patient records
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MergePatientsRequest {
+    pub survivor_id: Uuid,
+    pub duplicate_id: Uuid,
+    pub merge_reason: Option<String>,
+}
+
+/// Response from merge operation
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MergeResultResponse {
+    pub survivor_id: Uuid,
+    pub merged_id: Uuid,
+    pub records_moved: MergeRecordCounts,
+}
+
+#[derive(Debug, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct MergeRecordCounts {
+    pub encounters: i64,
+    pub appointments: i64,
+    pub allergies: i64,
+    pub problems: i64,
+    pub prescriptions: i64,
+    pub vital_signs: i64,
+    pub clinical_notes: i64,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdatePatientRequest {
@@ -284,7 +336,8 @@ pub async fn list_patients(
     let limit = query.limit.unwrap_or(100).min(1000);
     let offset = query.offset.unwrap_or(0);
 
-    let rows = sqlx::query_as::<_, PatientRow>(
+    let rows = sqlx::query_as!(
+        PatientRow,
         r#"
         SELECT
             id, organization_id, ien, mrn,
@@ -305,12 +358,12 @@ pub async fn list_patients(
         ORDER BY last_name, first_name
         LIMIT $4 OFFSET $5
         "#,
+        organization_id,
+        query.status.as_deref(),
+        query.provider_id,
+        limit,
+        offset,
     )
-    .bind(organization_id)
-    .bind(&query.status)
-    .bind(query.provider_id)
-    .bind(limit)
-    .bind(offset)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -334,7 +387,8 @@ pub async fn search_patients(
     let limit = query.limit.unwrap_or(20).min(100);
     let search_term = format!("%{}%", query.q);
 
-    let rows = sqlx::query_as::<_, PatientRow>(
+    let rows = sqlx::query_as!(
+        PatientRow,
         r#"
         SELECT
             id, organization_id, ien, mrn,
@@ -366,10 +420,10 @@ pub async fn search_patients(
             last_name, first_name
         LIMIT $3
         "#,
+        organization_id,
+        &search_term,
+        limit,
     )
-    .bind(organization_id)
-    .bind(&search_term)
-    .bind(limit)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -390,7 +444,8 @@ pub async fn get_patient(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Getting patient: {}", patient_id);
 
-    let row = sqlx::query_as::<_, PatientRow>(
+    let row = sqlx::query_as!(
+        PatientRow,
         r#"
         SELECT
             id, organization_id, ien, mrn,
@@ -408,9 +463,9 @@ pub async fn get_patient(
           AND organization_id = $2
           AND deleted_at IS NULL
         "#,
+        patient_id,
+        organization_id,
     )
-    .bind(patient_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -434,7 +489,8 @@ pub async fn get_patient_by_mrn(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Getting patient by MRN: {}", mrn);
 
-    let row = sqlx::query_as::<_, PatientRow>(
+    let row = sqlx::query_as!(
+        PatientRow,
         r#"
         SELECT
             id, organization_id, ien, mrn,
@@ -452,9 +508,9 @@ pub async fn get_patient_by_mrn(
           AND organization_id = $2
           AND deleted_at IS NULL
         "#,
+        mrn.as_str(),
+        organization_id,
     )
-    .bind(&mrn)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -478,7 +534,8 @@ pub async fn get_patient_by_ien(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Getting patient by IEN: {}", ien);
 
-    let row = sqlx::query_as::<_, PatientRow>(
+    let row = sqlx::query_as!(
+        PatientRow,
         r#"
         SELECT
             id, organization_id, ien, mrn,
@@ -496,9 +553,9 @@ pub async fn get_patient_by_ien(
           AND organization_id = $2
           AND deleted_at IS NULL
         "#,
+        ien,
+        organization_id,
     )
-    .bind(ien)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -522,7 +579,8 @@ pub async fn get_patient_banner(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Getting patient banner: {}", patient_id);
 
-    let patient = sqlx::query_as::<_, PatientBannerRow>(
+    let patient = sqlx::query_as!(
+        PatientBannerRow,
         r#"
         SELECT
             id, mrn, first_name, last_name,
@@ -532,9 +590,9 @@ pub async fn get_patient_banner(
           AND organization_id = $2
           AND deleted_at IS NULL
         "#,
+        patient_id,
+        organization_id,
     )
-    .bind(patient_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -551,11 +609,48 @@ pub async fn get_patient_banner(
         patient.last_name.clone().unwrap_or_default()
     );
 
-    // Get counts from other tables (simplified for now)
-    let allergies_count = 0i64; // TODO: Query drug_allergies table
-    let active_problems_count = 0i64; // TODO: Query problem_list table
-    let active_medications_count = 0i64; // TODO: Query prescriptions table
-    let last_visit_date: Option<chrono::DateTime<chrono::Utc>> = None; // TODO: Query encounters table
+    // Query actual counts from related tables
+    let allergies_count: i64 = sqlx::query_scalar!(
+        r#"SELECT COUNT(*) as "count!" FROM drug_allergies WHERE patient_id = $1 AND status = 'active'"#,
+        patient_id,
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| {
+        error!("Failed to count allergies: {:?}", e);
+        AppError::from(e)
+    })?;
+
+    let active_problems_count: i64 = sqlx::query_scalar!(
+        r#"SELECT COUNT(*) as "count!" FROM problem_list WHERE patient_id = $1 AND status = 'active'"#,
+        patient_id,
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| {
+        error!("Failed to count problems: {:?}", e);
+        AppError::from(e)
+    })?;
+
+    let active_medications_count: i64 = sqlx::query_scalar!(
+        r#"SELECT COUNT(*) as "count!" FROM prescriptions WHERE patient_id = $1 AND status = 'active'"#,
+        patient_id,
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| {
+        error!("Failed to count prescriptions: {:?}", e);
+        AppError::from(e)
+    })?;
+
+    let last_visit_date: Option<chrono::DateTime<chrono::Utc>> = sqlx::query_scalar!(
+        "SELECT MAX(encounter_datetime) FROM encounters WHERE patient_id = $1 AND status = 'completed'",
+        patient_id,
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .ok()
+    .flatten();
 
     let banner = PatientBannerResponse {
         id: patient.id,
@@ -594,7 +689,8 @@ pub async fn create_patient(
         return Err(AppError::Validation("Date of birth cannot be in the future".to_string()).into());
     }
 
-    let row = sqlx::query_as::<_, PatientRow>(
+    let row = sqlx::query_as!(
+        PatientRow,
         r#"
         INSERT INTO ehr_patients (
             organization_id, mrn, first_name, last_name, middle_name, suffix,
@@ -618,35 +714,35 @@ pub async fn create_patient(
             status, deceased_date, confidentiality_code, vip_flag,
             created_at, updated_at
         "#,
+        organization_id,
+        payload.mrn.as_deref(),
+        &payload.first_name,
+        &payload.last_name,
+        payload.middle_name.as_deref(),
+        payload.suffix.as_deref(),
+        payload.date_of_birth,
+        &payload.sex,
+        payload.marital_status.as_deref(),
+        payload.race.as_deref(),
+        payload.ethnicity.as_deref(),
+        payload.preferred_language.as_deref(),
+        payload.veteran_status.unwrap_or(false),
+        payload.email.as_deref(),
+        payload.phone_home.as_deref(),
+        payload.phone_work.as_deref(),
+        payload.phone_mobile.as_deref(),
+        payload.address_line1.as_deref(),
+        payload.address_line2.as_deref(),
+        payload.city.as_deref(),
+        payload.state.as_deref(),
+        payload.zip_code.as_deref(),
+        payload.country.as_deref(),
+        payload.emergency_contact_name.as_deref(),
+        payload.emergency_contact_phone.as_deref(),
+        payload.emergency_contact_relationship.as_deref(),
+        payload.primary_care_provider_id,
+        user_id,
     )
-    .bind(organization_id)
-    .bind(&payload.mrn)
-    .bind(&payload.first_name)
-    .bind(&payload.last_name)
-    .bind(&payload.middle_name)
-    .bind(&payload.suffix)
-    .bind(payload.date_of_birth)
-    .bind(&payload.sex)
-    .bind(&payload.marital_status)
-    .bind(&payload.race)
-    .bind(&payload.ethnicity)
-    .bind(&payload.preferred_language)
-    .bind(payload.veteran_status.unwrap_or(false))
-    .bind(&payload.email)
-    .bind(&payload.phone_home)
-    .bind(&payload.phone_work)
-    .bind(&payload.phone_mobile)
-    .bind(&payload.address_line1)
-    .bind(&payload.address_line2)
-    .bind(&payload.city)
-    .bind(&payload.state)
-    .bind(&payload.zip_code)
-    .bind(&payload.country)
-    .bind(&payload.emergency_contact_name)
-    .bind(&payload.emergency_contact_phone)
-    .bind(&payload.emergency_contact_relationship)
-    .bind(payload.primary_care_provider_id)
-    .bind(user_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -671,11 +767,12 @@ pub async fn update_patient(
     info!("Updating patient: {}", patient_id);
 
     // Verify patient exists
-    let _ = sqlx::query_as::<_, IdRow>(
+    let _ = sqlx::query_as!(
+        IdRow,
         "SELECT id FROM ehr_patients WHERE id = $1 AND organization_id = $2",
+        patient_id,
+        organization_id,
     )
-    .bind(patient_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -684,7 +781,8 @@ pub async fn update_patient(
     })?;
 
     // Build dynamic update query (only update provided fields)
-    let row = sqlx::query_as::<_, PatientRow>(
+    let row = sqlx::query_as!(
+        PatientRow,
         r#"
         UPDATE ehr_patients
         SET
@@ -729,36 +827,36 @@ pub async fn update_patient(
             status, deceased_date, confidentiality_code, vip_flag,
             created_at, updated_at
         "#,
+        payload.first_name.as_deref(),
+        payload.last_name.as_deref(),
+        payload.middle_name.as_deref(),
+        payload.suffix.as_deref(),
+        payload.date_of_birth,
+        payload.sex.as_deref(),
+        payload.marital_status.as_deref(),
+        payload.race.as_deref(),
+        payload.ethnicity.as_deref(),
+        payload.preferred_language.as_deref(),
+        payload.email.as_deref(),
+        payload.phone_home.as_deref(),
+        payload.phone_work.as_deref(),
+        payload.phone_mobile.as_deref(),
+        payload.phone_preferred.as_deref(),
+        payload.address_line1.as_deref(),
+        payload.address_line2.as_deref(),
+        payload.city.as_deref(),
+        payload.state.as_deref(),
+        payload.zip_code.as_deref(),
+        payload.country.as_deref(),
+        payload.emergency_contact_name.as_deref(),
+        payload.emergency_contact_phone.as_deref(),
+        payload.emergency_contact_relationship.as_deref(),
+        payload.primary_care_provider_id,
+        payload.status.as_deref(),
+        user_id,
+        patient_id,
+        organization_id,
     )
-    .bind(&payload.first_name)
-    .bind(&payload.last_name)
-    .bind(&payload.middle_name)
-    .bind(&payload.suffix)
-    .bind(payload.date_of_birth)
-    .bind(&payload.sex)
-    .bind(&payload.marital_status)
-    .bind(&payload.race)
-    .bind(&payload.ethnicity)
-    .bind(&payload.preferred_language)
-    .bind(&payload.email)
-    .bind(&payload.phone_home)
-    .bind(&payload.phone_work)
-    .bind(&payload.phone_mobile)
-    .bind(&payload.phone_preferred)
-    .bind(&payload.address_line1)
-    .bind(&payload.address_line2)
-    .bind(&payload.city)
-    .bind(&payload.state)
-    .bind(&payload.zip_code)
-    .bind(&payload.country)
-    .bind(&payload.emergency_contact_name)
-    .bind(&payload.emergency_contact_phone)
-    .bind(&payload.emergency_contact_relationship)
-    .bind(payload.primary_care_provider_id)
-    .bind(&payload.status)
-    .bind(user_id)
-    .bind(patient_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -781,7 +879,7 @@ pub async fn delete_patient(
     let user_id = Uuid::nil(); // Use system user for now
     info!("Deleting patient: {}", patient_id);
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE ehr_patients
         SET deleted_at = NOW(), updated_by = $1
@@ -789,10 +887,10 @@ pub async fn delete_patient(
           AND organization_id = $3
           AND deleted_at IS NULL
         "#,
+        user_id,
+        patient_id,
+        organization_id,
     )
-    .bind(user_id)
-    .bind(patient_id)
-    .bind(organization_id)
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -809,4 +907,310 @@ pub async fn delete_patient(
         "id": patient_id,
         "deleted": true
     }))))
+}
+
+/// POST /v1/ehr/patients/find-duplicates - Find potential duplicate patients
+#[tracing::instrument(skip(state, payload))]
+pub async fn find_duplicate_patients(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<FindDuplicatesRequest>,
+) -> Result<Json<ApiResponse<Vec<DuplicateMatchResponse>>>, ApiError> {
+    let organization_id = Uuid::nil();
+    info!(
+        "Finding duplicates for: {} {} (DOB: {})",
+        payload.first_name, payload.last_name, payload.date_of_birth
+    );
+
+    // Assertion 1: Names must not be empty
+    if payload.first_name.trim().is_empty() || payload.last_name.trim().is_empty() {
+        return Err(AppError::Validation("First and last name are required".to_string()).into());
+    }
+
+    // Assertion 2: DOB must be in the past
+    if payload.date_of_birth > chrono::Utc::now().date_naive() {
+        return Err(AppError::Validation("Date of birth cannot be in the future".to_string()).into());
+    }
+
+    // Query potential matches with scoring
+    // Note: SSN lookup would require joining patient_identifiers table
+    let rows = sqlx::query_as!(
+        DuplicateMatchRow,
+        r#"
+        SELECT
+            p.id as patient_id,
+            p.mrn,
+            CONCAT(COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "full_name!",
+            p.date_of_birth,
+            (
+                CASE WHEN LOWER(p.first_name) = LOWER($1) THEN 30 ELSE 0 END +
+                CASE WHEN LOWER(p.last_name) = LOWER($2) THEN 30 ELSE 0 END +
+                CASE WHEN p.date_of_birth = $3 THEN 40 ELSE 0 END
+            )::INTEGER as "match_score!",
+            ARRAY_REMOVE(ARRAY[
+                CASE WHEN LOWER(p.first_name) = LOWER($1) THEN 'first_name' END,
+                CASE WHEN LOWER(p.last_name) = LOWER($2) THEN 'last_name' END,
+                CASE WHEN p.date_of_birth = $3 THEN 'date_of_birth' END
+            ], NULL) as match_reasons
+        FROM ehr_patients p
+        WHERE p.organization_id = $4
+          AND p.status != 'merged'
+          AND p.deleted_at IS NULL
+          AND (
+              (LOWER(p.first_name) = LOWER($1) AND LOWER(p.last_name) = LOWER($2))
+              OR p.date_of_birth = $3
+          )
+        ORDER BY 5 DESC
+        LIMIT 10
+        "#,
+        &payload.first_name,
+        &payload.last_name,
+        payload.date_of_birth,
+        organization_id,
+    )
+    .fetch_all(state.database_pool.as_ref())
+    .await
+    .map_err(|e| {
+        error!("Failed to find duplicates: {:?}", e);
+        AppError::from(e)
+    })?;
+
+    let matches: Vec<DuplicateMatchResponse> = rows
+        .into_iter()
+        .filter(|r| r.match_score > 0)
+        .map(|r| DuplicateMatchResponse {
+            patient_id: r.patient_id,
+            mrn: r.mrn,
+            full_name: r.full_name,
+            date_of_birth: r.date_of_birth,
+            match_score: r.match_score,
+            match_reasons: r.match_reasons.unwrap_or_default(),
+        })
+        .collect();
+
+    info!("Found {} potential duplicates", matches.len());
+    Ok(Json(ApiResponse::success(matches)))
+}
+
+/// Database row for duplicate match query
+#[derive(Debug, FromRow)]
+struct DuplicateMatchRow {
+    patient_id: Uuid,
+    mrn: String,
+    full_name: String,
+    date_of_birth: Option<chrono::NaiveDate>,
+    match_score: i32,
+    match_reasons: Option<Vec<String>>,
+}
+
+/// POST /v1/ehr/patients/merge - Merge two patient records
+#[tracing::instrument(skip(state, payload))]
+pub async fn merge_patients(
+    State(state): State<Arc<AppState>>,
+    Json(payload): Json<MergePatientsRequest>,
+) -> Result<Json<ApiResponse<MergeResultResponse>>, ApiError> {
+    let organization_id = Uuid::nil();
+    let user_id = Uuid::nil();
+    info!(
+        "Merging patient {} into {}",
+        payload.duplicate_id, payload.survivor_id
+    );
+
+    // Assertion 1: Cannot merge patient into itself
+    if payload.survivor_id == payload.duplicate_id {
+        return Err(AppError::Validation("Cannot merge patient into itself".to_string()).into());
+    }
+
+    // Start transaction for atomic merge
+    let mut tx = state
+        .database_pool
+        .begin()
+        .await
+        .map_err(|e| AppError::from(e))?;
+
+    // Verify both patients exist and are not already merged
+    let survivor = sqlx::query_as!(
+        PatientRow,
+        r#"
+        SELECT
+            id, organization_id, ien, mrn,
+            first_name, last_name, middle_name, suffix,
+            date_of_birth, age, sex, marital_status,
+            race, ethnicity, preferred_language, veteran_status,
+            email, phone_home, phone_work, phone_mobile, phone_preferred,
+            address_line1, address_line2, city, state, zip_code, country,
+            emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+            primary_care_provider_id, primary_care_provider_name,
+            status, deceased_date, confidentiality_code, vip_flag,
+            created_at, updated_at
+        FROM ehr_patients
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL AND status != 'merged'
+        "#,
+        payload.survivor_id,
+        organization_id,
+    )
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?
+    .ok_or_else(|| AppError::NotFound("Survivor patient not found or already merged".to_string()))?;
+
+    let duplicate = sqlx::query_as!(
+        PatientRow,
+        r#"
+        SELECT
+            id, organization_id, ien, mrn,
+            first_name, last_name, middle_name, suffix,
+            date_of_birth, age, sex, marital_status,
+            race, ethnicity, preferred_language, veteran_status,
+            email, phone_home, phone_work, phone_mobile, phone_preferred,
+            address_line1, address_line2, city, state, zip_code, country,
+            emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+            primary_care_provider_id, primary_care_provider_name,
+            status, deceased_date, confidentiality_code, vip_flag,
+            created_at, updated_at
+        FROM ehr_patients
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL AND status != 'merged'
+        "#,
+        payload.duplicate_id,
+        organization_id,
+    )
+    .fetch_optional(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?
+    .ok_or_else(|| AppError::NotFound("Duplicate patient not found or already merged".to_string()))?;
+
+    // Assertion 2: Both patients must be active or inactive
+    if survivor.status.as_deref() == Some("merged") || duplicate.status.as_deref() == Some("merged") {
+        return Err(AppError::Validation("Cannot merge already merged patients".to_string()).into());
+    }
+
+    let mut counts = MergeRecordCounts::default();
+
+    // Move encounters
+    let result = sqlx::query!(
+        "UPDATE encounters SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.encounters = result.rows_affected() as i64;
+
+    // Move appointments
+    let result = sqlx::query!(
+        "UPDATE appointments SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.appointments = result.rows_affected() as i64;
+
+    // Move drug allergies
+    let result = sqlx::query!(
+        "UPDATE drug_allergies SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.allergies = result.rows_affected() as i64;
+
+    // Move problem list
+    let result = sqlx::query!(
+        "UPDATE problem_list SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.problems = result.rows_affected() as i64;
+
+    // Move prescriptions
+    let result = sqlx::query!(
+        "UPDATE prescriptions SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.prescriptions = result.rows_affected() as i64;
+
+    // Move vital signs
+    let result = sqlx::query!(
+        "UPDATE vital_signs SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.vital_signs = result.rows_affected() as i64;
+
+    // Move clinical notes
+    let result = sqlx::query!(
+        "UPDATE clinical_notes SET patient_id = $1 WHERE patient_id = $2",
+        payload.survivor_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+    counts.clinical_notes = result.rows_affected() as i64;
+
+    // Record merge history
+    sqlx::query!(
+        r#"
+        INSERT INTO patient_merge_history (
+            organization_id, source_patient_id, source_mrn,
+            target_patient_id, target_mrn, merged_by, merge_reason
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        "#,
+        organization_id,
+        payload.duplicate_id,
+        &duplicate.mrn,
+        payload.survivor_id,
+        &survivor.mrn,
+        user_id,
+        payload.merge_reason.as_deref(),
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+
+    // Mark duplicate as merged
+    sqlx::query!(
+        r#"
+        UPDATE ehr_patients
+        SET status = 'merged', updated_by = $1, updated_at = NOW()
+        WHERE id = $2
+        "#,
+        user_id,
+        payload.duplicate_id,
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| AppError::from(e))?;
+
+    // Commit transaction
+    tx.commit().await.map_err(|e| AppError::from(e))?;
+
+    info!(
+        "Merge complete: {} -> {} (moved {} total records)",
+        payload.duplicate_id,
+        payload.survivor_id,
+        counts.encounters + counts.appointments + counts.allergies
+            + counts.problems + counts.prescriptions + counts.vital_signs + counts.clinical_notes
+    );
+
+    Ok(Json(ApiResponse::success(MergeResultResponse {
+        survivor_id: payload.survivor_id,
+        merged_id: payload.duplicate_id,
+        records_moved: counts,
+    })))
 }

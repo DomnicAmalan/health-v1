@@ -3,6 +3,7 @@ use axum::{
     routing::{get, post, put, delete},
 };
 use crate::presentation::api::handlers::*;
+use crate::presentation::api::handlers::workflow_handlers;
 use crate::presentation::api::handlers::ehr::{anatomy_findings_handlers, appointment_handlers, body_system_handlers, clinical_note_handlers, encounter_handlers, imaging_orders_handlers, patient_handlers, pharmacy_handlers, problem_list_handlers, vital_signs_handlers};
 use crate::presentation::api::handlers::billing::{service_catalog_handlers, invoice_handlers, payment_handlers};
 use admin_service::handlers::*;
@@ -45,6 +46,8 @@ pub fn create_router() -> Router<Arc<super::AppState>> {
         .route("/v1/ehr/patients/:id/banner", get(patient_handlers::get_patient_banner))
         .route("/v1/ehr/patients/mrn/:mrn", get(patient_handlers::get_patient_by_mrn))
         .route("/v1/ehr/patients/ien/:ien", get(patient_handlers::get_patient_by_ien))
+        .route("/v1/ehr/patients/find-duplicates", post(patient_handlers::find_duplicate_patients))
+        .route("/v1/ehr/patients/merge", post(patient_handlers::merge_patients))
         // Appointment routes
         .route("/v1/ehr/appointments", get(appointment_handlers::list_appointments))
         .route("/v1/ehr/appointments", post(appointment_handlers::create_appointment))

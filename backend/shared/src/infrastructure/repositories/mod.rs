@@ -9,6 +9,7 @@ pub mod group_repository_impl;
 pub mod ui_entity_repository_impl;
 pub mod session_repository_impl;
 pub mod request_log_repository_impl;
+pub mod visual_workflow_repository_impl;
 pub mod ehr;
 
 pub use user_repository_impl::UserRepositoryImpl;
@@ -22,4 +23,5 @@ pub use group_repository_impl::GroupRepositoryImpl;
 pub use ui_entity_repository_impl::UiEntityRepositoryImpl;
 pub use session_repository_impl::SessionRepositoryImpl;
 pub use request_log_repository_impl::RequestLogRepositoryImpl;
+pub use visual_workflow_repository_impl::VisualWorkflowRepositoryImpl;
 

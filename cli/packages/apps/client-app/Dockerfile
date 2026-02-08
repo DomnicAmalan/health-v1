@@ -30,7 +30,7 @@ COPY packages/libs/shared/package.json ./packages/libs/shared/
 RUN bun install --frozen-lockfile || bun install
 
 # Expose Vite dev server port (matches local dev port)
-EXPOSE 4115
+EXPOSE 5175
 
 # Set working directory to client app
 WORKDIR /app/packages/apps/client-app

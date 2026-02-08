@@ -105,14 +105,14 @@ async fn main() {
         
         // Find and delete any users that are super users but setup wasn't completed
         // (these are likely from failed setup attempts)
-        if let Err(e) = sqlx::query(
+        if let Err(e) = sqlx::query!(
             r#"
-            DELETE FROM users 
-            WHERE is_super_user = true 
+            DELETE FROM users
+            WHERE is_super_user = true
             AND id NOT IN (
-                SELECT setup_completed_by 
-                FROM setup_status 
-                WHERE setup_completed = true 
+                SELECT setup_completed_by
+                FROM setup_status
+                WHERE setup_completed = true
                 AND setup_completed_by IS NOT NULL
             )
             "#
@@ -127,12 +127,12 @@ async fn main() {
         
         // Delete any organizations that don't have any users
         // (these are likely from failed setup attempts)
-        if let Err(e) = sqlx::query(
+        if let Err(e) = sqlx::query!(
             r#"
-            DELETE FROM organizations 
+            DELETE FROM organizations
             WHERE id NOT IN (
-                SELECT DISTINCT organization_id 
-                FROM users 
+                SELECT DISTINCT organization_id
+                FROM users
                 WHERE organization_id IS NOT NULL
             )
             "#
@@ -247,8 +247,7 @@ async fn main() {
         // Delete user if it was created
         if let Some(uid) = user_id {
             println!("Removing user...");
-            if let Err(e) = sqlx::query("DELETE FROM users WHERE id = $1")
-                .bind(uid)
+            if let Err(e) = sqlx::query!("DELETE FROM users WHERE id = $1", uid)
                 .execute(pool)
                 .await
             {
@@ -262,8 +261,7 @@ async fn main() {
         // Delete organization if it was created
         if let Some(oid) = org_id {
             println!("Removing organization...");
-            if let Err(e) = sqlx::query("DELETE FROM organizations WHERE id = $1")
-                .bind(oid)
+            if let Err(e) = sqlx::query!("DELETE FROM organizations WHERE id = $1", oid)
                 .execute(pool)
                 .await
             {
@@ -276,12 +274,12 @@ async fn main() {
         
         // Reset setup status
         println!("Resetting setup status...");
-        if let Err(e) = sqlx::query(
+        if let Err(e) = sqlx::query!(
             r#"
-            UPDATE setup_status 
-            SET setup_completed = false, 
-                setup_completed_at = NULL, 
-                setup_completed_by = NULL 
+            UPDATE setup_status
+            SET setup_completed = false,
+                setup_completed_at = NULL,
+                setup_completed_by = NULL
             WHERE setup_completed = true
             "#
         )

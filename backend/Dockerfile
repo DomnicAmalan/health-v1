@@ -42,6 +42,7 @@ COPY backend/admin-service/Cargo.toml backend/admin-service/
 COPY backend/api-service/Cargo.toml backend/api-service/
 COPY backend/rustyvault-service/Cargo.toml backend/rustyvault-service/
 COPY backend/yottadb-api/Cargo.toml backend/yottadb-api/
+COPY backend/state-machine-macro/ backend/state-machine-macro/
 
 WORKDIR /app/backend
 
@@ -86,6 +87,7 @@ COPY backend/admin-service/Cargo.toml ./admin-service/
 COPY backend/api-service/Cargo.toml ./api-service/
 COPY backend/rustyvault-service/Cargo.toml ./rustyvault-service/
 COPY backend/yottadb-api/Cargo.toml ./yottadb-api/
+COPY backend/state-machine-macro/ ./state-machine-macro/
 
 # Copy ALL source code (entire workspace)
 COPY backend/shared/src ./shared/src
@@ -94,6 +96,7 @@ COPY backend/admin-service/src ./admin-service/src
 COPY backend/api-service/src ./api-service/src
 COPY backend/rustyvault-service/src ./rustyvault-service/src
 COPY backend/yottadb-api/src ./yottadb-api/src
+COPY backend/state-machine-macro/src ./state-machine-macro/src
 COPY backend/migrations ./migrations
 
 # Build ALL binaries in a single cargo invocation with cache mount
@@ -144,6 +147,7 @@ COPY backend/admin-service/Cargo.toml ./admin-service/
 COPY backend/api-service/Cargo.toml ./api-service/
 COPY backend/rustyvault-service/Cargo.toml ./rustyvault-service/
 COPY backend/yottadb-api/Cargo.toml ./yottadb-api/
+COPY backend/state-machine-macro/ ./state-machine-macro/
 
 # Copy source code (volumes will override in docker-compose)
 COPY backend/shared/src ./shared/src
@@ -152,6 +156,7 @@ COPY backend/admin-service/src ./admin-service/src
 COPY backend/api-service/src ./api-service/src
 COPY backend/rustyvault-service/src ./rustyvault-service/src
 COPY backend/yottadb-api/src ./yottadb-api/src
+COPY backend/state-machine-macro/src ./state-machine-macro/src
 COPY backend/migrations ./migrations
 
 ENV CARGO_BUILD_JOBS=4
@@ -215,6 +220,7 @@ COPY backend/admin-service/Cargo.toml ./admin-service/
 COPY backend/api-service/Cargo.toml ./api-service/
 COPY backend/rustyvault-service/Cargo.toml ./rustyvault-service/
 COPY backend/yottadb-api/Cargo.toml ./yottadb-api/
+COPY backend/state-machine-macro/ ./state-machine-macro/
 
 # Copy source code (volumes will override in docker-compose)
 COPY backend/shared/src ./shared/src
@@ -223,6 +229,7 @@ COPY backend/admin-service/src ./admin-service/src
 COPY backend/api-service/src ./api-service/src
 COPY backend/rustyvault-service/src ./rustyvault-service/src
 COPY backend/yottadb-api/src ./yottadb-api/src
+COPY backend/state-machine-macro/src ./state-machine-macro/src
 COPY backend/migrations ./migrations
 
 ENV CARGO_BUILD_JOBS=4
@@ -287,6 +294,7 @@ COPY backend/admin-service/Cargo.toml ./admin-service/
 COPY backend/api-service/Cargo.toml ./api-service/
 COPY backend/rustyvault-service/Cargo.toml ./rustyvault-service/
 COPY backend/yottadb-api/Cargo.toml ./yottadb-api/
+COPY backend/state-machine-macro/ ./state-machine-macro/
 
 # Copy source code (volumes will override in docker-compose)
 COPY backend/shared/src ./shared/src
@@ -295,6 +303,7 @@ COPY backend/admin-service/src ./admin-service/src
 COPY backend/api-service/src ./api-service/src
 COPY backend/rustyvault-service/src ./rustyvault-service/src
 COPY backend/yottadb-api/src ./yottadb-api/src
+COPY backend/state-machine-macro/src ./state-machine-macro/src
 
 ENV CARGO_BUILD_JOBS=4
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true

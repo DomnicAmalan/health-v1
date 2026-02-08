@@ -104,8 +104,9 @@ impl PolicyStore {
 
         // Upsert into database with realm context
         // Use different conflict strategies based on realm_id
+        let policy_type_str = policy.policy_type.to_string();
         if let Some(realm_id) = realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 INSERT INTO vault_policies (name, policy, policy_type, raw_policy, parsed_policy, realm_id)
                 VALUES ($1, $2, $3, $4, $5, $6)
@@ -116,36 +117,36 @@ impl PolicyStore {
                     parsed_policy = $5,
                     updated_at = NOW()
                 "#,
+                &policy.name,
+                &raw_policy,
+                &policy_type_str,
+                &raw_policy,
+                &entry_json,
+                realm_id
             )
-            .bind(&policy.name)
-            .bind(&raw_policy)
-            .bind(policy.policy_type.to_string())
-            .bind(&raw_policy)
-            .bind(&entry_json)
-            .bind(realm_id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to save realm policy: {}", e)))?;
         } else {
-        sqlx::query(
-            r#"
+            sqlx::query!(
+                r#"
                 INSERT INTO vault_policies (name, policy, policy_type, raw_policy, parsed_policy, realm_id)
                 VALUES ($1, $2, $3, $4, $5, NULL)
                 ON CONFLICT (name) WHERE realm_id IS NULL DO UPDATE SET
-                policy = $2,
-                policy_type = $3,
-                raw_policy = $4,
-                parsed_policy = $5,
-                updated_at = NOW()
-            "#,
-        )
-        .bind(&policy.name)
-            .bind(&raw_policy)
-        .bind(policy.policy_type.to_string())
-        .bind(&raw_policy)
-        .bind(&entry_json)
-        .execute(&self.pool)
-        .await
+                    policy = $2,
+                    policy_type = $3,
+                    raw_policy = $4,
+                    parsed_policy = $5,
+                    updated_at = NOW()
+                "#,
+                &policy.name,
+                &raw_policy,
+                &policy_type_str,
+                &raw_policy,
+                &entry_json
+            )
+            .execute(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to save global policy: {}", e)))?;
         }
 
@@ -180,54 +181,58 @@ impl PolicyStore {
         }
 
         // Fetch from database - first try realm-specific, then global
-        let row: Option<(String, String, String, Option<Uuid>)> = if let Some(realm_id) = realm_id {
+        let row_data: Option<(String, String, String, Option<Uuid>)> = if let Some(realm_id) = realm_id {
             // Try realm-specific first
-            let realm_row: Option<(String, String, String, Option<Uuid>)> = sqlx::query_as(
-            r#"
-                SELECT name, policy_type, raw_policy, realm_id
+            let realm_row = sqlx::query!(
+                r#"
+                SELECT name, policy_type, raw_policy as "raw_policy!", realm_id
                 FROM vault_policies
                 WHERE name = $1 AND realm_id = $2
                 "#,
+                &name,
+                realm_id
             )
-            .bind(&name)
-            .bind(realm_id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| VaultError::Vault(format!("failed to fetch realm policy: {}", e)))?;
+            .map_err(|e| VaultError::Vault(format!("failed to fetch realm policy: {}", e)))?
+            .map(|r| (r.name, r.policy_type, r.raw_policy, r.realm_id));
 
             // If not found in realm, try global
             if realm_row.is_none() {
-                sqlx::query_as(
+                sqlx::query!(
                     r#"
-                    SELECT name, policy_type, raw_policy, realm_id
+                    SELECT name, policy_type, raw_policy as "raw_policy!", realm_id
                     FROM vault_policies
                     WHERE name = $1 AND realm_id IS NULL
                     "#,
+                    &name
                 )
-                .bind(&name)
                 .fetch_optional(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to fetch global policy: {}", e)))?
+                .map(|r| (r.name, r.policy_type, r.raw_policy, r.realm_id))
             } else {
                 realm_row
             }
         } else {
             // Fetch global only
-            sqlx::query_as(
+            sqlx::query!(
                 r#"
-                SELECT name, policy_type, raw_policy, realm_id
-            FROM vault_policies
+                SELECT name, policy_type, raw_policy as "raw_policy!", realm_id
+                FROM vault_policies
                 WHERE name = $1 AND realm_id IS NULL
-            "#,
-        )
-        .bind(&name)
-        .fetch_optional(&self.pool)
-        .await
+                "#,
+                &name
+            )
+            .fetch_optional(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to fetch policy: {}", e)))?
+            .map(|r| (r.name, r.policy_type, r.raw_policy, r.realm_id))
         };
 
-        match row {
-            Some((db_name, _policy_type, raw, policy_realm_id)) => {
+        match row_data {
+            Some(row) => {
+                let (db_name, _policy_type, raw, policy_realm_id) = row;
                 let policy = Policy::from_json(&raw)?;
                 let mut policy = policy;
                 policy.name = db_name;
@@ -243,51 +248,51 @@ impl PolicyStore {
 
     /// List all policy names (realm-scoped or global)
     pub async fn list_policies(&self, realm_id: Option<Uuid>) -> VaultResult<Vec<String>> {
-        let rows: Vec<(String,)> = if let Some(realm_id) = realm_id {
+        let rows: Vec<String> = if let Some(realm_id) = realm_id {
             // Include both realm-specific and global policies
-            sqlx::query_as(
+            sqlx::query_scalar!(
                 r#"
                 SELECT name FROM vault_policies
                 WHERE realm_id = $1 OR realm_id IS NULL
                 ORDER BY name
                 "#,
+                realm_id
             )
-            .bind(realm_id)
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list realm policies: {}", e)))?
         } else {
             // List only global policies
-            sqlx::query_as(
+            sqlx::query_scalar!(
                 r#"
                 SELECT name FROM vault_policies
                 WHERE realm_id IS NULL
                 ORDER BY name
-                "#,
+                "#
             )
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list policies: {}", e)))?
         };
 
-        Ok(rows.into_iter().map(|(name,)| name).collect())
+        Ok(rows)
     }
 
     /// List policies in a specific realm only (not including global)
     pub async fn list_realm_policies(&self, realm_id: Uuid) -> VaultResult<Vec<String>> {
-        let rows: Vec<(String,)> = sqlx::query_as(
+        let rows: Vec<String> = sqlx::query_scalar!(
             r#"
             SELECT name FROM vault_policies
             WHERE realm_id = $1
             ORDER BY name
             "#,
+            realm_id
         )
-        .bind(realm_id)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to list realm-only policies: {}", e)))?;
 
-        Ok(rows.into_iter().map(|(name,)| name).collect())
+        Ok(rows)
     }
 
     /// Delete a policy (realm-scoped or global)
@@ -304,17 +309,14 @@ impl PolicyStore {
 
         // Delete from database
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query("DELETE FROM vault_policies WHERE name = $1 AND realm_id = $2")
-                .bind(&name)
-                .bind(realm_id)
+            sqlx::query!("DELETE FROM vault_policies WHERE name = $1 AND realm_id = $2", &name, realm_id)
                 .execute(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete realm policy: {}", e)))?
         } else {
-            sqlx::query("DELETE FROM vault_policies WHERE name = $1 AND realm_id IS NULL")
-            .bind(&name)
-            .execute(&self.pool)
-            .await
+            sqlx::query!("DELETE FROM vault_policies WHERE name = $1 AND realm_id IS NULL", &name)
+                .execute(&self.pool)
+                .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete global policy: {}", e)))?
         };
 

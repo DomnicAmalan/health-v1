@@ -360,31 +360,31 @@ pub async fn cleanup_test_database(database_url: &str) {
     let pool = setup_test_database(database_url).await;
     
     // Truncate vault-related tables
-    sqlx::query("TRUNCATE TABLE vault_tokens CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_tokens CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_userpass_users CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_userpass_users CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_approles CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_approles CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_approle_secret_ids CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_approle_secret_ids CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_policies CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_policies CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_realms CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_realms CASCADE")
         .execute(&pool)
         .await
         .ok();
-    sqlx::query("TRUNCATE TABLE vault_realm_applications CASCADE")
+    sqlx::query!("TRUNCATE TABLE vault_realm_applications CASCADE")
         .execute(&pool)
         .await
         .ok();
@@ -453,7 +453,7 @@ pub async fn wait_for_postgres_ready(
         match setup_test_database(database_url).await {
             pool => {
                 // Try a simple query
-                match sqlx::query("SELECT 1").execute(&pool).await {
+                match sqlx::query!("SELECT 1 as one").execute(&pool).await {
                     Ok(_) => return Ok(()),
                     Err(_) => {}
                 }

@@ -1,25 +1,44 @@
 /**
  * ConnectorConfig Component
  * MuleSoft-style connector configuration for Action nodes
+ *
+ * This is a shared component that accepts connectors as props,
+ * allowing it to be used in both admin and client apps.
  */
 
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/card";
+import { Label } from "../components/label";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Input,
-  Textarea,
-} from "@lazarus-life/ui-components";
-import { useState } from "react";
-import { useConnectors } from "@/hooks/api/workflows/useWorkflows";
-import type { ConnectorMetadata } from "@/hooks/api/workflows/useWorkflows";
+} from "../components/select";
+import { Input } from "../components/input";
+import { Textarea } from "../components/textarea";
+
+// Connector types - shared between apps
+export interface ConnectorParameter {
+  name: string;
+  param_type: string;
+  required: boolean;
+  description: string;
+}
+
+export interface ConnectorAction {
+  name: string;
+  description: string;
+  parameters: ConnectorParameter[];
+}
+
+export interface ConnectorMetadata {
+  id: string;
+  name: string;
+  description: string;
+  actions: ConnectorAction[];
+}
 
 interface ConnectorConfigProps {
   value?: {
@@ -32,15 +51,34 @@ interface ConnectorConfigProps {
     action: string;
     parameters: Record<string, string>;
   }) => void;
+  /** Available connectors - passed from parent to keep this component agnostic */
+  connectors?: ConnectorMetadata[];
+  /** Whether connectors are loading */
+  isLoadingConnectors?: boolean;
 }
 
-export function ConnectorConfig({ value, onChange }: ConnectorConfigProps) {
+export function ConnectorConfig({
+  value,
+  onChange,
+  connectors = [],
+  isLoadingConnectors = false,
+}: ConnectorConfigProps) {
   const [selectedConnector, setSelectedConnector] = useState(value?.connector || "");
   const [selectedAction, setSelectedAction] = useState(value?.action || "");
   const [parameters, setParameters] = useState<Record<string, string>>(value?.parameters || {});
 
-  // Fetch connectors from backend
-  const { data: connectors = [], isLoading: loadingConnectors } = useConnectors();
+  // Sync with external value changes
+  useEffect(() => {
+    if (value?.connector !== selectedConnector) {
+      setSelectedConnector(value?.connector || "");
+    }
+    if (value?.action !== selectedAction) {
+      setSelectedAction(value?.action || "");
+    }
+    if (JSON.stringify(value?.parameters) !== JSON.stringify(parameters)) {
+      setParameters(value?.parameters || {});
+    }
+  }, [value]);
 
   const connector = connectors.find((c) => c.id === selectedConnector);
   const action = connector?.actions.find((a) => a.name === selectedAction);
@@ -85,9 +123,9 @@ export function ConnectorConfig({ value, onChange }: ConnectorConfigProps) {
           {/* Connector Selection */}
           <div className="space-y-2">
             <Label>Connector</Label>
-            <Select value={selectedConnector} onValueChange={handleConnectorChange} disabled={loadingConnectors}>
+            <Select value={selectedConnector} onValueChange={handleConnectorChange} disabled={isLoadingConnectors}>
               <SelectTrigger>
-                <SelectValue placeholder={loadingConnectors ? "Loading connectors..." : "Select a connector..."} />
+                <SelectValue placeholder={isLoadingConnectors ? "Loading connectors..." : "Select a connector..."} />
               </SelectTrigger>
               <SelectContent>
                 {connectors.map((conn) => (
@@ -153,7 +191,7 @@ export function ConnectorConfig({ value, onChange }: ConnectorConfigProps) {
               ))}
 
               <div className="mt-4 p-3 bg-muted rounded-md">
-                <p className="text-xs font-semibold mb-2">💡 Variable Syntax:</p>
+                <p className="text-xs font-semibold mb-2">Variable Syntax:</p>
                 <code className="text-xs">
                   {`\${variables.patientId}`} - Access workflow variables
                   <br />

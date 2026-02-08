@@ -341,7 +341,8 @@ pub async fn create_vital_signs(
     let weight = payload.weight.map(|v| sqlx::types::BigDecimal::try_from(v).ok()).flatten();
     let height = payload.height.map(|v| sqlx::types::BigDecimal::try_from(v).ok()).flatten();
 
-    let row = sqlx::query_as::<_, VitalSignsRow>(
+    let row = sqlx::query_as!(
+        VitalSignsRow,
         r#"
         INSERT INTO vital_signs (
             organization_id, patient_id, patient_ien, encounter_id, appointment_id,
@@ -363,35 +364,35 @@ pub async fn create_vital_signs(
             position, blood_pressure_site, is_abnormal, is_critical, abnormal_flags,
             notes, created_at
         "#,
+        organization_id,
+        payload.patient_id,
+        patient.ien,
+        payload.encounter_id as Option<Uuid>,
+        payload.appointment_id as Option<Uuid>,
+        user_id,
+        recorded_datetime,
+        payload.blood_pressure_systolic as Option<i32>,
+        payload.blood_pressure_diastolic as Option<i32>,
+        payload.heart_rate as Option<i32>,
+        payload.respiratory_rate as Option<i32>,
+        temperature as Option<sqlx::types::BigDecimal>,
+        &temperature_unit as &str,
+        payload.oxygen_saturation as Option<i32>,
+        payload.oxygen_delivery_method.as_deref() as Option<&str>,
+        weight as Option<sqlx::types::BigDecimal>,
+        &weight_unit as &str,
+        height as Option<sqlx::types::BigDecimal>,
+        &height_unit as &str,
+        payload.pain_score as Option<i32>,
+        payload.pain_location.as_deref() as Option<&str>,
+        payload.pain_quality.as_deref() as Option<&str>,
+        payload.position.as_deref() as Option<&str>,
+        payload.blood_pressure_site.as_deref() as Option<&str>,
+        payload.blood_pressure_method.as_deref() as Option<&str>,
+        payload.consciousness_level.as_deref() as Option<&str>,
+        payload.notes.as_deref() as Option<&str>,
+        user_id
     )
-    .bind(organization_id)
-    .bind(payload.patient_id)
-    .bind(patient.ien)
-    .bind(payload.encounter_id)
-    .bind(payload.appointment_id)
-    .bind(user_id)
-    .bind(recorded_datetime)
-    .bind(payload.blood_pressure_systolic)
-    .bind(payload.blood_pressure_diastolic)
-    .bind(payload.heart_rate)
-    .bind(payload.respiratory_rate)
-    .bind(temperature)
-    .bind(&temperature_unit)
-    .bind(payload.oxygen_saturation)
-    .bind(&payload.oxygen_delivery_method)
-    .bind(weight)
-    .bind(&weight_unit)
-    .bind(height)
-    .bind(&height_unit)
-    .bind(payload.pain_score)
-    .bind(&payload.pain_location)
-    .bind(&payload.pain_quality)
-    .bind(&payload.position)
-    .bind(&payload.blood_pressure_site)
-    .bind(&payload.blood_pressure_method)
-    .bind(&payload.consciousness_level)
-    .bind(&payload.notes)
-    .bind(user_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -421,7 +422,8 @@ pub async fn get_vital_signs(
     // Use a system user ID for now
     let organization_id = Uuid::nil();
 
-    let row = sqlx::query_as::<_, VitalSignsRow>(
+    let row = sqlx::query_as!(
+        VitalSignsRow,
         r#"SELECT id, organization_id, ien, patient_id, patient_ien, encounter_id, appointment_id,
                   recorded_by, recorded_by_name, recorded_datetime, recorded_location,
                   blood_pressure_systolic, blood_pressure_diastolic, heart_rate, respiratory_rate,
@@ -431,9 +433,9 @@ pub async fn get_vital_signs(
                   notes, created_at
            FROM vital_signs
            WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"#,
+        vitals_id,
+        organization_id
     )
-    .bind(vitals_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -465,7 +467,8 @@ pub async fn update_vital_signs(
     let weight = payload.weight.map(|v| sqlx::types::BigDecimal::try_from(v).ok()).flatten();
     let height = payload.height.map(|v| sqlx::types::BigDecimal::try_from(v).ok()).flatten();
 
-    let row = sqlx::query_as::<_, VitalSignsRow>(
+    let row = sqlx::query_as!(
+        VitalSignsRow,
         r#"
         UPDATE vital_signs
         SET blood_pressure_systolic = COALESCE($1, blood_pressure_systolic),
@@ -489,20 +492,20 @@ pub async fn update_vital_signs(
             position, blood_pressure_site, is_abnormal, is_critical, abnormal_flags,
             notes, created_at
         "#,
+        payload.blood_pressure_systolic as Option<i32>,
+        payload.blood_pressure_diastolic as Option<i32>,
+        payload.heart_rate as Option<i32>,
+        payload.respiratory_rate as Option<i32>,
+        temperature as Option<sqlx::types::BigDecimal>,
+        payload.oxygen_saturation as Option<i32>,
+        weight as Option<sqlx::types::BigDecimal>,
+        height as Option<sqlx::types::BigDecimal>,
+        payload.pain_score as Option<i32>,
+        payload.notes.as_deref() as Option<&str>,
+        user_id,
+        vitals_id,
+        organization_id
     )
-    .bind(payload.blood_pressure_systolic)
-    .bind(payload.blood_pressure_diastolic)
-    .bind(payload.heart_rate)
-    .bind(payload.respiratory_rate)
-    .bind(temperature)
-    .bind(payload.oxygen_saturation)
-    .bind(weight)
-    .bind(height)
-    .bind(payload.pain_score)
-    .bind(&payload.notes)
-    .bind(user_id)
-    .bind(vitals_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -531,13 +534,13 @@ pub async fn delete_vital_signs(
     let user_id = Uuid::nil();
     let organization_id = Uuid::nil();
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"UPDATE vital_signs SET deleted_at = NOW(), updated_by = $1
            WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL"#,
+        user_id,
+        vitals_id,
+        organization_id
     )
-    .bind(user_id)
-    .bind(vitals_id)
-    .bind(organization_id)
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -554,7 +557,7 @@ pub async fn delete_vital_signs(
 }
 
 /// Row type for trend queries
-#[derive(Debug, FromRow)]
+#[derive(Debug)]
 struct TrendRow {
     recorded_datetime: DateTime<Utc>,
     blood_pressure_systolic: Option<i32>,
@@ -582,7 +585,8 @@ pub async fn get_patient_vital_trends(
     let days_str = format!("{} days", days);
 
     // Get blood pressure trend
-    let bp_readings = sqlx::query_as::<_, TrendRow>(
+    let bp_readings = sqlx::query_as!(
+        TrendRow,
         r#"SELECT recorded_datetime, blood_pressure_systolic, NULL::int as heart_rate, is_abnormal, is_critical
            FROM vital_signs
            WHERE patient_id = $1 AND organization_id = $2
@@ -590,10 +594,10 @@ pub async fn get_patient_vital_trends(
              AND recorded_datetime >= NOW() - $3::INTERVAL
              AND deleted_at IS NULL
            ORDER BY recorded_datetime ASC"#,
+        patient_id,
+        organization_id,
+        &days_str as &str
     )
-    .bind(patient_id)
-    .bind(organization_id)
-    .bind(&days_str)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -616,7 +620,8 @@ pub async fn get_patient_vital_trends(
     }
 
     // Get heart rate trend
-    let hr_readings = sqlx::query_as::<_, TrendRow>(
+    let hr_readings = sqlx::query_as!(
+        TrendRow,
         r#"SELECT recorded_datetime, NULL::int as blood_pressure_systolic, heart_rate, is_abnormal, is_critical
            FROM vital_signs
            WHERE patient_id = $1 AND organization_id = $2
@@ -624,10 +629,10 @@ pub async fn get_patient_vital_trends(
              AND recorded_datetime >= NOW() - $3::INTERVAL
              AND deleted_at IS NULL
            ORDER BY recorded_datetime ASC"#,
+        patient_id,
+        organization_id,
+        &days_str as &str
     )
-    .bind(patient_id)
-    .bind(organization_id)
-    .bind(&days_str)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {

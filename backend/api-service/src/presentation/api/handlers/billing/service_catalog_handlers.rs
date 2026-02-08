@@ -8,12 +8,18 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
+use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::presentation::api::AppState;
+
+/// Helper to convert f64 to BigDecimal for SQL DECIMAL parameters
+fn to_bd(v: f64) -> BigDecimal {
+    BigDecimal::from_str(&v.to_string()).unwrap_or_default()
+}
 
 /// Helper to parse decimal string to f64
 fn parse_decimal(s: Option<String>) -> f64 {
@@ -158,9 +164,11 @@ pub struct BillingErrorResponse {
 pub async fn list_service_categories(
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
-        SELECT id, code, name, description, parent_id, display_order, is_active
+        SELECT id, code, name, description, parent_id,
+               COALESCE(display_order, 0) as "display_order!",
+               COALESCE(is_active, true) as "is_active!"
         FROM service_categories
         ORDER BY display_order, name
         "#
@@ -173,13 +181,13 @@ pub async fn list_service_categories(
             let categories: Vec<ServiceCategoryResponse> = rows
                 .iter()
                 .map(|row| ServiceCategoryResponse {
-                    id: row.get("id"),
-                    code: row.get("code"),
-                    name: row.get("name"),
-                    description: row.get("description"),
-                    parent_id: row.get("parent_id"),
-                    display_order: row.get("display_order"),
-                    is_active: row.get("is_active"),
+                    id: row.id,
+                    code: row.code.clone(),
+                    name: row.name.clone(),
+                    description: row.description.clone(),
+                    parent_id: row.parent_id,
+                    display_order: row.display_order,
+                    is_active: row.is_active,
                 })
                 .collect();
             (StatusCode::OK, Json(categories)).into_response()
@@ -199,25 +207,25 @@ pub async fn create_service_category(
     let org_id = Uuid::nil();
     let display_order = req.display_order.unwrap_or(0);
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         INSERT INTO service_categories (organization_id, code, name, description, parent_id, display_order)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id
-        "#
+        "#,
+        org_id,
+        &req.code,
+        &req.name,
+        req.description.as_deref(),
+        req.parent_id,
+        display_order
     )
-    .bind(org_id)
-    .bind(&req.code)
-    .bind(&req.name)
-    .bind(&req.description)
-    .bind(req.parent_id)
-    .bind(display_order)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
             (StatusCode::CREATED, Json(serde_json::json!({"id": id, "success": true}))).into_response()
         }
         Err(e) => (
@@ -231,11 +239,11 @@ pub async fn create_service_category(
 pub async fn list_tax_codes(
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT id, code, code_type, description,
                default_rate::text as default_rate,
-               effective_from, is_active
+               effective_from, COALESCE(is_active, true) as "is_active!"
         FROM tax_codes
         WHERE is_active = true
         ORDER BY code_type, code
@@ -249,15 +257,14 @@ pub async fn list_tax_codes(
             let codes: Vec<TaxCodeResponse> = rows
                 .iter()
                 .map(|row| {
-                    let effective_from: chrono::NaiveDate = row.get("effective_from");
                     TaxCodeResponse {
-                        id: row.get("id"),
-                        code: row.get("code"),
-                        code_type: row.get("code_type"),
-                        description: row.get("description"),
-                        default_rate: parse_decimal(row.get("default_rate")),
-                        effective_from: effective_from.to_string(),
-                        is_active: row.get("is_active"),
+                        id: row.id,
+                        code: row.code.clone(),
+                        code_type: row.code_type.clone(),
+                        description: row.description.clone(),
+                        default_rate: parse_decimal(row.default_rate.clone()),
+                        effective_from: row.effective_from.to_string(),
+                        is_active: row.is_active,
                     }
                 })
                 .collect();
@@ -280,24 +287,30 @@ pub async fn search_services(
     let offset = (page - 1) * page_size;
     let is_active = query.is_active.unwrap_or(true);
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT s.id, s.category_id, s.code, s.name, s.description, s.service_type,
-               s.department_code, s.base_price::text as base_price, s.unit,
-               s.tax_code_id, t.code as tax_code,
-               s.is_taxable, s.tax_inclusive, s.duration_minutes, s.requires_appointment,
-               s.requires_authorization, s.allow_discount,
-               s.max_discount_percent::text as max_discount_percent, s.is_active
+               s.department_code, s.base_price::text as base_price,
+               COALESCE(s.unit, 'each') as "unit!",
+               s.tax_code_id, t.code as "tax_code?",
+               COALESCE(s.is_taxable, true) as "is_taxable!",
+               COALESCE(s.tax_inclusive, false) as "tax_inclusive!",
+               s.duration_minutes,
+               COALESCE(s.requires_appointment, false) as "requires_appointment!",
+               COALESCE(s.requires_authorization, false) as "requires_authorization!",
+               COALESCE(s.allow_discount, true) as "allow_discount!",
+               s.max_discount_percent::text as max_discount_percent,
+               COALESCE(s.is_active, true) as "is_active!"
         FROM services s
         LEFT JOIN tax_codes t ON s.tax_code_id = t.id
         WHERE s.is_active = $1
         ORDER BY s.name
         LIMIT $2 OFFSET $3
-        "#
+        "#,
+        is_active,
+        page_size as i64,
+        offset as i64
     )
-    .bind(is_active)
-    .bind(page_size as i64)
-    .bind(offset as i64)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -306,25 +319,25 @@ pub async fn search_services(
             let services: Vec<ServiceResponse> = rows
                 .iter()
                 .map(|row| ServiceResponse {
-                    id: row.get("id"),
-                    category_id: row.get("category_id"),
-                    code: row.get("code"),
-                    name: row.get("name"),
-                    description: row.get("description"),
-                    service_type: row.get("service_type"),
-                    department_code: row.get("department_code"),
-                    base_price: parse_decimal(row.get("base_price")),
-                    unit: row.get("unit"),
-                    tax_code_id: row.get("tax_code_id"),
-                    tax_code: row.get("tax_code"),
-                    is_taxable: row.get("is_taxable"),
-                    tax_inclusive: row.get("tax_inclusive"),
-                    duration_minutes: row.get("duration_minutes"),
-                    requires_appointment: row.get("requires_appointment"),
-                    requires_authorization: row.get("requires_authorization"),
-                    allow_discount: row.get("allow_discount"),
-                    max_discount_percent: row.get::<Option<String>, _>("max_discount_percent").map(|s| parse_decimal(Some(s))),
-                    is_active: row.get("is_active"),
+                    id: row.id,
+                    category_id: row.category_id,
+                    code: row.code.clone(),
+                    name: row.name.clone(),
+                    description: row.description.clone(),
+                    service_type: row.service_type.clone(),
+                    department_code: row.department_code.clone(),
+                    base_price: parse_decimal(row.base_price.clone()),
+                    unit: row.unit.clone(),
+                    tax_code_id: row.tax_code_id,
+                    tax_code: row.tax_code.clone(),
+                    is_taxable: row.is_taxable,
+                    tax_inclusive: row.tax_inclusive,
+                    duration_minutes: row.duration_minutes,
+                    requires_appointment: row.requires_appointment,
+                    requires_authorization: row.requires_authorization,
+                    allow_discount: row.allow_discount,
+                    max_discount_percent: row.max_discount_percent.clone().map(|s| parse_decimal(Some(s))),
+                    is_active: row.is_active,
                 })
                 .collect();
 
@@ -351,45 +364,51 @@ pub async fn get_service(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT s.id, s.category_id, s.code, s.name, s.description, s.service_type,
-               s.department_code, s.base_price::text as base_price, s.unit,
-               s.tax_code_id, t.code as tax_code,
-               s.is_taxable, s.tax_inclusive, s.duration_minutes, s.requires_appointment,
-               s.requires_authorization, s.allow_discount,
-               s.max_discount_percent::text as max_discount_percent, s.is_active
+               s.department_code, s.base_price::text as base_price,
+               COALESCE(s.unit, 'each') as "unit!",
+               s.tax_code_id, t.code as "tax_code?",
+               COALESCE(s.is_taxable, true) as "is_taxable!",
+               COALESCE(s.tax_inclusive, false) as "tax_inclusive!",
+               s.duration_minutes,
+               COALESCE(s.requires_appointment, false) as "requires_appointment!",
+               COALESCE(s.requires_authorization, false) as "requires_authorization!",
+               COALESCE(s.allow_discount, true) as "allow_discount!",
+               s.max_discount_percent::text as max_discount_percent,
+               COALESCE(s.is_active, true) as "is_active!"
         FROM services s
         LEFT JOIN tax_codes t ON s.tax_code_id = t.id
         WHERE s.id = $1
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_optional(&*state.database_pool)
     .await;
 
     match result {
         Ok(Some(row)) => {
             let service = ServiceResponse {
-                id: row.get("id"),
-                category_id: row.get("category_id"),
-                code: row.get("code"),
-                name: row.get("name"),
-                description: row.get("description"),
-                service_type: row.get("service_type"),
-                department_code: row.get("department_code"),
-                base_price: parse_decimal(row.get("base_price")),
-                unit: row.get("unit"),
-                tax_code_id: row.get("tax_code_id"),
-                tax_code: row.get("tax_code"),
-                is_taxable: row.get("is_taxable"),
-                tax_inclusive: row.get("tax_inclusive"),
-                duration_minutes: row.get("duration_minutes"),
-                requires_appointment: row.get("requires_appointment"),
-                requires_authorization: row.get("requires_authorization"),
-                allow_discount: row.get("allow_discount"),
-                max_discount_percent: row.get::<Option<String>, _>("max_discount_percent").map(|s| parse_decimal(Some(s))),
-                is_active: row.get("is_active"),
+                id: row.id,
+                category_id: row.category_id,
+                code: row.code.clone(),
+                name: row.name.clone(),
+                description: row.description.clone(),
+                service_type: row.service_type.clone(),
+                department_code: row.department_code.clone(),
+                base_price: parse_decimal(row.base_price.clone()),
+                unit: row.unit.clone(),
+                tax_code_id: row.tax_code_id,
+                tax_code: row.tax_code.clone(),
+                is_taxable: row.is_taxable,
+                tax_inclusive: row.tax_inclusive,
+                duration_minutes: row.duration_minutes,
+                requires_appointment: row.requires_appointment,
+                requires_authorization: row.requires_authorization,
+                allow_discount: row.allow_discount,
+                max_discount_percent: row.max_discount_percent.clone().map(|s| parse_decimal(Some(s))),
+                is_active: row.is_active,
             };
             (StatusCode::OK, Json(service)).into_response()
         }
@@ -418,7 +437,7 @@ pub async fn create_service(
     let allow_discount = req.allow_discount.unwrap_or(true);
     let max_discount_percent = req.max_discount_percent.unwrap_or(100.0);
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         INSERT INTO services (
             organization_id, category_id, code, name, description, service_type,
@@ -428,31 +447,31 @@ pub async fn create_service(
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING id
-        "#
+        "#,
+        org_id,
+        req.category_id,
+        &req.code,
+        &req.name,
+        req.description.as_deref(),
+        &req.service_type,
+        req.department_code.as_deref(),
+        to_bd(req.base_price),
+        &unit,
+        req.tax_code_id,
+        is_taxable,
+        tax_inclusive,
+        req.duration_minutes,
+        requires_appointment,
+        requires_authorization,
+        allow_discount,
+        to_bd(max_discount_percent)
     )
-    .bind(org_id)
-    .bind(req.category_id)
-    .bind(&req.code)
-    .bind(&req.name)
-    .bind(&req.description)
-    .bind(&req.service_type)
-    .bind(&req.department_code)
-    .bind(req.base_price)
-    .bind(&unit)
-    .bind(req.tax_code_id)
-    .bind(is_taxable)
-    .bind(tax_inclusive)
-    .bind(req.duration_minutes)
-    .bind(requires_appointment)
-    .bind(requires_authorization)
-    .bind(allow_discount)
-    .bind(max_discount_percent)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
             (StatusCode::CREATED, Json(serde_json::json!({"id": id, "success": true}))).into_response()
         }
         Err(e) => (
@@ -466,12 +485,13 @@ pub async fn create_service(
 pub async fn list_service_packages(
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT id, code, name, description,
                package_price::text as package_price,
                discount_percent::text as discount_percent,
-               is_taxable, is_active
+               COALESCE(is_taxable, true) as "is_taxable!",
+               COALESCE(is_active, true) as "is_active!"
         FROM service_packages
         WHERE is_active = true
         ORDER BY name
@@ -483,45 +503,46 @@ pub async fn list_service_packages(
     match result {
         Ok(rows) => {
             let mut packages: Vec<ServicePackageResponse> = Vec::new();
-            for row in rows {
-                let package_id: Uuid = row.get("id");
+            for row in &rows {
+                let package_id = row.id;
 
                 // Get package items
-                let items_result = sqlx::query(
+                let items_result = sqlx::query!(
                     r#"
                     SELECT pi.service_id, s.code as service_code, s.name as service_name,
-                           pi.quantity, pi.individual_price::text as individual_price, pi.is_optional
+                           pi.quantity, pi.individual_price::text as individual_price,
+                           COALESCE(pi.is_optional, false) as "is_optional!"
                     FROM service_package_items pi
                     JOIN services s ON pi.service_id = s.id
                     WHERE pi.package_id = $1
-                    "#
+                    "#,
+                    package_id
                 )
-                .bind(package_id)
                 .fetch_all(&*state.database_pool)
                 .await;
 
                 let items = items_result.map(|item_rows| {
                     item_rows.iter().map(|item| {
                         PackageItemResponse {
-                            service_id: item.get("service_id"),
-                            service_code: item.get("service_code"),
-                            service_name: item.get("service_name"),
-                            quantity: item.get("quantity"),
-                            individual_price: item.get::<Option<String>, _>("individual_price").map(|s| parse_decimal(Some(s))),
-                            is_optional: item.get("is_optional"),
+                            service_id: item.service_id,
+                            service_code: item.service_code.clone(),
+                            service_name: item.service_name.clone(),
+                            quantity: item.quantity,
+                            individual_price: item.individual_price.clone().map(|s| parse_decimal(Some(s))),
+                            is_optional: item.is_optional,
                         }
                     }).collect()
                 }).unwrap_or_default();
 
                 packages.push(ServicePackageResponse {
                     id: package_id,
-                    code: row.get("code"),
-                    name: row.get("name"),
-                    description: row.get("description"),
-                    package_price: parse_decimal(row.get("package_price")),
-                    discount_percent: row.get::<Option<String>, _>("discount_percent").map(|s| parse_decimal(Some(s))),
-                    is_taxable: row.get("is_taxable"),
-                    is_active: row.get("is_active"),
+                    code: row.code.clone(),
+                    name: row.name.clone(),
+                    description: row.description.clone(),
+                    package_price: parse_decimal(row.package_price.clone()),
+                    discount_percent: row.discount_percent.clone().map(|s| parse_decimal(Some(s))),
+                    is_taxable: row.is_taxable,
+                    is_active: row.is_active,
                     items,
                 });
             }

@@ -96,19 +96,38 @@ class TokenAuthClient extends BaseApiClient {
   }
 
   override async request<T>(endpoint: string, config: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+    // If no custom interceptors, delegate to BaseApiClient which handles JSON.stringify
+    if (!this.requestInterceptor && !this.responseInterceptor) {
+      return super.request<T>(endpoint, config);
+    }
+
     const url = this.buildUrl(endpoint);
 
     try {
-      // Apply request interceptor if provided
-      let requestConfig = config as RequestInit;
-      if (this.requestInterceptor) {
-        requestConfig = await this.requestInterceptor(url, config as RequestInit);
-      }
+      // Build headers with auth
+      const authHeaders = await this.getAuthHeaders();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...authHeaders,
+        ...(config.headers as Record<string, string> || {}),
+      };
 
-      const response = await fetch(url, {
-        ...requestConfig,
+      // Build fetch config with properly serialized body
+      const fetchConfig: RequestInit = {
+        method: (config.method as string) || "GET",
+        headers,
+        body: config.body ? JSON.stringify(config.body) : undefined,
         credentials: "include",
-      });
+        signal: config.signal as AbortSignal | undefined,
+      };
+
+      // Apply request interceptor if provided
+      const finalConfig = this.requestInterceptor
+        ? await this.requestInterceptor(url, fetchConfig)
+        : fetchConfig;
+
+      const response = await fetch(url, finalConfig);
 
       if (!response.ok) {
         const error = this.errorInterceptorFn
@@ -122,8 +141,9 @@ class TokenAuthClient extends BaseApiClient {
         return await this.responseInterceptor<T>(response, url);
       }
 
-      // Default response handling
-      return await super.request<T>(endpoint, config);
+      // Default: parse JSON response
+      const data = await response.json();
+      return { data: data as T };
     } catch (error) {
       const apiError = this.errorInterceptorFn
         ? this.errorInterceptorFn(error, url)

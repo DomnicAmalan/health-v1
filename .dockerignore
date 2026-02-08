@@ -14,8 +14,11 @@ node_modules/
 *~
 
 # Keep source files for Docker builds
+!backend/
+!backend/**
 !backend/**/*.rs
 !backend/**/Cargo.toml
+!backend/**/Cargo.lock
 !cli/**/*.ts
 !cli/**/*.tsx
 !cli/**/package.json

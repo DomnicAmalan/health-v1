@@ -132,6 +132,37 @@ export const API_ROUTES = {
       MASTER_KEY_ROTATE: "/v1/admin/encryption/master-key/rotate",
       STATS: "/v1/admin/encryption/stats",
     },
+    /** Visual Workflow Designer (n8n-style) */
+    WORKFLOWS: {
+      /** Workflow Definitions */
+      DEFINITIONS: {
+        LIST: "/v1/admin/workflows",
+        GET: (id: string) => `/v1/admin/workflows/${id}`,
+        CREATE: "/v1/admin/workflows",
+        UPDATE: (id: string) => `/v1/admin/workflows/${id}`,
+        DELETE: (id: string) => `/v1/admin/workflows/${id}`,
+        CLONE: (id: string) => `/v1/admin/workflows/${id}/clone`,
+        ACTIVATE: (id: string) => `/v1/admin/workflows/${id}/activate`,
+        DEACTIVATE: (id: string) => `/v1/admin/workflows/${id}/deactivate`,
+      },
+      /** Workflow Instances */
+      INSTANCES: {
+        LIST: (workflowId: string) => `/v1/admin/workflows/${workflowId}/instances`,
+        START: (workflowId: string) => `/v1/admin/workflows/${workflowId}/start`,
+        GET: (id: string) => `/v1/admin/workflow-instances/${id}`,
+        PAUSE: (id: string) => `/v1/admin/workflow-instances/${id}/pause`,
+        RESUME: (id: string) => `/v1/admin/workflow-instances/${id}/resume`,
+        CANCEL: (id: string) => `/v1/admin/workflow-instances/${id}/cancel`,
+      },
+      /** Human Tasks */
+      TASKS: {
+        LIST: "/v1/admin/tasks",
+        GET: (id: string) => `/v1/admin/tasks/${id}`,
+        CLAIM: (id: string) => `/v1/admin/tasks/${id}/claim`,
+        UNCLAIM: (id: string) => `/v1/admin/tasks/${id}/unclaim`,
+        COMPLETE: (id: string) => `/v1/admin/tasks/${id}/complete`,
+      },
+    },
   },
 
   // Vault proxy routes (backend-mediated vault access)
@@ -283,6 +314,8 @@ export const API_ROUTES = {
       DELETE: (id: string) => `/v1/ehr/patients/${id}`,
       SEARCH: "/v1/ehr/patients/search",
       BANNER: (id: string) => `/v1/ehr/patients/${id}/banner`,
+      FIND_DUPLICATES: "/v1/ehr/patients/find-duplicates",
+      MERGE: "/v1/ehr/patients/merge",
     },
 
     /** Visit/Encounter management */

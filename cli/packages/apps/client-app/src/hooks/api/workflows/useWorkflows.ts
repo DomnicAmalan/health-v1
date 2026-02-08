@@ -192,7 +192,6 @@ export function useWorkflowTasks(filters?: { assignee?: string; status?: string 
     queryKey: [...workflowKeys.tasks(), filters],
     queryFn: async () => {
       const response = await apiClient.get<HumanTask[]>("/v1/workflow-tasks", { params: filters });
-      console.log(apiClient, 'sjdsdh')
       return response.data;
     },
   });

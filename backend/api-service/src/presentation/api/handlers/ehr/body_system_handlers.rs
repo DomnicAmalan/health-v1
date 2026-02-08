@@ -87,15 +87,20 @@ pub async fn list_body_systems(
 
     let systems = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        sqlx::query_as::<_, BodySystem>(
+        sqlx::query_as!(
+            BodySystem,
             r#"
-            SELECT * FROM body_systems
+            SELECT id, system_code, system_name, parent_system_id,
+                icd10_chapter, snomed_code, fma_code, model_region_id,
+                display_color, common_findings as "common_findings!", is_active,
+                created_at, updated_at
+            FROM body_systems
             WHERE is_active = true
             ORDER BY system_code
             LIMIT $1
-            "#
+            "#,
+            MAX_SYSTEMS
         )
-        .bind(MAX_SYSTEMS)
         .fetch_all(state.database_pool.as_ref())
     )
     .await
@@ -112,10 +117,17 @@ pub async fn get_body_system(
     State(state): State<Arc<AppState>>,
     Path(system_id): Path<Uuid>,
 ) -> Result<Json<BodySystem>, ApiError> {
-    let system = sqlx::query_as::<_, BodySystem>(
-        "SELECT * FROM body_systems WHERE id = $1 AND is_active = true"
+    let system = sqlx::query_as!(
+        BodySystem,
+        r#"
+        SELECT id, system_code, system_name, parent_system_id,
+            icd10_chapter, snomed_code, fma_code, model_region_id,
+            display_color, common_findings as "common_findings!", is_active,
+            created_at, updated_at
+        FROM body_systems WHERE id = $1 AND is_active = true
+        "#,
+        system_id
     )
-    .bind(system_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch body system: {}", e)))?
@@ -131,10 +143,17 @@ pub async fn get_lab_recommendations(
     Path(system_id): Path<Uuid>,
 ) -> Result<Json<LabRecommendationResponse>, ApiError> {
     // Assertion 1: Body system must exist
-    let system = sqlx::query_as::<_, BodySystem>(
-        "SELECT * FROM body_systems WHERE id = $1 AND is_active = true"
+    let system = sqlx::query_as!(
+        BodySystem,
+        r#"
+        SELECT id, system_code, system_name, parent_system_id,
+            icd10_chapter, snomed_code, fma_code, model_region_id,
+            display_color, common_findings as "common_findings!", is_active,
+            created_at, updated_at
+        FROM body_systems WHERE id = $1 AND is_active = true
+        "#,
+        system_id
     )
-    .bind(system_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch body system: {}", e)))?
@@ -144,18 +163,15 @@ pub async fn get_lab_recommendations(
     const MAX_RECOMMENDATIONS: i64 = 20;
 
     // Fetch lab test recommendations
-    let test_recommendations = tokio::time::timeout(
+    let recommendations = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        sqlx::query_as::<_, (
-            Uuid, Option<Uuid>, Option<Uuid>, Option<String>, Option<String>,
-            Option<String>, Option<String>, bigdecimal::BigDecimal, String,
-            Option<String>, Option<String>
-        )>(
+        sqlx::query_as!(
+            LabRecommendation,
             r#"
             SELECT
                 bslt.id,
-                bslt.lab_test_id,
-                bslt.lab_panel_id,
+                bslt.lab_test_id as test_id,
+                bslt.lab_panel_id as panel_id,
                 lt.test_code,
                 lt.test_name,
                 lp.panel_code,
@@ -175,10 +191,10 @@ pub async fn get_lab_recommendations(
               )
             ORDER BY bslt.relevance_score DESC
             LIMIT $2
-            "#
+            "#,
+            system_id,
+            MAX_RECOMMENDATIONS
         )
-        .bind(system_id)
-        .bind(MAX_RECOMMENDATIONS)
         .fetch_all(state.database_pool.as_ref())
     )
     .await
@@ -187,31 +203,9 @@ pub async fn get_lab_recommendations(
 
     // Assertion 2: Verify results are within bounds
     debug_assert!(
-        test_recommendations.len() as i64 <= MAX_RECOMMENDATIONS,
+        recommendations.len() as i64 <= MAX_RECOMMENDATIONS,
         "Lab recommendations exceeded maximum limit"
     );
-
-    // Map to response structs
-    let recommendations: Vec<LabRecommendation> = test_recommendations
-        .into_iter()
-        .map(|(
-            id, test_id, panel_id, test_code, test_name,
-            panel_code, panel_name, relevance_score, recommendation_reason,
-            category, specimen_type
-        )| LabRecommendation {
-            id,
-            test_id,
-            panel_id,
-            test_code,
-            test_name,
-            panel_code,
-            panel_name,
-            relevance_score,
-            recommendation_reason,
-            category,
-            specimen_type,
-        })
-        .collect();
 
     Ok(Json(LabRecommendationResponse {
         recommendations,

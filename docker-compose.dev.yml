@@ -16,6 +16,7 @@ x-profiles: &profiles
 services:
   # PostgreSQL Database with PostGIS support
   postgres:
+    platform: linux/amd64
     image: postgis/postgis:17-3.4-alpine
     container_name: health-postgres
     environment:
@@ -131,6 +132,7 @@ services:
       - ./backend/authz-core/src:/app/backend/authz-core/src
       - ./backend/admin-service/src:/app/backend/admin-service/src
       - ./backend/rustyvault-service/src:/app/backend/rustyvault-service/src
+      - ./backend/state-machine-macro/src:/app/backend/state-machine-macro/src
       # Mount migrations so they're available at runtime
       - ./backend/migrations:/app/backend/migrations
       # Mount ALL workspace Cargo.toml files (required for Cargo workspace)
@@ -140,6 +142,7 @@ services:
       - ./backend/admin-service/Cargo.toml:/app/backend/admin-service/Cargo.toml
       - ./backend/api-service/Cargo.toml:/app/backend/api-service/Cargo.toml
       - ./backend/rustyvault-service/Cargo.toml:/app/backend/rustyvault-service/Cargo.toml
+      - ./backend/state-machine-macro/Cargo.toml:/app/backend/state-machine-macro/Cargo.toml
       # Mount .cargo config for low-memory builds
       - ./backend/.cargo:/app/backend/.cargo
       # Mount .sqlx directory for SQLx offline mode
@@ -159,7 +162,7 @@ services:
       - health-network
     restart: unless-stopped
 
-  # Client App (React Frontend) - Dev mode with type checks skipped
+  # Client App (React Frontend) - Dev mode with Vite dev server
   client-app:
     build:
       context: ./cli
@@ -180,6 +183,7 @@ services:
       - ./cli/packages/apps/client-app:/app/packages/apps/client-app
       - ./cli/packages/libs/components:/app/packages/libs/components
       - ./cli/packages/libs/shared:/app/packages/libs/shared
+      - ./cli/packages/config:/app/packages/config
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
       - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
@@ -188,20 +192,20 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${CLIENT_APP_PORT}:5175"    # Maps to VITE_PORT inside container
+      - "${CLIENT_APP_PORT}:5175"    # Vite dev server port (not Caddy 80)
     depends_on:
       - api-service
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5175"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     networks:
       - health-network
     restart: unless-stopped
 
-  # Admin UI (React Frontend) - Dev mode with type checks skipped
+  # Admin UI (React Frontend) - Dev mode with Vite dev server
   admin-ui:
     build:
       context: ./cli
@@ -222,19 +226,20 @@ services:
       - ./cli/packages/apps/admin:/app/packages/apps/admin
       - ./cli/packages/libs/components:/app/packages/libs/components
       - ./cli/packages/libs/shared:/app/packages/libs/shared
+      - ./cli/packages/config:/app/packages/config
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
       - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
     ports:
-      - "${ADMIN_UI_PORT}:5174"    # Maps to VITE_PORT inside container
+      - "${ADMIN_UI_PORT}:5174"    # Vite dev server port (not Caddy 80)
     depends_on:
       - api-service
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5174"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     networks:
       - health-network
     restart: unless-stopped
@@ -302,6 +307,7 @@ services:
       # Mount source code for hot reload in dev mode
       - ./backend/rustyvault-service/src:/app/backend/rustyvault-service/src
       - ./backend/shared/src:/app/backend/shared/src
+      - ./backend/state-machine-macro/src:/app/backend/state-machine-macro/src
       # Mount migrations
       - ./backend/migrations:/app/backend/migrations
       # Mount ALL workspace Cargo.toml files (required for Cargo workspace)
@@ -311,6 +317,7 @@ services:
       - ./backend/authz-core/Cargo.toml:/app/backend/authz-core/Cargo.toml
       - ./backend/admin-service/Cargo.toml:/app/backend/admin-service/Cargo.toml
       - ./backend/api-service/Cargo.toml:/app/backend/api-service/Cargo.toml
+      - ./backend/state-machine-macro/Cargo.toml:/app/backend/state-machine-macro/Cargo.toml
       # Mount ALL workspace member src directories (required for Cargo workspace validation)
       - ./backend/authz-core/src:/app/backend/authz-core/src
       - ./backend/admin-service/src:/app/backend/admin-service/src
@@ -332,7 +339,7 @@ services:
       - health-network
     restart: unless-stopped
 
-  # RustyVault UI (React Frontend) - Vault Management Dashboard
+  # RustyVault UI (React Frontend) - Dev mode with Vite dev server
   rustyvault-ui:
     build:
       context: ./cli
@@ -353,6 +360,7 @@ services:
       - ./cli/packages/apps/rustyvault-ui:/app/packages/apps/rustyvault-ui
       - ./cli/packages/libs/components:/app/packages/libs/components
       - ./cli/packages/libs/shared:/app/packages/libs/shared
+      - ./cli/packages/config:/app/packages/config
       - ./cli/package.json:/app/package.json
       - ./cli/biome.json:/app/biome.json
       - ./cli/tsconfig.strict.json:/app/tsconfig.strict.json
@@ -361,15 +369,49 @@ services:
       - /app/packages/libs/components/node_modules
       - /app/packages/libs/shared/node_modules
     ports:
-      - "${VAULT_UI_PORT}:8215"    # Maps to VITE_PORT inside container
+      - "${VAULT_UI_PORT}:8215"    # Vite dev server port (not Caddy 80)
     depends_on:
       - rustyvault-service
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8215"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
+    networks:
+      - health-network
+    restart: unless-stopped
+
+  # Documentation Site (Docusaurus) - Dev mode with hot reload
+  docs:
+    build:
+      context: ./docs
+      dockerfile: Dockerfile
+      target: runner-dev
+    container_name: health-docs
+    volumes:
+      # Mount source for hot reload
+      - ./docs/docs:/app/docs
+      - ./docs/user-guides:/app/user-guides
+      - ./docs/ux:/app/ux
+      - ./docs/api-reference:/app/api-reference
+      - ./docs/src:/app/src
+      - ./docs/static:/app/static
+      - ./docs/docusaurus.config.ts:/app/docusaurus.config.ts
+      - ./docs/sidebars.ts:/app/sidebars.ts
+      - ./docs/sidebarsUserGuides.ts:/app/sidebarsUserGuides.ts
+      - ./docs/sidebarsUx.ts:/app/sidebarsUx.ts
+      - ./docs/sidebarsApi.ts:/app/sidebarsApi.ts
+      # Exclude node_modules from mount
+      - /app/node_modules
+    ports:
+      - "${DOCS_PORT:-3001}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     networks:
       - health-network
     restart: unless-stopped

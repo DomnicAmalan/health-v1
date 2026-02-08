@@ -44,3 +44,5 @@ export * from "./components/tooltip";
 export * from "./lib/formLayoutUtils";
 // Core utilities
 export * from "./lib/utils";
+// Workflow components
+export * from "./workflow";

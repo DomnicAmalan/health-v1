@@ -168,7 +168,7 @@ impl UserPassBackend {
 
         // Insert into database (upsert with realm context)
         if let Some(realm_id) = realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 INSERT INTO vault_users (id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, false)
@@ -181,48 +181,48 @@ impl UserPassBackend {
                     email = $10,
                     display_name = $11
                 "#,
+                entry.id,
+                &entry.username,
+                &entry.password_hash,
+                &entry.policies,
+                entry.ttl,
+                entry.max_ttl,
+                entry.created_at,
+                entry.updated_at,
+                realm_id,
+                entry.email.as_deref(),
+                entry.display_name.as_deref()
             )
-            .bind(entry.id)
-            .bind(&entry.username)
-            .bind(&entry.password_hash)
-            .bind(&entry.policies)
-            .bind(entry.ttl)
-            .bind(entry.max_ttl)
-            .bind(entry.created_at)
-            .bind(entry.updated_at)
-            .bind(realm_id)
-            .bind(&entry.email)
-            .bind(&entry.display_name)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to create realm user: {}", e)))?;
         } else {
-        sqlx::query(
-            r#"
+            sqlx::query!(
+                r#"
                 INSERT INTO vault_users (id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULL, $9, $10, true, false)
                 ON CONFLICT (username) WHERE realm_id IS NULL DO UPDATE SET
-                password_hash = $3,
-                policies = $4,
-                ttl = $5,
-                max_ttl = $6,
+                    password_hash = $3,
+                    policies = $4,
+                    ttl = $5,
+                    max_ttl = $6,
                     updated_at = $8,
                     email = $9,
                     display_name = $10
-            "#,
-        )
-        .bind(entry.id)
-        .bind(&entry.username)
-        .bind(&entry.password_hash)
-        .bind(&entry.policies)
-        .bind(entry.ttl)
-        .bind(entry.max_ttl)
-        .bind(entry.created_at)
-        .bind(entry.updated_at)
-            .bind(&entry.email)
-            .bind(&entry.display_name)
-        .execute(&self.pool)
-        .await
+                "#,
+                entry.id,
+                &entry.username,
+                &entry.password_hash,
+                &entry.policies,
+                entry.ttl,
+                entry.max_ttl,
+                entry.created_at,
+                entry.updated_at,
+                entry.email.as_deref(),
+                entry.display_name.as_deref()
+            )
+            .execute(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to create global user: {}", e)))?;
         }
 
@@ -238,86 +238,83 @@ impl UserPassBackend {
     pub async fn get_user_in_realm(&self, username: &str, realm_id: Option<Uuid>) -> VaultResult<Option<UserEntry>> {
         let username = username.to_lowercase().trim().to_string();
 
-        let row: Option<(
-            Uuid,                    // id
-            String,                  // username
-            String,                  // password_hash
-            Vec<String>,             // policies
-            i64,                     // ttl
-            i64,                     // max_ttl
-            DateTime<Utc>,           // created_at
-            DateTime<Utc>,           // updated_at
-            Option<Uuid>,            // realm_id
-            Option<String>,          // email
-            Option<String>,          // display_name
-            Option<bool>,            // is_active
-            Option<bool>,            // is_super_user
-        )> = if let Some(realm_id) = realm_id {
+        let entry = if let Some(realm_id) = realm_id {
             // Try realm-specific first
-            let realm_row: Option<_> = sqlx::query_as(
-            r#"
-                SELECT id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user
+            let realm_row = sqlx::query!(
+                r#"
+                SELECT id, username, password_hash,
+                       policies as "policies!", ttl as "ttl!", max_ttl as "max_ttl!",
+                       created_at as "created_at!", updated_at as "updated_at!",
+                       realm_id, email, display_name, is_active, is_super_user
                 FROM vault_users
                 WHERE username = $1 AND realm_id = $2
                 "#,
+                &username,
+                realm_id
             )
-            .bind(&username)
-            .bind(realm_id)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| VaultError::Vault(format!("failed to get realm user: {}", e)))?;
+            .map_err(|e| VaultError::Vault(format!("failed to get realm user: {}", e)))?
+            .map(|r| UserEntry {
+                id: r.id, username: r.username, password_hash: r.password_hash,
+                policies: r.policies, ttl: r.ttl, max_ttl: r.max_ttl,
+                created_at: r.created_at, updated_at: r.updated_at, realm_id: r.realm_id,
+                email: r.email, display_name: r.display_name,
+                is_active: r.is_active.unwrap_or(true), is_super_user: r.is_super_user.unwrap_or(false),
+            });
 
             // If not found in realm, try global
             if realm_row.is_none() {
-                sqlx::query_as(
+                sqlx::query!(
                     r#"
-                    SELECT id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user
+                    SELECT id, username, password_hash,
+                           policies as "policies!", ttl as "ttl!", max_ttl as "max_ttl!",
+                           created_at as "created_at!", updated_at as "updated_at!",
+                           realm_id, email, display_name, is_active, is_super_user
                     FROM vault_users
                     WHERE username = $1 AND realm_id IS NULL
                     "#,
+                    &username
                 )
-                .bind(&username)
                 .fetch_optional(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to get global user: {}", e)))?
+                .map(|r| UserEntry {
+                    id: r.id, username: r.username, password_hash: r.password_hash,
+                    policies: r.policies, ttl: r.ttl, max_ttl: r.max_ttl,
+                    created_at: r.created_at, updated_at: r.updated_at, realm_id: r.realm_id,
+                    email: r.email, display_name: r.display_name,
+                    is_active: r.is_active.unwrap_or(true), is_super_user: r.is_super_user.unwrap_or(false),
+                })
             } else {
                 realm_row
             }
         } else {
             // Get global user only
-            sqlx::query_as(
+            sqlx::query!(
                 r#"
-                SELECT id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user
-            FROM vault_users
+                SELECT id, username, password_hash,
+                       policies as "policies!", ttl as "ttl!", max_ttl as "max_ttl!",
+                       created_at as "created_at!", updated_at as "updated_at!",
+                       realm_id, email, display_name, is_active, is_super_user
+                FROM vault_users
                 WHERE username = $1 AND realm_id IS NULL
-            "#,
-        )
-        .bind(&username)
-        .fetch_optional(&self.pool)
-        .await
+                "#,
+                &username
+            )
+            .fetch_optional(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to get user: {}", e)))?
+            .map(|r| UserEntry {
+                id: r.id, username: r.username, password_hash: r.password_hash,
+                policies: r.policies, ttl: r.ttl, max_ttl: r.max_ttl,
+                created_at: r.created_at, updated_at: r.updated_at, realm_id: r.realm_id,
+                email: r.email, display_name: r.display_name,
+                is_active: r.is_active.unwrap_or(true), is_super_user: r.is_super_user.unwrap_or(false),
+            })
         };
 
-        match row {
-            Some((id, username, password_hash, policies, ttl, max_ttl, created_at, updated_at, realm_id, email, display_name, is_active, is_super_user)) => {
-                Ok(Some(UserEntry {
-                    id,
-                    username,
-                    password_hash,
-                    policies,
-                    ttl,
-                    max_ttl,
-                    created_at,
-                    updated_at,
-                    realm_id,
-                    email,
-                    display_name,
-                    is_active: is_active.unwrap_or(true),
-                    is_super_user: is_super_user.unwrap_or(false),
-                }))
-            }
-            None => Ok(None),
-        }
+        Ok(entry)
     }
 
     /// List all users (global only)
@@ -327,49 +324,49 @@ impl UserPassBackend {
 
     /// List users in a specific realm (includes global users)
     pub async fn list_users_in_realm(&self, realm_id: Option<Uuid>) -> VaultResult<Vec<String>> {
-        let rows: Vec<(String,)> = if let Some(realm_id) = realm_id {
-            sqlx::query_as(
+        let rows: Vec<String> = if let Some(realm_id) = realm_id {
+            sqlx::query_scalar!(
                 r#"
-                SELECT username FROM vault_users 
+                SELECT username FROM vault_users
                 WHERE realm_id = $1 OR realm_id IS NULL
                 ORDER BY username
                 "#,
+                realm_id
             )
-            .bind(realm_id)
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list realm users: {}", e)))?
         } else {
-            sqlx::query_as(
+            sqlx::query_scalar!(
                 r#"
-                SELECT username FROM vault_users 
+                SELECT username FROM vault_users
                 WHERE realm_id IS NULL
                 ORDER BY username
-                "#,
+                "#
             )
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list users: {}", e)))?
         };
 
-        Ok(rows.into_iter().map(|(u,)| u).collect())
+        Ok(rows)
     }
 
     /// List users in a specific realm only (excluding global)
     pub async fn list_realm_users_only(&self, realm_id: Uuid) -> VaultResult<Vec<String>> {
-        let rows: Vec<(String,)> = sqlx::query_as(
+        let rows: Vec<String> = sqlx::query_scalar!(
             r#"
-            SELECT username FROM vault_users 
+            SELECT username FROM vault_users
             WHERE realm_id = $1
             ORDER BY username
             "#,
+            realm_id
         )
-        .bind(realm_id)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to list realm-only users: {}", e)))?;
 
-        Ok(rows.into_iter().map(|(u,)| u).collect())
+        Ok(rows)
     }
 
     /// Delete a user (global only)
@@ -382,17 +379,14 @@ impl UserPassBackend {
         let username = username.to_lowercase().trim().to_string();
 
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query("DELETE FROM vault_users WHERE username = $1 AND realm_id = $2")
-                .bind(&username)
-                .bind(realm_id)
+            sqlx::query!("DELETE FROM vault_users WHERE username = $1 AND realm_id = $2", &username, realm_id)
                 .execute(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete realm user: {}", e)))?
         } else {
-            sqlx::query("DELETE FROM vault_users WHERE username = $1 AND realm_id IS NULL")
-            .bind(&username)
-            .execute(&self.pool)
-            .await
+            sqlx::query!("DELETE FROM vault_users WHERE username = $1 AND realm_id IS NULL", &username)
+                .execute(&self.pool)
+                .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete user: {}", e)))?
         };
 
@@ -420,31 +414,31 @@ impl UserPassBackend {
             .map_err(|e| VaultError::Vault(format!("failed to hash password: {}", e)))?;
 
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 UPDATE vault_users
                 SET password_hash = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id = $3
                 "#,
+                &password_hash,
+                &username,
+                realm_id
             )
-            .bind(&password_hash)
-            .bind(&username)
-            .bind(realm_id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to update password: {}", e)))?
         } else {
-        sqlx::query(
-            r#"
-            UPDATE vault_users
-            SET password_hash = $1, updated_at = NOW()
+            sqlx::query!(
+                r#"
+                UPDATE vault_users
+                SET password_hash = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id IS NULL
-            "#,
-        )
-        .bind(&password_hash)
-        .bind(&username)
-        .execute(&self.pool)
-        .await
+                "#,
+                &password_hash,
+                &username
+            )
+            .execute(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to update password: {}", e)))?
         };
 
@@ -465,31 +459,31 @@ impl UserPassBackend {
         let username = username.to_lowercase().trim().to_string();
 
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 UPDATE vault_users
                 SET policies = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id = $3
                 "#,
+                policies,
+                &username,
+                realm_id
             )
-            .bind(policies)
-            .bind(&username)
-            .bind(realm_id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to update policies: {}", e)))?
         } else {
-        sqlx::query(
-            r#"
-            UPDATE vault_users
-            SET policies = $1, updated_at = NOW()
+            sqlx::query!(
+                r#"
+                UPDATE vault_users
+                SET policies = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id IS NULL
-            "#,
-        )
-        .bind(policies)
-        .bind(&username)
-        .execute(&self.pool)
-        .await
+                "#,
+                policies,
+                &username
+            )
+            .execute(&self.pool)
+            .await
             .map_err(|e| VaultError::Vault(format!("failed to update policies: {}", e)))?
         };
 
@@ -557,29 +551,29 @@ impl UserPassBackend {
         let username = username.to_lowercase().trim().to_string();
 
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 UPDATE vault_users
                 SET is_active = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id = $3
                 "#,
+                is_active,
+                &username,
+                realm_id
             )
-            .bind(is_active)
-            .bind(&username)
-            .bind(realm_id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to update user status: {}", e)))?
         } else {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 UPDATE vault_users
                 SET is_active = $1, updated_at = NOW()
                 WHERE username = $2 AND realm_id IS NULL
                 "#,
+                is_active,
+                &username
             )
-            .bind(is_active)
-            .bind(&username)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to update user status: {}", e)))?

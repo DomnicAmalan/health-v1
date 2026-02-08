@@ -37,8 +37,12 @@
       "path": ".claude/skills/sonar-learn-fix.md"
     },
     "rfc-feature": {
-      "description": "Build features using RFC design process with research-first approach",
+      "description": "Design features using RFC process with research-first approach",
       "path": ".claude/skills/rfc-feature.md"
+    },
+    "rfc-implement": {
+      "description": "Implement approved RFCs following Google's design doc methodology",
+      "path": ".claude/skills/rfc-implement.md"
     },
     "version-release": {
       "description": "Manage version bumps, releases, and changelog generation",

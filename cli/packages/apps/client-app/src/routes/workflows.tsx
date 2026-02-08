@@ -46,7 +46,7 @@ import {
   ListTodo,
 } from "lucide-react";
 import { WorkflowDesigner } from "@/components/workflow";
-import type { WorkflowDefinition, WorkflowInstance, HumanTask } from "@lazarus-life/shared";
+import type { WorkflowDefinition } from "@lazarus-life/shared";
 import {
   useWorkflows,
   useCreateWorkflow,
@@ -56,7 +56,7 @@ import {
   useStartWorkflow,
   useWorkflowTasks,
   useClaimTask,
-  useCompleteTask
+  useCompleteTask,
 } from "@/hooks/api/workflows/useWorkflows";
 
 export const Route = createFileRoute("/workflows")({
@@ -71,111 +71,6 @@ function WorkflowsPage() {
   );
 }
 
-// Mock data for demonstration
-const MOCK_WORKFLOWS: WorkflowDefinition[] = [
-  {
-    id: "wf_1",
-    name: "Patient Admission Approval",
-    description: "Approval workflow for patient admissions",
-    version: 2,
-    category: "clinical",
-    nodes: [],
-    edges: [],
-    isActive: true,
-    tags: ["admission", "approval"],
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-20T14:30:00Z",
-  },
-  {
-    id: "wf_2",
-    name: "Prescription Review",
-    description: "Multi-level prescription review workflow",
-    version: 1,
-    category: "pharmacy",
-    nodes: [],
-    edges: [],
-    isActive: true,
-    tags: ["pharmacy", "prescription"],
-    createdAt: "2024-01-10T08:00:00Z",
-    updatedAt: "2024-01-18T09:15:00Z",
-  },
-  {
-    id: "wf_3",
-    name: "Invoice Approval",
-    description: "Financial invoice approval with escalation",
-    version: 3,
-    category: "billing",
-    nodes: [],
-    edges: [],
-    isActive: false,
-    tags: ["billing", "finance"],
-    createdAt: "2024-01-05T11:00:00Z",
-    updatedAt: "2024-01-22T16:45:00Z",
-  },
-];
-
-const MOCK_INSTANCES: WorkflowInstance[] = [
-  {
-    id: "inst_1",
-    workflowId: "wf_1",
-    workflowVersion: 2,
-    status: "running",
-    currentNodes: ["approval"],
-    variables: { patientId: "P001" },
-    history: [],
-    startedAt: "2024-01-25T09:00:00Z",
-  },
-  {
-    id: "inst_2",
-    workflowId: "wf_2",
-    workflowVersion: 1,
-    status: "waiting",
-    currentNodes: ["pharmacist_review"],
-    variables: { prescriptionId: "RX001" },
-    history: [],
-    startedAt: "2024-01-25T08:30:00Z",
-  },
-  {
-    id: "inst_3",
-    workflowId: "wf_1",
-    workflowVersion: 2,
-    status: "completed",
-    currentNodes: ["end"],
-    variables: { patientId: "P002" },
-    history: [],
-    startedAt: "2024-01-24T14:00:00Z",
-    completedAt: "2024-01-24T16:30:00Z",
-  },
-];
-
-const MOCK_TASKS: HumanTask[] = [
-  {
-    id: "task_1",
-    instanceId: "inst_1",
-    nodeId: "approval",
-    name: "Approve Patient Admission",
-    description: "Review and approve patient admission request",
-    assignee: "admissions_manager",
-    status: "pending",
-    priority: "high",
-    dueDate: "2024-01-26T17:00:00Z",
-    createdAt: "2024-01-25T09:00:00Z",
-  },
-  {
-    id: "task_2",
-    instanceId: "inst_2",
-    nodeId: "pharmacist_review",
-    name: "Review Prescription",
-    description: "Verify prescription details and check for interactions",
-    assignee: "pharmacist",
-    status: "claimed",
-    claimedBy: "user_123",
-    priority: "urgent",
-    dueDate: "2024-01-25T12:00:00Z",
-    createdAt: "2024-01-25T08:30:00Z",
-  },
-];
-
 function WorkflowsPageInner() {
   const [activeTab, setActiveTab] = useState("definitions");
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,6 +84,9 @@ function WorkflowsPageInner() {
   const createWorkflow = useCreateWorkflow();
   const updateWorkflow = useUpdateWorkflow();
   const deleteWorkflow = useDeleteWorkflow();
+  const startWorkflow = useStartWorkflow();
+  const claimTask = useClaimTask();
+  const completeTask = useCompleteTask();
 
   // Safely extract arrays from API responses
   const workflows = Array.isArray(workflowsData) ? workflowsData : [];
@@ -246,7 +144,7 @@ function WorkflowsPageInner() {
   };
 
   const getWorkflowName = (workflowId: string) => {
-    return MOCK_WORKFLOWS.find((w) => w.id === workflowId)?.name || workflowId;
+    return workflows.find((w) => w.id === workflowId)?.name || workflowId;
   };
 
   return (
@@ -303,7 +201,7 @@ function WorkflowsPageInner() {
               <Input
                 placeholder="Search workflows..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
@@ -340,7 +238,7 @@ function WorkflowsPageInner() {
                           <Copy className="mr-2 h-4 w-4" />
                           Duplicate
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => startWorkflow.mutate({ workflowId: workflow.id, variables: {} })}>
                           <Play className="mr-2 h-4 w-4" />
                           Start Instance
                         </DropdownMenuItem>
@@ -470,10 +368,10 @@ function WorkflowsPageInner() {
                       {task.status}
                     </Badge>
                     {task.status === "pending" && (
-                      <Button size="sm">Claim</Button>
+                      <Button size="sm" onClick={() => claimTask.mutate({ taskId: task.id, userId: task.assignee || "" })}>Claim</Button>
                     )}
                     {task.status === "claimed" && (
-                      <Button size="sm">Complete</Button>
+                      <Button size="sm" onClick={() => completeTask.mutate({ taskId: task.id, result: {} })}>Complete</Button>
                     )}
                   </div>
                 </CardContent>
@@ -496,6 +394,8 @@ function WorkflowsPageInner() {
             <WorkflowDesigner
               workflow={selectedWorkflow || undefined}
               onSave={handleSaveWorkflow}
+              connectors={[]}
+              isLoadingConnectors={false}
             />
           </div>
         </DialogContent>

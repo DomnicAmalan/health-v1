@@ -11,9 +11,10 @@ use crate::domain::repositories::ehr::patient_repository::{
     EhrPatientRepository, PaginatedResult, Pagination, PatientSearchCriteria,
 };
 use crate::infrastructure::database::{DatabaseService, RepositoryErrorExt};
-use crate::shared::{AppError, AppResult};
+use crate::shared::AppResult;
 
 /// Database row for EHR patient
+/// Maps actual DB column names (via SQL aliases) to entity field names
 #[derive(Debug, FromRow)]
 struct EhrPatientRow {
     id: Uuid,
@@ -61,9 +62,9 @@ struct EhrPatientRow {
 impl From<EhrPatientRow> for EhrPatient {
     fn from(row: EhrPatientRow) -> Self {
         let gender = match row.gender.as_str() {
-            "male" => Gender::Male,
-            "female" => Gender::Female,
-            "other" => Gender::Other,
+            "M" | "male" => Gender::Male,
+            "F" | "female" => Gender::Female,
+            "O" | "other" => Gender::Other,
             _ => Gender::Unknown,
         };
 
@@ -129,12 +130,13 @@ impl EhrPatientRepositoryImpl {
         Self { database_service }
     }
 
-    fn gender_to_string(gender: &Gender) -> &'static str {
+    /// Convert Gender enum to DB value (sex column uses M/F/O/U)
+    fn gender_to_db(gender: &Gender) -> &'static str {
         match gender {
-            Gender::Male => "male",
-            Gender::Female => "female",
-            Gender::Other => "other",
-            Gender::Unknown => "unknown",
+            Gender::Male => "M",
+            Gender::Female => "F",
+            Gender::Other => "O",
+            Gender::Unknown => "U",
         }
     }
 
@@ -150,194 +152,322 @@ impl EhrPatientRepositoryImpl {
 #[async_trait]
 impl EhrPatientRepository for EhrPatientRepositoryImpl {
     async fn create(&self, patient: EhrPatient) -> AppResult<EhrPatient> {
-        let gender = Self::gender_to_string(&patient.gender);
+        let sex = Self::gender_to_db(&patient.gender);
         let status = Self::status_to_string(&patient.status);
 
-        let row: EhrPatientRow = sqlx::query_as(
+        // Map entity fields to actual DB columns:
+        // preferred_name -> maiden_name, gender -> sex,
+        // insurance_carrier -> insurance_primary_carrier, etc.
+        let row = sqlx::query_as!(
+            EhrPatientRow,
             r#"
             INSERT INTO ehr_patients (
                 id, organization_id, last_name, first_name, middle_name, suffix,
-                preferred_name, date_of_birth, gender, ssn_last_four, mrn,
+                maiden_name, date_of_birth, sex, mrn,
                 email, phone_home, phone_mobile, phone_work,
                 address_line1, address_line2, city, state, zip_code, country,
                 emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
-                insurance_carrier, insurance_policy_number, insurance_group_number,
-                status, deceased_date, primary_provider_id, primary_location_id,
-                mumps_data, request_id, created_by, updated_by, system_id
+                insurance_primary_carrier, insurance_primary_policy_number, insurance_primary_group_number,
+                status, deceased_date, primary_care_provider_id, primary_facility_id,
+                mumps_data, created_by, updated_by
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-                $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-                $29, $30, $31, $32, $33, $34, $35, $36
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+                $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27,
+                $28, $29, $30, $31, $32, $33
             )
-            RETURNING *
+            RETURNING
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
             "#,
+            patient.id,
+            patient.organization_id,
+            &patient.last_name,
+            &patient.first_name,
+            patient.middle_name.as_deref(),
+            patient.suffix.as_deref(),
+            patient.preferred_name.as_deref(),
+            patient.date_of_birth,
+            sex,
+            &patient.mrn,
+            patient.email.as_deref(),
+            patient.phone_home.as_deref(),
+            patient.phone_mobile.as_deref(),
+            patient.phone_work.as_deref(),
+            patient.address_line1.as_deref(),
+            patient.address_line2.as_deref(),
+            patient.city.as_deref(),
+            patient.state.as_deref(),
+            patient.zip_code.as_deref(),
+            patient.country.as_deref(),
+            patient.emergency_contact_name.as_deref(),
+            patient.emergency_contact_phone.as_deref(),
+            patient.emergency_contact_relationship.as_deref(),
+            patient.insurance_carrier.as_deref(),
+            patient.insurance_policy_number.as_deref(),
+            patient.insurance_group_number.as_deref(),
+            status,
+            patient.deceased_date,
+            patient.primary_provider_id,
+            patient.primary_location_id,
+            patient.mumps_data.as_ref(),
+            patient.created_by,
+            patient.updated_by
         )
-        .bind(patient.id)
-        .bind(patient.organization_id)
-        .bind(&patient.last_name)
-        .bind(&patient.first_name)
-        .bind(&patient.middle_name)
-        .bind(&patient.suffix)
-        .bind(&patient.preferred_name)
-        .bind(patient.date_of_birth)
-        .bind(gender)
-        .bind(&patient.ssn_last_four)
-        .bind(&patient.mrn)
-        .bind(&patient.email)
-        .bind(&patient.phone_home)
-        .bind(&patient.phone_mobile)
-        .bind(&patient.phone_work)
-        .bind(&patient.address_line1)
-        .bind(&patient.address_line2)
-        .bind(&patient.city)
-        .bind(&patient.state)
-        .bind(&patient.zip_code)
-        .bind(&patient.country)
-        .bind(&patient.emergency_contact_name)
-        .bind(&patient.emergency_contact_phone)
-        .bind(&patient.emergency_contact_relationship)
-        .bind(&patient.insurance_carrier)
-        .bind(&patient.insurance_policy_number)
-        .bind(&patient.insurance_group_number)
-        .bind(status)
-        .bind(patient.deceased_date)
-        .bind(patient.primary_provider_id)
-        .bind(patient.primary_location_id)
-        .bind(&patient.mumps_data)
-        .bind(&patient.request_id)
-        .bind(patient.created_by)
-        .bind(patient.updated_by)
-        .bind(&patient.system_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("insert", "ehr_patient")?;
 
         Ok(row.into())
     }
 
     async fn find_by_id(&self, id: Uuid, organization_id: Uuid) -> AppResult<Option<EhrPatient>> {
-        let row: Option<EhrPatientRow> = sqlx::query_as(
+        let row = sqlx::query_as!(
+            EhrPatientRow,
             r#"
-            SELECT * FROM ehr_patients
+            SELECT
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
+            FROM ehr_patients
             WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
             "#,
+            id,
+            organization_id
         )
-        .bind(id)
-        .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("fetch", "ehr_patient")?;
 
         Ok(row.map(Into::into))
     }
 
     async fn find_by_ien(&self, ien: i64, organization_id: Uuid) -> AppResult<Option<EhrPatient>> {
-        let row: Option<EhrPatientRow> = sqlx::query_as(
+        let row = sqlx::query_as!(
+            EhrPatientRow,
             r#"
-            SELECT * FROM ehr_patients
-            WHERE ien = $1 AND organization_id = $2 AND deleted_at IS NULL
+            SELECT
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
+            FROM ehr_patients
+            WHERE ien = $1::int AND organization_id = $2 AND deleted_at IS NULL
             "#,
+            ien as i32,
+            organization_id
         )
-        .bind(ien)
-        .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("fetch", "ehr_patient")?;
 
         Ok(row.map(Into::into))
     }
 
     async fn find_by_mrn(&self, mrn: &str, organization_id: Uuid) -> AppResult<Option<EhrPatient>> {
-        let row: Option<EhrPatientRow> = sqlx::query_as(
+        let row = sqlx::query_as!(
+            EhrPatientRow,
             r#"
-            SELECT * FROM ehr_patients
+            SELECT
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
+            FROM ehr_patients
             WHERE mrn = $1 AND organization_id = $2 AND deleted_at IS NULL
             "#,
+            mrn,
+            organization_id
         )
-        .bind(mrn)
-        .bind(organization_id)
         .fetch_optional(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("fetch", "ehr_patient")?;
 
         Ok(row.map(Into::into))
     }
 
     async fn update(&self, patient: EhrPatient) -> AppResult<EhrPatient> {
-        let gender = Self::gender_to_string(&patient.gender);
+        let sex = Self::gender_to_db(&patient.gender);
         let status = Self::status_to_string(&patient.status);
 
-        let row: EhrPatientRow = sqlx::query_as(
+        let row = sqlx::query_as!(
+            EhrPatientRow,
             r#"
             UPDATE ehr_patients SET
                 last_name = $3, first_name = $4, middle_name = $5, suffix = $6,
-                preferred_name = $7, date_of_birth = $8, gender = $9, ssn_last_four = $10,
-                email = $11, phone_home = $12, phone_mobile = $13, phone_work = $14,
-                address_line1 = $15, address_line2 = $16, city = $17, state = $18,
-                zip_code = $19, country = $20,
-                emergency_contact_name = $21, emergency_contact_phone = $22,
-                emergency_contact_relationship = $23,
-                insurance_carrier = $24, insurance_policy_number = $25, insurance_group_number = $26,
-                status = $27, deceased_date = $28,
-                primary_provider_id = $29, primary_location_id = $30,
-                mumps_data = $31, updated_by = $32, updated_at = NOW(),
+                maiden_name = $7, date_of_birth = $8, sex = $9,
+                email = $10, phone_home = $11, phone_mobile = $12, phone_work = $13,
+                address_line1 = $14, address_line2 = $15, city = $16, state = $17,
+                zip_code = $18, country = $19,
+                emergency_contact_name = $20, emergency_contact_phone = $21,
+                emergency_contact_relationship = $22,
+                insurance_primary_carrier = $23, insurance_primary_policy_number = $24,
+                insurance_primary_group_number = $25,
+                status = $26, deceased_date = $27,
+                primary_care_provider_id = $28, primary_facility_id = $29,
+                mumps_data = $30, updated_by = $31, updated_at = NOW(),
                 version = version + 1
             WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
-            RETURNING *
+            RETURNING
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
             "#,
+            patient.id,
+            patient.organization_id,
+            &patient.last_name,
+            &patient.first_name,
+            patient.middle_name.as_deref(),
+            patient.suffix.as_deref(),
+            patient.preferred_name.as_deref(),
+            patient.date_of_birth,
+            sex,
+            patient.email.as_deref(),
+            patient.phone_home.as_deref(),
+            patient.phone_mobile.as_deref(),
+            patient.phone_work.as_deref(),
+            patient.address_line1.as_deref(),
+            patient.address_line2.as_deref(),
+            patient.city.as_deref(),
+            patient.state.as_deref(),
+            patient.zip_code.as_deref(),
+            patient.country.as_deref(),
+            patient.emergency_contact_name.as_deref(),
+            patient.emergency_contact_phone.as_deref(),
+            patient.emergency_contact_relationship.as_deref(),
+            patient.insurance_carrier.as_deref(),
+            patient.insurance_policy_number.as_deref(),
+            patient.insurance_group_number.as_deref(),
+            status,
+            patient.deceased_date,
+            patient.primary_provider_id,
+            patient.primary_location_id,
+            patient.mumps_data.as_ref(),
+            patient.updated_by
         )
-        .bind(patient.id)
-        .bind(patient.organization_id)
-        .bind(&patient.last_name)
-        .bind(&patient.first_name)
-        .bind(&patient.middle_name)
-        .bind(&patient.suffix)
-        .bind(&patient.preferred_name)
-        .bind(patient.date_of_birth)
-        .bind(gender)
-        .bind(&patient.ssn_last_four)
-        .bind(&patient.email)
-        .bind(&patient.phone_home)
-        .bind(&patient.phone_mobile)
-        .bind(&patient.phone_work)
-        .bind(&patient.address_line1)
-        .bind(&patient.address_line2)
-        .bind(&patient.city)
-        .bind(&patient.state)
-        .bind(&patient.zip_code)
-        .bind(&patient.country)
-        .bind(&patient.emergency_contact_name)
-        .bind(&patient.emergency_contact_phone)
-        .bind(&patient.emergency_contact_relationship)
-        .bind(&patient.insurance_carrier)
-        .bind(&patient.insurance_policy_number)
-        .bind(&patient.insurance_group_number)
-        .bind(status)
-        .bind(patient.deceased_date)
-        .bind(patient.primary_provider_id)
-        .bind(patient.primary_location_id)
-        .bind(&patient.mumps_data)
-        .bind(patient.updated_by)
         .fetch_one(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("update", "ehr_patient")?;
 
         Ok(row.into())
     }
 
     async fn delete(&self, id: Uuid, organization_id: Uuid) -> AppResult<()> {
-        sqlx::query(
+        sqlx::query!(
             r#"
             UPDATE ehr_patients SET deleted_at = NOW()
             WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
             "#,
+            id,
+            organization_id
         )
-        .bind(id)
-        .bind(organization_id)
         .execute(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("delete", "ehr_patient")?;
 
         Ok(())
     }
@@ -348,85 +478,82 @@ impl EhrPatientRepository for EhrPatientRepositoryImpl {
         criteria: PatientSearchCriteria,
         pagination: Pagination,
     ) -> AppResult<PaginatedResult<EhrPatient>> {
-        // Build dynamic WHERE clause
-        let mut conditions: Vec<String> = vec![
-            "organization_id = $1".to_string(),
-            "deleted_at IS NULL".to_string(),
-        ];
-        let mut param_idx = 2;
+        let name_pattern = criteria.name.as_ref().map(|n| format!("%{}%", n));
+        let status_str = criteria.status.as_ref().map(|s| Self::status_to_string(s).to_string());
+        let limit = pagination.limit.min(1000) as i64;
+        let offset = pagination.offset as i64;
 
-        if criteria.name.is_some() {
-            conditions.push("(last_name ILIKE $2 OR first_name ILIKE $2)".to_string());
-            param_idx = 3;
-        }
-        if criteria.mrn.is_some() {
-            conditions.push(format!("mrn = ${}", param_idx));
-            param_idx += 1;
-        }
-        if criteria.date_of_birth.is_some() {
-            conditions.push(format!("date_of_birth = ${}", param_idx));
-            param_idx += 1;
-        }
-        if criteria.status.is_some() {
-            conditions.push(format!("status = ${}", param_idx));
-        }
+        // Compile-time checked: use COALESCE/NULL-check pattern for optional filters
+        let total = sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM ehr_patients
+            WHERE organization_id = $1
+              AND deleted_at IS NULL
+              AND ($2::text IS NULL OR (last_name ILIKE $2 OR first_name ILIKE $2))
+              AND ($3::text IS NULL OR mrn = $3)
+              AND ($4::date IS NULL OR date_of_birth = $4)
+              AND ($5::text IS NULL OR status = $5)
+            "#,
+            organization_id,
+            name_pattern.as_deref(),
+            criteria.mrn.as_deref(),
+            criteria.date_of_birth,
+            status_str.as_deref()
+        )
+        .fetch_one(self.database_service.pool())
+        .await
+        .map_db_error("count", "ehr_patient")?;
 
-        let where_clause = conditions.join(" AND ");
-use crate::infrastructure::database::RepositoryErrorExt;
-
-        // Count query
-        let count_sql = format!(
-            "SELECT COUNT(*) FROM ehr_patients WHERE {}",
-            where_clause
-        );
-
-        let mut count_query = sqlx::query_scalar(&count_sql)
-            .bind(organization_id);
-
-        if let Some(ref name) = criteria.name {
-            count_query = count_query.bind(format!("%{}%", name));
-        }
-        if let Some(ref mrn) = criteria.mrn {
-            count_query = count_query.bind(mrn);
-        }
-        if let Some(dob) = criteria.date_of_birth {
-            count_query = count_query.bind(dob);
-        }
-        if let Some(ref status) = criteria.status {
-            count_query = count_query.bind(Self::status_to_string(status));
-        }
-
-        let total: i64 = count_query
-            .fetch_one(self.database_service.pool())
-            .await
-            .map_db_error("query", "record")?;
-
-        // Data query
-        let data_sql = format!(
-            "SELECT * FROM ehr_patients WHERE {} ORDER BY last_name, first_name LIMIT {} OFFSET {}",
-            where_clause, pagination.limit, pagination.offset
-        );
-
-        let mut data_query = sqlx::query_as::<_, EhrPatientRow>(&data_sql)
-            .bind(organization_id);
-
-        if let Some(ref name) = criteria.name {
-            data_query = data_query.bind(format!("%{}%", name));
-        }
-        if let Some(ref mrn) = criteria.mrn {
-            data_query = data_query.bind(mrn);
-        }
-        if let Some(dob) = criteria.date_of_birth {
-            data_query = data_query.bind(dob);
-        }
-        if let Some(ref status) = criteria.status {
-            data_query = data_query.bind(Self::status_to_string(status));
-        }
-
-        let rows: Vec<EhrPatientRow> = data_query
-            .fetch_all(self.database_service.pool())
-            .await
-            .map_db_error("query", "record")?;
+        let rows = sqlx::query_as!(
+            EhrPatientRow,
+            r#"
+            SELECT
+                id, ien::bigint as "ien!", organization_id,
+                COALESCE(last_name, '') as "last_name!",
+                COALESCE(first_name, '') as "first_name!",
+                middle_name, suffix,
+                maiden_name as preferred_name,
+                date_of_birth as "date_of_birth!",
+                COALESCE(sex, 'U') as "gender!",
+                NULL::text as ssn_last_four,
+                mrn,
+                email, phone_home, phone_mobile, phone_work,
+                address_line1, address_line2, city, state, zip_code, country,
+                emergency_contact_name, emergency_contact_phone, emergency_contact_relationship,
+                insurance_primary_carrier as insurance_carrier,
+                insurance_primary_policy_number as insurance_policy_number,
+                insurance_primary_group_number as insurance_group_number,
+                COALESCE(status, 'active') as "status!",
+                deceased_date,
+                primary_care_provider_id as primary_provider_id,
+                primary_facility_id as primary_location_id,
+                mumps_data,
+                NULL::text as request_id,
+                created_at, updated_at, created_by, updated_by,
+                NULL::text as system_id,
+                version
+            FROM ehr_patients
+            WHERE organization_id = $1
+              AND deleted_at IS NULL
+              AND ($2::text IS NULL OR (last_name ILIKE $2 OR first_name ILIKE $2))
+              AND ($3::text IS NULL OR mrn = $3)
+              AND ($4::date IS NULL OR date_of_birth = $4)
+              AND ($5::text IS NULL OR status = $5)
+            ORDER BY last_name, first_name
+            LIMIT $6 OFFSET $7
+            "#,
+            organization_id,
+            name_pattern.as_deref(),
+            criteria.mrn.as_deref(),
+            criteria.date_of_birth,
+            status_str.as_deref(),
+            limit,
+            offset
+        )
+        .fetch_all(self.database_service.pool())
+        .await
+        .map_db_error("search", "ehr_patient")?;
 
         Ok(PaginatedResult {
             items: rows.into_iter().map(Into::into).collect(),
@@ -445,29 +572,30 @@ use crate::infrastructure::database::RepositoryErrorExt;
     }
 
     async fn count(&self, organization_id: Uuid) -> AppResult<i64> {
-        let count: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM ehr_patients WHERE organization_id = $1 AND deleted_at IS NULL",
+        let count = sqlx::query_scalar!(
+            r#"SELECT COUNT(*) as "count!" FROM ehr_patients WHERE organization_id = $1 AND deleted_at IS NULL"#,
+            organization_id
         )
-        .bind(organization_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("count", "ehr_patient")?;
 
-        Ok(count.0)
+        Ok(count)
     }
 
     async fn next_ien(&self, organization_id: Uuid) -> AppResult<i64> {
-        let result: (i64,) = sqlx::query_as(
+        let result = sqlx::query_scalar!(
             r#"
-            SELECT COALESCE(MAX(ien), 0) + 1 FROM ehr_patients
+            SELECT (COALESCE(MAX(ien), 0) + 1)::bigint as "next_ien!"
+            FROM ehr_patients
             WHERE organization_id = $1
             "#,
+            organization_id
         )
-        .bind(organization_id)
         .fetch_one(self.database_service.pool())
         .await
-        .map_db_error("query", "record")?;
+        .map_db_error("next_ien", "ehr_patient")?;
 
-        Ok(result.0)
+        Ok(result)
     }
 }

@@ -120,14 +120,17 @@ pub async fn create_anatomy_finding(
     let user_id = Uuid::nil();
 
     // Assertion 1: Encounter must exist and be in valid state
-    let (patient_id, encounter_status) = sqlx::query_as::<_, (Uuid, String)>(
-        "SELECT patient_id, status FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let encounter_row = sqlx::query!(
+        r#"SELECT patient_id, status FROM encounters WHERE id = $1 AND deleted_at IS NULL"#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
     .ok_or_else(|| AppError::NotFound(format!("Encounter {} not found", encounter_id)))?;
+
+    let patient_id = encounter_row.patient_id;
+    let encounter_status = encounter_row.status;
 
     // Validate encounter status (can document findings when scheduled or in_progress)
     let valid_statuses = ["scheduled", "in_progress"];
@@ -139,10 +142,10 @@ pub async fn create_anatomy_finding(
     }
 
     // Assertion 2: Body system must exist
-    let body_system_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM body_systems WHERE id = $1 AND is_active = true)"
+    let body_system_exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM body_systems WHERE id = $1 AND is_active = true) as "exists!""#,
+        payload.body_system_id
     )
-    .bind(payload.body_system_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify body system: {}", e)))?;
@@ -206,7 +209,8 @@ pub async fn create_anatomy_finding(
     }
 
     // Insert anatomy finding
-    let finding = sqlx::query_as::<_, AnatomyFinding>(
+    let finding = sqlx::query_as!(
+        AnatomyFinding,
         r#"
         INSERT INTO anatomy_findings (
             encounter_id, patient_id, body_system_id,
@@ -215,19 +219,23 @@ pub async fn create_anatomy_finding(
             documented_by
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING *
-        "#
+        RETURNING id, encounter_id, patient_id, body_system_id,
+            finding_type, finding_category, finding_text,
+            severity, laterality, model_coordinates,
+            documented_by, documented_datetime,
+            created_at, updated_at, deleted_at
+        "#,
+        encounter_id,
+        patient_id,
+        payload.body_system_id,
+        payload.finding_type,
+        payload.finding_category,
+        payload.finding_text,
+        payload.severity.as_deref(),
+        payload.laterality.as_deref(),
+        payload.model_coordinates,
+        user_id
     )
-    .bind(encounter_id)
-    .bind(patient_id)
-    .bind(payload.body_system_id)
-    .bind(payload.finding_type)
-    .bind(payload.finding_category)
-    .bind(payload.finding_text)
-    .bind(payload.severity)
-    .bind(payload.laterality)
-    .bind(payload.model_coordinates)
-    .bind(user_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to create anatomy finding: {}", e)))?;
@@ -248,7 +256,8 @@ pub async fn list_anatomy_findings(
     const MAX_FINDINGS: i64 = 200;
 
     // Fetch findings with body system details
-    let rows = sqlx::query_as::<_, AnatomyFindingWithSystemRow>(
+    let rows = sqlx::query_as!(
+        AnatomyFindingWithSystemRow,
         r#"
         SELECT
             af.id, af.encounter_id, af.patient_id, af.body_system_id,
@@ -262,10 +271,10 @@ pub async fn list_anatomy_findings(
         WHERE af.encounter_id = $1 AND af.deleted_at IS NULL
         ORDER BY af.documented_datetime DESC
         LIMIT $2
-        "#
+        "#,
+        encounter_id,
+        MAX_FINDINGS
     )
-    .bind(encounter_id)
-    .bind(MAX_FINDINGS)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch anatomy findings: {}", e)))?;
@@ -315,16 +324,16 @@ pub async fn update_anatomy_finding(
     let _user_id = Uuid::nil();
 
     // Assertion 1: Finding must exist and belong to encounter
-    let exists = sqlx::query_scalar::<_, bool>(
+    let exists = sqlx::query_scalar!(
         r#"
         SELECT EXISTS(
             SELECT 1 FROM anatomy_findings
             WHERE id = $1 AND encounter_id = $2 AND deleted_at IS NULL
-        )
-        "#
+        ) as "exists!"
+        "#,
+        finding_id,
+        encounter_id
     )
-    .bind(finding_id)
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify finding: {}", e)))?;
@@ -348,62 +357,36 @@ pub async fn update_anatomy_finding(
         }
     }
 
-    // Build dynamic update query
-    let mut query = String::from("UPDATE anatomy_findings SET updated_at = NOW()");
-    let mut param_count = 1;
-
-    if payload.finding_type.is_some() {
-        query.push_str(&format!(", finding_type = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.finding_category.is_some() {
-        query.push_str(&format!(", finding_category = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.finding_text.is_some() {
-        query.push_str(&format!(", finding_text = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.severity.is_some() {
-        query.push_str(&format!(", severity = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.laterality.is_some() {
-        query.push_str(&format!(", laterality = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.model_coordinates.is_some() {
-        query.push_str(&format!(", model_coordinates = ${}", param_count));
-        param_count += 1;
-    }
-
-    query.push_str(&format!(" WHERE id = ${} AND deleted_at IS NULL RETURNING *", param_count));
-
-    let mut query_builder = sqlx::query_as::<_, AnatomyFinding>(&query).bind(finding_id);
-
-    if let Some(finding_type) = payload.finding_type {
-        query_builder = query_builder.bind(finding_type);
-    }
-    if let Some(finding_category) = payload.finding_category {
-        query_builder = query_builder.bind(finding_category);
-    }
-    if let Some(finding_text) = payload.finding_text {
-        query_builder = query_builder.bind(finding_text);
-    }
-    if let Some(severity) = payload.severity {
-        query_builder = query_builder.bind(severity);
-    }
-    if let Some(laterality) = payload.laterality {
-        query_builder = query_builder.bind(laterality);
-    }
-    if let Some(model_coordinates) = payload.model_coordinates {
-        query_builder = query_builder.bind(model_coordinates);
-    }
-
-    let finding = query_builder
-        .fetch_one(state.database_pool.as_ref())
-        .await
-        .map_err(|e| AppError::Internal(format!("Failed to update anatomy finding: {}", e)))?;
+    // Update using COALESCE pattern for optional fields
+    let finding = sqlx::query_as!(
+        AnatomyFinding,
+        r#"
+        UPDATE anatomy_findings SET
+            updated_at = NOW(),
+            finding_type = COALESCE($1, finding_type),
+            finding_category = COALESCE($2, finding_category),
+            finding_text = COALESCE($3, finding_text),
+            severity = COALESCE($4, severity),
+            laterality = COALESCE($5, laterality),
+            model_coordinates = COALESCE($6, model_coordinates)
+        WHERE id = $7 AND deleted_at IS NULL
+        RETURNING id, encounter_id, patient_id, body_system_id,
+            finding_type, finding_category, finding_text,
+            severity, laterality, model_coordinates,
+            documented_by, documented_datetime,
+            created_at, updated_at, deleted_at
+        "#,
+        payload.finding_type.as_deref(),
+        payload.finding_category.as_deref(),
+        payload.finding_text.as_deref(),
+        payload.severity.as_deref(),
+        payload.laterality.as_deref(),
+        payload.model_coordinates,
+        finding_id
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| AppError::Internal(format!("Failed to update anatomy finding: {}", e)))?;
 
     // Assertion 2: Verify update succeeded
     debug_assert_eq!(finding.id, finding_id, "Finding ID mismatch after update");
@@ -417,15 +400,15 @@ pub async fn delete_anatomy_finding(
     Path((encounter_id, finding_id)): Path<(Uuid, Uuid)>,
 ) -> Result<StatusCode, ApiError> {
     // Soft delete
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE anatomy_findings
         SET deleted_at = NOW()
         WHERE id = $1 AND encounter_id = $2 AND deleted_at IS NULL
-        "#
+        "#,
+        finding_id,
+        encounter_id
     )
-    .bind(finding_id)
-    .bind(encounter_id)
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to delete anatomy finding: {}", e)))?;

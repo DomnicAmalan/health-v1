@@ -8,6 +8,9 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
+# State Machine
+state-machine-macro = { path = "../state-machine-macro" }
+
 # Database
 sqlx.workspace = true
 

@@ -129,10 +129,10 @@ pub async fn create_encounter(
     let user_id = Uuid::nil();
 
     // Assertion 1: Patient must exist
-    let patient_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM patients WHERE id = $1 AND deleted_at IS NULL)"
+    let patient_exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM ehr_patients WHERE id = $1 AND deleted_at IS NULL) as "exists!""#,
+        payload.patient_id
     )
-    .bind(payload.patient_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify patient: {}", e)))?;
@@ -145,10 +145,10 @@ pub async fn create_encounter(
     }
 
     // Assertion 2: Provider must exist
-    let provider_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 AND deleted_at IS NULL)"
+    let provider_exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 AND deleted_at IS NULL) as "exists!""#,
+        payload.provider_id
     )
-    .bind(payload.provider_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify provider: {}", e)))?;
@@ -180,7 +180,8 @@ pub async fn create_encounter(
     }
 
     // Generate encounter number and insert
-    let encounter = sqlx::query_as::<_, Encounter>(
+    let encounter = sqlx::query_as!(
+        Encounter,
         r#"
         INSERT INTO encounters (
             encounter_number, patient_id, provider_id, organization_id, location_id,
@@ -192,18 +193,22 @@ pub async fn create_encounter(
             $5, 'scheduled', $6, $7, $8,
             $9, $9
         )
-        RETURNING *
-        "#
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        payload.patient_id,
+        payload.provider_id,
+        payload.organization_id,
+        payload.location_id,
+        &payload.encounter_type,
+        encounter_datetime,
+        payload.visit_reason.as_deref(),
+        payload.chief_complaint.as_deref(),
+        user_id
     )
-    .bind(payload.patient_id)
-    .bind(payload.provider_id)
-    .bind(payload.organization_id)
-    .bind(payload.location_id)
-    .bind(payload.encounter_type)
-    .bind(encounter_datetime)
-    .bind(payload.visit_reason)
-    .bind(payload.chief_complaint)
-    .bind(user_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to create encounter: {}", e)))?;
@@ -216,10 +221,18 @@ pub async fn get_encounter(
     State(state): State<Arc<AppState>>,
     Path(encounter_id): Path<Uuid>,
 ) -> Result<Json<Encounter>, ApiError> {
-    let encounter = sqlx::query_as::<_, Encounter>(
-        "SELECT * FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        FROM encounters WHERE id = $1 AND deleted_at IS NULL
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
@@ -238,84 +251,38 @@ pub async fn list_encounters(
     const MAX_LIMIT: i64 = 100;
     let limit = params.limit.min(MAX_LIMIT);
 
-    // Build dynamic query with filters
-    let mut query = String::from(
-        r#"
-        SELECT * FROM encounters
-        WHERE deleted_at IS NULL
-        "#
-    );
-    let mut count_query = String::from(
-        r#"
-        SELECT COUNT(*) FROM encounters
-        WHERE deleted_at IS NULL
-        "#
-    );
-
-    let mut conditions = Vec::new();
-
-    if params.patient_id.is_some() {
-        conditions.push("patient_id = $patient_id");
-    }
-    if params.provider_id.is_some() {
-        conditions.push("provider_id = $provider_id");
-    }
-    if params.status.is_some() {
-        conditions.push("status = $status");
-    }
-    if params.encounter_type.is_some() {
-        conditions.push("encounter_type = $encounter_type");
-    }
-    if params.start_date.is_some() {
-        conditions.push("encounter_datetime >= $start_date::timestamptz");
-    }
-    if params.end_date.is_some() {
-        conditions.push("encounter_datetime <= $end_date::timestamptz");
-    }
-
-    if !conditions.is_empty() {
-        let condition_str = format!(" AND {}", conditions.join(" AND "));
-        query.push_str(&condition_str);
-        count_query.push_str(&condition_str);
-    }
-
-    query.push_str(" ORDER BY encounter_datetime DESC LIMIT $limit OFFSET $offset");
-
-    // Build query with parameters
-    let mut query_builder = sqlx::query_as::<_, Encounter>(&query);
-    let mut count_builder = sqlx::query_scalar::<_, i64>(&count_query);
-
-    if let Some(patient_id) = params.patient_id {
-        query_builder = query_builder.bind(patient_id);
-        count_builder = count_builder.bind(patient_id);
-    }
-    if let Some(provider_id) = params.provider_id {
-        query_builder = query_builder.bind(provider_id);
-        count_builder = count_builder.bind(provider_id);
-    }
-    if let Some(status) = &params.status {
-        query_builder = query_builder.bind(status);
-        count_builder = count_builder.bind(status);
-    }
-    if let Some(encounter_type) = &params.encounter_type {
-        query_builder = query_builder.bind(encounter_type);
-        count_builder = count_builder.bind(encounter_type);
-    }
-    if let Some(start_date) = &params.start_date {
-        query_builder = query_builder.bind(start_date);
-        count_builder = count_builder.bind(start_date);
-    }
-    if let Some(end_date) = &params.end_date {
-        query_builder = query_builder.bind(end_date);
-        count_builder = count_builder.bind(end_date);
-    }
-
-    query_builder = query_builder.bind(limit).bind(params.offset);
-
-    // Execute queries with 5s timeout
+    // Execute queries with 5s timeout using NULL-check pattern for optional filters
     let encounters = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        query_builder.fetch_all(state.database_pool.as_ref())
+        sqlx::query_as!(
+            Encounter,
+            r#"
+            SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+                encounter_type, status, encounter_datetime, checkout_datetime,
+                visit_reason, chief_complaint, assessment, plan,
+                icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+                vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+            FROM encounters
+            WHERE deleted_at IS NULL
+              AND ($1::uuid IS NULL OR patient_id = $1)
+              AND ($2::uuid IS NULL OR provider_id = $2)
+              AND ($3::text IS NULL OR status = $3)
+              AND ($4::text IS NULL OR encounter_type = $4)
+              AND ($5::text IS NULL OR encounter_datetime >= $5::timestamptz)
+              AND ($6::text IS NULL OR encounter_datetime <= $6::timestamptz)
+            ORDER BY encounter_datetime DESC
+            LIMIT $7 OFFSET $8
+            "#,
+            params.patient_id,
+            params.provider_id,
+            params.status.as_deref(),
+            params.encounter_type.as_deref(),
+            params.start_date.as_deref(),
+            params.end_date.as_deref(),
+            limit,
+            params.offset
+        )
+        .fetch_all(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Query timed out".to_string()))?
@@ -323,7 +290,26 @@ pub async fn list_encounters(
 
     let total = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        count_builder.fetch_one(state.database_pool.as_ref())
+        sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM encounters
+            WHERE deleted_at IS NULL
+              AND ($1::uuid IS NULL OR patient_id = $1)
+              AND ($2::uuid IS NULL OR provider_id = $2)
+              AND ($3::text IS NULL OR status = $3)
+              AND ($4::text IS NULL OR encounter_type = $4)
+              AND ($5::text IS NULL OR encounter_datetime >= $5::timestamptz)
+              AND ($6::text IS NULL OR encounter_datetime <= $6::timestamptz)
+            "#,
+            params.patient_id,
+            params.provider_id,
+            params.status.as_deref(),
+            params.encounter_type.as_deref(),
+            params.start_date.as_deref(),
+            params.end_date.as_deref()
+        )
+        .fetch_one(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Count query timed out".to_string()))?
@@ -348,10 +334,10 @@ pub async fn update_encounter(
     let user_id = Uuid::nil();
 
     // Assertion 1: Encounter must exist
-    let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM encounters WHERE id = $1 AND deleted_at IS NULL)"
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM encounters WHERE id = $1 AND deleted_at IS NULL) as "exists!""#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify encounter: {}", e)))?;
@@ -376,78 +362,42 @@ pub async fn update_encounter(
         }
     }
 
-    // Build dynamic update query
-    let mut query = String::from("UPDATE encounters SET updated_by = $1, updated_at = NOW()");
-    let mut param_count = 2;
-
-    if payload.encounter_type.is_some() {
-        query.push_str(&format!(", encounter_type = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.status.is_some() {
-        query.push_str(&format!(", status = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.visit_reason.is_some() {
-        query.push_str(&format!(", visit_reason = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.chief_complaint.is_some() {
-        query.push_str(&format!(", chief_complaint = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.assessment.is_some() {
-        query.push_str(&format!(", assessment = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.plan.is_some() {
-        query.push_str(&format!(", plan = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.icd10_codes.is_some() {
-        query.push_str(&format!(", icd10_codes = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.cpt_codes.is_some() {
-        query.push_str(&format!(", cpt_codes = ${}", param_count));
-        param_count += 1;
-    }
-
-    query.push_str(&format!(" WHERE id = ${} AND deleted_at IS NULL RETURNING *", param_count));
-
-    let mut query_builder = sqlx::query_as::<_, Encounter>(&query)
-        .bind(user_id)
-        .bind(encounter_id);
-
-    if let Some(encounter_type) = payload.encounter_type {
-        query_builder = query_builder.bind(encounter_type);
-    }
-    if let Some(status) = payload.status {
-        query_builder = query_builder.bind(status);
-    }
-    if let Some(visit_reason) = payload.visit_reason {
-        query_builder = query_builder.bind(visit_reason);
-    }
-    if let Some(chief_complaint) = payload.chief_complaint {
-        query_builder = query_builder.bind(chief_complaint);
-    }
-    if let Some(assessment) = payload.assessment {
-        query_builder = query_builder.bind(assessment);
-    }
-    if let Some(plan) = payload.plan {
-        query_builder = query_builder.bind(plan);
-    }
-    if let Some(icd10_codes) = payload.icd10_codes {
-        query_builder = query_builder.bind(icd10_codes);
-    }
-    if let Some(cpt_codes) = payload.cpt_codes {
-        query_builder = query_builder.bind(cpt_codes);
-    }
-
-    let encounter = query_builder
-        .fetch_one(state.database_pool.as_ref())
-        .await
-        .map_err(|e| AppError::Internal(format!("Failed to update encounter: {}", e)))?;
+    // Update using COALESCE pattern for optional fields
+    let encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        UPDATE encounters SET
+            encounter_type = COALESCE($1, encounter_type),
+            status = COALESCE($2, status),
+            visit_reason = COALESCE($3, visit_reason),
+            chief_complaint = COALESCE($4, chief_complaint),
+            assessment = COALESCE($5, assessment),
+            plan = COALESCE($6, plan),
+            icd10_codes = COALESCE($7, icd10_codes),
+            cpt_codes = COALESCE($8, cpt_codes),
+            updated_by = $9,
+            updated_at = NOW()
+        WHERE id = $10 AND deleted_at IS NULL
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        payload.encounter_type.as_deref(),
+        payload.status.as_deref(),
+        payload.visit_reason.as_deref(),
+        payload.chief_complaint.as_deref(),
+        payload.assessment.as_deref(),
+        payload.plan.as_deref(),
+        payload.icd10_codes.as_deref(),
+        payload.cpt_codes.as_deref(),
+        user_id,
+        encounter_id
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| AppError::Internal(format!("Failed to update encounter: {}", e)))?;
 
     // Assertion 2: Verify update succeeded
     debug_assert_eq!(encounter.id, encounter_id, "Encounter ID mismatch after update");
@@ -461,14 +411,14 @@ pub async fn delete_encounter(
     Path(encounter_id): Path<Uuid>,
 ) -> Result<StatusCode, ApiError> {
     // Soft delete
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE encounters
         SET deleted_at = NOW()
         WHERE id = $1 AND deleted_at IS NULL
-        "#
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to delete encounter: {}", e)))?;
@@ -489,16 +439,24 @@ pub async fn start_encounter(
     let user_id = Uuid::nil();
 
     // Assertion 1: Fetch current encounter and validate status
-    let current_encounter = sqlx::query_as::<_, Encounter>(
-        "SELECT * FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let current_encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        FROM encounters WHERE id = $1 AND deleted_at IS NULL
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
     .ok_or_else(|| AppError::NotFound(format!("Encounter {} not found", encounter_id)))?;
 
-    // Valid transition: scheduled → in_progress
+    // Valid transition: scheduled -> in_progress
     if current_encounter.status != "scheduled" {
         return Err(AppError::Validation(format!(
             "Cannot start encounter with status '{}'. Must be 'scheduled'",
@@ -507,18 +465,23 @@ pub async fn start_encounter(
     }
 
     // Update to in_progress status
-    let encounter = sqlx::query_as::<_, Encounter>(
+    let encounter = sqlx::query_as!(
+        Encounter,
         r#"
         UPDATE encounters
         SET status = 'in_progress',
             updated_by = $1,
             updated_at = NOW()
         WHERE id = $2 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        user_id,
+        encounter_id
     )
-    .bind(user_id)
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to start encounter: {}", e)))?;
@@ -539,16 +502,24 @@ pub async fn finish_encounter(
     let user_id = Uuid::nil();
 
     // Assertion 1: Fetch current encounter and validate status
-    let current_encounter = sqlx::query_as::<_, Encounter>(
-        "SELECT * FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let current_encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        FROM encounters WHERE id = $1 AND deleted_at IS NULL
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
     .ok_or_else(|| AppError::NotFound(format!("Encounter {} not found", encounter_id)))?;
 
-    // Valid transitions: scheduled → in_progress → completed
+    // Valid transitions: scheduled -> in_progress -> completed
     if current_encounter.status == "completed" {
         return Err(AppError::Validation("Encounter is already completed".to_string()).into());
     }
@@ -557,7 +528,8 @@ pub async fn finish_encounter(
     }
 
     // Update to completed status
-    let encounter = sqlx::query_as::<_, Encounter>(
+    let encounter = sqlx::query_as!(
+        Encounter,
         r#"
         UPDATE encounters
         SET status = 'completed',
@@ -565,11 +537,15 @@ pub async fn finish_encounter(
             updated_by = $1,
             updated_at = NOW()
         WHERE id = $2 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        user_id,
+        encounter_id
     )
-    .bind(user_id)
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to complete encounter: {}", e)))?;
@@ -598,10 +574,18 @@ pub async fn add_diagnosis(
     let user_id = Uuid::nil();
 
     // Assertion 1: Encounter must exist and not be completed
-    let current_encounter = sqlx::query_as::<_, Encounter>(
-        "SELECT * FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let current_encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        FROM encounters WHERE id = $1 AND deleted_at IS NULL
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
@@ -621,19 +605,24 @@ pub async fn add_diagnosis(
     }
 
     // Append the new ICD-10 code to existing codes
-    let encounter = sqlx::query_as::<_, Encounter>(
+    let encounter = sqlx::query_as!(
+        Encounter,
         r#"
         UPDATE encounters
         SET icd10_codes = array_append(icd10_codes, $1),
             updated_by = $2,
             updated_at = NOW()
         WHERE id = $3 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        &payload.icd10_code,
+        user_id,
+        encounter_id
     )
-    .bind(&payload.icd10_code)
-    .bind(user_id)
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to add diagnosis: {}", e)))?;
@@ -657,10 +646,18 @@ pub async fn add_procedure(
     let user_id = Uuid::nil();
 
     // Assertion 1: Encounter must exist and not be completed
-    let current_encounter = sqlx::query_as::<_, Encounter>(
-        "SELECT * FROM encounters WHERE id = $1 AND deleted_at IS NULL"
+    let current_encounter = sqlx::query_as!(
+        Encounter,
+        r#"
+        SELECT id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        FROM encounters WHERE id = $1 AND deleted_at IS NULL
+        "#,
+        encounter_id
     )
-    .bind(encounter_id)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch encounter: {}", e)))?
@@ -680,19 +677,24 @@ pub async fn add_procedure(
     }
 
     // Append the new CPT code to existing codes
-    let encounter = sqlx::query_as::<_, Encounter>(
+    let encounter = sqlx::query_as!(
+        Encounter,
         r#"
         UPDATE encounters
         SET cpt_codes = array_append(cpt_codes, $1),
             updated_by = $2,
             updated_at = NOW()
         WHERE id = $3 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id, encounter_number, patient_id, provider_id, organization_id, location_id,
+            encounter_type, status, encounter_datetime, checkout_datetime,
+            visit_reason, chief_complaint, assessment, plan,
+            icd10_codes as "icd10_codes!", cpt_codes as "cpt_codes!",
+            vista_ien, created_at, updated_at, created_by, updated_by, deleted_at
+        "#,
+        &payload.cpt_code,
+        user_id,
+        encounter_id
     )
-    .bind(&payload.cpt_code)
-    .bind(user_id)
-    .bind(encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to add procedure: {}", e)))?;

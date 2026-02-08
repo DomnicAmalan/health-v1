@@ -199,10 +199,10 @@ pub async fn create_imaging_order(
     .ok_or_else(|| AppError::NotFound(format!("Patient {} not found", payload.patient_id)))?;
 
     // Assertion 2: Ordering provider must exist
-    let provider_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 AND deleted_at IS NULL)"
+    let provider_exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM users WHERE id = $1 AND deleted_at IS NULL) as "exists!""#,
+        payload.ordering_provider_id
     )
-    .bind(payload.ordering_provider_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify provider: {}", e)))?;
@@ -244,8 +244,11 @@ pub async fn create_imaging_order(
         chrono::Utc::now().timestamp() % 100000000
     );
 
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
+
     // Create order
-    let order = sqlx::query_as::<_, ImagingOrder>(
+    let order = sqlx::query_as!(
+        ImagingOrder,
         r#"
         INSERT INTO imaging_orders (
             organization_id, order_number, patient_id, patient_ien, encounter_id,
@@ -261,30 +264,43 @@ pub async fn create_imaging_order(
             $15, $16, $17, $18,
             $19, $20, $21, $21
         )
-        RETURNING *
-        "#
+        RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        "#,
+        organization_id,
+        order_number,
+        payload.patient_id,
+        patient.patient_ien.unwrap_or(0),
+        payload.encounter_id,
+        payload.ordering_provider_id,
+        payload.study_type_id,
+        payload.modality_code,
+        payload.study_name,
+        payload.body_part.as_deref(),
+        payload.laterality.as_deref(),
+        payload.clinical_indication,
+        payload.clinical_history.as_deref(),
+        payload.relevant_diagnoses,
+        payload.special_instructions.as_deref(),
+        priority,
+        payload.requires_contrast.unwrap_or(false),
+        payload.contrast_type.as_deref(),
+        payload.requires_sedation.unwrap_or(false),
+        payload.requires_fasting.unwrap_or(false),
+        user_id
     )
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
-    .bind(order_number)
-    .bind(payload.patient_id)
-    .bind(patient.patient_ien)
-    .bind(payload.encounter_id)
-    .bind(payload.ordering_provider_id)
-    .bind(payload.study_type_id)
-    .bind(payload.modality_code)
-    .bind(payload.study_name)
-    .bind(payload.body_part)
-    .bind(payload.laterality)
-    .bind(payload.clinical_indication)
-    .bind(payload.clinical_history)
-    .bind(payload.relevant_diagnoses)
-    .bind(payload.special_instructions)
-    .bind(priority)
-    .bind(payload.requires_contrast.unwrap_or(false))
-    .bind(payload.contrast_type)
-    .bind(payload.requires_sedation.unwrap_or(false))
-    .bind(payload.requires_fasting.unwrap_or(false))
-    .bind(user_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to create imaging order: {}", e)))?;
@@ -297,11 +313,31 @@ pub async fn get_imaging_order(
     State(state): State<Arc<AppState>>,
     Path(order_id): Path<Uuid>,
 ) -> Result<Json<ImagingOrder>, ApiError> {
-    let order = sqlx::query_as::<_, ImagingOrder>(
-        "SELECT * FROM imaging_orders WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
+
+    let order = sqlx::query_as!(
+        ImagingOrder,
+        r#"
+        SELECT id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        FROM imaging_orders
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
+        "#,
+        order_id,
+        organization_id
     )
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch order: {}", e)))?
@@ -320,103 +356,57 @@ pub async fn list_imaging_orders(
     const MAX_LIMIT: i64 = 1000;
     let limit = params.limit.min(MAX_LIMIT);
 
-    // Build dynamic query
-    let mut conditions: Vec<String> = vec!["deleted_at IS NULL".to_string(), "organization_id = $1".to_string()];
-    let mut bind_count = 2;
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
 
-    if params.patient_id.is_some() {
-        conditions.push(format!("patient_id = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.ordering_provider_id.is_some() {
-        conditions.push(format!("ordering_provider_id = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.radiologist_id.is_some() {
-        conditions.push(format!("radiologist_id = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.status.is_some() {
-        conditions.push(format!("status = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.modality_code.is_some() {
-        conditions.push(format!("modality_code = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.priority.is_some() {
-        conditions.push(format!("priority = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.is_critical_finding.is_some() {
-        conditions.push(format!("is_critical_finding = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.start_date.is_some() {
-        conditions.push(format!("ordering_datetime >= ${}::timestamptz", bind_count));
-        bind_count += 1;
-    }
-    if params.end_date.is_some() {
-        conditions.push(format!("ordering_datetime <= ${}::timestamptz", bind_count));
-        bind_count += 1;
-    }
-
-    let where_clause = conditions.join(" AND ");
-    let query = format!(
-        "SELECT * FROM imaging_orders WHERE {} ORDER BY ordering_datetime DESC LIMIT ${} OFFSET ${}",
-        where_clause, bind_count, bind_count + 1
-    );
-    let count_query = format!("SELECT COUNT(*) FROM imaging_orders WHERE {}", where_clause);
-
-    // Build query with parameters
-    let mut query_builder = sqlx::query_as::<_, ImagingOrder>(&query)
-        .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */);
-    let mut count_builder = sqlx::query_scalar::<_, i64>(&count_query)
-        .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */);
-
-    if let Some(patient_id) = params.patient_id {
-        query_builder = query_builder.bind(patient_id);
-        count_builder = count_builder.bind(patient_id);
-    }
-    if let Some(ordering_provider_id) = params.ordering_provider_id {
-        query_builder = query_builder.bind(ordering_provider_id);
-        count_builder = count_builder.bind(ordering_provider_id);
-    }
-    if let Some(radiologist_id) = params.radiologist_id {
-        query_builder = query_builder.bind(radiologist_id);
-        count_builder = count_builder.bind(radiologist_id);
-    }
-    if let Some(ref status) = params.status {
-        query_builder = query_builder.bind(status);
-        count_builder = count_builder.bind(status);
-    }
-    if let Some(ref modality_code) = params.modality_code {
-        query_builder = query_builder.bind(modality_code);
-        count_builder = count_builder.bind(modality_code);
-    }
-    if let Some(ref priority) = params.priority {
-        query_builder = query_builder.bind(priority);
-        count_builder = count_builder.bind(priority);
-    }
-    if let Some(is_critical) = params.is_critical_finding {
-        query_builder = query_builder.bind(is_critical);
-        count_builder = count_builder.bind(is_critical);
-    }
-    if let Some(ref start_date) = params.start_date {
-        query_builder = query_builder.bind(start_date);
-        count_builder = count_builder.bind(start_date);
-    }
-    if let Some(ref end_date) = params.end_date {
-        query_builder = query_builder.bind(end_date);
-        count_builder = count_builder.bind(end_date);
-    }
-
-    query_builder = query_builder.bind(limit).bind(params.offset);
-
-    // Execute with 5s timeout
+    // Execute with 5s timeout - using NULL-check pattern for optional filters
     let orders = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        query_builder.fetch_all(state.database_pool.as_ref())
+        sqlx::query_as!(
+            ImagingOrder,
+            r#"
+            SELECT id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+                encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+                study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+                clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+                requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+                priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+                performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+                report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+                impression, recommendations, preliminary_datetime, final_datetime,
+                report_verified_by, report_verified_datetime,
+                pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+                is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+                cancelled_by, cancelled_datetime, cancellation_reason,
+                created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+            FROM imaging_orders
+            WHERE deleted_at IS NULL
+              AND organization_id = $1
+              AND ($2::uuid IS NULL OR patient_id = $2)
+              AND ($3::uuid IS NULL OR ordering_provider_id = $3)
+              AND ($4::uuid IS NULL OR radiologist_id = $4)
+              AND ($5::text IS NULL OR status = $5)
+              AND ($6::text IS NULL OR modality_code = $6)
+              AND ($7::text IS NULL OR priority = $7)
+              AND ($8::bool IS NULL OR is_critical_finding = $8)
+              AND ($9::text IS NULL OR ordering_datetime >= $9::timestamptz)
+              AND ($10::text IS NULL OR ordering_datetime <= $10::timestamptz)
+            ORDER BY ordering_datetime DESC
+            LIMIT $11 OFFSET $12
+            "#,
+            organization_id,
+            params.patient_id,
+            params.ordering_provider_id,
+            params.radiologist_id,
+            params.status.as_deref(),
+            params.modality_code.as_deref(),
+            params.priority.as_deref(),
+            params.is_critical_finding,
+            params.start_date.as_deref(),
+            params.end_date.as_deref(),
+            limit,
+            params.offset
+        )
+        .fetch_all(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Query timed out".to_string()))?
@@ -424,7 +414,34 @@ pub async fn list_imaging_orders(
 
     let total = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        count_builder.fetch_one(state.database_pool.as_ref())
+        sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM imaging_orders
+            WHERE deleted_at IS NULL
+              AND organization_id = $1
+              AND ($2::uuid IS NULL OR patient_id = $2)
+              AND ($3::uuid IS NULL OR ordering_provider_id = $3)
+              AND ($4::uuid IS NULL OR radiologist_id = $4)
+              AND ($5::text IS NULL OR status = $5)
+              AND ($6::text IS NULL OR modality_code = $6)
+              AND ($7::text IS NULL OR priority = $7)
+              AND ($8::bool IS NULL OR is_critical_finding = $8)
+              AND ($9::text IS NULL OR ordering_datetime >= $9::timestamptz)
+              AND ($10::text IS NULL OR ordering_datetime <= $10::timestamptz)
+            "#,
+            organization_id,
+            params.patient_id,
+            params.ordering_provider_id,
+            params.radiologist_id,
+            params.status.as_deref(),
+            params.modality_code.as_deref(),
+            params.priority.as_deref(),
+            params.is_critical_finding,
+            params.start_date.as_deref(),
+            params.end_date.as_deref()
+        )
+        .fetch_one(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Query timed out".to_string()))?
@@ -446,13 +463,14 @@ pub async fn update_imaging_order(
 ) -> Result<Json<ImagingOrder>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
 
     // Validate order exists
-    let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM imaging_orders WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL)"
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM imaging_orders WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL) as "exists!""#,
+        order_id,
+        organization_id
     )
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify order: {}", e)))?;
@@ -461,59 +479,51 @@ pub async fn update_imaging_order(
         return Err(AppError::NotFound(format!("Imaging order {} not found", order_id)).into());
     }
 
-    // Build dynamic update query
-    let mut updates: Vec<String> = vec![
-        "updated_by = $1".to_string(),
-        "updated_at = NOW()".to_string(),
-    ];
-    let mut param_count = 2;
+    // Parse scheduled_datetime if provided
+    let scheduled_datetime = payload.scheduled_datetime
+        .as_deref()
+        .map(|s| s.parse::<chrono::DateTime<chrono::Utc>>())
+        .transpose()
+        .map_err(|e| AppError::Validation(format!("Invalid scheduled_datetime: {}", e)))?;
 
-    if payload.scheduled_datetime.is_some() {
-        updates.push(format!("scheduled_datetime = ${}::timestamptz", param_count));
-        param_count += 1;
-    }
-    if payload.status.is_some() {
-        updates.push(format!("status = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.special_instructions.is_some() {
-        updates.push(format!("special_instructions = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.patient_prepared.is_some() {
-        updates.push(format!("patient_prepared = ${}", param_count));
-        param_count += 1;
-    }
-
-    let update_clause = updates.join(", ");
-    let query = format!(
-        "UPDATE imaging_orders SET {} WHERE id = ${} AND organization_id = ${} AND deleted_at IS NULL RETURNING *",
-        update_clause, param_count, param_count + 1
-    );
-
-    let mut query_builder = sqlx::query_as::<_, ImagingOrder>(&query)
-        .bind(user_id)
-        .bind(order_id);
-
-    if let Some(scheduled_datetime) = payload.scheduled_datetime {
-        query_builder = query_builder.bind(scheduled_datetime);
-    }
-    if let Some(status) = payload.status {
-        query_builder = query_builder.bind(status);
-    }
-    if let Some(special_instructions) = payload.special_instructions {
-        query_builder = query_builder.bind(special_instructions);
-    }
-    if let Some(patient_prepared) = payload.patient_prepared {
-        query_builder = query_builder.bind(patient_prepared);
-    }
-
-    query_builder = query_builder.bind(Uuid::nil() /* organization_id - extract from auth middleware in production */);
-
-    let order = query_builder
-        .fetch_one(state.database_pool.as_ref())
-        .await
-        .map_err(|e| AppError::Internal(format!("Failed to update order: {}", e)))?;
+    // Use COALESCE pattern for optional updates
+    let order = sqlx::query_as!(
+        ImagingOrder,
+        r#"
+        UPDATE imaging_orders SET
+            scheduled_datetime = COALESCE($1, scheduled_datetime),
+            status = COALESCE($2, status),
+            special_instructions = COALESCE($3, special_instructions),
+            patient_prepared = COALESCE($4, patient_prepared),
+            updated_by = $5,
+            updated_at = NOW()
+        WHERE id = $6 AND organization_id = $7 AND deleted_at IS NULL
+        RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        "#,
+        scheduled_datetime,
+        payload.status.as_deref(),
+        payload.special_instructions.as_deref(),
+        payload.patient_prepared,
+        user_id,
+        order_id,
+        organization_id
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| AppError::Internal(format!("Failed to update order: {}", e)))?;
 
     Ok(Json(order))
 }
@@ -527,13 +537,32 @@ pub async fn perform_study(
 ) -> Result<Json<ImagingOrder>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
 
     // Assertion 1: Fetch and validate order status
-    let current_order = sqlx::query_as::<_, ImagingOrder>(
-        "SELECT * FROM imaging_orders WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"
+    let current_order = sqlx::query_as!(
+        ImagingOrder,
+        r#"
+        SELECT id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        FROM imaging_orders
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
+        "#,
+        order_id,
+        organization_id
     )
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch order: {}", e)))?
@@ -544,7 +573,8 @@ pub async fn perform_study(
     }
 
     // Update to in_progress/completed status
-    let order = sqlx::query_as::<_, ImagingOrder>(
+    let order = sqlx::query_as!(
+        ImagingOrder,
         r#"
         UPDATE imaging_orders
         SET status = 'in_progress',
@@ -558,18 +588,31 @@ pub async fn perform_study(
             updated_by = $7,
             updated_at = NOW()
         WHERE id = $8 AND organization_id = $9 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        "#,
+        payload.performing_technologist_id,
+        payload.performing_location.as_deref(),
+        payload.equipment_used.as_deref(),
+        payload.pacs_study_instance_uid.as_deref(),
+        payload.series_count.unwrap_or(0),
+        payload.image_count.unwrap_or(0),
+        user_id,
+        order_id,
+        organization_id
     )
-    .bind(payload.performing_technologist_id)
-    .bind(payload.performing_location)
-    .bind(payload.equipment_used)
-    .bind(payload.pacs_study_instance_uid)
-    .bind(payload.series_count.unwrap_or(0))
-    .bind(payload.image_count.unwrap_or(0))
-    .bind(user_id)
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to perform study: {}", e)))?;
@@ -589,13 +632,32 @@ pub async fn enter_report(
 ) -> Result<Json<ImagingOrder>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
 
     // Assertion 1: Validate order exists and is performed
-    let current_order = sqlx::query_as::<_, ImagingOrder>(
-        "SELECT * FROM imaging_orders WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"
+    let current_order = sqlx::query_as!(
+        ImagingOrder,
+        r#"
+        SELECT id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        FROM imaging_orders
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
+        "#,
+        order_id,
+        organization_id
     )
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch order: {}", e)))?
@@ -619,7 +681,8 @@ pub async fn enter_report(
 
     // Update order with report
     let order = if is_final {
-        sqlx::query_as::<_, ImagingOrder>(
+        sqlx::query_as!(
+            ImagingOrder,
             r#"
             UPDATE imaging_orders
             SET report_status = 'final',
@@ -634,21 +697,35 @@ pub async fn enter_report(
                 updated_by = $4,
                 updated_at = NOW()
             WHERE id = $6 AND organization_id = $7 AND deleted_at IS NULL
-            RETURNING *
-            "#
+            RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+                encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+                study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+                clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+                requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+                priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+                performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+                report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+                impression, recommendations, preliminary_datetime, final_datetime,
+                report_verified_by, report_verified_datetime,
+                pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+                is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+                cancelled_by, cancelled_datetime, cancellation_reason,
+                created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+            "#,
+            &payload.findings,
+            &payload.impression,
+            payload.recommendations.as_deref(),
+            user_id,
+            is_critical,
+            order_id,
+            organization_id
         )
-        .bind(&payload.findings)
-        .bind(&payload.impression)
-        .bind(&payload.recommendations)
-        .bind(user_id)
-        .bind(is_critical)
-        .bind(order_id)
-        .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
         .fetch_one(state.database_pool.as_ref())
         .await
         .map_err(|e| AppError::Internal(format!("Failed to enter final report: {}", e)))?
     } else {
-        sqlx::query_as::<_, ImagingOrder>(
+        sqlx::query_as!(
+            ImagingOrder,
             r#"
             UPDATE imaging_orders
             SET report_status = 'preliminary',
@@ -661,16 +738,29 @@ pub async fn enter_report(
                 updated_by = $4,
                 updated_at = NOW()
             WHERE id = $6 AND organization_id = $7 AND deleted_at IS NULL
-            RETURNING *
-            "#
+            RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+                encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+                study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+                clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+                requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+                priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+                performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+                report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+                impression, recommendations, preliminary_datetime, final_datetime,
+                report_verified_by, report_verified_datetime,
+                pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+                is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+                cancelled_by, cancelled_datetime, cancellation_reason,
+                created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+            "#,
+            &payload.findings,
+            &payload.impression,
+            payload.recommendations.as_deref(),
+            user_id,
+            is_critical,
+            order_id,
+            organization_id
         )
-        .bind(&payload.findings)
-        .bind(&payload.impression)
-        .bind(&payload.recommendations)
-        .bind(user_id)
-        .bind(is_critical)
-        .bind(order_id)
-        .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
         .fetch_one(state.database_pool.as_ref())
         .await
         .map_err(|e| AppError::Internal(format!("Failed to enter preliminary report: {}", e)))?
@@ -694,11 +784,13 @@ pub async fn cancel_imaging_order(
 ) -> Result<Json<ImagingOrder>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
     let cancellation_reason = payload.get("cancellationReason")
         .and_then(|v| v.as_str())
         .map(String::from);
 
-    let order = sqlx::query_as::<_, ImagingOrder>(
+    let order = sqlx::query_as!(
+        ImagingOrder,
         r#"
         UPDATE imaging_orders
         SET status = 'cancelled',
@@ -708,13 +800,26 @@ pub async fn cancel_imaging_order(
             updated_by = $1,
             updated_at = NOW()
         WHERE id = $3 AND organization_id = $4 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING id as "id!", organization_id as "organization_id!", ien, order_number as "order_number!", accession_number, patient_id as "patient_id!", patient_ien as "patient_ien!",
+            encounter_id, ordering_provider_id as "ordering_provider_id!", ordering_provider_name, ordering_datetime as "ordering_datetime!",
+            study_type_id, modality_id, study_name as "study_name!", modality_code as "modality_code!", body_part, laterality,
+            clinical_indication as "clinical_indication!", clinical_history, relevant_diagnoses, special_instructions,
+            requires_contrast as "requires_contrast!", contrast_type, requires_sedation as "requires_sedation!", requires_fasting as "requires_fasting!", patient_prepared as "patient_prepared!",
+            priority as "priority!", status as "status!", scheduled_datetime, performed_datetime, completed_datetime,
+            performing_technologist_id, performing_technologist_name, performing_location, equipment_used,
+            report_status, radiologist_id, radiologist_name, preliminary_findings, final_findings,
+            impression, recommendations, preliminary_datetime, final_datetime,
+            report_verified_by, report_verified_datetime,
+            pacs_study_instance_uid, pacs_url, series_count as "series_count!", image_count as "image_count!",
+            is_critical_finding as "is_critical_finding!", critical_finding_notified as "critical_finding_notified!", critical_finding_notified_datetime,
+            cancelled_by, cancelled_datetime, cancellation_reason,
+            created_at as "created_at!", updated_at as "updated_at!", created_by, updated_by, version as "version!", deleted_at
+        "#,
+        user_id,
+        cancellation_reason.as_deref(),
+        order_id,
+        organization_id
     )
-    .bind(user_id)
-    .bind(cancellation_reason)
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to cancel order: {}", e)))?
@@ -730,13 +835,14 @@ pub async fn delete_imaging_order(
 ) -> Result<StatusCode, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let organization_id = Uuid::nil(); // extract from auth middleware in production
 
-    let result = sqlx::query(
-        "UPDATE imaging_orders SET deleted_at = NOW(), updated_by = $1 WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL"
+    let result = sqlx::query!(
+        "UPDATE imaging_orders SET deleted_at = NOW(), updated_by = $1 WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL",
+        user_id,
+        order_id,
+        organization_id
     )
-    .bind(user_id)
-    .bind(order_id)
-    .bind(Uuid::nil() /* organization_id - extract from auth middleware in production */)
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to delete order: {}", e)))?;

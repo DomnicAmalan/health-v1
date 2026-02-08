@@ -192,6 +192,15 @@ make dev-vault       # Vault UI
 - Log errors with `error.log_with_context()` or `error.log_with_operation()`
 - Run `cargo fmt` and `cargo clippy --workspace -- -D warnings` before committing
 
+### SQLx Compile-Time Queries (MANDATORY)
+- **ALWAYS use compile-time checked queries**: `sqlx::query!`, `sqlx::query_as!`, `sqlx::query_scalar!`
+- **NEVER use runtime queries**: `sqlx::query()`, `sqlx::query_as::<_, T>()`, `sqlx::query_scalar()` without the `!` macro
+- Compile-time macros verify SQL against the live database at build time — this is the whole point of using Rust + SQLx
+- **Docker must be running** before `cargo check` or `cargo build`: run `make docker-dev && make db-migrate` first
+- If you get "relation does not exist" errors from sqlx macros, the database is not running or migrations are not applied
+- For new tables, create the migration first, apply it with `make db-migrate`, then write the queries
+- Use `"column_name!"` syntax in `query_as!` to override nullability when sqlx infers incorrectly (e.g., computed columns)
+
 ### TypeScript Frontend
 - No `any` types - use `unknown` or proper types
 - Use `type` imports: `import type { ... }`

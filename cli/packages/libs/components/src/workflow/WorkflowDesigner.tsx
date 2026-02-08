@@ -1,31 +1,26 @@
 /**
  * WorkflowDesigner Component
  * Main visual workflow designer with canvas, nodes, edges, and property panel
+ *
+ * This is a shared component that can be used in both admin and client apps.
  */
 
 import { useState, useCallback, useRef, useEffect, memo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/card";
+import { Button } from "../components/button";
+import { Input } from "../components/input";
+import { Label } from "../components/label";
+import { Textarea } from "../components/textarea";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Button,
-  Input,
-  Label,
-  Textarea,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  ScrollArea,
-  Badge,
-} from "@lazarus-life/ui-components";
-import { X } from "lucide-react";
+} from "../components/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/tabs";
+import { ScrollArea } from "../components/scroll-area";
+import { Badge } from "../components/badge";
 import type {
   WorkflowDefinition,
   WorkflowNode,
@@ -38,14 +33,18 @@ import type {
 import { NODE_TEMPLATES } from "@lazarus-life/shared";
 import { WorkflowNodeComponent } from "./WorkflowNode";
 import { WorkflowToolbar } from "./WorkflowToolbar";
-import { ConnectorConfig } from "./ConnectorConfig";
-import { cn } from "@lazarus-life/ui-components/utils";
+import { ConnectorConfig, type ConnectorMetadata } from "./ConnectorConfig";
+import { cn } from "../lib/utils";
 
 interface WorkflowDesignerProps {
   workflow?: WorkflowDefinition;
   onChange?: (workflow: WorkflowDefinition) => void;
   onSave?: (workflow: WorkflowDefinition) => void;
   readOnly?: boolean;
+  /** Available connectors for action nodes */
+  connectors?: ConnectorMetadata[];
+  /** Whether connectors are loading */
+  isLoadingConnectors?: boolean;
 }
 
 /** Generate unique ID */
@@ -72,6 +71,8 @@ export const WorkflowDesigner = memo(function WorkflowDesigner({
   onChange,
   onSave,
   readOnly = false,
+  connectors = [],
+  isLoadingConnectors = false,
 }: WorkflowDesignerProps) {
   // Workflow state
   const [nodes, setNodes] = useState<WorkflowNode[]>(initialWorkflow?.nodes || []);
@@ -720,6 +721,8 @@ export const WorkflowDesigner = memo(function WorkflowDesigner({
                     <ConnectorConfig
                       value={selectedNode.config}
                       onChange={(config) => updateNodeConfig(config)}
+                      connectors={connectors}
+                      isLoadingConnectors={isLoadingConnectors}
                     />
                   </div>
                 )}

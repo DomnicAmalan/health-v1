@@ -8,12 +8,18 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
+use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::presentation::api::AppState;
+
+/// Helper to convert f64 to BigDecimal for SQL DECIMAL parameters
+fn to_bd(v: f64) -> BigDecimal {
+    BigDecimal::from_str(&v.to_string()).unwrap_or_default()
+}
 
 /// Helper to parse decimal string to f64
 fn parse_decimal(s: Option<String>) -> f64 {
@@ -167,17 +173,18 @@ pub async fn list_invoices(
     let page_size = query.page_size.unwrap_or(20).min(100);
     let offset = (page - 1) * page_size;
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
-        SELECT id, invoice_number, invoice_type, invoice_date, patient_name,
-               grand_total::text as grand_total, balance_due::text as balance_due, status
+        SELECT id, invoice_number, invoice_type::text as "invoice_type!", invoice_date, patient_name,
+               grand_total::text as grand_total, balance_due::text as balance_due,
+               status::text as "status!"
         FROM invoices
         ORDER BY invoice_date DESC, invoice_number DESC
         LIMIT $1 OFFSET $2
-        "#
+        "#,
+        page_size as i64,
+        offset as i64
     )
-    .bind(page_size as i64)
-    .bind(offset as i64)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -186,16 +193,15 @@ pub async fn list_invoices(
             let invoices: Vec<InvoiceSummaryResponse> = rows
                 .iter()
                 .map(|row| {
-                    let invoice_date: chrono::NaiveDate = row.get("invoice_date");
                     InvoiceSummaryResponse {
-                        id: row.get("id"),
-                        invoice_number: row.get("invoice_number"),
-                        invoice_type: row.get("invoice_type"),
-                        invoice_date: invoice_date.to_string(),
-                        patient_name: row.get("patient_name"),
-                        grand_total: parse_decimal(row.get("grand_total")),
-                        balance_due: parse_decimal(row.get("balance_due")),
-                        status: row.get("status"),
+                        id: row.id,
+                        invoice_number: row.invoice_number.clone(),
+                        invoice_type: row.invoice_type.clone(),
+                        invoice_date: row.invoice_date.to_string(),
+                        patient_name: row.patient_name.clone(),
+                        grand_total: parse_decimal(row.grand_total.clone()),
+                        balance_due: parse_decimal(row.balance_due.clone()),
+                        status: row.status.clone(),
                     }
                 })
                 .collect();
@@ -221,31 +227,33 @@ pub async fn get_invoice(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let invoice_result = sqlx::query(
+    let invoice_result = sqlx::query!(
         r#"
-        SELECT id, invoice_number, invoice_type, invoice_date, due_date,
+        SELECT id, invoice_number, invoice_type::text as "invoice_type!", invoice_date, due_date,
                patient_id, patient_name, patient_mrn, visit_id,
                subtotal::text as subtotal, discount_amount::text as discount_amount,
                taxable_amount::text as taxable_amount,
                cgst_amount::text as cgst_amount, sgst_amount::text as sgst_amount,
                igst_amount::text as igst_amount, total_tax::text as total_tax,
                grand_total::text as grand_total, amount_paid::text as amount_paid,
-               balance_due::text as balance_due, status, is_finalized
+               balance_due::text as balance_due, status::text as "status!",
+               is_finalized as "is_finalized!"
         FROM invoices
         WHERE id = $1
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_optional(&*state.database_pool)
     .await;
 
     match invoice_result {
         Ok(Some(row)) => {
             // Get invoice items
-            let items_result = sqlx::query(
+            let items_result = sqlx::query!(
                 r#"
                 SELECT id, service_code, service_name,
-                       quantity::text as quantity, unit, unit_price::text as unit_price,
+                       quantity::text as quantity, COALESCE(unit, 'each') as "unit!",
+                       unit_price::text as unit_price,
                        gross_amount::text as gross_amount, discount_amount::text as discount_amount,
                        net_amount::text as net_amount,
                        cgst_rate::text as cgst_rate, cgst_amount::text as cgst_amount,
@@ -256,9 +264,9 @@ pub async fn get_invoice(
                 FROM invoice_items
                 WHERE invoice_id = $1
                 ORDER BY line_number
-                "#
+                "#,
+                id
             )
-            .bind(id)
             .fetch_all(&*state.database_pool)
             .await;
 
@@ -266,54 +274,51 @@ pub async fn get_invoice(
                 .map(|item_rows| {
                     item_rows.iter().map(|item| {
                         InvoiceItemResponse {
-                            id: item.get("id"),
-                            service_code: item.get("service_code"),
-                            service_name: item.get("service_name"),
-                            quantity: parse_decimal(item.get("quantity")),
-                            unit: item.get("unit"),
-                            unit_price: parse_decimal(item.get("unit_price")),
-                            gross_amount: parse_decimal(item.get("gross_amount")),
-                            discount_amount: parse_decimal(item.get("discount_amount")),
-                            net_amount: parse_decimal(item.get("net_amount")),
-                            cgst_rate: parse_decimal(item.get("cgst_rate")),
-                            cgst_amount: parse_decimal(item.get("cgst_amount")),
-                            sgst_rate: parse_decimal(item.get("sgst_rate")),
-                            sgst_amount: parse_decimal(item.get("sgst_amount")),
-                            igst_rate: parse_decimal(item.get("igst_rate")),
-                            igst_amount: parse_decimal(item.get("igst_amount")),
-                            total_tax: parse_decimal(item.get("total_tax")),
-                            total_amount: parse_decimal(item.get("total_amount")),
-                            line_number: item.get("line_number"),
+                            id: item.id,
+                            service_code: item.service_code.clone(),
+                            service_name: item.service_name.clone(),
+                            quantity: parse_decimal(item.quantity.clone()),
+                            unit: item.unit.clone(),
+                            unit_price: parse_decimal(item.unit_price.clone()),
+                            gross_amount: parse_decimal(item.gross_amount.clone()),
+                            discount_amount: parse_decimal(item.discount_amount.clone()),
+                            net_amount: parse_decimal(item.net_amount.clone()),
+                            cgst_rate: parse_decimal(item.cgst_rate.clone()),
+                            cgst_amount: parse_decimal(item.cgst_amount.clone()),
+                            sgst_rate: parse_decimal(item.sgst_rate.clone()),
+                            sgst_amount: parse_decimal(item.sgst_amount.clone()),
+                            igst_rate: parse_decimal(item.igst_rate.clone()),
+                            igst_amount: parse_decimal(item.igst_amount.clone()),
+                            total_tax: parse_decimal(item.total_tax.clone()),
+                            total_amount: parse_decimal(item.total_amount.clone()),
+                            line_number: item.line_number,
                         }
                     }).collect()
                 })
                 .unwrap_or_default();
 
-            let invoice_date: chrono::NaiveDate = row.get("invoice_date");
-            let due_date: Option<chrono::NaiveDate> = row.get("due_date");
-
             let invoice = InvoiceResponse {
-                id: row.get("id"),
-                invoice_number: row.get("invoice_number"),
-                invoice_type: row.get("invoice_type"),
-                invoice_date: invoice_date.to_string(),
-                due_date: due_date.map(|d| d.to_string()),
-                patient_id: row.get("patient_id"),
-                patient_name: row.get("patient_name"),
-                patient_mrn: row.get("patient_mrn"),
-                visit_id: row.get("visit_id"),
-                subtotal: parse_decimal(row.get("subtotal")),
-                discount_amount: parse_decimal(row.get("discount_amount")),
-                taxable_amount: parse_decimal(row.get("taxable_amount")),
-                cgst_amount: parse_decimal(row.get("cgst_amount")),
-                sgst_amount: parse_decimal(row.get("sgst_amount")),
-                igst_amount: parse_decimal(row.get("igst_amount")),
-                total_tax: parse_decimal(row.get("total_tax")),
-                grand_total: parse_decimal(row.get("grand_total")),
-                amount_paid: parse_decimal(row.get("amount_paid")),
-                balance_due: parse_decimal(row.get("balance_due")),
-                status: row.get("status"),
-                is_finalized: row.get("is_finalized"),
+                id: row.id,
+                invoice_number: row.invoice_number.clone(),
+                invoice_type: row.invoice_type.clone(),
+                invoice_date: row.invoice_date.to_string(),
+                due_date: row.due_date.map(|d| d.to_string()),
+                patient_id: row.patient_id,
+                patient_name: row.patient_name.clone(),
+                patient_mrn: row.patient_mrn.clone(),
+                visit_id: row.visit_id,
+                subtotal: parse_decimal(row.subtotal.clone()),
+                discount_amount: parse_decimal(row.discount_amount.clone()),
+                taxable_amount: parse_decimal(row.taxable_amount.clone()),
+                cgst_amount: parse_decimal(row.cgst_amount.clone()),
+                sgst_amount: parse_decimal(row.sgst_amount.clone()),
+                igst_amount: parse_decimal(row.igst_amount.clone()),
+                total_tax: parse_decimal(row.total_tax.clone()),
+                grand_total: parse_decimal(row.grand_total.clone()),
+                amount_paid: parse_decimal(row.amount_paid.clone()),
+                balance_due: parse_decimal(row.balance_due.clone()),
+                status: row.status.clone(),
+                is_finalized: row.is_finalized,
                 items,
             };
 
@@ -339,36 +344,40 @@ pub async fn create_invoice(
     let invoice_number = generate_invoice_number();
     let invoice_date = chrono::Utc::now().date_naive();
     let is_inter_state = req.is_inter_state.unwrap_or(false);
+    let due_date = req
+        .due_date
+        .as_deref()
+        .and_then(|d| chrono::NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         INSERT INTO invoices (
             organization_id, invoice_number, invoice_type, invoice_date, due_date,
             patient_id, patient_name, patient_mrn, visit_id,
             place_of_supply, is_inter_state, notes, status
         )
-        VALUES ($1, $2, $3::invoice_type, $4, $5::date, $6, $7, $8, $9, $10, $11, $12, 'draft'::invoice_status)
+        VALUES ($1, $2, $3::text::invoice_type, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'draft'::invoice_status)
         RETURNING id
-        "#
+        "#,
+        org_id,
+        &invoice_number,
+        &req.invoice_type,
+        invoice_date,
+        due_date,
+        req.patient_id,
+        &req.patient_name,
+        req.patient_mrn.as_deref(),
+        req.visit_id,
+        req.place_of_supply.as_deref(),
+        is_inter_state,
+        req.notes.as_deref()
     )
-    .bind(org_id)
-    .bind(&invoice_number)
-    .bind(&req.invoice_type)
-    .bind(invoice_date)
-    .bind(req.due_date.as_deref())
-    .bind(req.patient_id)
-    .bind(&req.patient_name)
-    .bind(&req.patient_mrn)
-    .bind(req.visit_id)
-    .bind(&req.place_of_supply)
-    .bind(is_inter_state)
-    .bind(&req.notes)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
             (StatusCode::CREATED, Json(serde_json::json!({
                 "id": id,
                 "invoiceNumber": invoice_number,
@@ -406,19 +415,17 @@ pub async fn add_invoice_item(
     let total_amount = net_amount + total_tax;
 
     // Get next line number
-    let line_result = sqlx::query(
-        "SELECT COALESCE(MAX(line_number), 0) + 1 as next_line FROM invoice_items WHERE invoice_id = $1"
+    let line_result = sqlx::query_scalar!(
+        "SELECT COALESCE(MAX(line_number), 0) + 1 as next_line FROM invoice_items WHERE invoice_id = $1",
+        invoice_id
     )
-    .bind(invoice_id)
     .fetch_one(&*state.database_pool)
     .await;
 
-    let line_number: i32 = line_result
-        .map(|r| r.get("next_line"))
-        .unwrap_or(1);
+    let line_number: i32 = line_result.unwrap_or(Some(1)).unwrap_or(1);
 
-    // Use f64 directly - PostgreSQL accepts numeric literals for DECIMAL columns
-    let result = sqlx::query(
+    // Convert f64 to BigDecimal for PostgreSQL DECIMAL columns
+    let result = sqlx::query!(
         r#"
         INSERT INTO invoice_items (
             invoice_id, service_id, service_code, service_name, description, tax_code,
@@ -429,36 +436,36 @@ pub async fn add_invoice_item(
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true,
                 $14, $15, $16, $17, $18, $19, $20, $21, $22)
         RETURNING id
-        "#
+        "#,
+        invoice_id,
+        req.service_id,
+        &req.service_code,
+        &req.service_name,
+        req.description.as_deref(),
+        req.tax_code.as_deref(),
+        to_bd(req.quantity),
+        &unit,
+        to_bd(req.unit_price),
+        to_bd(gross_amount),
+        to_bd(discount_percent),
+        to_bd(discount_amount),
+        to_bd(net_amount),
+        to_bd(cgst_rate),
+        to_bd(cgst_amount),
+        to_bd(sgst_rate),
+        to_bd(sgst_amount),
+        to_bd(igst_rate),
+        to_bd(igst_amount),
+        to_bd(total_tax),
+        to_bd(total_amount),
+        line_number
     )
-    .bind(invoice_id)
-    .bind(req.service_id)
-    .bind(&req.service_code)
-    .bind(&req.service_name)
-    .bind(&req.description)
-    .bind(&req.tax_code)
-    .bind(req.quantity)
-    .bind(&unit)
-    .bind(req.unit_price)
-    .bind(gross_amount)
-    .bind(discount_percent)
-    .bind(discount_amount)
-    .bind(net_amount)
-    .bind(cgst_rate)
-    .bind(cgst_amount)
-    .bind(sgst_rate)
-    .bind(sgst_amount)
-    .bind(igst_rate)
-    .bind(igst_amount)
-    .bind(total_tax)
-    .bind(total_amount)
-    .bind(line_number)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
 
             // Update invoice totals
             let _ = update_invoice_totals(&state, invoice_id).await;
@@ -478,7 +485,7 @@ pub async fn add_invoice_item(
 
 /// Update invoice totals from items
 async fn update_invoice_totals(state: &Arc<AppState>, invoice_id: Uuid) -> Result<(), String> {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE invoices SET
             subtotal = (SELECT COALESCE(SUM(gross_amount), 0) FROM invoice_items WHERE invoice_id = $1),
@@ -491,9 +498,9 @@ async fn update_invoice_totals(state: &Arc<AppState>, invoice_id: Uuid) -> Resul
             balance_due = (SELECT COALESCE(SUM(total_amount), 0) FROM invoice_items WHERE invoice_id = $1) - amount_paid,
             updated_at = NOW()
         WHERE id = $1
-        "#
+        "#,
+        invoice_id
     )
-    .bind(invoice_id)
     .execute(&*state.database_pool)
     .await;
 
@@ -505,7 +512,7 @@ pub async fn finalize_invoice(
     State(state): State<Arc<AppState>>,
     Path(invoice_id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE invoices SET
             status = 'pending'::invoice_status,
@@ -514,9 +521,9 @@ pub async fn finalize_invoice(
             updated_at = NOW()
         WHERE id = $1 AND is_finalized = false
         RETURNING id
-        "#
+        "#,
+        invoice_id
     )
-    .bind(invoice_id)
     .fetch_optional(&*state.database_pool)
     .await;
 
@@ -541,7 +548,7 @@ pub async fn cancel_invoice(
     State(state): State<Arc<AppState>>,
     Path(invoice_id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         UPDATE invoices SET
             status = 'cancelled'::invoice_status,
@@ -549,9 +556,9 @@ pub async fn cancel_invoice(
             updated_at = NOW()
         WHERE id = $1 AND status NOT IN ('paid', 'cancelled')
         RETURNING id
-        "#
+        "#,
+        invoice_id
     )
-    .bind(invoice_id)
     .fetch_optional(&*state.database_pool)
     .await;
 

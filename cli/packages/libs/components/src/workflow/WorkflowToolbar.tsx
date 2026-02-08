@@ -4,15 +4,10 @@
  */
 
 import { memo } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Button,
-  Separator,
-  ScrollArea,
-} from "@lazarus-life/ui-components";
+import { Card, CardContent } from "../components/card";
+import { Button } from "../components/button";
+import { Separator } from "../components/separator";
+import { ScrollArea } from "../components/scroll-area";
 import {
   Play,
   Square,
@@ -40,7 +35,7 @@ import {
 } from "lucide-react";
 import type { NodeType } from "@lazarus-life/shared";
 import { NODE_TEMPLATES } from "@lazarus-life/shared";
-import { cn } from "@lazarus-life/ui-components/utils";
+import { cn } from "../lib/utils";
 
 interface WorkflowToolbarProps {
   onAddNode: (type: NodeType) => void;

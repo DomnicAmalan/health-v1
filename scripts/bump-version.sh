@@ -177,11 +177,12 @@ update_cargo_version() {
         if [[ "$dry_run" == "true" ]]; then
             print_info "backend/Cargo.toml: $current -> $version (dry-run)"
         else
-            # Update version in [workspace.package] section
+            # Update only the first 'version = ' line in [workspace.package] section
+            # Use a more specific pattern to avoid matching rust-version
             if [[ "$(uname)" == "Darwin" ]]; then
-                sed -i '' '/\[workspace.package\]/,/^\[/ s/version = "[^"]*"/version = "'"$version"'"/' "$CARGO_TOML"
+                sed -i '' '/\[workspace.package\]/,/^\[/ s/^version = "[^"]*"/version = "'"$version"'"/' "$CARGO_TOML"
             else
-                sed -i '/\[workspace.package\]/,/^\[/ s/version = "[^"]*"/version = "'"$version"'"/' "$CARGO_TOML"
+                sed -i '/\[workspace.package\]/,/^\[/ s/^version = "[^"]*"/version = "'"$version"'"/' "$CARGO_TOML"
             fi
             print_success "backend/Cargo.toml: $current -> $version"
         fi

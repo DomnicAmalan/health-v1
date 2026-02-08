@@ -178,10 +178,10 @@ pub async fn create_problem(
     let user_id = Uuid::nil();
 
     // Assertion 1: Patient must exist
-    let patient_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM ehr_patients WHERE id = $1 AND deleted_at IS NULL)"
+    let patient_exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM ehr_patients WHERE id = $1 AND deleted_at IS NULL) as "exists!""#,
+        payload.patient_id
     )
-    .bind(payload.patient_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify patient: {}", e)))?;
@@ -193,11 +193,11 @@ pub async fn create_problem(
         )).into());
     }
 
-    // Get patient IEN for denormalization
-    let patient_ien = sqlx::query_scalar::<_, i32>(
-        "SELECT patient_ien FROM ehr_patients WHERE id = $1"
+    // Get patient IEN for denormalization (ehr_patients has column `ien`, not `patient_ien`)
+    let patient_ien = sqlx::query_scalar!(
+        r#"SELECT COALESCE(ien, 0) as "patient_ien!" FROM ehr_patients WHERE id = $1"#,
+        payload.patient_id
     )
-    .bind(payload.patient_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to get patient IEN: {}", e)))?;
@@ -229,8 +229,13 @@ pub async fn create_problem(
         None
     };
 
+    let onset_date_precision = payload.onset_date_precision.unwrap_or_else(|| "day".to_string());
+    let is_chronic = payload.is_chronic.unwrap_or(false);
+    let is_principal_diagnosis = payload.is_principal_diagnosis.unwrap_or(false);
+
     // Create problem
-    let problem = sqlx::query_as::<_, Problem>(
+    let problem = sqlx::query_as!(
+        Problem,
         r#"
         INSERT INTO problem_list (
             organization_id, patient_id, patient_ien, problem_name, problem_code, problem_code_system,
@@ -246,30 +251,40 @@ pub async fn create_problem(
             $17, $18, $19, $20, NOW(),
             $21, $20, $20
         )
-        RETURNING *
-        "#
+        RETURNING
+            id, organization_id, ien, patient_id, patient_ien,
+            problem_name, problem_code, problem_code_system,
+            icd10_code, icd10_description, snomed_code, snomed_description,
+            status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+            encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+            provider_id, provider_name, severity, acuity,
+            is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+            problem_comment, clinical_notes,
+            last_reviewed_date, review_frequency_days,
+            created_at, updated_at, created_by, updated_by, version, deleted_at
+        "#,
+        Uuid::nil(),                                        // $1: organization_id
+        payload.patient_id,                                 // $2: patient_id
+        patient_ien,                                        // $3: patient_ien
+        payload.problem_name,                               // $4: problem_name
+        payload.problem_code.as_deref(),                    // $5: problem_code
+        payload.problem_code_system.as_deref(),             // $6: problem_code_system
+        payload.icd10_code.as_deref(),                      // $7: icd10_code
+        payload.icd10_description.as_deref(),               // $8: icd10_description
+        payload.snomed_code.as_deref(),                     // $9: snomed_code
+        payload.snomed_description.as_deref(),              // $10: snomed_description
+        onset_date,                                         // $11: onset_date
+        onset_date_precision.as_str(),                      // $12: onset_date_precision
+        payload.severity.as_deref(),                        // $13: severity
+        payload.acuity.as_deref(),                          // $14: acuity
+        is_chronic,                                         // $15: is_chronic
+        is_principal_diagnosis,                             // $16: is_principal_diagnosis
+        payload.problem_comment.as_deref(),                 // $17: problem_comment
+        payload.encounter_id,                               // $18: encounter_id
+        payload.provider_id,                                // $19: provider_id
+        user_id,                                            // $20: recorded_by, created_by, updated_by
+        payload.review_frequency_days,                      // $21: review_frequency_days
     )
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
-    .bind(payload.patient_id)
-    .bind(patient_ien)
-    .bind(payload.problem_name)
-    .bind(payload.problem_code)
-    .bind(payload.problem_code_system)
-    .bind(payload.icd10_code)
-    .bind(payload.icd10_description)
-    .bind(payload.snomed_code)
-    .bind(payload.snomed_description)
-    .bind(onset_date)
-    .bind(payload.onset_date_precision.unwrap_or_else(|| "day".to_string()))
-    .bind(payload.severity)
-    .bind(payload.acuity)
-    .bind(payload.is_chronic.unwrap_or(false))
-    .bind(payload.is_principal_diagnosis.unwrap_or(false))
-    .bind(payload.problem_comment)
-    .bind(payload.encounter_id)
-    .bind(payload.provider_id)
-    .bind(user_id)
-    .bind(payload.review_frequency_days)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to create problem: {}", e)))?;
@@ -282,11 +297,28 @@ pub async fn get_problem(
     State(state): State<Arc<AppState>>,
     Path(problem_id): Path<Uuid>,
 ) -> Result<Json<Problem>, ApiError> {
-    let problem = sqlx::query_as::<_, Problem>(
-        "SELECT * FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"
+    let org_id = Uuid::nil(); // Use a system user ID for now - in production, extract from auth middleware
+
+    let problem = sqlx::query_as!(
+        Problem,
+        r#"
+        SELECT
+            id, organization_id, ien, patient_id, patient_ien,
+            problem_name, problem_code, problem_code_system,
+            icd10_code, icd10_description, snomed_code, snomed_description,
+            status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+            encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+            provider_id, provider_name, severity, acuity,
+            is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+            problem_comment, clinical_notes,
+            last_reviewed_date, review_frequency_days,
+            created_at, updated_at, created_by, updated_by, version, deleted_at
+        FROM problem_list
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
+        "#,
+        problem_id,
+        org_id
     )
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch problem: {}", e)))?
@@ -305,70 +337,44 @@ pub async fn list_problems(
     const MAX_LIMIT: i64 = 1000;
     let limit = params.limit.min(MAX_LIMIT);
 
-    // Build dynamic query
-    let mut conditions: Vec<String> = vec![
-        "deleted_at IS NULL".to_string(),
-        "organization_id = $1".to_string()
-    ];
-    let mut bind_count = 2;
+    let org_id = Uuid::nil(); // Use a system user ID for now - in production, extract from auth middleware
 
-    if params.patient_id.is_some() {
-        conditions.push(format!("patient_id = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.status.is_some() {
-        conditions.push(format!("status = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.is_chronic.is_some() {
-        conditions.push(format!("is_chronic = ${}", bind_count));
-        bind_count += 1;
-    }
-    if params.icd10_code.is_some() {
-        conditions.push(format!("icd10_code = ${}", bind_count));
-        bind_count += 1;
-    }
-
-    let where_clause = conditions.join(" AND ");
-    let query = format!(
-        "SELECT * FROM problem_list WHERE {} ORDER BY recorded_datetime DESC LIMIT ${} OFFSET ${}",
-        where_clause, bind_count, bind_count + 1
-    );
-    let count_query = format!(
-        "SELECT COUNT(*) FROM problem_list WHERE {}",
-        where_clause
-    );
-
-    // Build query with parameters
-    // Use a system user ID for now - in production, extract from auth middleware
-    let mut query_builder = sqlx::query_as::<_, Problem>(&query)
-        .bind(Uuid::nil());
-    let mut count_builder = sqlx::query_scalar::<_, i64>(&count_query)
-        .bind(Uuid::nil());
-
-    if let Some(patient_id) = params.patient_id {
-        query_builder = query_builder.bind(patient_id);
-        count_builder = count_builder.bind(patient_id);
-    }
-    if let Some(ref status) = params.status {
-        query_builder = query_builder.bind(status);
-        count_builder = count_builder.bind(status);
-    }
-    if let Some(is_chronic) = params.is_chronic {
-        query_builder = query_builder.bind(is_chronic);
-        count_builder = count_builder.bind(is_chronic);
-    }
-    if let Some(ref icd10_code) = params.icd10_code {
-        query_builder = query_builder.bind(icd10_code);
-        count_builder = count_builder.bind(icd10_code);
-    }
-
-    query_builder = query_builder.bind(limit).bind(params.offset);
-
-    // Execute with 5s timeout
+    // Execute with 5s timeout - using NULL-check pattern for optional filters
     let problems = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        query_builder.fetch_all(state.database_pool.as_ref())
+        sqlx::query_as!(
+            Problem,
+            r#"
+            SELECT
+                id, organization_id, ien, patient_id, patient_ien,
+                problem_name, problem_code, problem_code_system,
+                icd10_code, icd10_description, snomed_code, snomed_description,
+                status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+                encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+                provider_id, provider_name, severity, acuity,
+                is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+                problem_comment, clinical_notes,
+                last_reviewed_date, review_frequency_days,
+                created_at, updated_at, created_by, updated_by, version, deleted_at
+            FROM problem_list
+            WHERE deleted_at IS NULL
+              AND organization_id = $1
+              AND ($2::uuid IS NULL OR patient_id = $2)
+              AND ($3::text IS NULL OR status = $3)
+              AND ($4::bool IS NULL OR is_chronic = $4)
+              AND ($5::text IS NULL OR icd10_code = $5)
+            ORDER BY recorded_datetime DESC
+            LIMIT $6 OFFSET $7
+            "#,
+            org_id,
+            params.patient_id,
+            params.status.as_deref(),
+            params.is_chronic,
+            params.icd10_code.as_deref(),
+            limit,
+            params.offset
+        )
+        .fetch_all(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Query timed out".to_string()))?
@@ -376,7 +382,24 @@ pub async fn list_problems(
 
     let total = tokio::time::timeout(
         std::time::Duration::from_secs(5),
-        count_builder.fetch_one(state.database_pool.as_ref())
+        sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!"
+            FROM problem_list
+            WHERE deleted_at IS NULL
+              AND organization_id = $1
+              AND ($2::uuid IS NULL OR patient_id = $2)
+              AND ($3::text IS NULL OR status = $3)
+              AND ($4::bool IS NULL OR is_chronic = $4)
+              AND ($5::text IS NULL OR icd10_code = $5)
+            "#,
+            org_id,
+            params.patient_id,
+            params.status.as_deref(),
+            params.is_chronic,
+            params.icd10_code.as_deref()
+        )
+        .fetch_one(state.database_pool.as_ref())
     )
     .await
     .map_err(|_| AppError::Timeout("Query timed out".to_string()))?
@@ -399,13 +422,14 @@ pub async fn update_problem(
 ) -> Result<Json<Problem>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let org_id = Uuid::nil();
 
     // Assertion 1: Problem must exist
-    let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL)"
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL) as "exists!""#,
+        problem_id,
+        org_id
     )
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify problem: {}", e)))?;
@@ -414,102 +438,63 @@ pub async fn update_problem(
         return Err(AppError::NotFound(format!("Problem {} not found", problem_id)).into());
     }
 
-    // Build dynamic update query
-    let mut query = String::from("UPDATE problem_list SET updated_by = $1, updated_at = NOW()");
-    let mut param_count = 2;
+    // Parse last_reviewed_date if provided
+    let last_reviewed_date = if let Some(ref date_str) = payload.last_reviewed_date {
+        Some(chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+            .map_err(|e| AppError::Validation(format!("Invalid last_reviewed_date format: {}", e)))?)
+    } else {
+        None
+    };
 
-    if payload.problem_name.is_some() {
-        query.push_str(&format!(", problem_name = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.icd10_code.is_some() {
-        query.push_str(&format!(", icd10_code = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.icd10_description.is_some() {
-        query.push_str(&format!(", icd10_description = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.snomed_code.is_some() {
-        query.push_str(&format!(", snomed_code = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.snomed_description.is_some() {
-        query.push_str(&format!(", snomed_description = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.status.is_some() {
-        query.push_str(&format!(", status = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.severity.is_some() {
-        query.push_str(&format!(", severity = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.acuity.is_some() {
-        query.push_str(&format!(", acuity = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.is_chronic.is_some() {
-        query.push_str(&format!(", is_chronic = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.problem_comment.is_some() {
-        query.push_str(&format!(", problem_comment = ${}", param_count));
-        param_count += 1;
-    }
-    if payload.last_reviewed_date.is_some() {
-        query.push_str(&format!(", last_reviewed_date = ${}::date", param_count));
-        param_count += 1;
-    }
-
-    query.push_str(&format!(" WHERE id = ${} AND organization_id = ${} AND deleted_at IS NULL RETURNING *", param_count, param_count + 1));
-
-    let mut query_builder = sqlx::query_as::<_, Problem>(&query)
-        .bind(user_id)
-        .bind(problem_id);
-
-    if let Some(problem_name) = payload.problem_name {
-        query_builder = query_builder.bind(problem_name);
-    }
-    if let Some(icd10_code) = payload.icd10_code {
-        query_builder = query_builder.bind(icd10_code);
-    }
-    if let Some(icd10_description) = payload.icd10_description {
-        query_builder = query_builder.bind(icd10_description);
-    }
-    if let Some(snomed_code) = payload.snomed_code {
-        query_builder = query_builder.bind(snomed_code);
-    }
-    if let Some(snomed_description) = payload.snomed_description {
-        query_builder = query_builder.bind(snomed_description);
-    }
-    if let Some(status) = payload.status {
-        query_builder = query_builder.bind(status);
-    }
-    if let Some(severity) = payload.severity {
-        query_builder = query_builder.bind(severity);
-    }
-    if let Some(acuity) = payload.acuity {
-        query_builder = query_builder.bind(acuity);
-    }
-    if let Some(is_chronic) = payload.is_chronic {
-        query_builder = query_builder.bind(is_chronic);
-    }
-    if let Some(problem_comment) = payload.problem_comment {
-        query_builder = query_builder.bind(problem_comment);
-    }
-    if let Some(last_reviewed_date) = payload.last_reviewed_date {
-        query_builder = query_builder.bind(last_reviewed_date);
-    }
-
-    // Use a system user ID for now - in production, extract from auth middleware
-    query_builder = query_builder.bind(Uuid::nil());
-
-    let problem = query_builder
-        .fetch_one(state.database_pool.as_ref())
-        .await
-        .map_err(|e| AppError::Internal(format!("Failed to update problem: {}", e)))?;
+    // COALESCE pattern: only update fields that are provided, keep existing values otherwise
+    let problem = sqlx::query_as!(
+        Problem,
+        r#"
+        UPDATE problem_list SET
+            problem_name = COALESCE($1, problem_name),
+            icd10_code = COALESCE($2, icd10_code),
+            icd10_description = COALESCE($3, icd10_description),
+            snomed_code = COALESCE($4, snomed_code),
+            snomed_description = COALESCE($5, snomed_description),
+            status = COALESCE($6, status),
+            severity = COALESCE($7, severity),
+            acuity = COALESCE($8, acuity),
+            is_chronic = COALESCE($9, is_chronic),
+            problem_comment = COALESCE($10, problem_comment),
+            last_reviewed_date = COALESCE($11::date, last_reviewed_date),
+            updated_by = $12,
+            updated_at = NOW()
+        WHERE id = $13 AND organization_id = $14 AND deleted_at IS NULL
+        RETURNING
+            id, organization_id, ien, patient_id, patient_ien,
+            problem_name, problem_code, problem_code_system,
+            icd10_code, icd10_description, snomed_code, snomed_description,
+            status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+            encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+            provider_id, provider_name, severity, acuity,
+            is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+            problem_comment, clinical_notes,
+            last_reviewed_date, review_frequency_days,
+            created_at, updated_at, created_by, updated_by, version, deleted_at
+        "#,
+        payload.problem_name.as_deref(),          // $1
+        payload.icd10_code.as_deref(),            // $2
+        payload.icd10_description.as_deref(),     // $3
+        payload.snomed_code.as_deref(),           // $4
+        payload.snomed_description.as_deref(),    // $5
+        payload.status.as_deref(),                // $6
+        payload.severity.as_deref(),              // $7
+        payload.acuity.as_deref(),                // $8
+        payload.is_chronic,                       // $9
+        payload.problem_comment.as_deref(),       // $10
+        last_reviewed_date,                       // $11
+        user_id,                                  // $12
+        problem_id,                               // $13
+        org_id                                    // $14
+    )
+    .fetch_one(state.database_pool.as_ref())
+    .await
+    .map_err(|e| AppError::Internal(format!("Failed to update problem: {}", e)))?;
 
     // Assertion 2: Verify update succeeded
     debug_assert_eq!(problem.id, problem_id, "Problem ID mismatch after update");
@@ -526,13 +511,29 @@ pub async fn resolve_problem(
 ) -> Result<Json<Problem>, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let org_id = Uuid::nil();
 
     // Assertion 1: Fetch current problem and validate status
-    let current_problem = sqlx::query_as::<_, Problem>(
-        "SELECT * FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"
+    let current_problem = sqlx::query_as!(
+        Problem,
+        r#"
+        SELECT
+            id, organization_id, ien, patient_id, patient_ien,
+            problem_name, problem_code, problem_code_system,
+            icd10_code, icd10_description, snomed_code, snomed_description,
+            status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+            encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+            provider_id, provider_name, severity, acuity,
+            is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+            problem_comment, clinical_notes,
+            last_reviewed_date, review_frequency_days,
+            created_at, updated_at, created_by, updated_by, version, deleted_at
+        FROM problem_list
+        WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL
+        "#,
+        problem_id,
+        org_id
     )
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_optional(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch problem: {}", e)))?
@@ -543,7 +544,8 @@ pub async fn resolve_problem(
     }
 
     // Update to resolved status
-    let problem = sqlx::query_as::<_, Problem>(
+    let problem = sqlx::query_as!(
+        Problem,
         r#"
         UPDATE problem_list
         SET status = 'resolved',
@@ -552,13 +554,23 @@ pub async fn resolve_problem(
             updated_by = $2,
             updated_at = NOW()
         WHERE id = $3 AND organization_id = $4 AND deleted_at IS NULL
-        RETURNING *
-        "#
+        RETURNING
+            id, organization_id, ien, patient_id, patient_ien,
+            problem_name, problem_code, problem_code_system,
+            icd10_code, icd10_description, snomed_code, snomed_description,
+            status, onset_date, onset_date_precision, resolved_date, resolved_reason,
+            encounter_id, recorded_by, recorded_by_name, recorded_datetime,
+            provider_id, provider_name, severity, acuity,
+            is_chronic as "is_chronic!", is_principal_diagnosis as "is_principal_diagnosis!",
+            problem_comment, clinical_notes,
+            last_reviewed_date, review_frequency_days,
+            created_at, updated_at, created_by, updated_by, version, deleted_at
+        "#,
+        payload.resolved_reason.as_deref(),   // $1
+        user_id,                               // $2
+        problem_id,                            // $3
+        org_id                                 // $4
     )
-    .bind(payload.resolved_reason)
-    .bind(user_id)
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to resolve problem: {}", e)))?;
@@ -576,13 +588,18 @@ pub async fn delete_problem(
 ) -> Result<StatusCode, ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let org_id = Uuid::nil();
 
-    let result = sqlx::query(
-        "UPDATE problem_list SET deleted_at = NOW(), updated_by = $1 WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL"
+    let result = sqlx::query!(
+        r#"
+        UPDATE problem_list
+        SET deleted_at = NOW(), updated_by = $1
+        WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL
+        "#,
+        user_id,
+        problem_id,
+        org_id
     )
-    .bind(user_id)
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .execute(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to delete problem: {}", e)))?;
@@ -602,13 +619,14 @@ pub async fn add_problem_comment(
 ) -> Result<(StatusCode, Json<ProblemComment>), ApiError> {
     // Use a system user ID for now - in production, extract from auth middleware
     let user_id = Uuid::nil();
+    let org_id = Uuid::nil();
 
     // Validate problem exists
-    let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL)"
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL) as "exists!""#,
+        problem_id,
+        org_id
     )
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify problem: {}", e)))?;
@@ -618,19 +636,22 @@ pub async fn add_problem_comment(
     }
 
     // Create comment
-    let comment = sqlx::query_as::<_, ProblemComment>(
+    let comment = sqlx::query_as!(
+        ProblemComment,
         r#"
         INSERT INTO problem_comments (
             problem_id, comment_text, author_id, encounter_id
         )
         VALUES ($1, $2, $3, $4)
-        RETURNING *
-        "#
+        RETURNING
+            id, problem_id, comment_text, author_id, author_name,
+            comment_datetime, encounter_id
+        "#,
+        problem_id,          // $1
+        payload.comment_text, // $2
+        user_id,             // $3
+        payload.encounter_id  // $4
     )
-    .bind(problem_id)
-    .bind(payload.comment_text)
-    .bind(user_id)
-    .bind(payload.encounter_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to add comment: {}", e)))?;
@@ -643,12 +664,14 @@ pub async fn list_problem_history(
     State(state): State<Arc<AppState>>,
     Path(problem_id): Path<Uuid>,
 ) -> Result<Json<Vec<ProblemHistory>>, ApiError> {
+    let org_id = Uuid::nil(); // Use a system user ID for now - in production, extract from auth middleware
+
     // Validate problem exists and belongs to organization
-    let exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2)"
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM problem_list WHERE id = $1 AND organization_id = $2) as "exists!""#,
+        problem_id,
+        org_id
     )
-    .bind(problem_id)
-    .bind(Uuid::nil()) // Use a system user ID for now - in production, extract from auth middleware
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to verify problem: {}", e)))?;
@@ -657,10 +680,18 @@ pub async fn list_problem_history(
         return Err(AppError::NotFound(format!("Problem {} not found", problem_id)).into());
     }
 
-    let history = sqlx::query_as::<_, ProblemHistory>(
-        "SELECT * FROM problem_history WHERE problem_id = $1 ORDER BY changed_datetime DESC"
+    let history = sqlx::query_as!(
+        ProblemHistory,
+        r#"
+        SELECT
+            id, problem_id, previous_status, new_status, change_reason,
+            changed_by, changed_by_name, changed_datetime, encounter_id
+        FROM problem_history
+        WHERE problem_id = $1
+        ORDER BY changed_datetime DESC
+        "#,
+        problem_id
     )
-    .bind(problem_id)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| AppError::Internal(format!("Failed to fetch history: {}", e)))?;

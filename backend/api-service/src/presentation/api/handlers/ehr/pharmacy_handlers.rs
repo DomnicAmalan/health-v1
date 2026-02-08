@@ -13,7 +13,6 @@ use axum::{
     Json,
 };
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -196,7 +195,7 @@ pub struct PharmacyErrorResponse {
 pub async fn list_catalogs(
     State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT id, catalog_code, catalog_name, catalog_version, country_code,
                regulatory_body, is_primary, is_active
@@ -211,14 +210,14 @@ pub async fn list_catalogs(
     match result {
         Ok(rows) => {
             let catalogs: Vec<DrugCatalogResponse> = rows.iter().map(|r| DrugCatalogResponse {
-                id: r.get("id"),
-                catalog_code: r.get("catalog_code"),
-                catalog_name: r.get("catalog_name"),
-                catalog_version: r.get("catalog_version"),
-                country_code: r.get("country_code"),
-                regulatory_body: r.get("regulatory_body"),
-                is_primary: r.get("is_primary"),
-                is_active: r.get("is_active"),
+                id: r.id,
+                catalog_code: r.catalog_code.clone(),
+                catalog_name: r.catalog_name.clone(),
+                catalog_version: r.catalog_version.clone(),
+                country_code: r.country_code.clone(),
+                regulatory_body: r.regulatory_body.clone(),
+                is_primary: r.is_primary,
+                is_active: r.is_active,
             }).collect();
             (StatusCode::OK, Json(catalogs)).into_response()
         }
@@ -246,20 +245,21 @@ pub async fn search_drugs(
     let search_term = format!("%{}%", query.q.to_lowercase());
     let formulary_only = query.formulary_only.unwrap_or(false);
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
             dm.id, dm.drug_code, dm.generic_name, dm.brand_names,
             dm.therapeutic_class, dm.pharmacological_class,
-            dm.atc_code, dm.rxnorm_code, dm.form::text as form, dm.route::text as route,
+            dm.atc_code, dm.rxnorm_code, dm.form::text as "form!", dm.route::text as "route!",
             dm.strength, dm.strength_unit, dm.usual_dose, dm.max_daily_dose,
             dm.pediatric_dose, dm.geriatric_dose, dm.pregnancy_category,
             dm.lactation_safe, dm.renal_adjustment_required, dm.hepatic_adjustment_required,
             dm.storage_conditions, dm.is_formulary,
-            ds.id as schedule_id, ds.schedule_code, ds.schedule_name,
-            ds.schedule_type::text as schedule_type, ds.description as schedule_description,
-            ds.prescriber_requirements, ds.dispensing_requirements,
-            ds.record_keeping_days, ds.refill_allowed, ds.max_refills, ds.max_quantity_days
+            ds.id as "schedule_id?", ds.schedule_code as "schedule_code?", ds.schedule_name as "schedule_name?",
+            ds.schedule_type::text as "schedule_type", ds.description as "schedule_description",
+            ds.prescriber_requirements as "prescriber_requirements?", ds.dispensing_requirements as "dispensing_requirements?",
+            ds.record_keeping_days as "record_keeping_days?", ds.refill_allowed as "refill_allowed?",
+            ds.max_refills as "max_refills?", ds.max_quantity_days as "max_quantity_days?"
         FROM drug_master dm
         LEFT JOIN drug_schedules ds ON dm.schedule_id = ds.id
         WHERE dm.is_active = true
@@ -277,58 +277,57 @@ pub async fn search_drugs(
             CASE WHEN LOWER(dm.generic_name) = LOWER($3) THEN 0 ELSE 1 END,
             dm.generic_name ASC
         LIMIT $4
-        "#
+        "#,
+        &search_term,
+        formulary_only,
+        &query.q,
+        limit
     )
-    .bind(&search_term)
-    .bind(formulary_only)
-    .bind(&query.q)
-    .bind(limit)
     .fetch_all(&*state.database_pool)
     .await;
 
     match result {
         Ok(rows) => {
             let drugs: Vec<DrugResponse> = rows.iter().map(|r| {
-                let schedule_id: Option<Uuid> = r.get("schedule_id");
-                let schedule = schedule_id.map(|sid| {
+                let schedule = r.schedule_id.map(|sid| {
                     DrugScheduleResponse {
                         id: sid,
-                        schedule_code: r.get::<Option<String>, _>("schedule_code").unwrap_or_default(),
-                        schedule_name: r.get::<Option<String>, _>("schedule_name").unwrap_or_default(),
-                        schedule_type: r.get::<Option<String>, _>("schedule_type").unwrap_or_default(),
-                        description: r.get("schedule_description"),
-                        prescriber_requirements: r.get("prescriber_requirements"),
-                        dispensing_requirements: r.get("dispensing_requirements"),
-                        record_keeping_days: r.get("record_keeping_days"),
-                        refill_allowed: r.get::<Option<bool>, _>("refill_allowed").unwrap_or(true),
-                        max_refills: r.get("max_refills"),
-                        max_quantity_days: r.get("max_quantity_days"),
+                        schedule_code: r.schedule_code.clone().unwrap_or_default(),
+                        schedule_name: r.schedule_name.clone().unwrap_or_default(),
+                        schedule_type: r.schedule_type.clone().unwrap_or_default(),
+                        description: r.schedule_description.clone(),
+                        prescriber_requirements: r.prescriber_requirements.clone(),
+                        dispensing_requirements: r.dispensing_requirements.clone(),
+                        record_keeping_days: r.record_keeping_days,
+                        refill_allowed: r.refill_allowed.unwrap_or(true),
+                        max_refills: r.max_refills,
+                        max_quantity_days: r.max_quantity_days,
                     }
                 });
 
                 DrugResponse {
-                    id: r.get("id"),
-                    drug_code: r.get("drug_code"),
-                    generic_name: r.get("generic_name"),
-                    brand_names: r.get::<Option<Vec<String>>, _>("brand_names").unwrap_or_default(),
-                    therapeutic_class: r.get("therapeutic_class"),
-                    pharmacological_class: r.get("pharmacological_class"),
-                    atc_code: r.get("atc_code"),
-                    rxnorm_code: r.get("rxnorm_code"),
-                    form: r.get::<Option<String>, _>("form").unwrap_or_default(),
-                    route: r.get::<Option<String>, _>("route").unwrap_or_default(),
-                    strength: r.get("strength"),
-                    strength_unit: r.get("strength_unit"),
-                    usual_dose: r.get("usual_dose"),
-                    max_daily_dose: r.get("max_daily_dose"),
-                    pediatric_dose: r.get("pediatric_dose"),
-                    geriatric_dose: r.get("geriatric_dose"),
-                    pregnancy_category: r.get("pregnancy_category"),
-                    lactation_safe: r.get("lactation_safe"),
-                    renal_adjustment_required: r.get::<Option<bool>, _>("renal_adjustment_required").unwrap_or(false),
-                    hepatic_adjustment_required: r.get::<Option<bool>, _>("hepatic_adjustment_required").unwrap_or(false),
-                    storage_conditions: r.get("storage_conditions"),
-                    is_formulary: r.get("is_formulary"),
+                    id: r.id,
+                    drug_code: r.drug_code.clone(),
+                    generic_name: r.generic_name.clone(),
+                    brand_names: r.brand_names.clone().unwrap_or_default(),
+                    therapeutic_class: r.therapeutic_class.clone(),
+                    pharmacological_class: r.pharmacological_class.clone(),
+                    atc_code: r.atc_code.clone(),
+                    rxnorm_code: r.rxnorm_code.clone(),
+                    form: r.form.clone(),
+                    route: r.route.clone(),
+                    strength: r.strength.clone(),
+                    strength_unit: r.strength_unit.clone(),
+                    usual_dose: r.usual_dose.clone(),
+                    max_daily_dose: r.max_daily_dose.clone(),
+                    pediatric_dose: r.pediatric_dose.clone(),
+                    geriatric_dose: r.geriatric_dose.clone(),
+                    pregnancy_category: r.pregnancy_category.clone(),
+                    lactation_safe: r.lactation_safe,
+                    renal_adjustment_required: r.renal_adjustment_required.unwrap_or(false),
+                    hepatic_adjustment_required: r.hepatic_adjustment_required.unwrap_or(false),
+                    storage_conditions: r.storage_conditions.clone(),
+                    is_formulary: r.is_formulary,
                     schedule,
                 }
             }).collect();
@@ -361,71 +360,71 @@ pub async fn get_drug(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
             dm.id, dm.drug_code, dm.generic_name, dm.brand_names,
             dm.therapeutic_class, dm.pharmacological_class,
-            dm.atc_code, dm.rxnorm_code, dm.form::text as form, dm.route::text as route,
+            dm.atc_code, dm.rxnorm_code, dm.form::text as "form!", dm.route::text as "route!",
             dm.strength, dm.strength_unit, dm.usual_dose, dm.max_daily_dose,
             dm.pediatric_dose, dm.geriatric_dose, dm.pregnancy_category,
             dm.lactation_safe, dm.renal_adjustment_required, dm.hepatic_adjustment_required,
             dm.storage_conditions, dm.is_formulary,
-            ds.id as schedule_id, ds.schedule_code, ds.schedule_name,
-            ds.schedule_type::text as schedule_type, ds.description as schedule_description,
-            ds.prescriber_requirements, ds.dispensing_requirements,
-            ds.record_keeping_days, ds.refill_allowed, ds.max_refills, ds.max_quantity_days
+            ds.id as "schedule_id?", ds.schedule_code as "schedule_code?", ds.schedule_name as "schedule_name?",
+            ds.schedule_type::text as "schedule_type", ds.description as "schedule_description",
+            ds.prescriber_requirements as "prescriber_requirements?", ds.dispensing_requirements as "dispensing_requirements?",
+            ds.record_keeping_days as "record_keeping_days?", ds.refill_allowed as "refill_allowed?",
+            ds.max_refills as "max_refills?", ds.max_quantity_days as "max_quantity_days?"
         FROM drug_master dm
         LEFT JOIN drug_schedules ds ON dm.schedule_id = ds.id
         WHERE dm.id = $1 AND dm.is_active = true
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_optional(&*state.database_pool)
     .await;
 
     match result {
         Ok(Some(r)) => {
-            let schedule_id: Option<Uuid> = r.get("schedule_id");
-            let schedule = schedule_id.map(|sid| {
+            let schedule = r.schedule_id.map(|sid| {
                 DrugScheduleResponse {
                     id: sid,
-                    schedule_code: r.get::<Option<String>, _>("schedule_code").unwrap_or_default(),
-                    schedule_name: r.get::<Option<String>, _>("schedule_name").unwrap_or_default(),
-                    schedule_type: r.get::<Option<String>, _>("schedule_type").unwrap_or_default(),
-                    description: r.get("schedule_description"),
-                    prescriber_requirements: r.get("prescriber_requirements"),
-                    dispensing_requirements: r.get("dispensing_requirements"),
-                    record_keeping_days: r.get("record_keeping_days"),
-                    refill_allowed: r.get::<Option<bool>, _>("refill_allowed").unwrap_or(true),
-                    max_refills: r.get("max_refills"),
-                    max_quantity_days: r.get("max_quantity_days"),
+                    schedule_code: r.schedule_code.clone().unwrap_or_default(),
+                    schedule_name: r.schedule_name.clone().unwrap_or_default(),
+                    schedule_type: r.schedule_type.clone().unwrap_or_default(),
+                    description: r.schedule_description.clone(),
+                    prescriber_requirements: r.prescriber_requirements.clone(),
+                    dispensing_requirements: r.dispensing_requirements.clone(),
+                    record_keeping_days: r.record_keeping_days,
+                    refill_allowed: r.refill_allowed.unwrap_or(true),
+                    max_refills: r.max_refills,
+                    max_quantity_days: r.max_quantity_days,
                 }
             });
 
             let drug = DrugResponse {
-                id: r.get("id"),
-                drug_code: r.get("drug_code"),
-                generic_name: r.get("generic_name"),
-                brand_names: r.get::<Option<Vec<String>>, _>("brand_names").unwrap_or_default(),
-                therapeutic_class: r.get("therapeutic_class"),
-                pharmacological_class: r.get("pharmacological_class"),
-                atc_code: r.get("atc_code"),
-                rxnorm_code: r.get("rxnorm_code"),
-                form: r.get::<Option<String>, _>("form").unwrap_or_default(),
-                route: r.get::<Option<String>, _>("route").unwrap_or_default(),
-                strength: r.get("strength"),
-                strength_unit: r.get("strength_unit"),
-                usual_dose: r.get("usual_dose"),
-                max_daily_dose: r.get("max_daily_dose"),
-                pediatric_dose: r.get("pediatric_dose"),
-                geriatric_dose: r.get("geriatric_dose"),
-                pregnancy_category: r.get("pregnancy_category"),
-                lactation_safe: r.get("lactation_safe"),
-                renal_adjustment_required: r.get::<Option<bool>, _>("renal_adjustment_required").unwrap_or(false),
-                hepatic_adjustment_required: r.get::<Option<bool>, _>("hepatic_adjustment_required").unwrap_or(false),
-                storage_conditions: r.get("storage_conditions"),
-                is_formulary: r.get("is_formulary"),
+                id: r.id,
+                drug_code: r.drug_code.clone(),
+                generic_name: r.generic_name.clone(),
+                brand_names: r.brand_names.clone().unwrap_or_default(),
+                therapeutic_class: r.therapeutic_class.clone(),
+                pharmacological_class: r.pharmacological_class.clone(),
+                atc_code: r.atc_code.clone(),
+                rxnorm_code: r.rxnorm_code.clone(),
+                form: r.form.clone(),
+                route: r.route.clone(),
+                strength: r.strength.clone(),
+                strength_unit: r.strength_unit.clone(),
+                usual_dose: r.usual_dose.clone(),
+                max_daily_dose: r.max_daily_dose.clone(),
+                pediatric_dose: r.pediatric_dose.clone(),
+                geriatric_dose: r.geriatric_dose.clone(),
+                pregnancy_category: r.pregnancy_category.clone(),
+                lactation_safe: r.lactation_safe,
+                renal_adjustment_required: r.renal_adjustment_required.unwrap_or(false),
+                hepatic_adjustment_required: r.hepatic_adjustment_required.unwrap_or(false),
+                storage_conditions: r.storage_conditions.clone(),
+                is_formulary: r.is_formulary,
                 schedule,
             };
             (StatusCode::OK, Json(drug)).into_response()
@@ -459,13 +458,13 @@ pub async fn get_drug_interactions(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
             di.id,
-            di.drug_id_1, dm1.generic_name as drug1_name,
-            di.drug_id_2, dm2.generic_name as drug2_name,
-            di.severity::text as severity,
+            di.drug_id_1, dm1.generic_name as "drug1_name!",
+            di.drug_id_2, dm2.generic_name as "drug2_name!",
+            di.severity::text as "severity!",
             di.interaction_type, di.mechanism,
             di.clinical_effect, di.management, di.evidence_level
         FROM drug_interactions di
@@ -481,9 +480,9 @@ pub async fn get_drug_interactions(
                 WHEN 'minor' THEN 4
                 ELSE 5
             END
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -491,17 +490,17 @@ pub async fn get_drug_interactions(
         Ok(rows) => {
             let interactions: Vec<DrugInteractionResponse> = rows.iter().map(|r| {
                 DrugInteractionResponse {
-                    id: r.get("id"),
-                    drug1_id: r.get("drug_id_1"),
-                    drug1_name: r.get::<Option<String>, _>("drug1_name").unwrap_or_default(),
-                    drug2_id: r.get("drug_id_2"),
-                    drug2_name: r.get::<Option<String>, _>("drug2_name").unwrap_or_default(),
-                    severity: r.get::<Option<String>, _>("severity").unwrap_or_default(),
-                    interaction_type: r.get("interaction_type"),
-                    mechanism: r.get("mechanism"),
-                    clinical_effect: r.get("clinical_effect"),
-                    management: r.get("management"),
-                    evidence_level: r.get("evidence_level"),
+                    id: r.id,
+                    drug1_id: r.drug_id_1,
+                    drug1_name: r.drug1_name.clone(),
+                    drug2_id: r.drug_id_2,
+                    drug2_name: r.drug2_name.clone(),
+                    severity: r.severity.clone(),
+                    interaction_type: r.interaction_type.clone(),
+                    mechanism: r.mechanism.clone(),
+                    clinical_effect: r.clinical_effect.clone(),
+                    management: r.management.clone(),
+                    evidence_level: r.evidence_level.clone(),
                 }
             }).collect();
             (StatusCode::OK, Json(interactions)).into_response()
@@ -526,11 +525,11 @@ pub async fn get_drug_contraindications(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
             id, drug_id, contraindication_type, condition_code,
-            condition_name, description, severity::text as severity,
+            condition_name, description, severity::text as "severity!",
             alternative_recommendation
         FROM drug_contraindications
         WHERE drug_id = $1 AND is_active = true
@@ -541,9 +540,9 @@ pub async fn get_drug_contraindications(
                 WHEN 'moderate' THEN 3
                 ELSE 4
             END
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -551,14 +550,14 @@ pub async fn get_drug_contraindications(
         Ok(rows) => {
             let contraindications: Vec<ContraindicationResponse> = rows.iter().map(|r| {
                 ContraindicationResponse {
-                    id: r.get("id"),
-                    drug_id: r.get("drug_id"),
-                    contraindication_type: r.get("contraindication_type"),
-                    condition_code: r.get("condition_code"),
-                    condition_name: r.get("condition_name"),
-                    description: r.get("description"),
-                    severity: r.get::<Option<String>, _>("severity").unwrap_or_default(),
-                    alternative_recommendation: r.get("alternative_recommendation"),
+                    id: r.id,
+                    drug_id: r.drug_id,
+                    contraindication_type: r.contraindication_type.clone(),
+                    condition_code: r.condition_code.clone(),
+                    condition_name: r.condition_name.clone(),
+                    description: r.description.clone(),
+                    severity: r.severity.clone(),
+                    alternative_recommendation: r.alternative_recommendation.clone(),
                 }
             }).collect();
             (StatusCode::OK, Json(contraindications)).into_response()
@@ -596,13 +595,13 @@ pub async fn check_interactions(
     let include_minor = request.include_minor.unwrap_or(false);
 
     // Check drug-drug interactions
-    let interactions_result = sqlx::query(
+    let interactions_result = sqlx::query!(
         r#"
         SELECT
             di.id,
-            di.drug_id_1, dm1.generic_name as drug1_name,
-            di.drug_id_2, dm2.generic_name as drug2_name,
-            di.severity::text as severity,
+            di.drug_id_1, dm1.generic_name as "drug1_name!",
+            di.drug_id_2, dm2.generic_name as "drug2_name!",
+            di.severity::text as "severity!",
             di.interaction_type, di.mechanism,
             di.clinical_effect, di.management, di.evidence_level
         FROM drug_interactions di
@@ -619,26 +618,26 @@ pub async fn check_interactions(
                 WHEN 'minor' THEN 4
                 ELSE 5
             END
-        "#
+        "#,
+        &request.drug_ids as &[Uuid],
+        include_minor
     )
-    .bind(&request.drug_ids)
-    .bind(include_minor)
     .fetch_all(&*state.database_pool)
     .await;
 
     let drug_interactions: Vec<DrugInteractionResponse> = match interactions_result {
         Ok(rows) => rows.iter().map(|r| DrugInteractionResponse {
-            id: r.get("id"),
-            drug1_id: r.get("drug_id_1"),
-            drug1_name: r.get::<Option<String>, _>("drug1_name").unwrap_or_default(),
-            drug2_id: r.get("drug_id_2"),
-            drug2_name: r.get::<Option<String>, _>("drug2_name").unwrap_or_default(),
-            severity: r.get::<Option<String>, _>("severity").unwrap_or_default(),
-            interaction_type: r.get("interaction_type"),
-            mechanism: r.get("mechanism"),
-            clinical_effect: r.get("clinical_effect"),
-            management: r.get("management"),
-            evidence_level: r.get("evidence_level"),
+            id: r.id,
+            drug1_id: r.drug_id_1,
+            drug1_name: r.drug1_name.clone(),
+            drug2_id: r.drug_id_2,
+            drug2_name: r.drug2_name.clone(),
+            severity: r.severity.clone(),
+            interaction_type: r.interaction_type.clone(),
+            mechanism: r.mechanism.clone(),
+            clinical_effect: r.clinical_effect.clone(),
+            management: r.management.clone(),
+            evidence_level: r.evidence_level.clone(),
         }).collect(),
         Err(e) => {
             tracing::error!("Failed to check interactions: {}", e);
@@ -690,18 +689,18 @@ pub async fn get_catalog_schedules(
     State(state): State<Arc<AppState>>,
     Path(catalog_id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
-            id, schedule_code, schedule_name, schedule_type::text as schedule_type,
+            id, schedule_code, schedule_name, schedule_type::text as "schedule_type!",
             description, prescriber_requirements, dispensing_requirements,
             record_keeping_days, refill_allowed, max_refills, max_quantity_days
         FROM drug_schedules
         WHERE catalog_id = $1 AND is_active = true
         ORDER BY schedule_code
-        "#
+        "#,
+        catalog_id
     )
-    .bind(catalog_id)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -709,17 +708,17 @@ pub async fn get_catalog_schedules(
         Ok(rows) => {
             let schedules: Vec<DrugScheduleResponse> = rows.iter().map(|r| {
                 DrugScheduleResponse {
-                    id: r.get("id"),
-                    schedule_code: r.get("schedule_code"),
-                    schedule_name: r.get("schedule_name"),
-                    schedule_type: r.get::<Option<String>, _>("schedule_type").unwrap_or_default(),
-                    description: r.get("description"),
-                    prescriber_requirements: r.get("prescriber_requirements"),
-                    dispensing_requirements: r.get("dispensing_requirements"),
-                    record_keeping_days: r.get("record_keeping_days"),
-                    refill_allowed: r.get("refill_allowed"),
-                    max_refills: r.get("max_refills"),
-                    max_quantity_days: r.get("max_quantity_days"),
+                    id: r.id,
+                    schedule_code: r.schedule_code.clone(),
+                    schedule_name: r.schedule_name.clone(),
+                    schedule_type: r.schedule_type.clone(),
+                    description: r.description.clone(),
+                    prescriber_requirements: r.prescriber_requirements.clone(),
+                    dispensing_requirements: r.dispensing_requirements.clone(),
+                    record_keeping_days: r.record_keeping_days,
+                    refill_allowed: r.refill_allowed,
+                    max_refills: r.max_refills,
+                    max_quantity_days: r.max_quantity_days,
                 }
             }).collect();
             (StatusCode::OK, Json(schedules)).into_response()

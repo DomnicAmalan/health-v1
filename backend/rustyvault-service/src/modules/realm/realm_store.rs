@@ -65,32 +65,33 @@ impl RealmStore {
 
     /// Create a new realm
     pub async fn create(&self, request: &CreateRealmRequest) -> VaultResult<Realm> {
-        let realm: Realm = sqlx::query_as(
+        let realm = sqlx::query_as!(
+            Realm,
             r#"
             INSERT INTO vault_realms (
-                name, 
-                description, 
+                name,
+                description,
                 display_name,
-                organization_id, 
-                config, 
-                default_lease_ttl, 
+                organization_id,
+                config,
+                default_lease_ttl,
                 max_lease_ttl,
                 is_active
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-            RETURNING 
+            RETURNING
                 id, name, description, display_name, organization_id, config,
-                default_lease_ttl, max_lease_ttl, is_active, 
+                default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             "#,
+            &request.name,
+            request.description.as_deref(),
+            request.display_name.as_deref(),
+            request.organization_id,
+            request.config.as_ref(),
+            request.default_lease_ttl.unwrap_or(3600),
+            request.max_lease_ttl.unwrap_or(86400)
         )
-        .bind(&request.name)
-        .bind(&request.description)
-        .bind(&request.display_name)
-        .bind(&request.organization_id)
-        .bind(&request.config)
-        .bind(request.default_lease_ttl.unwrap_or(3600))
-        .bind(request.max_lease_ttl.unwrap_or(86400))
         .fetch_one(&self.pool)
         .await
         .map_err(|e| {
@@ -106,17 +107,18 @@ impl RealmStore {
 
     /// Get a realm by ID
     pub async fn get(&self, id: Uuid) -> VaultResult<Option<Realm>> {
-        let realm: Option<Realm> = sqlx::query_as(
+        let realm = sqlx::query_as!(
+            Realm,
             r#"
-            SELECT 
+            SELECT
                 id, name, description, display_name, organization_id, config,
                 default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realms
             WHERE id = $1
             "#,
+            id
         )
-        .bind(id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get realm: {}", e)))?;
@@ -126,17 +128,18 @@ impl RealmStore {
 
     /// Get a realm by name
     pub async fn get_by_name(&self, name: &str) -> VaultResult<Option<Realm>> {
-        let realm: Option<Realm> = sqlx::query_as(
+        let realm = sqlx::query_as!(
+            Realm,
             r#"
-            SELECT 
+            SELECT
                 id, name, description, display_name, organization_id, config,
                 default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realms
             WHERE name = $1
             "#,
+            name
         )
-        .bind(name)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get realm by name: {}", e)))?;
@@ -146,9 +149,10 @@ impl RealmStore {
 
     /// Get a realm by organization ID
     pub async fn get_by_organization(&self, organization_id: Uuid) -> VaultResult<Option<Realm>> {
-        let realm: Option<Realm> = sqlx::query_as(
+        let realm = sqlx::query_as!(
+            Realm,
             r#"
-            SELECT 
+            SELECT
                 id, name, description, display_name, organization_id, config,
                 default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
@@ -157,8 +161,8 @@ impl RealmStore {
             ORDER BY created_at ASC
             LIMIT 1
             "#,
+            organization_id
         )
-        .bind(organization_id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get realm by organization: {}", e)))?;
@@ -168,15 +172,16 @@ impl RealmStore {
 
     /// List all realms
     pub async fn list(&self) -> VaultResult<Vec<Realm>> {
-        let realms: Vec<Realm> = sqlx::query_as(
+        let realms = sqlx::query_as!(
+            Realm,
             r#"
-            SELECT 
+            SELECT
                 id, name, description, display_name, organization_id, config,
                 default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realms
             ORDER BY name
-            "#,
+            "#
         )
         .fetch_all(&self.pool)
         .await
@@ -187,9 +192,10 @@ impl RealmStore {
 
     /// List realms by organization ID
     pub async fn list_by_organization(&self, organization_id: Uuid) -> VaultResult<Vec<Realm>> {
-        let realms: Vec<Realm> = sqlx::query_as(
+        let realms = sqlx::query_as!(
+            Realm,
             r#"
-            SELECT 
+            SELECT
                 id, name, description, display_name, organization_id, config,
                 default_lease_ttl, max_lease_ttl, is_active,
                 created_at, updated_at, request_id, created_by, updated_by
@@ -197,8 +203,8 @@ impl RealmStore {
             WHERE organization_id = $1
             ORDER BY name
             "#,
+            organization_id
         )
-        .bind(organization_id)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to list realms by organization: {}", e)))?;
@@ -299,8 +305,7 @@ impl RealmStore {
 
     /// Delete a realm
     pub async fn delete(&self, id: Uuid) -> VaultResult<()> {
-        let result = sqlx::query("DELETE FROM vault_realms WHERE id = $1")
-            .bind(id)
+        let result = sqlx::query!("DELETE FROM vault_realms WHERE id = $1", id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to delete realm: {}", e)))?;
@@ -314,28 +319,30 @@ impl RealmStore {
 
     /// Check if a realm exists
     pub async fn exists(&self, id: Uuid) -> VaultResult<bool> {
-        let count: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM vault_realms WHERE id = $1"
+        let count: i64 = sqlx::query_scalar!(
+            "SELECT COUNT(*) FROM vault_realms WHERE id = $1",
+            id
         )
-        .bind(id)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| VaultError::Vault(format!("failed to check realm existence: {}", e)))?;
+        .map_err(|e| VaultError::Vault(format!("failed to check realm existence: {}", e)))?
+        .unwrap_or(0);
 
-        Ok(count.0 > 0)
+        Ok(count > 0)
     }
 
     /// Check if a realm name exists
     pub async fn name_exists(&self, name: &str) -> VaultResult<bool> {
-        let count: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*) FROM vault_realms WHERE name = $1"
+        let count: i64 = sqlx::query_scalar!(
+            "SELECT COUNT(*) FROM vault_realms WHERE name = $1",
+            name
         )
-        .bind(name)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| VaultError::Vault(format!("failed to check realm name existence: {}", e)))?;
+        .map_err(|e| VaultError::Vault(format!("failed to check realm name existence: {}", e)))?
+        .unwrap_or(0);
 
-        Ok(count.0 > 0)
+        Ok(count > 0)
     }
 
     /// Get or create a realm for an organization

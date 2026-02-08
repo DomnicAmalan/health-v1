@@ -4,7 +4,8 @@
  */
 
 import { memo, useCallback } from "react";
-import { Card, CardContent, Badge } from "@lazarus-life/ui-components";
+import { Card, CardContent } from "../components/card";
+import { Badge } from "../components/badge";
 import {
   Play,
   Square,
@@ -21,7 +22,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import type { WorkflowNode as WorkflowNodeType, NodeType } from "@lazarus-life/shared";
-import { cn } from "@lazarus-life/ui-components/utils";
+import { cn } from "../lib/utils";
 
 interface WorkflowNodeProps {
   node: WorkflowNodeType;
@@ -127,6 +128,7 @@ export const WorkflowNodeComponent = memo(function WorkflowNodeComponent({
       }}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
+      data-node-id={node.id}
     >
       <Card
         className={cn(

@@ -160,7 +160,7 @@ impl AppRoleBackend {
 
         // Upsert into database
         if let Some(realm_id) = request.realm_id {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 INSERT INTO vault_approles (
                     id, realm_id, role_name, role_id, policies, bind_secret_id,
@@ -178,26 +178,26 @@ impl AppRoleBackend {
                     token_policies = $11,
                     updated_at = $14
                 "#,
+                entry.id,
+                realm_id,
+                &entry.role_name,
+                entry.role_id,
+                &entry.policies,
+                entry.bind_secret_id,
+                entry.secret_id_ttl,
+                entry.secret_id_num_uses,
+                entry.token_ttl,
+                entry.token_max_ttl,
+                &entry.token_policies,
+                &entry.token_type,
+                entry.created_at,
+                entry.updated_at
             )
-            .bind(entry.id)
-            .bind(realm_id)
-            .bind(&entry.role_name)
-            .bind(entry.role_id)
-            .bind(&entry.policies)
-            .bind(entry.bind_secret_id)
-            .bind(entry.secret_id_ttl)
-            .bind(entry.secret_id_num_uses)
-            .bind(entry.token_ttl)
-            .bind(entry.token_max_ttl)
-            .bind(&entry.token_policies)
-            .bind(&entry.token_type)
-            .bind(entry.created_at)
-            .bind(entry.updated_at)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to create approle: {}", e)))?;
         } else {
-            sqlx::query(
+            sqlx::query!(
                 r#"
                 INSERT INTO vault_approles (
                     id, realm_id, role_name, role_id, policies, bind_secret_id,
@@ -215,20 +215,20 @@ impl AppRoleBackend {
                     token_policies = $10,
                     updated_at = $13
                 "#,
+                entry.id,
+                &entry.role_name,
+                entry.role_id,
+                &entry.policies,
+                entry.bind_secret_id,
+                entry.secret_id_ttl,
+                entry.secret_id_num_uses,
+                entry.token_ttl,
+                entry.token_max_ttl,
+                &entry.token_policies,
+                &entry.token_type,
+                entry.created_at,
+                entry.updated_at
             )
-            .bind(entry.id)
-            .bind(&entry.role_name)
-            .bind(entry.role_id)
-            .bind(&entry.policies)
-            .bind(entry.bind_secret_id)
-            .bind(entry.secret_id_ttl)
-            .bind(entry.secret_id_num_uses)
-            .bind(entry.token_ttl)
-            .bind(entry.token_max_ttl)
-            .bind(&entry.token_policies)
-            .bind(&entry.token_type)
-            .bind(entry.created_at)
-            .bind(entry.updated_at)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to create global approle: {}", e)))?;
@@ -241,111 +241,99 @@ impl AppRoleBackend {
     pub async fn get_role(&self, role_name: &str, realm_id: Option<Uuid>) -> VaultResult<Option<AppRoleEntry>> {
         let role_name = role_name.to_lowercase().trim().to_string();
 
-        let row: Option<(
-            Uuid, Option<Uuid>, String, Uuid, Vec<String>, bool,
-            i32, i32, i32, i32, Vec<String>, String, bool,
-            DateTime<Utc>, DateTime<Utc>
-        )> = if let Some(realm_id) = realm_id {
-            sqlx::query_as(
+        let row = if let Some(realm_id) = realm_id {
+            sqlx::query!(
                 r#"
-                SELECT id, realm_id, role_name, role_id, policies, bind_secret_id,
-                       secret_id_ttl, secret_id_num_uses, token_ttl, token_max_ttl,
-                       token_policies, token_type, is_active, created_at, updated_at
+                SELECT id, realm_id, role_name, role_id,
+                       policies as "policies!", bind_secret_id,
+                       secret_id_ttl as "secret_id_ttl!", secret_id_num_uses as "secret_id_num_uses!",
+                       token_ttl as "token_ttl!", token_max_ttl as "token_max_ttl!",
+                       token_policies as "token_policies!", token_type as "token_type!",
+                       is_active, created_at, updated_at
                 FROM vault_approles
                 WHERE role_name = $1 AND realm_id = $2
                 "#,
+                &role_name,
+                realm_id
             )
-            .bind(&role_name)
-            .bind(realm_id)
             .fetch_optional(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to get approle: {}", e)))?
+            .map(|r| AppRoleEntry {
+                id: r.id, realm_id: r.realm_id, role_name: r.role_name, role_id: r.role_id,
+                policies: r.policies, bind_secret_id: r.bind_secret_id,
+                secret_id_ttl: r.secret_id_ttl, secret_id_num_uses: r.secret_id_num_uses,
+                token_ttl: r.token_ttl, token_max_ttl: r.token_max_ttl,
+                token_policies: r.token_policies, token_type: r.token_type,
+                is_active: r.is_active, created_at: r.created_at, updated_at: r.updated_at,
+            })
         } else {
-            sqlx::query_as(
+            sqlx::query!(
                 r#"
-                SELECT id, realm_id, role_name, role_id, policies, bind_secret_id,
-                       secret_id_ttl, secret_id_num_uses, token_ttl, token_max_ttl,
-                       token_policies, token_type, is_active, created_at, updated_at
+                SELECT id, realm_id, role_name, role_id,
+                       policies as "policies!", bind_secret_id,
+                       secret_id_ttl as "secret_id_ttl!", secret_id_num_uses as "secret_id_num_uses!",
+                       token_ttl as "token_ttl!", token_max_ttl as "token_max_ttl!",
+                       token_policies as "token_policies!", token_type as "token_type!",
+                       is_active, created_at, updated_at
                 FROM vault_approles
                 WHERE role_name = $1 AND realm_id IS NULL
                 "#,
+                &role_name
             )
-            .bind(&role_name)
             .fetch_optional(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to get approle: {}", e)))?
+            .map(|r| AppRoleEntry {
+                id: r.id, realm_id: r.realm_id, role_name: r.role_name, role_id: r.role_id,
+                policies: r.policies, bind_secret_id: r.bind_secret_id,
+                secret_id_ttl: r.secret_id_ttl, secret_id_num_uses: r.secret_id_num_uses,
+                token_ttl: r.token_ttl, token_max_ttl: r.token_max_ttl,
+                token_policies: r.token_policies, token_type: r.token_type,
+                is_active: r.is_active, created_at: r.created_at, updated_at: r.updated_at,
+            })
         };
 
-        match row {
-            Some((
-                id, realm_id, role_name, role_id, policies, bind_secret_id,
-                secret_id_ttl, secret_id_num_uses, token_ttl, token_max_ttl,
-                token_policies, token_type, is_active, created_at, updated_at
-            )) => {
-                Ok(Some(AppRoleEntry {
-                    id,
-                    realm_id,
-                    role_name,
-                    role_id,
-                    policies,
-                    bind_secret_id,
-                    secret_id_ttl,
-                    secret_id_num_uses,
-                    token_ttl,
-                    token_max_ttl,
-                    token_policies,
-                    token_type,
-                    is_active,
-                    created_at,
-                    updated_at,
-                }))
-            }
-            None => Ok(None),
-        }
+        Ok(row)
     }
 
     /// Get an AppRole by role_id
     pub async fn get_role_by_role_id(&self, role_id: Uuid) -> VaultResult<Option<AppRoleEntry>> {
-        let row: Option<(
-            Uuid, Option<Uuid>, String, Uuid, Vec<String>, bool,
-            i32, i32, i32, i32, Vec<String>, String, bool,
-            DateTime<Utc>, DateTime<Utc>
-        )> = sqlx::query_as(
+        let row = sqlx::query!(
             r#"
-            SELECT id, realm_id, role_name, role_id, policies, bind_secret_id,
-                   secret_id_ttl, secret_id_num_uses, token_ttl, token_max_ttl,
-                   token_policies, token_type, is_active, created_at, updated_at
+            SELECT id, realm_id, role_name, role_id,
+                   policies as "policies!", bind_secret_id,
+                   secret_id_ttl as "secret_id_ttl!", secret_id_num_uses as "secret_id_num_uses!",
+                   token_ttl as "token_ttl!", token_max_ttl as "token_max_ttl!",
+                   token_policies as "token_policies!", token_type as "token_type!",
+                   is_active, created_at, updated_at
             FROM vault_approles
             WHERE role_id = $1
             "#,
+            role_id
         )
-        .bind(role_id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get approle by role_id: {}", e)))?;
 
         match row {
-            Some((
-                id, realm_id, role_name, role_id, policies, bind_secret_id,
-                secret_id_ttl, secret_id_num_uses, token_ttl, token_max_ttl,
-                token_policies, token_type, is_active, created_at, updated_at
-            )) => {
+            Some(row) => {
                 Ok(Some(AppRoleEntry {
-                    id,
-                    realm_id,
-                    role_name,
-                    role_id,
-                    policies,
-                    bind_secret_id,
-                    secret_id_ttl,
-                    secret_id_num_uses,
-                    token_ttl,
-                    token_max_ttl,
-                    token_policies,
-                    token_type,
-                    is_active,
-                    created_at,
-                    updated_at,
+                    id: row.id,
+                    realm_id: row.realm_id,
+                    role_name: row.role_name,
+                    role_id: row.role_id,
+                    policies: row.policies,
+                    bind_secret_id: row.bind_secret_id,
+                    secret_id_ttl: row.secret_id_ttl,
+                    secret_id_num_uses: row.secret_id_num_uses,
+                    token_ttl: row.token_ttl,
+                    token_max_ttl: row.token_max_ttl,
+                    token_policies: row.token_policies,
+                    token_type: row.token_type,
+                    is_active: row.is_active,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
                 }))
             }
             None => Ok(None),
@@ -354,32 +342,32 @@ impl AppRoleBackend {
 
     /// List all AppRoles (realm-scoped)
     pub async fn list_roles(&self, realm_id: Option<Uuid>) -> VaultResult<Vec<String>> {
-        let rows: Vec<(String,)> = if let Some(realm_id) = realm_id {
-            sqlx::query_as(
+        let rows: Vec<String> = if let Some(realm_id) = realm_id {
+            sqlx::query_scalar!(
                 r#"
                 SELECT role_name FROM vault_approles
                 WHERE realm_id = $1 OR realm_id IS NULL
                 ORDER BY role_name
                 "#,
+                realm_id
             )
-            .bind(realm_id)
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list approles: {}", e)))?
         } else {
-            sqlx::query_as(
+            sqlx::query_scalar!(
                 r#"
                 SELECT role_name FROM vault_approles
                 WHERE realm_id IS NULL
                 ORDER BY role_name
-                "#,
+                "#
             )
             .fetch_all(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to list approles: {}", e)))?
         };
 
-        Ok(rows.into_iter().map(|(name,)| name).collect())
+        Ok(rows)
     }
 
     /// Delete an AppRole
@@ -387,15 +375,12 @@ impl AppRoleBackend {
         let role_name = role_name.to_lowercase().trim().to_string();
 
         let result = if let Some(realm_id) = realm_id {
-            sqlx::query("DELETE FROM vault_approles WHERE role_name = $1 AND realm_id = $2")
-                .bind(&role_name)
-                .bind(realm_id)
+            sqlx::query!("DELETE FROM vault_approles WHERE role_name = $1 AND realm_id = $2", &role_name, realm_id)
                 .execute(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete approle: {}", e)))?
         } else {
-            sqlx::query("DELETE FROM vault_approles WHERE role_name = $1 AND realm_id IS NULL")
-                .bind(&role_name)
+            sqlx::query!("DELETE FROM vault_approles WHERE role_name = $1 AND realm_id IS NULL", &role_name)
                 .execute(&self.pool)
                 .await
                 .map_err(|e| VaultError::Vault(format!("failed to delete approle: {}", e)))?
@@ -446,22 +431,22 @@ impl AppRoleBackend {
         };
 
         // Insert secret ID
-        sqlx::query(
+        sqlx::query!(
             r#"
             INSERT INTO vault_approle_secret_ids (
-                approle_id, secret_id_hash, accessor, metadata, 
+                approle_id, secret_id_hash, accessor, metadata,
                 num_uses_remaining, expires_at, is_active, created_at
             )
             VALUES ($1, $2, $3, $4, $5, $6, true, $7)
             "#,
+            role.id,
+            &secret_id_hash,
+            accessor,
+            metadata.as_ref(),
+            num_uses,
+            expires_at,
+            now
         )
-        .bind(role.id)
-        .bind(&secret_id_hash)
-        .bind(accessor)
-        .bind(&metadata)
-        .bind(num_uses)
-        .bind(expires_at)
-        .bind(now)
         .execute(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to create secret_id: {}", e)))?;
@@ -539,14 +524,14 @@ impl AppRoleBackend {
     /// SECURITY: Uses constant-time comparison to prevent timing attacks
     async fn validate_secret_id(&self, approle_id: Uuid, secret_id: &str) -> VaultResult<()> {
         // Get all active secret IDs for this role
-        let rows: Vec<(Uuid, String, i32, Option<DateTime<Utc>>)> = sqlx::query_as(
+        let rows = sqlx::query!(
             r#"
             SELECT id, secret_id_hash, num_uses_remaining, expires_at
             FROM vault_approle_secret_ids
             WHERE approle_id = $1 AND is_active = true
             "#,
+            approle_id
         )
-        .bind(approle_id)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to lookup secret_id: {}", e)))?;
@@ -559,7 +544,8 @@ impl AppRoleBackend {
         // This prevents timing attacks that could distinguish between:
         // - Invalid hash format (fast error)
         // - Valid hash, wrong secret (slow bcrypt comparison)
-        for (id, hash, num_uses, expires_at) in rows {
+        for row in rows {
+            let (id, hash, num_uses, expires_at) = (row.id, row.secret_id_hash, row.num_uses_remaining, row.expires_at);
             // Check expiration (but still verify hash for constant time)
             let is_expired = if let Some(exp) = expires_at {
                 now > exp
@@ -578,7 +564,7 @@ impl AppRoleBackend {
 
             // Only consider this secret_id if hash matches AND not expired
             if hash_valid && !is_expired {
-                if num_uses == 0 {
+                if num_uses == Some(0) {
                     // Mark as exhausted but continue checking other hashes
                     found_exhausted = true;
                 } else if found_valid_id.is_none() {
@@ -591,7 +577,7 @@ impl AppRoleBackend {
         // After checking all hashes (constant time complete), process result
         if let Some(valid_id) = found_valid_id {
             // Decrement uses atomically
-            let result: Option<(i32,)> = sqlx::query_as(
+            let result: Option<i32> = sqlx::query_scalar!(
                 r#"
                 UPDATE vault_approle_secret_ids
                 SET num_uses_remaining = CASE
@@ -600,21 +586,20 @@ impl AppRoleBackend {
                     END,
                     last_used_at = NOW()
                 WHERE id = $1 AND (num_uses_remaining > 0 OR num_uses_remaining = -1)
-                RETURNING num_uses_remaining
-                "#
+                RETURNING num_uses_remaining as "num_uses_remaining!"
+                "#,
+                valid_id
             )
-            .bind(valid_id)
             .fetch_optional(&self.pool)
             .await
             .ok()
             .flatten();
 
             match result {
-                Some((remaining,)) => {
+                Some(remaining) => {
                     if remaining == 0 {
                         // Secret ID exhausted, mark inactive
-                        sqlx::query("UPDATE vault_approle_secret_ids SET is_active = false WHERE id = $1")
-                            .bind(valid_id)
+                        sqlx::query!("UPDATE vault_approle_secret_ids SET is_active = false WHERE id = $1", valid_id)
                             .execute(&self.pool)
                             .await
                             .ok();

@@ -370,7 +370,8 @@ pub async fn get_clinical_note(
     // Use a system organization ID for now
     let organization_id = Uuid::nil();
 
-    let note = sqlx::query_as::<_, ClinicalNoteFullResponse>(
+    let note = sqlx::query_as!(
+        ClinicalNoteFullResponse,
         r#"SELECT id, organization_id, ien, encounter_id, patient_id, patient_ien,
                   provider_id, provider_name, note_type, note_title, template_id,
                   subjective, objective, assessment, plan, chief_complaint,
@@ -383,10 +384,10 @@ pub async fn get_clinical_note(
                   amended_datetime, amendment_reason, is_addendum, requires_cosign,
                   cosigned_by, cosigned_datetime, created_at, updated_at
            FROM clinical_notes
-           WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"#
+           WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL"#,
+        note_id,
+        organization_id
     )
-    .bind(note_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {

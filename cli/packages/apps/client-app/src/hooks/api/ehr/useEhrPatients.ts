@@ -262,3 +262,105 @@ export function useDeleteEhrPatient() {
     },
   });
 }
+
+// =============================================================================
+// Duplicate Detection & Patient Merge (RFC 0002)
+// =============================================================================
+
+/** Request for finding duplicate patients */
+export interface FindDuplicatesRequest {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string; // ISO date string (YYYY-MM-DD)
+  ssnLastFour?: string;
+}
+
+/** Potential duplicate patient result */
+export interface PotentialDuplicate {
+  patientId: string;
+  matchScore: number;
+  matchReasons: string[];
+  patient: EhrPatient;
+}
+
+/** Response schema for duplicate detection */
+const PotentialDuplicateSchema = z.object({
+  patientId: z.string(),
+  matchScore: z.number(),
+  matchReasons: z.array(z.string()),
+  patient: EhrPatientSchema,
+});
+
+/**
+ * Find potential duplicate patients
+ * Used before creating a new patient to check for existing matches
+ */
+export function useFindDuplicatePatients() {
+  const { logPHI } = useAuditLog();
+
+  return useMutation({
+    mutationFn: async (request: FindDuplicatesRequest): Promise<PotentialDuplicate[]> => {
+      const response = await apiClient.post<PotentialDuplicate[]>(
+        API_ROUTES.EHR.PATIENTS.FIND_DUPLICATES,
+        {
+          body: request,
+          validateResponse: z.array(PotentialDuplicateSchema),
+          throwOnValidationError: true,
+        }
+      );
+
+      const data = unwrapApiResponse(response);
+      logPHI("ehr_patients", undefined, {
+        action: "find_duplicates",
+        criteria: { firstName: request.firstName, lastName: request.lastName },
+        resultCount: data.length,
+      });
+      return data;
+    },
+  });
+}
+
+/** Request for merging two patient records */
+export interface MergePatientsRequest {
+  survivorId: string;
+  duplicateId: string;
+  mergeReason?: string;
+}
+
+/**
+ * Merge two patient records
+ * Moves all clinical data from duplicate to survivor, marks duplicate as merged
+ */
+export function useMergePatients() {
+  const queryClient = useQueryClient();
+  const { logState } = useAuditLog();
+
+  return useMutation({
+    mutationFn: async (request: MergePatientsRequest): Promise<EhrPatient> => {
+      const response = await apiClient.post<EhrPatient>(
+        API_ROUTES.EHR.PATIENTS.MERGE,
+        {
+          body: request,
+          validateResponse: EhrPatientSchema,
+          throwOnValidationError: true,
+        }
+      );
+
+      const data = unwrapApiResponse(response);
+      logState("MERGE", "ehr_patients", request.survivorId, {
+        action: "merge",
+        duplicateId: request.duplicateId,
+        reason: request.mergeReason,
+      });
+      return data;
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate both patient records and lists
+      queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.detail(variables.survivorId) });
+      queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.detail(variables.duplicateId) });
+      queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.banner(variables.survivorId) });
+      queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.banner(variables.duplicateId) });
+      queryClient.invalidateQueries({ queryKey: EHR_PATIENT_QUERY_KEYS.lists() });
+    },
+  });
+}

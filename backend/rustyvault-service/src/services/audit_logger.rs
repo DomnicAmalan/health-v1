@@ -90,7 +90,8 @@ impl AuditLogger {
         let log_hash = self.calculate_log_hash(&entry, &previous_hash);
 
         // Insert into database
-        sqlx::query(
+        let auth_result_str = entry.auth_result.to_string();
+        sqlx::query!(
             r#"
             INSERT INTO vault_audit_logs (
                 request_id, timestamp, operation, path, method,
@@ -113,30 +114,30 @@ impl AuditLogger {
                 $22, $23
             )
             "#,
+            entry.request_id,
+            &entry.operation,
+            &entry.path,
+            &entry.method,
+            entry.auth_display_name.as_deref(),
+            &entry.auth_policies as _,
+            entry.auth_token_id,
+            entry.client_token_hash.as_deref(),
+            &auth_result_str,
+            &entry.acl_capabilities as _,
+            entry.realm_id,
+            entry.realm_name.as_deref(),
+            entry.request_data.as_ref(),
+            entry.remote_addr.as_deref(),
+            entry.user_agent.as_deref(),
+            entry.response_status,
+            entry.response_error.as_deref(),
+            entry.duration_ms,
+            entry.phi_accessed,
+            &entry.phi_field_names as _,
+            &entry.phi_record_ids as _,
+            &log_hash,
+            previous_hash.as_deref()
         )
-        .bind(entry.request_id)
-        .bind(&entry.operation)
-        .bind(&entry.path)
-        .bind(&entry.method)
-        .bind(&entry.auth_display_name)
-        .bind(&entry.auth_policies)
-        .bind(entry.auth_token_id)
-        .bind(&entry.client_token_hash)
-        .bind(entry.auth_result.to_string())
-        .bind(&entry.acl_capabilities)
-        .bind(entry.realm_id)
-        .bind(&entry.realm_name)
-        .bind(&entry.request_data)
-        .bind(&entry.remote_addr)
-        .bind(&entry.user_agent)
-        .bind(entry.response_status)
-        .bind(&entry.response_error)
-        .bind(entry.duration_ms)
-        .bind(entry.phi_accessed)
-        .bind(&entry.phi_field_names)
-        .bind(&entry.phi_record_ids)
-        .bind(&log_hash)
-        .bind(previous_hash)
         .execute(&self.pool)
         .await
         .map_err(|e| {
@@ -149,14 +150,14 @@ impl AuditLogger {
 
     /// Get the hash of the most recent log entry (for chain integrity)
     async fn get_latest_log_hash(&self) -> VaultResult<Option<String>> {
-        let result: Option<(String,)> = sqlx::query_as(
+        let result: Option<String> = sqlx::query_scalar!(
             "SELECT log_hash FROM vault_audit_logs ORDER BY timestamp DESC LIMIT 1"
         )
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get latest log hash: {}", e)))?;
 
-        Ok(result.map(|(hash,)| hash))
+        Ok(result)
     }
 
     /// Calculate SHA256 hash of log entry for tamper detection
@@ -194,23 +195,24 @@ impl AuditLogger {
 
     /// Verify integrity of audit log chain
     pub async fn verify_log_chain(&self, start_time: DateTime<Utc>, end_time: DateTime<Utc>) -> VaultResult<bool> {
-        let logs: Vec<(String, Option<String>)> = sqlx::query_as(
+        let logs = sqlx::query!(
             r#"
             SELECT log_hash, previous_log_hash
             FROM vault_audit_logs
             WHERE timestamp >= $1 AND timestamp <= $2
             ORDER BY timestamp ASC
-            "#
+            "#,
+            start_time,
+            end_time
         )
-        .bind(start_time)
-        .bind(end_time)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to fetch logs: {}", e)))?;
 
         for i in 1..logs.len() {
-            let (current_hash, current_prev_hash) = &logs[i];
-            let (previous_hash, _) = &logs[i - 1];
+            let current_hash = &logs[i].log_hash;
+            let current_prev_hash = &logs[i].previous_log_hash;
+            let previous_hash = &logs[i - 1].log_hash;
 
             // Verify chain: current.previous_log_hash should match previous.log_hash
             if current_prev_hash.as_ref() != Some(previous_hash) {

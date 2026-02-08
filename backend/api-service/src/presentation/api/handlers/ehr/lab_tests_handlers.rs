@@ -107,7 +107,8 @@ pub async fn list_lab_tests(
 
     let limit = query.limit.unwrap_or(100).min(1000);
 
-    let tests = sqlx::query_as::<_, LabTestResponse>(
+    let tests = sqlx::query_as!(
+        LabTestResponse,
         r#"
         SELECT
             id, organization_id, ien, test_code, test_name, test_name_short,
@@ -128,12 +129,12 @@ pub async fn list_lab_tests(
         ORDER BY category, test_name
         LIMIT $5
         "#,
+        organization_id,
+        query.category.as_deref(),
+        query.specimen_type.as_deref(),
+        query.q.as_deref(),
+        limit
     )
-    .bind(organization_id)
-    .bind(&query.category)
-    .bind(&query.specimen_type)
-    .bind(&query.q)
-    .bind(limit)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -153,7 +154,8 @@ pub async fn get_lab_test(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Getting lab test: {}", test_id);
 
-    let test = sqlx::query_as::<_, LabTestResponse>(
+    let test = sqlx::query_as!(
+        LabTestResponse,
         r#"
         SELECT
             id, organization_id, ien, test_code, test_name, test_name_short,
@@ -166,9 +168,9 @@ pub async fn get_lab_test(
           AND organization_id = $2
           AND deleted_at IS NULL
         "#,
+        test_id,
+        organization_id
     )
-    .bind(test_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -192,7 +194,8 @@ pub async fn list_lab_panels(
     info!("Listing lab panels for organization {}", organization_id);
 
     // Get panels
-    let panels = sqlx::query_as::<_, LabPanelRow>(
+    let panels = sqlx::query_as!(
+        LabPanelRow,
         r#"
         SELECT id, organization_id, panel_code, panel_name, description, category, is_active
         FROM lab_panels
@@ -201,8 +204,8 @@ pub async fn list_lab_panels(
           AND is_active = TRUE
         ORDER BY category, panel_name
         "#,
+        organization_id
     )
-    .bind(organization_id)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -214,7 +217,8 @@ pub async fn list_lab_panels(
     let mut panel_responses = Vec::new();
 
     for panel in panels {
-        let tests = sqlx::query_as::<_, LabTestResponse>(
+        let tests = sqlx::query_as!(
+            LabTestResponse,
             r#"
             SELECT
                 t.id, t.organization_id, t.ien, t.test_code, t.test_name, t.test_name_short,
@@ -227,8 +231,8 @@ pub async fn list_lab_panels(
             WHERE pt.panel_id = $1
             ORDER BY pt.display_order
             "#,
+            panel.id
         )
-        .bind(panel.id)
         .fetch_all(state.database_pool.as_ref())
         .await
         .map_err(|e| {
@@ -261,11 +265,11 @@ pub async fn get_test_reference_ranges(
     info!("Getting reference ranges for test: {}", test_id);
 
     // Verify test belongs to organization
-    let _ = sqlx::query_scalar::<_, Uuid>(
-        "SELECT id FROM lab_tests WHERE id = $1 AND organization_id = $2",
+    let _ = sqlx::query_scalar!(
+        r#"SELECT id FROM lab_tests WHERE id = $1 AND organization_id = $2"#,
+        test_id,
+        organization_id
     )
-    .bind(test_id)
-    .bind(organization_id)
     .fetch_one(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -273,7 +277,8 @@ pub async fn get_test_reference_ranges(
         AppError::NotFound("Lab test not found".to_string())
     })?;
 
-    let ranges = sqlx::query_as::<_, ReferenceRangeResponse>(
+    let ranges = sqlx::query_as!(
+        ReferenceRangeResponse,
         r#"
         SELECT
             id, test_id, age_min_years, age_max_years, gender,
@@ -289,8 +294,8 @@ pub async fn get_test_reference_ranges(
             END,
             age_min_years NULLS FIRST
         "#,
+        test_id
     )
-    .bind(test_id)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {
@@ -309,7 +314,7 @@ pub async fn list_test_categories(
     let organization_id = Uuid::nil(); // Use system org for now
     info!("Listing lab test categories");
 
-    let categories: Vec<String> = sqlx::query_scalar::<_, String>(
+    let categories: Vec<String> = sqlx::query_scalar!(
         r#"
         SELECT DISTINCT category
         FROM lab_tests
@@ -318,8 +323,8 @@ pub async fn list_test_categories(
           AND is_active = TRUE
         ORDER BY category
         "#,
+        organization_id
     )
-    .bind(organization_id)
     .fetch_all(state.database_pool.as_ref())
     .await
     .map_err(|e| {

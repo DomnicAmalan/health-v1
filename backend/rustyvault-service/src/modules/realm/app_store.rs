@@ -163,7 +163,8 @@ impl RealmApplicationStore {
             }
         });
 
-        let app: RealmApplication = sqlx::query_as(
+        let app = sqlx::query_as!(
+            RealmApplication,
             r#"
             INSERT INTO vault_realm_applications (
                 realm_id,
@@ -176,19 +177,19 @@ impl RealmApplicationStore {
                 is_active
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-            RETURNING 
+            RETURNING
                 id, realm_id, app_name, app_type, display_name, description,
-                config, allowed_auth_methods, is_active,
+                config, allowed_auth_methods as "allowed_auth_methods!", is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             "#,
+            realm_id,
+            &request.app_name,
+            &request.app_type,
+            request.display_name.as_deref(),
+            request.description.as_deref(),
+            request.config.as_ref(),
+            &allowed_auth_methods
         )
-        .bind(realm_id)
-        .bind(&request.app_name)
-        .bind(&request.app_type)
-        .bind(&request.display_name)
-        .bind(&request.description)
-        .bind(&request.config)
-        .bind(&allowed_auth_methods)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| {
@@ -212,17 +213,18 @@ impl RealmApplicationStore {
 
     /// Get an application by ID
     pub async fn get(&self, id: Uuid) -> VaultResult<Option<RealmApplication>> {
-        let app: Option<RealmApplication> = sqlx::query_as(
+        let app = sqlx::query_as!(
+            RealmApplication,
             r#"
-            SELECT 
+            SELECT
                 id, realm_id, app_name, app_type, display_name, description,
-                config, allowed_auth_methods, is_active,
+                config, allowed_auth_methods as "allowed_auth_methods!", is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realm_applications
             WHERE id = $1
             "#,
+            id
         )
-        .bind(id)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get application: {}", e)))?;
@@ -232,18 +234,19 @@ impl RealmApplicationStore {
 
     /// Get an application by name in a realm
     pub async fn get_by_name(&self, realm_id: Uuid, app_name: &str) -> VaultResult<Option<RealmApplication>> {
-        let app: Option<RealmApplication> = sqlx::query_as(
+        let app = sqlx::query_as!(
+            RealmApplication,
             r#"
-            SELECT 
+            SELECT
                 id, realm_id, app_name, app_type, display_name, description,
-                config, allowed_auth_methods, is_active,
+                config, allowed_auth_methods as "allowed_auth_methods!", is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realm_applications
             WHERE realm_id = $1 AND app_name = $2
             "#,
+            realm_id,
+            app_name
         )
-        .bind(realm_id)
-        .bind(app_name)
         .fetch_optional(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to get application by name: {}", e)))?;
@@ -253,18 +256,19 @@ impl RealmApplicationStore {
 
     /// List all applications in a realm
     pub async fn list(&self, realm_id: Uuid) -> VaultResult<Vec<RealmApplication>> {
-        let apps: Vec<RealmApplication> = sqlx::query_as(
+        let apps = sqlx::query_as!(
+            RealmApplication,
             r#"
-            SELECT 
+            SELECT
                 id, realm_id, app_name, app_type, display_name, description,
-                config, allowed_auth_methods, is_active,
+                config, allowed_auth_methods as "allowed_auth_methods!", is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realm_applications
             WHERE realm_id = $1
             ORDER BY app_name
             "#,
+            realm_id
         )
-        .bind(realm_id)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to list applications: {}", e)))?;
@@ -274,19 +278,20 @@ impl RealmApplicationStore {
 
     /// List applications by type in a realm
     pub async fn list_by_type(&self, realm_id: Uuid, app_type: &str) -> VaultResult<Vec<RealmApplication>> {
-        let apps: Vec<RealmApplication> = sqlx::query_as(
+        let apps = sqlx::query_as!(
+            RealmApplication,
             r#"
-            SELECT 
+            SELECT
                 id, realm_id, app_name, app_type, display_name, description,
-                config, allowed_auth_methods, is_active,
+                config, allowed_auth_methods as "allowed_auth_methods!", is_active,
                 created_at, updated_at, request_id, created_by, updated_by
             FROM vault_realm_applications
             WHERE realm_id = $1 AND app_type = $2
             ORDER BY app_name
             "#,
+            realm_id,
+            app_type
         )
-        .bind(realm_id)
-        .bind(app_type)
         .fetch_all(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to list applications by type: {}", e)))?;
@@ -373,8 +378,7 @@ impl RealmApplicationStore {
 
     /// Delete an application
     pub async fn delete(&self, id: Uuid) -> VaultResult<()> {
-        let result = sqlx::query("DELETE FROM vault_realm_applications WHERE id = $1")
-            .bind(id)
+        let result = sqlx::query!("DELETE FROM vault_realm_applications WHERE id = $1", id)
             .execute(&self.pool)
             .await
             .map_err(|e| VaultError::Vault(format!("failed to delete application: {}", e)))?;
@@ -388,11 +392,11 @@ impl RealmApplicationStore {
 
     /// Delete an application by name in a realm
     pub async fn delete_by_name(&self, realm_id: Uuid, app_name: &str) -> VaultResult<()> {
-        let result = sqlx::query(
-            "DELETE FROM vault_realm_applications WHERE realm_id = $1 AND app_name = $2"
+        let result = sqlx::query!(
+            "DELETE FROM vault_realm_applications WHERE realm_id = $1 AND app_name = $2",
+            realm_id,
+            app_name
         )
-        .bind(realm_id)
-        .bind(app_name)
         .execute(&self.pool)
         .await
         .map_err(|e| VaultError::Vault(format!("failed to delete application: {}", e)))?;

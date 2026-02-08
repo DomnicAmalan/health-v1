@@ -8,12 +8,18 @@ use axum::{
     response::IntoResponse,
     Json,
 };
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
+use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::presentation::api::AppState;
+
+/// Helper to convert f64 to BigDecimal for SQL DECIMAL parameters
+fn to_bd(v: f64) -> BigDecimal {
+    BigDecimal::from_str(&v.to_string()).unwrap_or_default()
+}
 
 /// Helper to parse decimal string to f64
 fn parse_decimal(s: Option<String>) -> f64 {
@@ -125,19 +131,22 @@ pub async fn list_payments(
     let page_size = query.page_size.unwrap_or(20).min(100);
     let offset = (page - 1) * page_size;
 
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT id, receipt_number, payment_date, patient_id, patient_name, payer_name,
-               amount::text as amount, currency, payment_method, payment_status, transaction_id,
-               is_advance, is_allocated, notes
+               amount::text as amount, COALESCE(currency, 'INR') as "currency!",
+               payment_method::text as "payment_method!",
+               payment_status::text as "payment_status!",
+               transaction_id,
+               is_advance as "is_advance!", is_allocated as "is_allocated!", notes
         FROM payments
         WHERE payment_status != 'cancelled'
         ORDER BY payment_date DESC
         LIMIT $1 OFFSET $2
-        "#
+        "#,
+        page_size as i64,
+        offset as i64
     )
-    .bind(page_size as i64)
-    .bind(offset as i64)
     .fetch_all(&*state.database_pool)
     .await;
 
@@ -146,22 +155,21 @@ pub async fn list_payments(
             let payments: Vec<PaymentResponse> = rows
                 .iter()
                 .map(|row| {
-                    let payment_date: chrono::DateTime<chrono::Utc> = row.get("payment_date");
                     PaymentResponse {
-                        id: row.get("id"),
-                        receipt_number: row.get("receipt_number"),
-                        payment_date: payment_date.to_rfc3339(),
-                        patient_id: row.get("patient_id"),
-                        patient_name: row.get("patient_name"),
-                        payer_name: row.get("payer_name"),
-                        amount: parse_decimal(row.get("amount")),
-                        currency: row.get("currency"),
-                        payment_method: row.get("payment_method"),
-                        payment_status: row.get("payment_status"),
-                        transaction_id: row.get("transaction_id"),
-                        is_advance: row.get("is_advance"),
-                        is_allocated: row.get("is_allocated"),
-                        notes: row.get("notes"),
+                        id: row.id,
+                        receipt_number: row.receipt_number.clone(),
+                        payment_date: row.payment_date.to_rfc3339(),
+                        patient_id: row.patient_id,
+                        patient_name: row.patient_name.clone(),
+                        payer_name: row.payer_name.clone(),
+                        amount: parse_decimal(row.amount.clone()),
+                        currency: row.currency.clone(),
+                        payment_method: row.payment_method.clone(),
+                        payment_status: row.payment_status.clone(),
+                        transaction_id: row.transaction_id.clone(),
+                        is_advance: row.is_advance,
+                        is_allocated: row.is_allocated,
+                        notes: row.notes.clone(),
                     }
                 })
                 .collect();
@@ -187,37 +195,39 @@ pub async fn get_payment(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT id, receipt_number, payment_date, patient_id, patient_name, payer_name,
-               amount::text as amount, currency, payment_method, payment_status, transaction_id,
-               is_advance, is_allocated, notes
+               amount::text as amount, COALESCE(currency, 'INR') as "currency!",
+               payment_method::text as "payment_method!",
+               payment_status::text as "payment_status!",
+               transaction_id,
+               is_advance as "is_advance!", is_allocated as "is_allocated!", notes
         FROM payments
         WHERE id = $1
-        "#
+        "#,
+        id
     )
-    .bind(id)
     .fetch_optional(&*state.database_pool)
     .await;
 
     match result {
         Ok(Some(row)) => {
-            let payment_date: chrono::DateTime<chrono::Utc> = row.get("payment_date");
             let payment = PaymentResponse {
-                id: row.get("id"),
-                receipt_number: row.get("receipt_number"),
-                payment_date: payment_date.to_rfc3339(),
-                patient_id: row.get("patient_id"),
-                patient_name: row.get("patient_name"),
-                payer_name: row.get("payer_name"),
-                amount: parse_decimal(row.get("amount")),
-                currency: row.get("currency"),
-                payment_method: row.get("payment_method"),
-                payment_status: row.get("payment_status"),
-                transaction_id: row.get("transaction_id"),
-                is_advance: row.get("is_advance"),
-                is_allocated: row.get("is_allocated"),
-                notes: row.get("notes"),
+                id: row.id,
+                receipt_number: row.receipt_number.clone(),
+                payment_date: row.payment_date.to_rfc3339(),
+                patient_id: row.patient_id,
+                patient_name: row.patient_name.clone(),
+                payer_name: row.payer_name.clone(),
+                amount: parse_decimal(row.amount.clone()),
+                currency: row.currency.clone(),
+                payment_method: row.payment_method.clone(),
+                payment_status: row.payment_status.clone(),
+                transaction_id: row.transaction_id.clone(),
+                is_advance: row.is_advance,
+                is_allocated: row.is_allocated,
+                notes: row.notes.clone(),
             };
             (StatusCode::OK, Json(payment)).into_response()
         }
@@ -241,36 +251,36 @@ pub async fn create_payment(
     let receipt_number = generate_receipt_number();
     let is_advance = req.is_advance.unwrap_or(false);
 
-    // Use f64 directly - PostgreSQL accepts numeric literals for DECIMAL columns
-    let result = sqlx::query(
+    // Convert f64 to BigDecimal for PostgreSQL DECIMAL columns
+    let result = sqlx::query!(
         r#"
         INSERT INTO payments (
             organization_id, receipt_number, patient_id, patient_name, payer_name,
             amount, payment_method, payment_details, transaction_id, bank_reference,
             is_advance, notes, payment_status
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7::payment_method, $8, $9, $10, $11, $12, 'completed'::payment_status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7::text::payment_method, $8, $9, $10, $11, $12, 'completed'::payment_status)
         RETURNING id
-        "#
+        "#,
+        org_id,
+        &receipt_number,
+        req.patient_id,
+        req.patient_name.as_deref(),
+        req.payer_name.as_deref(),
+        to_bd(req.amount),
+        &req.payment_method,
+        req.payment_details.as_ref(),
+        req.transaction_id.as_deref(),
+        req.bank_reference.as_deref(),
+        is_advance,
+        req.notes.as_deref()
     )
-    .bind(org_id)
-    .bind(&receipt_number)
-    .bind(req.patient_id)
-    .bind(&req.patient_name)
-    .bind(&req.payer_name)
-    .bind(req.amount)
-    .bind(&req.payment_method)
-    .bind(&req.payment_details)
-    .bind(&req.transaction_id)
-    .bind(&req.bank_reference)
-    .bind(is_advance)
-    .bind(&req.notes)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
             (StatusCode::CREATED, Json(serde_json::json!({
                 "id": id,
                 "receiptNumber": receipt_number,
@@ -299,19 +309,20 @@ pub async fn allocate_payment(
         ).into_response(),
     };
 
-    // Create allocation record - use f64 directly
-    let alloc_result = sqlx::query(
+    // Create allocation record - convert f64 to BigDecimal
+    let alloc_amount = to_bd(req.amount);
+    let alloc_result = sqlx::query!(
         r#"
         INSERT INTO payment_allocations (payment_id, invoice_id, allocated_amount)
         VALUES ($1, $2, $3)
         ON CONFLICT (payment_id, invoice_id) DO UPDATE SET
             allocated_amount = payment_allocations.allocated_amount + $3
         RETURNING id
-        "#
+        "#,
+        payment_id,
+        req.invoice_id,
+        alloc_amount
     )
-    .bind(payment_id)
-    .bind(req.invoice_id)
-    .bind(req.amount)
     .fetch_one(&mut *tx)
     .await;
 
@@ -324,7 +335,8 @@ pub async fn allocate_payment(
     }
 
     // Update invoice amount_paid and balance_due
-    let invoice_result = sqlx::query(
+    let update_amount = to_bd(req.amount);
+    let invoice_result = sqlx::query!(
         r#"
         UPDATE invoices SET
             amount_paid = amount_paid + $1,
@@ -336,10 +348,10 @@ pub async fn allocate_payment(
             END,
             updated_at = NOW()
         WHERE id = $2
-        "#
+        "#,
+        update_amount,
+        req.invoice_id
     )
-    .bind(req.amount)
-    .bind(req.invoice_id)
     .execute(&mut *tx)
     .await;
 
@@ -352,10 +364,10 @@ pub async fn allocate_payment(
     }
 
     // Mark payment as allocated
-    let _ = sqlx::query(
-        "UPDATE payments SET is_allocated = true, updated_at = NOW() WHERE id = $1"
+    let _ = sqlx::query!(
+        "UPDATE payments SET is_allocated = true, updated_at = NOW() WHERE id = $1",
+        payment_id
     )
-    .bind(payment_id)
     .execute(&mut *tx)
     .await;
 
@@ -383,15 +395,15 @@ pub async fn refund_payment(
     let receipt_number = generate_receipt_number();
 
     // Get original payment details
-    let original = sqlx::query(
-        "SELECT patient_id, patient_name, payment_method FROM payments WHERE id = $1"
+    let original = sqlx::query!(
+        r#"SELECT patient_id, patient_name, payment_method::text as "payment_method!" FROM payments WHERE id = $1"#,
+        payment_id
     )
-    .bind(payment_id)
     .fetch_optional(&*state.database_pool)
     .await;
 
-    let (patient_id, patient_name, payment_method): (Uuid, Option<String>, String) = match original {
-        Ok(Some(row)) => (row.get("patient_id"), row.get("patient_name"), row.get("payment_method")),
+    let (patient_id, patient_name, payment_method) = match original {
+        Ok(Some(row)) => (row.patient_id, row.patient_name, row.payment_method),
         Ok(None) => return (
             StatusCode::NOT_FOUND,
             Json(PaymentErrorResponse { error: "Original payment not found".to_string() }),
@@ -402,39 +414,41 @@ pub async fn refund_payment(
         ).into_response(),
     };
 
-    // Create refund record - use negative f64 directly
-    let result = sqlx::query(
+    let neg_amount = to_bd(-req.amount);
+
+    // Create refund record - use negative BigDecimal
+    let result = sqlx::query!(
         r#"
         INSERT INTO payments (
             organization_id, receipt_number, patient_id, patient_name,
             amount, payment_method, is_refund, original_payment_id,
             refund_reason, payment_status, notes
         )
-        VALUES ($1, $2, $3, $4, $5, $6::payment_method, true, $7, $8, 'completed'::payment_status, $9)
+        VALUES ($1, $2, $3, $4, $5, $6::text::payment_method, true, $7, $8, 'completed'::payment_status, $9)
         RETURNING id
-        "#
+        "#,
+        org_id,
+        &receipt_number,
+        patient_id,
+        patient_name.as_deref(),
+        neg_amount, // Negative amount for refund
+        &payment_method,
+        payment_id,
+        &req.reason,
+        &req.reason
     )
-    .bind(org_id)
-    .bind(&receipt_number)
-    .bind(patient_id)
-    .bind(&patient_name)
-    .bind(-req.amount) // Negative amount for refund
-    .bind(&payment_method)
-    .bind(payment_id)
-    .bind(&req.reason)
-    .bind(&req.reason)
     .fetch_one(&*state.database_pool)
     .await;
 
     match result {
         Ok(row) => {
-            let id: Uuid = row.get("id");
+            let id = row.id;
 
             // Update original payment status
-            let _ = sqlx::query(
-                "UPDATE payments SET payment_status = 'refunded'::payment_status WHERE id = $1"
+            let _ = sqlx::query!(
+                "UPDATE payments SET payment_status = 'refunded'::payment_status WHERE id = $1",
+                payment_id
             )
-            .bind(payment_id)
             .execute(&*state.database_pool)
             .await;
 
@@ -456,7 +470,7 @@ pub async fn get_patient_balance(
     State(state): State<Arc<AppState>>,
     Path(patient_id): Path<Uuid>,
 ) -> impl IntoResponse {
-    let result = sqlx::query(
+    let result = sqlx::query!(
         r#"
         SELECT
             $1::uuid as patient_id,
@@ -465,9 +479,9 @@ pub async fn get_patient_balance(
             COALESCE((SELECT SUM(amount) FROM payments WHERE patient_id = $1 AND payment_status = 'completed' AND NOT is_refund), 0)::text as total_paid,
             COALESCE((SELECT SUM(amount) FROM payments WHERE patient_id = $1 AND is_advance AND NOT is_allocated AND payment_status = 'completed'), 0)::text as advance_balance,
             COALESCE((SELECT COUNT(*) FROM invoices WHERE patient_id = $1 AND status IN ('pending', 'partially_paid', 'overdue'))::int, 0) as pending_invoices
-        "#
+        "#,
+        patient_id
     )
-    .bind(patient_id)
     .fetch_one(&*state.database_pool)
     .await;
 
@@ -475,11 +489,11 @@ pub async fn get_patient_balance(
         Ok(row) => {
             let balance = PatientBalanceResponse {
                 patient_id,
-                current_balance: parse_decimal(row.get("current_balance")),
-                total_billed: parse_decimal(row.get("total_billed")),
-                total_paid: parse_decimal(row.get("total_paid")),
-                advance_balance: parse_decimal(row.get("advance_balance")),
-                pending_invoices: row.get("pending_invoices"),
+                current_balance: parse_decimal(row.current_balance.clone()),
+                total_billed: parse_decimal(row.total_billed.clone()),
+                total_paid: parse_decimal(row.total_paid.clone()),
+                advance_balance: parse_decimal(row.advance_balance.clone()),
+                pending_invoices: row.pending_invoices.unwrap_or(0),
             };
             (StatusCode::OK, Json(balance)).into_response()
         }

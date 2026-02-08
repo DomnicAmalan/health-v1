@@ -26,8 +26,7 @@ async fn rollback_all(pool: &PgPool, org_id: Option<Uuid>, user_id: Option<Uuid>
     
     // Delete user if created
     if let Some(uid) = user_id {
-        match sqlx::query("DELETE FROM users WHERE id = $1")
-            .bind(uid)
+        match sqlx::query!("DELETE FROM users WHERE id = $1", uid)
             .execute(pool)
             .await
         {
@@ -39,13 +38,12 @@ async fn rollback_all(pool: &PgPool, org_id: Option<Uuid>, user_id: Option<Uuid>
     // Delete organization if created
     if let Some(oid) = org_id {
         // First delete related records
-        let _ = sqlx::query("DELETE FROM relationships WHERE subject LIKE $1 OR object LIKE $1")
-            .bind(format!("%{}%", oid))
+        let like_pattern = format!("%{}%", oid);
+        let _ = sqlx::query!("DELETE FROM relationships WHERE \"user\" LIKE $1 OR object LIKE $1", like_pattern)
             .execute(pool)
             .await;
             
-        match sqlx::query("DELETE FROM organizations WHERE id = $1")
-            .bind(oid)
+        match sqlx::query!("DELETE FROM organizations WHERE id = $1", oid)
             .execute(pool)
             .await
         {
@@ -55,7 +53,7 @@ async fn rollback_all(pool: &PgPool, org_id: Option<Uuid>, user_id: Option<Uuid>
     }
     
     // Reset setup status
-    let _ = sqlx::query("UPDATE setup_status SET setup_completed = false")
+    let _ = sqlx::query!("UPDATE setup_status SET setup_completed = false")
         .execute(pool)
         .await;
     

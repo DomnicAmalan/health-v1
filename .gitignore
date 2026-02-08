@@ -232,3 +232,10 @@ cube/dist/
 # Cube.js logs
 cube/*.log
 coverage-summary.md
+
+# ============================================
+# Docusaurus
+# ============================================
+docs/build/
+docs/.docusaurus/
+docs/node_modules/
