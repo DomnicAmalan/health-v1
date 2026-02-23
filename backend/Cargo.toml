@@ -114,7 +114,7 @@ rand = "0.8"
 url = "2.5"
 
 # Enum utilities
-strum = { version = "0.25", features = ["derive"] }
+strum = { version = "0.28", features = ["derive"] }
 
 [workspace.lints.clippy]
 # Allow unwrap/expect in test code - deny in production
